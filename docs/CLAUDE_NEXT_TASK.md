@@ -135,3 +135,16 @@ Return one concise report with these headings:
 For asset shortlists, use tables where possible.
 
 Do not guess. If provenance, permissions, a FormKey, or a file relationship cannot be confirmed locally, mark it as unknown.
+
+
+## Persistent audit handoff
+
+After completing this task:
+
+1. overwrite `docs/AUDIT.md` in full with the latest verified local state,
+2. do not append old audit text,
+3. commit the change with `docs: refresh local audit`,
+4. push it to the active project branch,
+5. tell Barry only that the audit has been pushed and note any blocker that needs his action.
+
+The Git history is the audit history. `docs/AUDIT.md` should always describe the latest known state only.
