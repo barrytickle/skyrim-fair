@@ -126,9 +126,32 @@ Read-only inspection. Nothing was installed.
 
 There is an **officially supported pipeline**: model in Blender -> assign collision with BGS Art Tools -> export BSFBX -> AssetWatcher converts to NIF -> register in the Creation Kit. This needs no third-party collision tooling, which is why the absence of ChunkMerge, NifUtilsSuite and hkxcmd (all confirmed not installed) does not matter.
 
-### Blocker — Blender version mismatch
+### Blender version blocker — RESOLVED
 
-**The pipeline cannot be used as installed.**
+Barry has extracted a portable **Blender 3.6.23** build to:
+
+```text
+C:\Blender\blender-3.6.23-windows-x64\blender-3.6.23-windows-x64\
+```
+
+Version verified as `Blender 3.6.23` (build date 2025-06-17). Both Bethesda addons are now installed and enabled in it:
+
+| Addon | Version | Requires | Enabled |
+| --- | --- | --- | --- |
+| `bgs_skyrim_tools` — "BGS Art Tools [Skyrim]" | 1.0.0 | Blender 3.6.0 | **yes** |
+| `io_scene_bsfbx_skyrim` — "BGS FBX Exporter [Skyrim]" | 1.0.0 | Blender 3.6.0 | **yes** |
+
+Installed to `C:\Users\Barry\AppData\Roaming\Blender Foundation\Blender\3.6\scripts\addons`, which is version-scoped, so **Blender 5.2 is untouched**.
+
+Verified present and callable:
+
+- exporter operator `bpy.ops.export_scene.bsfbx_skyrim`
+- collision operators `bgs_skyrim.create_rigidbody_skyrim`, `create_collider_skyrim`, `remove_collider_skyrim`, `add_constraint_to_rigidbody_skyrim` and 11 others
+- `bgs_skyrim.set_recommended_unit_scale_skyrim` exists but **cannot be invoked headlessly** ("invalid operator call" — it needs UI context), so scene units are set directly in the build script instead
+
+Original blocker, retained for context:
+
+**The pipeline could not be used with Blender 5.2.**
 
 - Both Bethesda addons declare `"blender": (3, 6, 0)` in a legacy `bl_info` dict, and neither ships a `blender_manifest.toml`.
 - Bethesda's own guide states: *"Blender version 3.6 is the last Long-Term Support (LTS) version prior to 4.0. Support for Blender 4.0 is currently in beta."*
@@ -140,19 +163,11 @@ Per this stage's brief, that is a stop-and-document point rather than something 
 
 **What is needed:** an install of **Blender 3.6 LTS** (side-by-side with 5.2 is fine — Blender supports parallel versions), then install the two zips from `Tools\ArtTools\Blender\` into that 3.6 install. Both zips are already present locally; no download beyond Blender itself is required.
 
-Barry's call. Options:
+Resolved by installing Blender 3.6.23 alongside 5.2, as above. The whole pipeline is now available and no third-party NIF or collision tooling was needed.
 
-1. install Blender 3.6 LTS alongside 5.2 and use the official pipeline — lowest risk, officially supported collision
-2. try the addons on Blender 5.2 first — free to attempt, likely to fail on registration or export
-3. skip custom geometry for now and prototype the foundation from vanilla statics only — no new software, but seams and high reference counts, and it will not deliver the organic look well
+## Phase 2 — project-owned tile kit specification
 
-Recommendation: **option 1**. The official collision workflow is the whole reason this is low-risk, and the tooling is already on the machine.
-
-Nothing in Phase 3 or Phase 4 was attempted. No geometry was authored, no assets created, no placement changed.
-
-## Phase 2 — proposed project-owned tile kit
-
-Design only, recorded before any modelling, as the brief requires.
+Specified before modelling, as the brief requires, and now built — see Phase 3.
 
 Grid: **128 units**, matching Skyrim's architectural grid and the exterior heightmap interval. All pieces are multiples of 128 so they can be generated and placed from config.
 
@@ -181,6 +196,79 @@ Collision, following Bethesda's stated best practices (avoid concave collision, 
 No LAND edits at any point: the floor sits above native terrain everywhere, and the retaining pieces plus vanilla rocks cover the gap.
 
 The kit is deliberately small — six pieces — and project-owned, which is tier 2 in the `docs/DESIGN.md` asset preference rather than a third-party dependency.
+
+## Phase 3 — foundation tile kit authored
+
+All six pieces are built, collisioned and exported. **The build is reproducible from a committed script**, matching the project's code-first approach — the script is the source of truth and the `.blend` and `.fbx` are build outputs.
+
+```powershell
+& "C:\Blender\blender-3.6.23-windows-x64\blender-3.6.23-windows-x64\blender.exe" --background --python assets\blender\build_foundation_kit.py
+```
+
+### Project-owned assets created
+
+| Path | Size | What |
+| --- | --- | --- |
+| `assets/blender/build_foundation_kit.py` | 10,677 B | build script — **source of truth** |
+| `assets/blender/fair_foundation_kit.blend` | 837,612 B | Blender scene, build output |
+| `assets/fbx/SkyrimFair_FloorFill_1024.fbx` | 11,836 B | BSFBX export |
+| `assets/fbx/SkyrimFair_FloorEdge_512.fbx` | 11,836 B | BSFBX export |
+| `assets/fbx/SkyrimFair_Retain_512.fbx` | 11,820 B | BSFBX export |
+| `assets/fbx/SkyrimFair_RetainCorner_128.fbx` | 11,836 B | BSFBX export |
+| `assets/fbx/SkyrimFair_Ramp_512.fbx` | 13,692 B | BSFBX export, includes child collider |
+| `assets/fbx/SkyrimFair_Shoulder_512.fbx` | 11,692 B | BSFBX export |
+| `assets/README.md` | — | pipeline, kit spec, manual conversion step |
+
+Nothing third-party is copied or referenced. All geometry is original box and wedge primitives authored for this project.
+
+### Verified geometry, as built
+
+| Piece | X | Y | Z | Verts | Origin |
+| --- | --- | --- | --- | --- | --- |
+| `SkyrimFair_FloorFill_1024` | −512..512 | −512..512 | −32..0 | 8 | (0,0,0) |
+| `SkyrimFair_FloorEdge_512` | −256..256 | −256..256 | −32..0 | 8 | (0,0,0) |
+| `SkyrimFair_Retain_512` | −256..256 | −128..0 | −256..0 | 8 | (0,0,0) |
+| `SkyrimFair_RetainCorner_128` | −128..0 | −128..0 | −256..0 | 8 | (0,0,0) |
+| `SkyrimFair_Ramp_512` | −256..256 | 0..512 | −256..0 | 8 | (0,0,0) |
+| `SkyrimFair_Shoulder_512` | −256..256 | 0..256 | −32..0 | 6 | (0,0,0) |
+
+Pivot conventions as specified in Phase 2 and implemented exactly: floor and ramp pivots at the centre of the top face, retaining pieces at the top outer edge, corner at the top outer corner, shoulder at the thick end top face. For retaining, ramp and shoulder pieces **+Y points away from the platform centre**.
+
+### Collision, as built
+
+| Piece | Rigidbody | Collider |
+| --- | --- | --- |
+| `FloorFill_1024` | unyielding, mass 0 | self, Box |
+| `FloorEdge_512` | unyielding, mass 0 | self, Box |
+| `Retain_512` | unyielding, mass 0 | self, Box |
+| `RetainCorner_128` | unyielding, mass 0 | self, Box |
+| `Ramp_512` | unyielding, mass 0 | **child box rotated 7.13 deg** (`SkyrimFair_Ramp_512_Collider`) |
+| `Shoulder_512` | unyielding, mass 0 | **none, intentional** |
+
+Two corrections were needed against the BGS defaults, both worth knowing for future assets:
+
+1. **The default rigidbody is a movable prop** — mass 80, `unyielding` off. For static world geometry that is wrong, so every piece is now set `unyielding = True, mass = 0`.
+2. **A bounding-box collider on the ramp would be a solid 512 x 512 x 256 block** and would stop the player walking up the slope. The ramp instead uses a separate box child collider rotated 7.13 degrees (`atan(64/512)`) to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Confirmed present in the exported FBX.
+
+### Blocker — FBX to NIF conversion is manual
+
+**AssetWatcher is a Qt GUI application with no command-line interface**, and Bethesda's guide instructs running it as administrator. Its converter is a plugin DLL (`Plugins\Skyrim\BSFBXDLL.dll`) driven by the GUI's folder watcher. This cannot be automated from here.
+
+Barry needs to run it:
+
+1. launch `...\Skyrim Special Edition\Tools\AssetWatcher\AssetWatcher.exe` as administrator
+2. point it at `assets\fbx\`
+3. let it convert the six FBX files to NIF
+4. the NIFs should end up under a `meshes\SkyrimFair\` path for the plugin to reference
+
+**Phase 4 is blocked until then.** No `STAT` records were generated, because a static pointing at a non-existent mesh would produce invisible or broken references in game. `SkyrimFair.esp` is unchanged.
+
+### Unverified in this pass
+
+- **Scale.** Built 1:1 in Blender units with no unit scaling on export. Must be confirmed on first Creation Kit import — a scale error would be immediately obvious and the script is parametric, so it is cheap to correct.
+- **Collider `type` / `layer` / `material` enums.** Populated by a UI callback, so they cannot be enumerated in headless Blender. Left at BGS defaults (`type='Box'`, `layer='1'`) and should be reviewed in the Blender UI.
+- **Material and texture.** No texture assigned. Geometry proof first, per the brief. Cobblestone character still needs a material pass — and note that vanilla Skyrim has no generic cobblestone paving texture path confirmed by this audit either.
+- **The ramp's child collider** is correct by construction but has not been seen in the Creation Kit or in game.
 
 ## Phase 5 — navmesh assessment
 
@@ -299,7 +387,8 @@ All three are archives in `external/` (git-ignored) and **none is installed in M
 
 ## Current blockers / cautions
 
-- **Blocked on Blender 3.6 LTS.** The official Bethesda Blender-to-NIF pipeline is fully present locally but targets Blender 3.6; Barry has 5.2. Phases 3 and 4 of the foundation prototype cannot start until this is resolved. Barry's decision — see Phase 1 above.
+- **Blocked on the FBX to NIF conversion.** AssetWatcher is GUI-only with no CLI, so Barry must run it against `assets\fbx\`. Phase 4 placement cannot start until NIFs exist — see Phase 3 above.
+- Asset **scale, collider enums and materials are unverified**; all need a look in the Blender UI or Creation Kit.
 - **Navmesh is on the critical path** for the platform milestone and cannot be generated by this pipeline. Creation Kit work, and it should follow Barry approving the visual foundation.
 - Vanilla mesh dimensions and pivots are unverified; no vanilla generic paving tile exists.
 - The stall's Z is native terrain height; `SMarketStall01`'s mesh origin was never read, so a small vertical offset may still be wanted.
@@ -309,8 +398,17 @@ All three are archives in `external/` (git-ignored) and **none is installed in M
 
 ## Next local verification
 
-Blocked pending Barry's decision on Blender 3.6 LTS.
+Phases 1, 2, 3 and 5 of `docs/CLAUDE_AFTER_SITE_TEST.md` are complete. **Phase 4 is blocked on the manual FBX to NIF conversion.**
 
-Once a supported Blender is available, resume `docs/CLAUDE_AFTER_SITE_TEST.md` at **Phase 3** — the Phase 2 kit specification above is ready to model against. Phase 1 and Phase 5 are complete.
+What Barry needs to do:
 
-If Barry prefers not to install Blender 3.6, the fallback is a vanilla-statics-only foundation prototype, accepting seams, higher reference counts and a weaker organic read.
+1. run **AssetWatcher as administrator** against `assets\fbx\` to produce the six NIFs, and put them under `meshes\SkyrimFair\`
+2. ideally open one in NifSkope or the Creation Kit to sanity-check **scale** and that the ramp's child collider survived conversion
+
+Then the next agent pass can:
+
+1. register the six pieces as project-owned `STAT` records in `SkyrimFair.esp` through the Mutagen generator, reading the stock Skyrim data path as always — **not** the Creation Kit
+2. place a small irregular test arrangement at Site 1: some paving, at least one retaining edge, one ramp, plus vanilla rocks, shrubs and grass over the join to demonstrate the blend
+3. keep the existing fair marker for travel, and add no NPCs, navmesh, stalls, stage, vendors, music or dancers
+
+Reminder from `docs/DESIGN.md`: the test arrangement must already read as **irregular and organic**, not as a rectangle or the L-shaped safe envelope. Step the outline, vary the reach per side, and hide the stepped silhouette under dressing.
