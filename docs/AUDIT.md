@@ -16,226 +16,190 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## What changed in this pass
+## Site 1 and the marker fix are confirmed in game
 
-The prototype has been moved to Site 1 and the fast-travel fix implemented. **Not yet tested in game.**
+Barry has tested the current build. All three gates are passed:
 
-1. Map marker now carries the `Persistent` record flag (`0x400`) — the proven cause of the fast-travel failure.
-2. Marker icon changed from `Town` to vanilla **`Pass`** (`TNAM 0x18`), per `docs/DESIGN.md`.
-3. Marker gained `XLRT` (`MapMarkerRefType`) and `XRDS` (radius 1800).
-4. Marker and stall moved from cell `2,-2` to **Site 1** in cell `-2,-4`.
-5. No platform, navmesh, LAND edits, NPCs or fair layout were added.
+- **fast travel now works** — the `Persistent` flag fix resolved it
+- **the `Pass` icon displays correctly**
+- **Site 1 is approved** as the fairground location
 
-## Generated plugin — current state
+The generated plugin is unchanged since that test. No new ESP was built or deployed in this pass.
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
-| Size | **46,997 bytes** |
+| Size | 46,997 bytes |
 | sha256 | `2fb5379e10d05c9fffef4ba761ae62013edab8672930e4277fc0c3d64800097e` |
-| Masters | **`Skyrim.esm` only** (derived from FormKeys, no hardcoded index) |
+| Deployed to | `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (byte-identical) |
+| Masters | `Skyrim.esm` only |
 | TES4 Author (`CNAM`) | `BarryRim Event Planner` |
-| HEDR | form version 1.71, next object ID `0x802` |
-| Records | **1 WRLD, 2 CELL, 2 REFR** |
-| Excluded | no LAND, NAVM, NPC, quest, script, package, music or animation records |
+| Records | 1 WRLD, 2 CELL, 2 REFR |
+| Load order | `SkyrimFair.esp` at position 82, correctly **before** `DynDOLOD.esp` (416) and `Occlusion.esp` (417) |
 
 | FormKey | EditorID | What it is |
 | --- | --- | --- |
-| `000800:SkyrimFair.esp` | `FairSiteMapMarker` | map marker "The Wanderer's Fair" |
-| `000801:SkyrimFair.esp` | `FairTestMarketStall` | placed `SMarketStall01` (`00064B87:Skyrim.esm`) |
+| `000800:SkyrimFair.esp` | `FairSiteMapMarker` | map marker "The Wanderer's Fair", `Pass` icon |
+| `000801:SkyrimFair.esp` | `FairTestMarketStall` | placed `SMarketStall01` |
 
-### Site 1 placement
+Placement: Tamriel cell `00009A28:Skyrim.esm`, grid `-2, -4`, position `X -5632, Y -12800, Z -5720` (native terrain height).
 
-| Field | Value |
-| --- | --- |
-| Worldspace | Tamriel `0000003C:Skyrim.esm` |
-| Exterior cell | **`00009A28:Skyrim.esm`** |
-| Cell grid | **`-2, -4`** |
-| Exterior block / sub-block | `-1, -1` / `-1, -1` (verified against Skyrim.esm) |
-| Marker + stall position | **`X -5632, Y -12800, Z -5720`** |
-| Persistent cell (marker) | `00000D74:Skyrim.esm`, grid `0, 0` |
+## Site 1 hazards and safe build envelope
 
-**Z deviation from the task brief, deliberate.** The brief specified test elevation `Z -5672`. That figure came from the previous audit's *platform* analysis — it is the terrain **maximum** across the 3072-unit core, i.e. the future platform floor. Native terrain at exactly `(-5632, -12800)` is **`-5720`**, so placing the prototype stall at `-5672` would leave it floating 48 units (~0.7 m) above the ground and would read as a bug during the retest. The prototype therefore sits on native ground at `-5720`, and `-5672` is preserved in config as `site.plannedPlatformFloorZ` for the platform milestone. Nothing is lost.
+Barry's in-game observations were checked against the winning-LAND heightmap and all confirmed.
 
-Terrain context at Site 1: 2048 core min `-5792` / max `-5696` / mean `-5728`; 3072 core min `-5832` / max `-5672` / mean `-5734`.
+### Hazards
 
-### Marker record — verified as written
-
-```text
-REFR 000800:SkyrimFair.esp  EDID=FairSiteMapMarker
-  raw record flags : 0x00000400   (Persistent)
-  child group      : 8 (cell persistent children)
-  subrecords       : EDID, NAME, XRDS, XLRT, XMRK, FNAM, FULL, TNAM, DATA
-  NAME  000010:Skyrim.esm   (MapMarker base STAT)
-  XRDS  1800.0
-  XLRT  0010F63C:Skyrim.esm (MapMarkerRefType)
-  FNAM  0x03                (Visible + CanTravelTo)
-  FULL  "The Wanderer's Fair"
-  TNAM  0x18                (Pass)
-  DATA  pos (-5632, -12800, -5720) rot (0, 0, 0)
-```
-
-That subrecord order is **identical to `WhiterunStablesMapMarker`**.
-
-`XRDS 1800.0` follows `WhiterunWatchtowerMapMarker` (also 1800.0), the nearest vanilla marker to Site 1, rather than the global modal value of 1250.0. 1800 also suits a 3072-unit market core. Nearby precedents: Western Watchtower 1800.0, Whiterun Stables 1500.0, Fort Greymoor 3400.0.
-
-`XLKR` (linked reference) is still omitted. 341 of 347 vanilla markers have one, but it links to an arbitrary nearby reference and cannot be generated meaningfully yet. It is not required for fast travel.
-
-### Verification performed
-
-22 structural checks, all passing, by parsing the written ESP independently of Mutagen:
-
-- `Skyrim.esm` is the only master; author is `BarryRim Event Planner`
-- exactly one map marker and one placed stall
-- marker: `Persistent` flag set, `TNAM 0x18`, `FNAM 0x03`, `XLRT 10F63C`, `XRDS 1800`, name preserved, in persistent group, at Site 1
-- stall: base `00064B87:Skyrim.esm`, at Site 1, in temporary group, parent cell grid `-2,-4`
-- cells `00009A28` and `00000D74` present; worldspace is Tamriel; block/sub-block `(-1,-1)`
-- no LAND / NAVM / NPC / quest / script / package / music / animation records
-- only WRLD, CELL and REFR record types
-
-Override fidelity, diffed against `Skyrim.esm`:
-
-| Record | Result |
-| --- | --- |
-| `CELL 00009A28` (Site 1) | **identical to vanilla** — same subrecord kinds, same values |
-| `CELL 00000D74` (persistent) | **identical to vanilla** |
-| `WRLD 0000003C` (Tamriel) | identical except `FULL` (localized string ID vs literal string — same value) and `RNAM`, deliberately dropped |
-
-## MO2 deployment
-
-| Field | Value |
-| --- | --- |
-| Destination | `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
-| Action | **replaced the existing test ESP only** |
-| Deployed size | 46,997 bytes |
-| Deployed sha256 | `2fb5379e10d05c9fffef4ba761ae62013edab8672930e4277fc0c3d64800097e` |
-| Byte-identical to `dist` | **yes** — matching sha256 and `cmp` reports no differences |
-| Folder contents | `SkyrimFair.esp` only, no metadata files added |
-
-Confirmed not done: no mods enabled or disabled, no plugins reordered, no profile edits, Skyrim and SKSE not launched, no saves touched, Pandora output untouched, DynDOLOD/Occlusion not run. `modlist.txt`, `plugins.txt` and `loadorder.txt` were hashed before and after the copy and are **byte-for-byte unchanged**.
-
-### Load order — previous warning resolved
-
-The previous audit warned that `SkyrimFair.esp` was loading after `DynDOLOD.esp` and `Occlusion.esp`, letting our Tamriel `WRLD`/`CELL` overrides beat their occlusion and LOD data.
-
-**Barry has already moved it.** Verified current positions in the active `plugins.txt`:
-
-| Position | Plugin |
-| --- | --- |
-| 82 | `*SkyrimFair.esp` |
-| 416 | `*DynDOLOD.esp` |
-| 417 | `*Occlusion.esp` |
-
-`SkyrimFair.esp` is now correctly before both. No further action needed; it should stay in that region of the order as the fair grows.
-
-## Next in-game test — what Barry needs to confirm
-
-1. **The `Pass` icon displays correctly** on the world map for "The Wanderer's Fair".
-2. **Fast travel now moves the player to Site 1** rather than returning them to their current location. This is the primary test of the `Persistent` flag fix.
-3. **Site 1 reads appropriately as the landscape surrounding a future raised/levelled market platform** — open tundra, correct character, nothing awkward in the immediate surroundings.
-4. Secondary: whether the stall sits cleanly on the ground at `Z -5720`, which validates the terrain-height figure the platform work will build on.
-
-If fast travel still fails after this build, the remaining untested hypothesis is that the arrival point must be navmesh-accessible. Site 1 sits on vanilla-navmeshed tundra with no navmesh edits in any spanned cell, so this is unlikely, but it cannot be ruled out without the in-game result.
-
-## Plan B — flat fairground platform (approved direction, not yet built)
-
-Barry has approved Plan B in principle. Natural terrain cannot provide a genuinely level market core: the flattest clean 3072 x 3072 site anywhere near the Western Watchtower is 160 units of relief with a 48-unit maximum step per 128 units — roughly a 21-degree local slope at worst. The design calls for generated, aligned rows of stalls, which need a level floor.
-
-### Recommended platform
-
-**Site 1, 3072 x 3072 paved core, floor at `Z -5672`** — the terrain maximum across the core, so the platform is **pure fill with zero cut** and needs **no LAND edits**.
-
-| Field | Value |
-| --- | --- |
-| Max fill (floor above terrain) | **160u** |
-| Max cut | **0u** |
-| Perimeter step to native ground | 0u on the high edge to 160u on the low edge |
-| At a 2048 core instead | only 96u of fill |
-
-The low edge should become the intentional main entrance approach: 160u over a 1:8 ramp is about 1,280 units of sloped approach. The high edge meets grade with essentially no treatment. Side edges taper between the two and suit stepped retaining, rocks, hay, shrubs, fences and stall placement rather than ramps — matching the layered perimeter treatment in `docs/DESIGN.md`.
-
-### Why Site 1
-
-| Field | Value |
-| --- | --- |
-| Cells spanned by a 3072 footprint | `-2,-4` (`00009A28`), `-2,-3` (`00009A07`), `-1,-4` (`00009A27`), `-1,-3` (`00009A06`) |
-| Relief 2048 / 3072 / 4096 | 96u / 160u / 416u |
-| Max step per 128u | 24u (2048), 48u (3072) — smoothest gradient found in the whole search box |
-| Distance from Western Watchtower | 7,535u (1.8 cells) |
-| Nearest map markers | Western Watchtower 7,535u; Fort Greymoor 9,219u |
-| Winning LAND | **`Skyrim.esm` — vanilla, no mod height edits** |
-| Navmesh edits | **none in any spanned cell** |
-| Placed-reference conflicts | USSEP (8 + 9), Butterflies (4 + 3), SLaWF (1 + 1) — all low, all ambient clutter |
-| Civil-war / dragon / quest / settlement / farm content | **none** |
-| Vanilla references in footprint | 18 — 11 tundra shrubs, 4 critter markers, `RockTundraLand01Tundra01` x1, `RockShelf01FieldGrass01` x1, `TreeThicket01` x1 |
-
-Rejected alternatives: `(768, -11520)` was flatter at 2048 (80u) and closer to the tower (3,302u), but a 3072 footprint clips `WhiterunWatchtowerExterior` (`0,-4`), the Mirmulnir dragon-fight cell from MQ104. `(10240, -10752)` is closest to Whiterun but least flat (256u at 2048) and pine-covered.
-
-### Paving assets
-
-**Vanilla Skyrim has no generic cobblestone paving tile.** Whiterun's streets and plaza are baked into its `WRTerrain` architecture meshes. A search of all `STAT` records for paving, plaza, street, cobble, courtyard and floor patterns returned 119 records, none of which is a plain repeatable exterior paving tile.
-
-Nordic exterior cut-stone platform kit — a genuine modular exterior set with floor, edges and corners (62 records including snow/ice variants). Reads as ancient ruin masonry, arguably too monumental for a temporary handmade market:
-
-| FormKey | EditorID | Model |
+| Direction | Hazard | Detail |
 | --- | --- | --- |
-| `001044CB:Skyrim.esm` | `NorTmpExtPlatFloorRaised01CutStone` | `Dungeons\Nordic\Exterior\NorTmpExtPlatFloorRaised01Stone.nif` |
-| `00028A62:Skyrim.esm` | `NorTmpExtPlatFloorRaised01` | `Dungeons\Nordic\Exterior\NorTmpExtPlatFloorRaised01.nif` |
-| `00026F7B:Skyrim.esm` | `NorTmpExtPlatCorOut01` | `Dungeons\Nordic\Exterior\NorTmpExtPlatCorOut01.nif` |
-| `00026F79:Skyrim.esm` | `NorTmpExtPlatCorIn01` | `Dungeons\Nordic\Exterior\NorTmpExtPlatCorIn01.nif` |
-| `00026F7A:Skyrim.esm` | `NorTmpExtPlatCorDblEnd01` | `Dungeons\Nordic\Exterior\NorTmpExtPlatCorDblEnd01.nif` |
-| `0002BE41:Skyrim.esm` | `NorTmpExtPlatExSmFree01` | `Dungeons\Nordic\Exterior\NorTmpExtPlatExSmFree01.nif` |
+| **East-south-east** | **Western Watchtower** | marker `000DB889` at `(1660, -14699)`, bearing 105 deg, **7,535u** away. Its cells `0,-4` and `1,-4` are the Mirmulnir dragon fight from MQ104 "Dragon Rising". Ground also climbs east: +152u at 2k, +328u at 4k, +320u at 8k. Eastward clearance before those cells: **5,632u**. |
+| **South** | **mountain** | level or falling out to ~5,000u, then climbs: +136u at 7,168u, +312u at 8,192u, +472u at 9,216u, **+1,296u at 11,264u**. Practical southern limit **6,000–7,000u**. |
+| **South-west diagonal** | **Fort Greymoor exterior** | cell `-3,-5` `FortGreymoorExteriorEdge`, nearest edge **4,404u** away. Also `-3,-3` `FortGreymoorExterior02` at 2,611u (north-west) and `-4,-3` `FortGreymoorExterior01` at 6,676u. The fort's own marker is WNW at 9,219u with a 3,400u radius. |
 
-Whiterun terrain platforms — the plinths vanilla uses to level Whiterun's buildings against its own slope. Visually native to the tundra, but building-shaped footprints that will not tessellate into a square floor:
+### Safe envelope
 
-| FormKey | EditorID | Model |
+South-west is the only bearing that descends smoothly and cleanly the whole way: −40u at 2k, −256u at 4k, −344u at 6k, −456u at 8k.
+
+The permitted build area is an **L-shape**: the site cell `-2,-4`, due west `-3,-4`, due south `-2,-5`, and east `-1,-4`. All are unnamed vanilla cells with vanilla `LAND` and **zero navmesh edits**. The `-3,-5` diagonal corner is excluded because it is Fort Greymoor's exterior edge.
+
+> **The L-shape is a build constraint, never the visible shape.** Per `docs/DESIGN.md`, the fairground the player sees must read as an irregular organic rocky terrace — curving, tapering, varying in width — not as any geometric outline. Keep the paving on a grid so it can be generated seamlessly, but drive the outline irregularly and hide the stepped silhouette under the shoulder, rocks, shrubs and stall placement.
+
+### Where the flat core belongs
+
+Offsetting the paved core south-west does **not** improve flatness; the best 3072 core stays essentially at the marker:
+
+| Core centre | Offset from marker | Relief |
 | --- | --- | --- |
-| `000506DF:Skyrim.esm` | `WRCarlottaPlatform01` | `Architecture\WhiteRun\WRTerrain\WRCarlottaPlatform01.nif` |
-| `000510E2:Skyrim.esm` | `WRCommonHousePlatform01` | `Architecture\WhiteRun\WRTerrain\WRCommonHousePlatform01.nif` |
-| `0005071F:Skyrim.esm` | `WRGreatHousePlatform01` | `Architecture\WhiteRun\WRTerrain\WRGreatHousePlatform01.nif` |
-| `000510F7:Skyrim.esm` | `WRGreatHousePlatform02` | `Architecture\WhiteRun\WRTerrain\WRGreatHousePlatform02.nif` |
-| `0005071A:Skyrim.esm` | `WRHallOfDeadPlatform01` | `Architecture\WhiteRun\WRTerrain\WRHallOfDeadPlatform01.nif` |
-| `000510E0:Skyrim.esm` | `WRStairsPlatform01` | `Architecture\WhiteRun\WRTerrain\WRStairsPlatform01.nif` |
-| `000506ED:Skyrim.esm` | `WRUlfberhPlatform01` | `Architecture\WhiteRun\WRTerrain\WRUlfberhPlatform01.nif` |
+| `(-5632, -12928)` | dy −128 | **160u** |
+| `(-5760, -13056)` | dx −128, dy −256 | 160u |
+| `(-5888, -13184)` | dx −256, dy −384 | 192u |
 
-Edge and transition pieces:
+So: keep the **paved market core at/near the marker** where it is flattest, and let the **outer fair** — games, archery, stables, future jousting, which `docs/DESIGN.md` already allows on natural ground — spread south-west into `-3,-4` and `-2,-5` where the ground opens out and falls away.
 
-| FormKey | EditorID | Use |
+## Platform geometry — measured
+
+3072 x 3072 core centred `(-5632, -12800)`, floor at **Z -5672** (terrain maximum across the core, so pure fill, zero cut, **no LAND edits**).
+
+Extents: X `-7168`..`-4096`, Y `-14336`..`-11264`.
+
+**Cells spanned: two, not four.** An earlier audit said four; that was a sampling artefact from including the exact `x = -4096` boundary, which belongs to cell `-1`. Corrected:
+
+| Cell | FormKey | EditorID | Navmesh edits |
+| --- | --- | --- | --- |
+| `-2,-4` | `00009A28:Skyrim.esm` | none | **none** |
+| `-2,-3` | `00009A07:Skyrim.esm` | none | **none** |
+
+Floor exposure above native terrain, sampled every 128u along each edge:
+
+| Edge | Min | Max | Mean |
+| --- | --- | --- | --- |
+| **East** | **0u** | 72u | **32u** |
+| North | 40u | 160u | 82u |
+| South | 40u | 152u | 89u |
+| **West** | 16u | **160u** | **92u** |
+
+- The **east edge meets grade** — 0u exposure at `(-4096, -13440)`. This is the natural walk-on side and the cheapest navmesh join.
+- The **west edge is most exposed** — up to 160u, peaking at the north-west corner `(-7168, -11264)`. This is the low side, so the **broad entrance ramp belongs on the west / south-west**, matching both the design brief and Barry's build direction.
+
+An earlier audit described the high side as north-east; the measured data says **east**. Corrected here.
+
+## Phase 1 — local asset-authoring toolchain
+
+Read-only inspection. Nothing was installed.
+
+### Available
+
+| Tool | Location | Notes |
 | --- | --- | --- |
-| `0000099B:Skyrim.esm` | `Stonewall01` | farmhouse dry-stone wall — retaining / embankment |
-| `0000099D:Skyrim.esm` | `Stonewall02` | as above, variant |
-| `0000099C:Skyrim.esm` | `Stonewall01Ivy` | as above, ivy |
-| `0003F93B:Skyrim.esm` | `ImpExtStairs01` | exterior stone steps |
-| `000F03D3:Skyrim.esm` | `RTTemplePlazaStairs01` | wide plaza stairs |
-| `0010EC69:Skyrim.esm` | `MrkDocksidePlatforms03stairs` | dockside platform stairs |
+| **Creation Kit 2.0 (SSE)** | `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\CreationKit.exe` | **v1.7.99.0**, "Bethesda Softworks: Creation Kit 2.0" |
+| **BGS Art Tools [Skyrim]** (Blender addon) | `...\Skyrim Special Edition\Tools\ArtTools\Blender\bgs_skyrim_tools.zip` | v1.0.0. Includes `operators/collision_ops.py` — a Collision tab with Create Collider, child colliders, mass/friction |
+| **BGS FBX Exporter [Skyrim]** (Blender addon) | `...\Tools\ArtTools\Blender\io_scene_bsfbx_skyrim.zip` | v1.0.0. Bundles its own copy of Blender's `export_fbx_bin.py` / `fbx_utils.py` |
+| **AssetWatcher** | `...\Tools\AssetWatcher` | watches FBX output and converts to NIF |
+| **Elric** | `...\Tools\Elric` | texture conversion |
+| **Archive.exe** | `...\Tools\Archive\Archive.exe` | BSA packing |
+| **HavokBehaviorPostProcess** | `...\Tools\HavokBehaviorPostProcess` | behaviour post-processing |
+| **Official guide** | `...\Tools\Exporting Blender Art Assets for Skyrim.pdf` | 18 pages, includes "Adding Collision to a Mesh" and "Collision Best Practices" |
+| **NifSkope** | `E:\Modlists\Still In Skyrim\tools\nifscope\NifSkope.exe` | |
+| **Cathedral Assets Optimizer** | `E:\Modlists\Still In Skyrim\tools\cao` | |
+| **Blender** | `C:\Program Files\Blender Foundation\Blender 5.2` | **version 5.2** |
+| Also present | SSEEdit, DynDOLOD, xLODGen, Pandora, LOOT, Synthesis, Bethini, ACMOS | |
 
-**Unverified:** exact mesh dimensions, pivot points and whether any of these tile seamlessly. NIF geometry cannot be read with the tooling used here, so tile sizes and edge alignment are **unknown** and must be checked in the Creation Kit or NifSkope before committing to a kit.
+There is an **officially supported pipeline**: model in Blender -> assign collision with BGS Art Tools -> export BSFBX -> AssetWatcher converts to NIF -> register in the Creation Kit. This needs no third-party collision tooling, which is why the absence of ChunkMerge, NifUtilsSuite and hkxcmd (all confirmed not installed) does not matter.
 
-### Preferred technical direction
+### Blocker — Blender version mismatch
 
-A **small custom project-owned tile kit** — repeatable floor tile, edge piece, corner piece, ramp/transition piece. Reasons: no vanilla repeatable paving tile exists, so a 3072 floor from vanilla pieces means hundreds of statics with visible seams, Z-fighting risk and heavy draw-call cost; one clean collision surface per tile beats hundreds of overlapping ones; and a tile kit is project-owned, which is tier 2 in the `docs/DESIGN.md` asset preference rather than a third-party dependency.
+**The pipeline cannot be used as installed.**
 
-### Navmesh — now on the critical path
+- Both Bethesda addons declare `"blender": (3, 6, 0)` in a legacy `bl_info` dict, and neither ships a `blender_manifest.toml`.
+- Bethesda's own guide states: *"Blender version 3.6 is the last Long-Term Support (LTS) version prior to 4.0. Support for Blender 4.0 is currently in beta."*
+- Barry has **Blender 5.2** — three major versions past even the beta-supported 4.0.
+- The FBX exporter bundles a 3.6-era copy of Blender's FBX exporter internals, which is very unlikely to run against Blender 5.2's Python API.
+- Blender currently has **no addons or extensions installed at all**, so neither plugin is even registered yet.
 
-- Statics do **not** generate navmesh. NPCs will not path onto a raised platform without new navmesh over it.
-- New navmesh must be authored and **joined to the existing exterior navmesh** at the ramp and step edges, or vendors, crowds, Garrick Tallow, Claudius Vale and the stage performers will refuse to enter and leave.
-- Site 1 has **no navmesh edits in any spanned cell**, the cleanest possible starting point, and a strong argument for choosing it.
-- This project's Mutagen pipeline cannot practically generate navmesh. It is Creation Kit work, and it breaks the `docs/ROADMAP.md` principle of deferring custom navmesh. **This milestone needs it.**
-- A lower platform helps: at 160u of fill a generous ramp can carry navmesh smoothly.
-- Interim option: place the platform visual-only and accept that NPCs cannot walk on it, purely to evaluate how the flat floor looks before committing to navmesh work.
+Per this stage's brief, that is a stop-and-document point rather than something to work around.
 
-### Compatibility: platform vs LAND edit
+**What is needed:** an install of **Blender 3.6 LTS** (side-by-side with 5.2 is fine — Blender supports parallel versions), then install the two zips from `Tools\ArtTools\Blender\` into that 3.6 install. Both zips are already present locally; no download beyond Blender itself is required.
 
-| Approach | Compatibility |
-| --- | --- |
-| **Static platform, no LAND edit** | Conflicts only with mods placing objects in the same cells. Does not fight `Landscape and Water Fixes`, `Majestic Mountains` or any landscape mod, and survives their updates. Requires navmesh work. |
-| **LAND height edit (flattening)** | Directly conflicts with SLaWF and the Majestic Mountains patches, which already author `LAND` in 18 nearby cells. Needs a per-mod compatibility patch, breaks on their updates, and creates visible cell-border seams. Still needs navmesh work. |
+Barry's call. Options:
 
-At Site 1 specifically `LAND` is vanilla-authored with no mod overrides, so a LAND edit there would be less conflict-prone than elsewhere — but the static platform remains the more compatible choice and matches the approved direction.
+1. install Blender 3.6 LTS alongside 5.2 and use the official pipeline — lowest risk, officially supported collision
+2. try the addons on Blender 5.2 first — free to attempt, likely to fail on registration or export
+3. skip custom geometry for now and prototype the foundation from vanilla statics only — no new software, but seams and high reference counts, and it will not deliver the organic look well
+
+Recommendation: **option 1**. The official collision workflow is the whole reason this is low-risk, and the tooling is already on the machine.
+
+Nothing in Phase 3 or Phase 4 was attempted. No geometry was authored, no assets created, no placement changed.
+
+## Phase 2 — proposed project-owned tile kit
+
+Design only, recorded before any modelling, as the brief requires.
+
+Grid: **128 units**, matching Skyrim's architectural grid and the exterior heightmap interval. All pieces are multiples of 128 so they can be generated and placed from config.
+
+| Piece | Footprint | Height | Purpose |
+| --- | --- | --- | --- |
+| **Floor fill tile** | 1024 x 1024 | 32u thick | interior of the paved core. A 3072 core needs 9 of these |
+| **Floor edge tile** | 512 x 512 | 32u thick | the outer ring, at half the fill size so the outline can step in 512u increments and read as irregular |
+| **Retaining edge** | 512 wide x 128 deep | 256u tall | rough stone face hanging below the floor plane. Max measured exposure is 160u, so one height covers every case and the surplus buries in terrain |
+| **Retaining corner** | 128 x 128 | 256u tall | outer and inner corner variants to turn the stepped outline |
+| **Ramp tile** | 512 x 512 | rises 64u | 1:8 grade, chainable. 160u of fall needs 3 chained tiles over ~1,536u |
+| **Shoulder wedge** | 512 x 256 | tapers 32u to 0u | rough-earth/grass transition strip laid outside the paving to soften the join |
+
+Pivot convention, chosen so the generator needs no offset arithmetic:
+
+- **floor and ramp tiles:** pivot at the **centre of the top face**, so placing at `Z = -5672` puts the walking surface exactly on the platform floor
+- **retaining pieces:** pivot at the **top outer edge**, so the piece hangs down from the floor plane and any excess buries
+- **shoulder wedge:** pivot at the **thick end, top face**
+
+Collision, following Bethesda's stated best practices (avoid concave collision, prefer primitive boxes):
+
+- floor tiles: a **single box** collider matching the tile, not a mesh copy
+- ramp tiles: one angled box, or two stepped boxes if an angled primitive proves awkward
+- retaining and corner pieces: box child colliders approximating the face. Visual rock detail needs no collision fidelity because nothing walks on the face
+- shoulder wedge: **no collision** — it sits on native ground and would only create snag geometry
+
+No LAND edits at any point: the floor sits above native terrain everywhere, and the retaining pieces plus vanilla rocks cover the gap.
+
+The kit is deliberately small — six pieces — and project-owned, which is tier 2 in the `docs/DESIGN.md` asset preference rather than a third-party dependency.
+
+## Phase 5 — navmesh assessment
+
+Documented only. **No navmesh was authored, and none should be until Barry approves the visual foundation.**
+
+- **Cells the paved core spans:** `-2,-4` (`00009A28`) and `-2,-3` (`00009A07`). Both have vanilla navmesh with **no mod navmesh edits in the active load order** — the cleanest possible starting point.
+- **Where existing navmesh approaches:** vanilla exterior navmesh covers all of this tundra continuously. The relevant question is not coverage but elevation — the platform surface will sit 0–160u above it.
+- **Where new navmesh is needed:** over the paved core surface in both cells, plus the ramp.
+- **Likely join points:**
+  - **East edge, around `(-4096, -13440)`** — 0u exposure, the paving meets native grade. This is the cheapest and most reliable join and should be the primary one.
+  - **West / south-west ramp foot** — the intended main entrance. Join at the bottom of the ramp chain, roughly 1,536u out from the paving edge.
+  - Two joins are enough. Every additional access point is another join to maintain.
+- **Should geometry change before navmesh work?** Yes. Fix the number and position of access points first, because each one is a navmesh join. Decide the final outline and ramp placement before any navmesh is cut.
+- **Capability:** this project's Mutagen pipeline cannot practically generate navmesh. It is Creation Kit work, and it breaks the `docs/ROADMAP.md` principle of deferring custom navmesh — that principle now has to give. Affects vendors, ambient crowds, Garrick Tallow, Claudius Vale and the stage performers.
+- **Interim option:** place the foundation visual-only and accept that NPCs cannot walk on it, purely to judge the look before committing to navmesh.
 
 ## Terrain audit methodology
 
-An earlier audit reported cell `2,-2` as "24 units relief" and called it flat. That was measured over a 512 x 512 footprint — far too small for a fairground. Same site, same heightmap:
+An earlier audit reported the original prototype cell `2,-2` as "24 units relief" and called it flat. That was measured over a 512 x 512 footprint — far too small for a fairground:
 
 | Footprint | Relief | Max step per 128u |
 | --- | --- | --- |
@@ -245,35 +209,61 @@ An earlier audit reported cell `2,-2` as "24 units relief" and called it flat. T
 | 3072 x 3072 | 400u | 88u |
 | 4096 x 4096 | **472u** | 88u |
 
-The 512 sample landed on a local sweet spot inside rolling tundra; relief grows roughly 20x at fair scale. That is the hilliness Barry saw in game.
+Relief grows roughly 20x from the 512 sample to fair scale. That was the hilliness Barry saw in game.
 
-**All future terrain audits must sample at the real footprint size** (2048 minimum for the market core, 3072–4096 for the whole site) and report maximum local step per 128-unit heightmap interval alongside total relief.
+**All future terrain audits must sample at the real footprint size** (2048 minimum for the market core, 3072–4096 for the whole site) and report maximum local step per 128-unit interval alongside total relief.
 
-Method used: heightmaps decoded from `LAND` `VHGT` for a 17 x 15 cell box (x -8..8, y -12..2), 255 cells, all present. **The winning `LAND` record per cell was resolved through the full active load order**, not vanilla alone. Only 18 of 255 cells have mod-altered heights: SLaWF (12), SLaWF Majestic Mountains patch (1), SLaWF Tundra Homestead patch (2), `Embers XD.esp` (1), `Helgen Reborn.esp` (2). `MajesticMountains_Landscape.esm` provides `LAND` for 89 region cells but changes no heights.
+Method: heightmaps decoded from `LAND` `VHGT` across a 17 x 15 cell box (x -8..8, y -12..2), 255 cells, all present. **The winning `LAND` record per cell was resolved through the full active load order**, not vanilla alone. Only 18 of 255 cells have mod-altered heights: SLaWF (12), SLaWF Majestic Mountains patch (1), SLaWF Tundra Homestead patch (2), `Embers XD.esp` (1), `Helgen Reborn.esp` (2). `MajesticMountains_Landscape.esm` supplies `LAND` for 89 region cells but changes no heights.
+
+Why natural terrain was rejected: the flattest *clean* 3072 site anywhere near the Western Watchtower is 160u relief with a 48u maximum step per 128 units, roughly a 21-degree local slope at worst. The design generates aligned rows of stalls from config, which needs a level floor.
+
+## Vanilla statics of interest
+
+**Vanilla Skyrim has no generic cobblestone paving tile.** Whiterun's streets and plaza are baked into its `WRTerrain` architecture meshes. A search of all `STAT` records for paving, plaza, street, cobble, courtyard and floor patterns returned 119 records, none a plain repeatable exterior paving tile. This is the main argument for a project-owned kit.
+
+Closest vanilla families, kept for reference and for edge dressing:
+
+| FormKey | EditorID | Use |
+| --- | --- | --- |
+| `001044CB:Skyrim.esm` | `NorTmpExtPlatFloorRaised01CutStone` | Nordic exterior cut-stone raised floor |
+| `00028A62:Skyrim.esm` | `NorTmpExtPlatFloorRaised01` | as above, plain |
+| `00026F7B:Skyrim.esm` | `NorTmpExtPlatCorOut01` | outer corner |
+| `00026F79:Skyrim.esm` | `NorTmpExtPlatCorIn01` | inner corner |
+| `0002BE41:Skyrim.esm` | `NorTmpExtPlatExSmFree01` | small free-standing platform |
+| `000506DF:Skyrim.esm` | `WRCarlottaPlatform01` | Whiterun building-levelling plinth |
+| `000510E0:Skyrim.esm` | `WRStairsPlatform01` | Whiterun stepped plinth |
+| `0000099B:Skyrim.esm` | `Stonewall01` | farmhouse dry-stone wall — retaining |
+| `0000099D:Skyrim.esm` | `Stonewall02` | as above, variant |
+| `0003F93B:Skyrim.esm` | `ImpExtStairs01` | exterior stone steps |
+| `000F03D3:Skyrim.esm` | `RTTemplePlazaStairs01` | wide plaza stairs |
+
+**Unverified:** exact mesh dimensions and pivots. NIF geometry cannot be read with the tooling used in this audit, so tile sizes and seam behaviour are **unknown** and must be checked in NifSkope or the Creation Kit before relying on any of them.
 
 ## Map marker implementation notes
 
 - Base object: `MapMarker`, `00000010:Skyrim.esm` (a `STAT`)
 - Markers live in Tamriel's persistent cell `00000D74:Skyrim.esm`, not the grid cell they sit over
 - `XMRK` presence is what makes a REFR a map marker
-- **The record must carry the `Persistent` flag `0x400`.** All 347 vanilla Tamriel markers have it. Mutagen's `SkyrimMajorRecordFlag` enum does not expose it and does not derive it from `Cell.Persistent` membership, so the generator sets `MajorRecordFlagsRaw` explicitly.
-- `FULL`: display name. `TNAM`: icon type. `FNAM`: flags. `DATA`: position + rotation. `XRDS`: radius. `XLRT`: location ref type.
+- **The record must carry the `Persistent` flag `0x400`.** All 347 vanilla Tamriel markers have it. Mutagen's `SkyrimMajorRecordFlag` enum does not expose it and does not derive it from `Cell.Persistent` membership, so the generator sets `MajorRecordFlagsRaw` explicitly. **This was the fast-travel bug and it is now fixed and confirmed in game.**
+- `FULL`: display name. `TNAM`: icon type. `FNAM`: flags. `DATA`: position + rotation. `XRDS`: radius. `XLRT`: location ref type
 - `FNAM` bit `0x01` = Visible, bit `0x02` = Can Travel To. Vanilla: 332 markers at `0x00`, 4 at `0x01`, 11 at `0x03`
 - `XLRT` should be `MapMarkerRefType` = `0010F63C:Skyrim.esm` (333 of 347 vanilla markers)
+- `XRDS` in use: 1800, matching `WhiterunWatchtowerMapMarker`, the nearest vanilla marker to the site
 - A linked location (`XLCN`) is **not** required — the Whiterun Stables and Western Watchtower markers both have none
-- Icon types: `0x18` **Pass** (Mutagen `MarkerType.Pass`, now in use, 3 vanilla border crossings), `0x02` town/village (`MarkerType.Town` — Riverwood, Rorikstead, Shor's Stone), `0x0D` farm (incl. `MerryFairMapMarker`), `0x05` camp, `0x1E` shack, `0x15` stable
+- Current icon: `0x18` **Pass** (Mutagen `MarkerType.Pass`), confirmed correct in game
+- Other useful icons: `0x02` town/village (`MarkerType.Town`), `0x0D` farm (incl. `MerryFairMapMarker`), `0x05` camp, `0x1E` shack, `0x15` stable
 - Mutagen's `MarkerType.Settlement` is `0x03`, which vanilla uses for Honningbrew Meadery and Goldenglow Estate. The name is misleading.
 
 ## Skyrim install
 
 - Mod manager: Mod Organizer 2 v2.5.2, portable instance at `E:\Modlists\Still In Skyrim`
-- Install dir: `E:\Modlists\Still In Skyrim\stock`
-- Data dir: `E:\Modlists\Still In Skyrim\stock\Data`
+- Game the mod list runs: `E:\Modlists\Still In Skyrim\stock` (MO2 stock-game copy), Data at `...\stock\Data`
 - Runtime: 1.6.1170.0 (Skyrim SE/AE, Steam)
-- Active profile: `Still in Skyrim Plus`
-- Active plugins: 426 (including `SkyrimFair.esp`)
+- Active profile: `Still in Skyrim Plus`, 426 active plugins
 - SKSE 2.2.6 (matches runtime), Address Library 11.0.0
 - Pandora Behaviour Engine+ is the active behaviour generator (output mod v4.3.0); Open Animation Replacer 3.1.6.0; no FNIS or Nemesis installed
+- A **separate Steam install** exists at `E:\SteamLibrary\steamapps\common\Skyrim Special Edition`, which is where the Creation Kit lives. Its `Skyrim.esm` is 249,752,131 bytes versus 249,753,412 in the stock copy — **they are not identical**. The generator deliberately reads the **stock** copy, which is what the game actually loads. Anyone opening the Creation Kit should be aware it points at the Steam install by default.
+- A Skyrim **Legendary Edition** Creation Kit v1.9.36 also exists at `C:\Program Files (x86)\Steam\steamapps\common\skyrim\CreationKit.exe`. Wrong edition — not usable for SSE work.
 
 ## Asset packs
 
@@ -309,18 +299,18 @@ All three are archives in `external/` (git-ignored) and **none is installed in M
 
 ## Current blockers / cautions
 
-- **The fast-travel fix is implemented but unverified in game.** Cause and fix were both proven structurally; only Barry's retest can confirm the engine behaviour.
-- **Navmesh is on the critical path** for the platform milestone and cannot be generated by this pipeline. Creation Kit work.
-- **Platform mesh dimensions are unknown.** No vanilla generic paving tile exists; tile sizes and seam behaviour need checking in the Creation Kit or NifSkope.
-- The stall's Z is native terrain height; `SMarketStall01`'s mesh origin was never read, so a small vertical offset may still be needed.
+- **Blocked on Blender 3.6 LTS.** The official Bethesda Blender-to-NIF pipeline is fully present locally but targets Blender 3.6; Barry has 5.2. Phases 3 and 4 of the foundation prototype cannot start until this is resolved. Barry's decision — see Phase 1 above.
+- **Navmesh is on the critical path** for the platform milestone and cannot be generated by this pipeline. Creation Kit work, and it should follow Barry approving the visual foundation.
+- Vanilla mesh dimensions and pivots are unverified; no vanilla generic paving tile exists.
+- The stall's Z is native terrain height; `SMarketStall01`'s mesh origin was never read, so a small vertical offset may still be wanted.
 - The generator copies the WRLD/CELL records it overrides from `Skyrim.esm`, not from the winning record in the active load order. Correct load-order placement (now in effect) makes this harmless, but building from the load order would be more robust. Not implemented.
 - Permanent exterior placements will eventually require DynDOLOD/Occlusion regeneration.
 - `external/` holds large third-party mod archives and must never be committed.
 
 ## Next local verification
 
-The next pass depends on Barry's retest result.
+Blocked pending Barry's decision on Blender 3.6 LTS.
 
-If fast travel works, the Pass icon is right and Site 1 is approved, the queued follow-up is `docs/CLAUDE_AFTER_SITE_TEST.md` — prototype the landscaped fairground foundation.
+Once a supported Blender is available, resume `docs/CLAUDE_AFTER_SITE_TEST.md` at **Phase 3** — the Phase 2 kit specification above is ready to model against. Phase 1 and Phase 5 are complete.
 
-If fast travel still fails, investigate whether the arrival point must be navmesh-accessible; that is the only remaining untested hypothesis.
+If Barry prefers not to install Blender 3.6, the fallback is a vanilla-statics-only foundation prototype, accepting seams, higher reference counts and a weaker organic read.

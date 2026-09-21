@@ -313,6 +313,16 @@ Use a layered transition:
 
 The perimeter should be irregular rather than reading as one perfect rectangle.
 
+### Safe build envelope is not the visible shape
+
+Terrain and conflict analysis produced a safe **L-shaped build envelope** around Site 1 (see `docs/AUDIT.md`): the site cell plus the cells due west and due south, avoiding the Western Watchtower cells to the east, the mountain to the south and Fort Greymoor's exterior cells on the south-west diagonal.
+
+**That L-shape is a constraint on where building is permitted. It must never become the shape the player sees.**
+
+Within the safe area, the visible fairground footprint should feel irregular and organic — like a natural rocky terrace or a patch of prepared market ground worked into the landscape over years. The perimeter should curve, taper and vary in width so it reads as a rock formation adapted for a fair, never as a geometric letter shape, rectangle or any other obviously authored outline.
+
+Practical consequence for the tile kit: keep the **paving** on a clean grid so it can be generated and stays seamless, but drive the **outline** irregularly — step tiles in and out, vary how far the paving reaches on each side, and hide the resulting stepped silhouette under the shoulder, rocks, shrubs and stall placement. The grid should be invisible in the final read.
+
 ### Terrain logic
 
 - high side should meet the native ground as naturally as possible
