@@ -169,3 +169,28 @@ Therefore:
 - if the Creation Kit is opened for visual inspection later, treat it as a viewer/editor convenience only and document any risk from the differing master copy
 
 This keeps the generated plugin aligned with the exact game data Barry actually loads in MO2.
+
+
+## Blender 3.6 is now available
+
+Barry has extracted a portable Blender 3.6 LTS build here:
+
+```text
+C:\Blender\blender-3.6.23-windows-x64\blender-3.6.23-windows-x64\
+```
+
+Use the executable from that portable folder for the Skyrim Fair asset pipeline.
+
+Do not modify or replace Barry's existing Blender 5.2 install.
+
+Next steps:
+
+1. verify the portable Blender reports version 3.6.23,
+2. install / register the two Bethesda Skyrim Blender addons already present under the Creation Kit ArtTools folder:
+   - `bgs_skyrim_tools.zip`
+   - `io_scene_bsfbx_skyrim.zip`
+3. verify both addons load successfully in Blender 3.6,
+4. verify the BGS collision tools and BSFBX exporter appear,
+5. then resume this task at Phase 3.
+
+Do not download alternative NIF/collision plugins unless the official Bethesda toolchain fails and that failure is documented first.
