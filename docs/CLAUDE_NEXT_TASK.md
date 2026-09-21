@@ -1,197 +1,152 @@
-# Claude next task: re-site the fair near Western Watchtower and diagnose fast travel
+# Claude next task: move the prototype to Site 1 and fix fast travel
 
 Work from the latest `feat/bootstrap-generator` branch.
 
-Read `docs/AUDIT.md` first. Treat it as the current source of truth for Barry's local setup.
+Read `docs/AUDIT.md` and `docs/DESIGN.md` first. Treat them as the current source of truth.
 
-Barry has now performed the first in-game test.
+Barry has approved Plan B in principle: the final fair should use a purpose-built, perfectly flat paved market core blended into the tundra rather than forcing stalls onto sloped natural terrain.
 
-## In-game findings
-
-The first visible prototype loaded successfully.
-
-Observed:
-
-- `The Wanderer's Fair` appears on the map.
-- Attempting to fast travel to it does **not** move the player to the fair. The game redirects Barry back to his current location instead.
-- Barry manually walked to the marker and confirmed the placed vanilla market stall/table exists in-world.
-- The current site around cell `2, -2` is much hillier in actual gameplay than desired for a dense Christmas-market-style fair.
-- Barry reports the terrain near the **Western Watchtower** looks substantially flatter.
-
-Treat the successful in-world object placement as confirmation that the generator pipeline itself works.
+This task does **not** build the full platform yet. First prove the corrected marker and new site in game.
 
 ## Goal
 
-Find a better, flatter fairground site in the broader Western Watchtower / Whiterun tundra area without colliding with quest, dragon, civil-war, navmesh, road, settlement, or major exterior-overhaul content.
+Produce the next test build with:
 
-Also diagnose the prototype map-marker fast-travel failure and determine the correct implementation.
+1. the fast-travel marker fixed,
+2. the fair marker changed to Skyrim's vanilla `Pass` icon,
+3. the prototype marker and stall moved to the recommended Site 1,
+4. no platform, navmesh, LAND edits, NPCs or fair layout yet.
 
-Do not modify Skyrim, MO2, Barry's saves, load order, Pandora output, DynDOLOD or Occlusion during this audit.
+## 1. Fix the map marker
 
-Do not move the generated fair yet unless Barry explicitly asks after reviewing the audit.
+Apply the proven marker fix from `docs/AUDIT.md`.
 
-## 1. Audit flatter terrain near Western Watchtower
+Required:
 
-Start from the vanilla Western Watchtower area and inspect surrounding exterior cells.
+- set the marker REFR raw major-record flags to include `Persistent` = `0x400`
+- add `XLRT` using `MapMarkerRefType` = `0010F63C:Skyrim.esm`
+- add `XRDS` radius, using the audited conventional value unless there is a stronger nearby vanilla precedent
+- keep the marker in Tamriel's persistent cell
+- keep it visible + fast-travelable for prototype testing
+- change marker type from `Town` to `Pass`
+- preserve the name `The Wanderer's Fair`
 
-Important prior finding:
+After generation, verify the written ESP carries:
 
-- the actual Western Watchtower area and nearby cells may participate in scripted dragon / civil-war content
-- previous audit specifically warned about Western Watchtower cells around grid `0,-4` / `1,-4`
+- raw flags containing `0x400`
+- `XLRT`
+- `XRDS`
+- `TNAM 0x18` / Mutagen `MarkerType.Pass`
 
-Therefore:
+## 2. Move the prototype to Site 1
 
-- do **not** assume the tower cell itself is safe
-- search outward from the tower for nearby flat tundra that visually feels connected to the area but avoids scripted conflict zones
-- prioritise a site still reasonably close to Whiterun and roads, but with enough open space for the full fair layout
+Use the recommended audited Site 1:
 
-For each viable candidate report:
+- fair centre: `X -5632, Y -12800`
+- test elevation: `Z -5672`
+- broader area spans cells around `-2,-4 / -2,-3 / -1,-4 / -1,-3`
+- no LAND edits
+- no navmesh edits
+- no scripted / dragon / civil-war content in the target footprint
 
-- Tamriel cell FormKey
-- grid X/Y
-- exact world coordinates for a proposed fair centre
-- approximate usable flat footprint in Skyrim units
-- terrain relief across the proposed footprint
-- nearest road / landmark / map marker
-- distance from Western Watchtower
-- nearest vanilla references
-- whether the candidate cell has LAND edits in the active load order
-- whether it has navmesh edits
-- whether it has placed-reference conflicts
-- whether it is touched by civil-war, dragon, encounter, settlement, farm, road or quest content
-- whether Landscape and Water Fixes, Majestic Mountains, GreatWarSkyrim, Jobs, Occlusion or other active exterior mods touch it
-- any visible terrain seam / rock / slope / obstruction concerns
+Update config rather than scattering coordinates through implementation code.
 
-Rank **three** candidate areas by suitability, but do not make a final placement change.
+Move both:
 
-The target footprint should be large enough for the current design direction:
+- `FairSiteMapMarker`
+- `FairTestMarketStall`
 
-- main entrance avenue
-- central traders' crossing
-- east/west specialist trading rows
-- food/drink lane
-- stage and crowd square
-- games area
-- outer stable / future jousting space
+to the new site.
 
-Prefer one broad, naturally flat area over several smaller terraces.
+Do not create the cobblestone platform yet.
 
-### Hard requirement: the market core must be flat
+## 3. Preserve the approved Plan B direction
 
-The fair's commercial core should be genuinely level in game. Do not recommend a site that only looks acceptable numerically if the actual footprint has enough slope to make rows of stalls, tables, crowds or stage placement look awkward.
+The final market core is expected to be approximately `3072 x 3072` and **perfectly flat**.
 
-If no naturally flat candidate is good enough, report that clearly rather than forcing the design onto unsuitable terrain.
+Design requirements already approved:
 
-### Plan B: purpose-built flat fairground platform
+- paved / cobblestone appearance
+- not a giant exposed rectangular block
+- floor should visually merge into Skyrim's terrain
+- high edge can meet grade naturally
+- low edge should become the intentional main entrance approach
+- use ramps, stone retaining details, rocks, grass, hay, fences, shrubs and stall placement to hide transitions
+- archery, stables and future jousting can remain on natural ground outside the paved core
+- avoid LAND edits if possible
 
-If natural terrain cannot provide a sufficiently large, safe, flat site, assess a purpose-built raised/levelled fairground as the fallback.
+The current preferred technical direction is a **small custom project-owned tile kit**, likely:
 
-The intended concept is:
+- repeatable floor tile
+- edge piece
+- corner piece
+- ramp / transition piece
 
-- a broad **perfectly flat cobblestone / stone-paved market floor**
-- the central fair, trading rows and stage square sit on this level surface
-- the outer edges transition back into native tundra through deliberate blending rather than a visible rectangular slab
-- possible edge treatments include shallow ramps, packed-earth embankments, retaining stone, rocks, fences, hay, shrubs, steps and stall placement that hides transitions
-- archery, stable and future jousting areas may remain on more natural ground outside the paved core if that improves visual integration
+Do not model or generate those assets in this task. The point of this test is to confirm Site 1 and fast travel before spending time on the platform.
 
-For this fallback, report:
+## 4. Rebuild and deploy the test ESP
 
-- a sensible approximate platform footprint for the current fair layout
-- likely platform elevation at each candidate site
-- maximum height difference between the proposed flat floor and surrounding terrain
-- where ramps / slopes / steps would be needed
-- whether vanilla Skyrim statics can plausibly create a cobblestone or stone-paved surface
-- candidate vanilla floor / road / courtyard / stone platform meshes or modular pieces, with exact EditorIDs/FormKeys where identifiable
-- whether a custom static mesh would be substantially cleaner than assembling vanilla pieces
-- collision implications
-- navmesh implications for merchants, crowds, Garrick, Claudius and performers
-- how the platform could connect safely to existing exterior navmesh
-- whether the solution can avoid LAND edits
-- expected compatibility implications compared with directly flattening the landscape
+Run:
 
-Do **not** build the platform during this audit.
+```powershell
+dotnet restore SkyrimFair.sln
+dotnet build SkyrimFair.sln -c Release
+dotnet run --project src/SkyrimFair.Generator -- fair.config.json
+```
 
-The preferred fallback is a static/platform solution rather than editing LAND, provided it can be made visually convincing and navmeshed safely. The goal is to preserve compatibility while giving the fair a reliable flat foundation.
+Verify the generated ESP structurally.
 
-## 2. Check current site against the in-game observation
+Then copy the new ESP into:
 
-Revisit the current prototype site:
+```text
+E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp
+```
 
-- cell `000095FE:Skyrim.esm`
-- grid `2,-2`
-- centre near `10880,-7552,-4616`
+Replacing only the existing Skyrim Fair test ESP is allowed.
 
-Explain why the previous numeric relief check understated the visible hilliness, if that can be determined from the heightmap sampling method or footprint size.
+Do not enable/disable other mods, reorder other plugins, launch Skyrim, touch saves, modify Pandora output, or run DynDOLOD/Occlusion.
 
-This is important so future terrain audits use a more representative method.
+## 5. Load-order warning
 
-If useful, compare:
+The audit found `SkyrimFair.esp` currently loads after `DynDOLOD.esp` and `Occlusion.esp`.
 
-- local 512x512 relief
-- larger fair-sized footprint relief
-- slope gradients / elevation change over the full candidate footprint
+Do not reorder Barry's load order automatically.
 
-## 3. Diagnose the map-marker fast-travel failure
+Record clearly in `docs/AUDIT.md` that Barry should move `SkyrimFair.esp` **before both `DynDOLOD.esp` and `Occlusion.esp`** before the next in-game test.
 
-The marker currently:
+## 6. Verification
 
-- appears on the world map
-- is named `The Wanderer's Fair`
-- uses the MapMarker base
-- is in Tamriel's persistent cell
-- has visible + can-travel flags set
-- uses the town/village icon
-- visually selects correctly on the map
-- but choosing fast travel returns Barry to his current location instead of moving him
+After generating the plugin, verify:
 
-Inspect vanilla exterior fast-travel markers and compare our generated record structure.
+- `Skyrim.esm` remains the only master
+- TES4 author remains `BarryRim Event Planner`
+- map marker uses `Pass`
+- map marker has `Persistent` flag
+- `XLRT` and `XRDS` are present
+- marker and stall are at Site 1
+- no LAND records
+- no NAVM records
+- no NPC / quest / script / package / music / animation records
+- deployed ESP is byte-identical to generated ESP
 
-Determine whether the marker also needs one or more of:
+## 7. Audit and Git workflow
 
-- a linked location
-- a persistent reference flag
-- a specific reference flag / record flag
-- a teleport / arrival marker relationship
-- a different placement cell or persistent-cell structure
-- additional map-marker fields
-- a valid landing coordinate convention
-- a navmesh-accessible destination
-- another field omitted by the current generator
+When complete:
 
-Use Skyrim.esm examples close to Whiterun where possible.
-
-Do not guess. Report the exact structural difference between our marker and a known-working vanilla marker.
-
-If the issue can be proven and the fix is low-risk, document the exact Mutagen-side change required, but do not commit the implementation in this audit unless explicitly asked.
-
-## 4. Record the in-game milestone
-
-Update `docs/AUDIT.md` to record that:
-
-- the generated plugin has now been loaded in game successfully
-- the marker renders on the map
-- the placed stall renders in-world
-- current site is rejected for fair layout because it is too hilly in practice
-- fast travel to the custom marker is currently broken
-- the next site search is focused around Western Watchtower while avoiding its scripted conflict cells
-- a flat cobblestone platform is the approved fallback if no suitable natural site exists
-
-## 5. Git workflow
-
-After the audit:
-
-1. overwrite `docs/AUDIT.md` with the latest verified state,
-2. include the three ranked site candidates and the fast-travel diagnosis,
-3. include the Plan B platform assessment if no natural candidate meets the flat-floor requirement,
-4. commit and push to `feat/bootstrap-generator`,
-5. do not modify generator placement coordinates yet,
-6. do not deploy a new ESP into MO2,
-7. tell Barry the audit is pushed and highlight the recommended candidate plus the fast-travel cause.
+1. overwrite `docs/AUDIT.md`,
+2. record exact new coordinates, cell structure, marker flags/subrecords, file size/hash and deployment hash,
+3. keep the Plan B platform recommendation in the audit,
+4. note that the next user test must confirm:
+   - Pass icon displays correctly
+   - fast travel now moves Barry to Site 1
+   - Site 1 looks appropriate as the landscape surrounding a future raised/levelled market platform
+5. commit and push to `feat/bootstrap-generator`,
+6. do not merge the PR.
 
 Suggested commit message:
 
 ```text
-docs: audit flatter fair sites near watchtower
+feat: move prototype and fix fair marker
 ```
 
 The Git history is the audit history. `docs/AUDIT.md` should describe only the latest known state.
