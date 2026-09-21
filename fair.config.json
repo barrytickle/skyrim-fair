@@ -16,13 +16,14 @@
     "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",
     "worldspace": "0000003C:Skyrim.esm",
     "persistentCell": "00000D74:Skyrim.esm",
-    "cell": "000095FE:Skyrim.esm",
-    "cellGridX": 2,
-    "cellGridY": -2,
+    "cell": "00009A28:Skyrim.esm",
+    "cellGridX": -2,
+    "cellGridY": -4,
+    "plannedPlatformFloorZ": -5672,
     "placement": {
-      "x": 10880,
-      "y": -7552,
-      "z": -4616
+      "x": -5632,
+      "y": -12800,
+      "z": -5720
     },
     "testObject": {
       "editorId": "SMarketStall01",
@@ -31,9 +32,11 @@
     "mapMarker": {
       "baseObject": "00000010:Skyrim.esm",
       "name": "The Wanderer's Fair",
-      "type": "Town",
+      "type": "Pass",
       "visible": true,
-      "canTravelTo": true
+      "canTravelTo": true,
+      "radius": 1800,
+      "locationRefType": "0010F63C:Skyrim.esm"
     }
   }
 }

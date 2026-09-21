@@ -77,13 +77,21 @@ internal sealed record PrototypeSite
     public string PersistentCell { get; init; } = "00000D74:Skyrim.esm";
 
     /// <summary>The exterior cell that receives the test object.</summary>
-    public string Cell { get; init; } = "000095FE:Skyrim.esm";
+    public string Cell { get; init; } = "00009A28:Skyrim.esm";
 
-    public int CellGridX { get; init; } = 2;
+    public int CellGridX { get; init; } = -2;
 
-    public int CellGridY { get; init; } = -2;
+    public int CellGridY { get; init; } = -4;
 
     public FairPlacement Placement { get; init; } = new();
+
+    /// <summary>
+    /// Planned floor height for the future flat market platform (Plan B): the terrain
+    /// maximum across the 3072-unit core, so the platform is pure fill with no cut and
+    /// needs no LAND edits. Recorded here for the platform milestone; the current
+    /// prototype places objects on native ground instead, via Placement.
+    /// </summary>
+    public float PlannedPlatformFloorZ { get; init; } = -5672f;
 
     public FairTestObject TestObject { get; init; } = new();
 
@@ -120,11 +128,12 @@ internal sealed record PrototypeSite
 
 internal sealed record FairPlacement
 {
-    public float X { get; init; } = 10880f;
+    public float X { get; init; } = -5632f;
 
-    public float Y { get; init; } = -7552f;
+    public float Y { get; init; } = -12800f;
 
-    public float Z { get; init; } = -4616f;
+    /// <summary>Native terrain height at X/Y, so prototype objects sit on the ground.</summary>
+    public float Z { get; init; } = -5720f;
 }
 
 internal sealed record FairTestObject
@@ -141,12 +150,24 @@ internal sealed record FairMapMarker
     public string Name { get; init; } = "The Wanderer's Fair";
 
     /// <summary>
-    /// Name of a Mutagen MapMarker.MarkerType value. "Town" is the icon vanilla
-    /// uses for Riverwood, Rorikstead and Shor's Stone (raw TNAM 0x02).
+    /// Name of a Mutagen MapMarker.MarkerType value. "Pass" is raw TNAM 0x18,
+    /// the icon vanilla uses for its border-pass crossings.
     /// </summary>
-    public string Type { get; init; } = "Town";
+    public string Type { get; init; } = "Pass";
 
     public bool Visible { get; init; } = true;
 
     public bool CanTravelTo { get; init; } = true;
+
+    /// <summary>
+    /// XRDS marker radius. 1800 matches WhiterunWatchtowerMapMarker, the nearest
+    /// vanilla marker to the fair site, and suits a 3072-unit market core.
+    /// </summary>
+    public float Radius { get; init; } = 1800f;
+
+    /// <summary>
+    /// XLRT location reference type. Vanilla uses MapMarkerRefType on 333 of its
+    /// 347 Tamriel map markers.
+    /// </summary>
+    public string LocationRefType { get; init; } = "0010F63C:Skyrim.esm";
 }

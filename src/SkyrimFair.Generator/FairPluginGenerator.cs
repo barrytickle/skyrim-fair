@@ -14,6 +14,16 @@ internal static class FairPluginGenerator
     private const int ExteriorSubBlockSize = 8;
 
     /// <summary>
+    /// The Persistent record flag. Every one of the 347 vanilla map markers in Tamriel
+    /// carries it, and without it the engine will not resolve the reference as a
+    /// fast-travel destination: the marker draws on the map but travelling to it
+    /// returns the player to where they already are. Mutagen models persistence only
+    /// through Cell.Persistent membership and does not write this flag, so it is set
+    /// explicitly here.
+    /// </summary>
+    private const int PersistentRecordFlag = 0x400;
+
+    /// <summary>
     /// Copies a worldspace's own fields without dragging in its cells.
     /// LargeReferences (the RNAM lists) are deliberately dropped: the Creation Kit omits
     /// them on every WRLD override, and so does every mod in the audited load order.
@@ -232,9 +242,10 @@ internal static class FairPluginGenerator
                 $"Expected one of: {string.Join(", ", Enum.GetNames<MapMarker.MarkerType>())}.");
         }
 
-        return new PlacedObject(mod)
+        var placed = new PlacedObject(mod)
         {
             EditorID = "FairSiteMapMarker",
+            MajorRecordFlagsRaw = PersistentRecordFlag,
             Base = new FormLinkNullable<IPlaceableObjectGetter>(ParseFormKey(marker.BaseObject)),
             MapMarker = new MapMarker
             {
@@ -242,12 +253,20 @@ internal static class FairPluginGenerator
                 Type = markerType,
                 Flags = flags,
             },
+            Radius = marker.Radius,
             Placement = new Placement
             {
                 Position = new P3Float(site.Placement.X, site.Placement.Y, site.Placement.Z),
                 Rotation = new P3Float(0f, 0f, 0f),
             },
         };
+
+        placed.LocationRefTypes = new ExtendedList<IFormLinkGetter<ILocationReferenceTypeGetter>>
+        {
+            new FormLink<ILocationReferenceTypeGetter>(ParseFormKey(marker.LocationRefType)),
+        };
+
+        return placed;
     }
 
     private static WorldspaceBlock BuildBlockChain(int cellX, int cellY, Cell cell)
