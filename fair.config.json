@@ -16,14 +16,14 @@
     "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",
     "worldspace": "0000003C:Skyrim.esm",
     "persistentCell": "00000D74:Skyrim.esm",
-    "cell": "00009A49:Skyrim.esm",
+    "cell": "00009A28:Skyrim.esm",
     "cellGridX": -2,
-    "cellGridY": -5,
+    "cellGridY": -4,
     "plannedPlatformFloorZ": -5672,
     "placement": {
-      "x": -5376,
-      "y": -18304,
-      "z": -5656
+      "x": -5888,
+      "y": -12928,
+      "z": -5720
     },
     "testObject": {
       "editorId": "SMarketStall01",
@@ -38,17 +38,17 @@
       "radius": 1800,
       "locationRefType": "0010F63C:Skyrim.esm",
       "position": {
-        "x": -5376,
-        "y": -14720,
-        "z": -5792
+        "x": -5888,
+        "y": -10368,
+        "z": -5912
       }
     },
     "foundation": {
       "enabled": true,
       "tileSize": 512,
-      "floorZ": -5568,
+      "floorZ": -5696,
       "rampEdge": "N",
-      "rampTiles": 4,
+      "rampTiles": 2,
       "rampWidth": 2,
       "rampRise": 64,
       "shoulderOffset": 64,
@@ -121,7 +121,12 @@
       "shoulderMaxDrop": 112,
       "clearSearchRadius": 2048,
       "clearMaxRadius": 2000,
-      "clearClutter": false
+      "clearClutter": false,
+      "disableReferences": [
+        "00048032:Skyrim.esm",
+        "0004801A:Skyrim.esm",
+        "00048031:Skyrim.esm"
+      ]
     }
   }
 }

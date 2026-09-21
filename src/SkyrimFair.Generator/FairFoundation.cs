@@ -346,6 +346,9 @@ internal sealed class FoundationResult
     /// <summary>Dressing picks rejected for having an oversized mesh footprint.</summary>
     public int OversizedSkipped { get; set; }
 
+    /// <summary>References named for disabling that were refused, with the reason.</summary>
+    public List<string> Refused { get; } = new();
+
     public Dictionary<string, int> Counts { get; } = new();
 
     public int DressingCount { get; set; }

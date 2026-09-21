@@ -237,11 +237,20 @@ internal sealed record FoundationConfig
     public float RetainHeight { get; init; } = 256f;
 
     /// <summary>
-    /// Whether to override intruding vanilla clutter as Initially Disabled.
-    /// Currently OFF: the footprint audit in docs/AUDIT.md lists what would be
-    /// affected, and Barry reviews that before anything is disabled.
+    /// Bulk radius-based clearing. Deliberately OFF. The footprint audit in
+    /// docs/AUDIT.md lists everything that intersects, and references are disabled
+    /// only by explicit FormKey via DisableReferences below.
     /// </summary>
     public bool ClearClutter { get; init; }
+
+    /// <summary>
+    /// Individual placed references to override as Initially Disabled, named
+    /// explicitly after review. Each is checked before being touched: it must exist
+    /// in the master, its base must be scenery (STAT/TREE/FLOR), and it must carry no
+    /// script, link, owner, enable parent or persistent flag. Anything failing those
+    /// checks is refused and reported rather than disabled.
+    /// </summary>
+    public IReadOnlyList<string> DisableReferences { get; init; } = Array.Empty<string>();
 
     /// <summary>
     /// Extra margin added to each object's own mesh radius when deciding whether it

@@ -198,6 +198,61 @@ internal static class FairPluginGenerator
             }
         }
 
+        // Disable individually named references. Nothing is cleared in bulk: each
+        // FormKey was reviewed in the footprint audit, and each is re-checked here
+        // before being touched.
+        if (foundation is not null && vanillaWorldspace is not null
+            && site.Foundation.DisableReferences.Count > 0)
+        {
+            var scenery = CollectClearableBases(master!);
+            var wanted = site.Foundation.DisableReferences
+                .Select(FormKeyHelper.Parse).ToHashSet();
+            var found = new HashSet<FormKey>();
+
+            foreach (var (cx, cy) in EnumerateCellsAround(foundation, site.Foundation.ClearSearchRadius))
+            {
+                var vanillaCell = FindVanillaCell(vanillaWorldspace, cx, cy);
+                if (vanillaCell is null)
+                {
+                    continue;
+                }
+
+                foreach (var existing in vanillaCell.Temporary.OfType<IPlacedObjectGetter>())
+                {
+                    if (!wanted.Contains(existing.FormKey))
+                    {
+                        continue;
+                    }
+
+                    found.Add(existing.FormKey);
+                    var refusal = WhyUnsafeToDisable(existing, scenery);
+                    if (refusal is not null)
+                    {
+                        foundation.Refused.Add($"{existing.FormKey}: {refusal}");
+                        continue;
+                    }
+
+                    var disabled = existing.DeepCopy();
+                    disabled.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+
+                    var key = (cx, cy);
+                    if (!byCell.TryGetValue(key, out var list))
+                    {
+                        list = new List<PlacedObject>();
+                        byCell[key] = list;
+                    }
+
+                    list.Add(disabled);
+                    foundation.DisabledCount++;
+                }
+            }
+
+            foreach (var missing in wanted.Except(found))
+            {
+                foundation.Refused.Add($"{missing}: not found near the footprint");
+            }
+        }
+
         // Nest each touched cell under its exterior block / sub-block.
         var blocks = new Dictionary<(int X, int Y), WorldspaceBlock>();
         var subBlocks = new Dictionary<(int X, int Y), WorldspaceSubBlock>();
@@ -259,6 +314,48 @@ internal static class FairPluginGenerator
             master is not null,
             byCell.Keys.OrderBy(k => k.Y).ThenBy(k => k.X).ToList(),
             foundation);
+    }
+
+    private static IEnumerable<(int X, int Y)> EnumerateCellsAround(
+        FoundationResult foundation, float pad)
+    {
+        var minX = foundation.PavedRects.Min(r => r.MinX) - pad;
+        var maxX = foundation.PavedRects.Max(r => r.MaxX) + pad;
+        var minY = foundation.PavedRects.Min(r => r.MinY) - pad;
+        var maxY = foundation.PavedRects.Max(r => r.MaxY) + pad;
+        for (var cy = (int)MathF.Floor(minY / CellSize); cy <= (int)MathF.Floor(maxY / CellSize); cy++)
+        {
+            for (var cx = (int)MathF.Floor(minX / CellSize); cx <= (int)MathF.Floor(maxX / CellSize); cx++)
+            {
+                yield return (cx, cy);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Refuses anything that is not plain scenery. Returns null when safe to disable.
+    /// </summary>
+    private static string? WhyUnsafeToDisable(
+        IPlacedObjectGetter placed, Dictionary<FormKey, float> scenery)
+    {
+        if (!scenery.ContainsKey(placed.Base.FormKey))
+        {
+            return "base object is not a static, tree or flora";
+        }
+
+        if ((placed.MajorRecordFlagsRaw & PersistentRecordFlag) != 0)
+        {
+            return "reference is persistent";
+        }
+
+        if (placed.VirtualMachineAdapter is not null) return "reference has a script";
+        if (placed.EnableParent is not null) return "reference is enable-parented";
+        if (placed.LinkedReferences.Count > 0) return "reference has linked references";
+        if (placed.Owner.FormKey != FormKey.Null) return "reference is owned";
+        if (placed.LocationRefTypes is { Count: > 0 }) return "reference has location ref types";
+        if (placed.TeleportDestination is not null) return "reference is a teleport door";
+        if (placed.EncounterZone.FormKey != FormKey.Null) return "reference has an encounter zone";
+        return null;
     }
 
     /// <summary>
