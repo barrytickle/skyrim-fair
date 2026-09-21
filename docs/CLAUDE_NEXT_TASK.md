@@ -1,150 +1,96 @@
-# Claude next task: prepare the first visible fair build
+# Claude next task: first visible Skyrim Fair build
 
-Work from the current `feat/bootstrap-generator` branch.
+Work from the latest `feat/bootstrap-generator` branch.
+
+Read `docs/AUDIT.md` first. Treat it as the current source of truth for Barry's local setup.
 
 ## Goal
 
-Produce the exact local information needed for ChatGPT to make the next code commit that places the first visible fair assets and map marker.
+Upgrade the C# / Mutagen generator from the current header-only ESP into the first **visible in-game proof** of Skyrim Fair.
 
-Do not change Skyrim, MO2, the active load order, Pandora output, or any installed mod files. Repository build output under `dist/` is fine.
+This milestone should generate an ESP containing:
 
-## 1. Verify the generator now that .NET 10 SDK is installed
+1. one vanilla market stall at the audited fair test site, and
+2. a temporary map marker named **The Wanderer's Fair** so Barry can reach the site easily during testing.
 
-From the repository root run:
+Do not install or enable the ESP in MO2 yet. Do not modify Skyrim, MO2, the load order, Pandora output, or any installed mod files.
+
+## Known-good audited data
+
+### Test exterior cell
+
+- Worldspace: Tamriel
+- cell grid: `2, -2`
+- cell FormKey: `000095FE:Skyrim.esm`
+- placement: `X 10880, Y -7552, Z -4616`
+
+### Test object
+
+- EditorID: `SMarketStall01`
+- type: `STAT`
+- FormKey: `00064B87:Skyrim.esm`
+
+### Map marker
+
+- base object: `MapMarker`
+- FormKey: `00000010:Skyrim.esm`
+- display name: `The Wanderer's Fair`
+- place the marker in Tamriel's persistent cell, as vanilla exterior markers are structured
+- for this prototype, make it visible and fast-travelable immediately so Barry can reach the test site easily
+- use the village / settlement-style marker icon identified in the audit unless Mutagen exposes a clearer typed equivalent
+
+## Implementation requirements
+
+- Use Mutagen APIs, not binary patching or hand-written ESP bytes.
+- Reference records with `FormKey` / typed FormLinks. Never hardcode a load-order index.
+- Ensure `Skyrim.esm` is present as a master in the generated plugin.
+- Preserve the existing config-driven generator structure where practical.
+- Prefer adding explicit prototype-site configuration fields over scattering raw coordinates through implementation code.
+- Keep this milestone minimal. Do not add Medieval Markets, banner assets, dancers, music, NPCs, navmesh, LAND edits, scripts, packages, or DynDOLOD work yet.
+- Do not write into Skyrim's `Data` directory.
+- Output remains `dist/SkyrimFair.esp`.
+
+## Verification
+
+Run:
 
 ```powershell
-dotnet --info
 dotnet restore SkyrimFair.sln
 dotnet build SkyrimFair.sln -c Release
 dotnet run --project src/SkyrimFair.Generator -- fair.config.json
 ```
 
-Report:
+Then inspect the generated ESP read-only and verify:
 
-- exact .NET SDK version detected
-- restore/build result
-- whether `dist/SkyrimFair.esp` is produced
-- generated ESP size in bytes
-- all warnings/errors, if any
+- it parses successfully
+- `Skyrim.esm` is a master
+- it contains a placed reference whose base is `00064B87:Skyrim.esm`
+- that reference resolves under Tamriel cell `000095FE:Skyrim.esm`
+- its position is the intended test-site coordinate
+- it contains a map-marker reference using base `00000010:Skyrim.esm`
+- the marker name is `The Wanderer's Fair`
+- the marker is visible + fast-travelable for the prototype
+- no navmesh, LAND, NPC, quest, script, package, music, or animation records were accidentally added
 
-Do not install the ESP into MO2 yet.
+If Mutagen requires a different structural approach for exterior-cell overrides or persistent worldspace references, use the correct Mutagen-native approach and document it. Do not fake the result merely to satisfy the expected shape.
 
-## 2. Reconfirm the first test site
+## Git workflow
 
-Use the previous audit result as the starting point:
+You may edit the generator/config/tests/docs required for this milestone.
 
-- Tamriel exterior cell grid: `2, -2`
-- cell FormKey: `000095FE:Skyrim.esm`
-- proposed placement: `X 10880, Y -7552, Z -4616`
-- vanilla test object: `SMarketStall01`
-- test object FormKey: `00064B87:Skyrim.esm`
+When complete:
 
-Reconfirm that none of the newly installed resource mods changed this cell or override `SMarketStall01`.
+1. overwrite `docs/AUDIT.md` with the latest verified local state,
+2. include the generated ESP size, record counts, exact new FormKeys allocated by Skyrim Fair, build result, and any caveats,
+3. commit all code changes and the refreshed audit,
+4. push them to `feat/bootstrap-generator`,
+5. do not merge the PR,
+6. tell Barry that the first visible build has been pushed, or clearly report the blocker if it cannot be completed.
 
-Do not redo the whole worldspace audit unless something has changed.
+Suggested final commit message:
 
-## 3. Inspect Medieval Markets
+```text
+feat: generate first visible fair site
+```
 
-Identify the installed Medieval Markets mod and produce a shortlist of useful fair assets.
-
-For each shortlisted asset report:
-
-- exact relative mesh path
-- exact relative texture path(s), where practical
-- plugin record EditorID/FormKey if the installed plugin exposes one
-- plain-English description of what it is
-- likely use in Skyrim Fair
-- provenance: JJerem-authored or third-party source
-- redistribution status if clearly documented
-- whether dependency-only use would avoid redistribution concerns
-
-Prioritise:
-
-- market stalls
-- tents/canopies
-- shelving
-- tables
-- baskets
-- produce/display clutter
-- anything that would make a fair lane look populated
-
-Do not copy or modify the assets.
-
-## 4. Inspect the newly installed banner resource
-
-Barry has installed a banner resource after the previous audit.
-
-First identify the exact mod from the local MO2 folders / metadata. Do not guess its title, author, or Nexus ID.
-
-Report:
-
-- exact mod name
-- author
-- installed version
-- Nexus/mod source identifier if locally available
-- plugin name(s), if any
-- exact MO2 mod folder
-- bundled licence / permissions / credits documentation
-
-Then shortlist the best assets for a fairground.
-
-For each shortlisted banner/bunting asset report:
-
-- mesh path
-- texture path(s)
-- EditorID/FormKey if exposed by a plugin
-- visual description inferred from file/record naming
-- attribution/provenance
-- redistribution conditions if clearly documented
-
-Prioritise:
-
-- strings of bunting
-- colourful hanging banners
-- entrance banners
-- stage decorations
-- generic medieval/festival designs rather than hold-specific heraldry
-
-Do not copy or modify the assets.
-
-## 5. Find the vanilla map-marker records we need
-
-Inspect Skyrim.esm and identify the exact record information needed to create a new exterior map marker programmatically.
-
-Report:
-
-- base `MapMarker` placed-object/base-object FormKey used by vanilla exterior markers
-- relevant record fields controlling marker name
-- icon/type options that would make sense for a fair, camp, settlement, or miscellaneous location
-- fields/flags controlling visibility, discovery, and fast travel
-- one nearby vanilla map marker record as a known-good structural example
-
-Do not modify any plugin.
-
-## 6. Output
-
-Return one concise report with these headings:
-
-1. Generator verification
-2. Test-site reconfirmation
-3. Medieval Markets shortlist
-4. Banner resource identification and shortlist
-5. Vanilla map-marker implementation notes
-6. Blockers / uncertainties
-
-For asset shortlists, use tables where possible.
-
-Do not guess. If provenance, permissions, a FormKey, or a file relationship cannot be confirmed locally, mark it as unknown.
-
-
-## Persistent audit handoff
-
-After completing this task:
-
-1. overwrite `docs/AUDIT.md` in full with the latest verified local state,
-2. do not append old audit text,
-3. commit the change with `docs: refresh local audit`,
-4. push it to the active project branch,
-5. tell Barry only that the audit has been pushed and note any blocker that needs his action.
-
-The Git history is the audit history. `docs/AUDIT.md` should always describe the latest known state only.
+The Git history is the audit history. `docs/AUDIT.md` must describe only the latest known state.
