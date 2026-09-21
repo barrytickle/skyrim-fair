@@ -2,7 +2,7 @@
 
 A code-first Skyrim Special Edition fairground mod.
 
-The long-term idea is a dedicated fairground with live music, generic bards and dancers, stalls, games, archery, scheduled performances, and eventually a safely-faked jousting tournament.
+The long-term idea is a dedicated fairground with live music, generic bards and dancers, stalls, games, archery, scheduled performances, and eventually a safely-faked jousting tournament. The design target is a **UK Christmas market translated into medieval Skyrim**: dense lanes, specialist food and gear stalls, warm lighting, side streets, crowds and a lively performance square.
 
 The first milestone is intentionally much less glamorous: prove that the repository can generate a valid Skyrim plugin from C#.
 
@@ -84,4 +84,4 @@ The generated ESP is deliberately empty for now. The test is whether Skyrim acce
 8. Only introduce SKSE or Papyrus where a feature actually needs runtime logic.
 9. Attempt jousting after we have demonstrated basic survival instincts.
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the current milestone list.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the current milestone list and [docs/DESIGN.md](docs/DESIGN.md) for the fair layout, atmosphere and content direction.
