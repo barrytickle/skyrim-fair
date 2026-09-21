@@ -1,116 +1,158 @@
-# Claude next task: prepare the first MO2 test build
+# Claude next task: re-site the fair near Western Watchtower and diagnose fast travel
 
 Work from the latest `feat/bootstrap-generator` branch.
 
 Read `docs/AUDIT.md` first. Treat it as the current source of truth for Barry's local setup.
 
+Barry has now performed the first in-game test.
+
+## In-game findings
+
+The first visible prototype loaded successfully.
+
+Observed:
+
+- `The Wanderer's Fair` appears on the map.
+- Attempting to fast travel to it does **not** move the player to the fair. The game redirects Barry back to his current location instead.
+- Barry manually walked to the marker and confirmed the placed vanilla market stall/table exists in-world.
+- The current site around cell `2, -2` is much hillier in actual gameplay than desired for a dense Christmas-market-style fair.
+- Barry reports the terrain near the **Western Watchtower** looks substantially flatter.
+
+Treat the successful in-world object placement as confirmation that the generator pipeline itself works.
+
 ## Goal
 
-Prepare the first generated Skyrim Fair plugin for an in-game test through Mod Organizer 2.
+Find a better, flatter fairground site in the broader Western Watchtower / Whiterun tundra area without colliding with quest, dragon, civil-war, navmesh, road, settlement, or major exterior-overhaul content.
 
-The generated ESP has already been structurally verified. This task is only to place it into a dedicated MO2 mod folder so Barry can enable it manually.
+Also diagnose the prototype map-marker fast-travel failure and determine the correct implementation.
 
-## Small easter egg
+Do not modify Skyrim, MO2, Barry's saves, load order, Pandora output, DynDOLOD or Occlusion during this audit.
 
-Before rebuilding, add one harmless metadata easter egg to the generated plugin:
+Do not move the generated fair yet unless Barry explicitly asks after reviewing the audit.
 
-- TES4 Author / CNAM: `BarryRim Event Planner`
+## 1. Audit flatter terrain near Western Watchtower
 
-Keep it subtle. Do not add gameplay content, records, scripts, messages, quests, or visible in-game jokes for this easter egg. Verify after generation that the author metadata is present in the written ESP.
+Start from the vanilla Western Watchtower area and inspect surrounding exterior cells.
 
-## Safety boundary
+Important prior finding:
 
-You may create files and folders inside the MO2 `mods` directory for this dedicated project mod.
+- the actual Western Watchtower area and nearby cells may participate in scripted dragon / civil-war content
+- previous audit specifically warned about Western Watchtower cells around grid `0,-4` / `1,-4`
 
-Do **not**:
+Therefore:
 
-- enable the mod in MO2
-- enable the plugin in the right-hand plugin pane
-- reorder the load order
-- edit Barry's active profile
-- launch Skyrim
-- launch SKSE
-- modify `stock\Data`
-- modify any existing mod
-- modify Pandora output
-- run DynDOLOD/Occlusion
-- touch Barry's saves
+- do **not** assume the tower cell itself is safe
+- search outward from the tower for nearby flat tundra that visually feels connected to the area but avoids scripted conflict zones
+- prioritise a site still reasonably close to Whiterun and roads, but with enough open space for the full fair layout
 
-Barry will perform the enable-and-launch step manually.
+For each viable candidate report:
 
-## Known paths
+- Tamriel cell FormKey
+- grid X/Y
+- exact world coordinates for a proposed fair centre
+- approximate usable flat footprint in Skyrim units
+- terrain relief across the proposed footprint
+- nearest road / landmark / map marker
+- distance from Western Watchtower
+- nearest vanilla references
+- whether the candidate cell has LAND edits in the active load order
+- whether it has navmesh edits
+- whether it has placed-reference conflicts
+- whether it is touched by civil-war, dragon, encounter, settlement, farm, road or quest content
+- whether Landscape and Water Fixes, Majestic Mountains, GreatWarSkyrim, Jobs, Occlusion or other active exterior mods touch it
+- any visible terrain seam / rock / slope / obstruction concerns
 
-From the latest audit:
+Rank **three** candidate areas by suitability, but do not make a final placement change.
 
-- MO2 instance: `E:\Modlists\Still In Skyrim`
-- MO2 mods directory: `E:\Modlists\Still In Skyrim\mods`
-- project output: `dist\SkyrimFair.esp`
+The target footprint should be large enough for the current design direction:
 
-## Required work
+- main entrance avenue
+- central traders' crossing
+- east/west specialist trading rows
+- food/drink lane
+- stage and crowd square
+- games area
+- outer stable / future jousting space
 
-1. Add the plugin author metadata described above, preserving the existing generator structure.
+Prefer one broad, naturally flat area over several smaller terraces.
 
-2. Rebuild the project from the repository root:
+## 2. Check current site against the in-game observation
 
-```powershell
-dotnet restore SkyrimFair.sln
-dotnet build SkyrimFair.sln -c Release
-dotnet run --project src/SkyrimFair.Generator -- fair.config.json
-```
+Revisit the current prototype site:
 
-3. Verify `dist\SkyrimFair.esp` exists and matches the expected first-visible-build structure from `docs/AUDIT.md`, including `BarryRim Event Planner` as the TES4 author metadata.
+- cell `000095FE:Skyrim.esm`
+- grid `2,-2`
+- centre near `10880,-7552,-4616`
 
-4. Create this dedicated MO2 mod folder if it does not already exist:
+Explain why the previous numeric relief check understated the visible hilliness, if that can be determined from the heightmap sampling method or footprint size.
 
-```text
-E:\Modlists\Still In Skyrim\mods\Skyrim Fair\
-```
+This is important so future terrain audits use a more representative method.
 
-5. Copy the generated plugin to:
+If useful, compare:
 
-```text
-E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp
-```
+- local 512x512 relief
+- larger fair-sized footprint relief
+- slope gradients / elevation change over the full candidate footprint
 
-6. Verify the copied file exists and is byte-identical to `dist\SkyrimFair.esp`.
+## 3. Diagnose the map-marker fast-travel failure
 
-7. Do not add any other files unless MO2 itself requires metadata to recognise the folder. If metadata is created, document exactly what was added and why.
+The marker currently:
 
-## Expected state when finished
+- appears on the world map
+- is named `The Wanderer's Fair`
+- uses the MapMarker base
+- is in Tamriel's persistent cell
+- has visible + can-travel flags set
+- uses the town/village icon
+- visually selects correctly on the map
+- but choosing fast travel returns Barry to his current location instead of moving him
 
-The filesystem should contain:
+Inspect vanilla exterior fast-travel markers and compare our generated record structure.
 
-```text
-E:\Modlists\Still In Skyrim\mods\Skyrim Fair\
-└── SkyrimFair.esp
-```
+Determine whether the marker also needs one or more of:
 
-The mod may appear in MO2's left pane after refresh/restart, but it must remain disabled.
+- a linked location
+- a persistent reference flag
+- a specific reference flag / record flag
+- a teleport / arrival marker relationship
+- a different placement cell or persistent-cell structure
+- additional map-marker fields
+- a valid landing coordinate convention
+- a navmesh-accessible destination
+- another field omitted by the current generator
 
-The plugin must not be enabled in Barry's active load order.
+Use Skyrim.esm examples close to Whiterun where possible.
 
-## Git / audit workflow
+Do not guess. Report the exact structural difference between our marker and a known-working vanilla marker.
 
-After preparing the folder:
+If the issue can be proven and the fix is low-risk, document the exact Mutagen-side change required, but do not commit the implementation in this audit unless explicitly asked.
+
+## 4. Record the in-game milestone
+
+Update `docs/AUDIT.md` to record that:
+
+- the generated plugin has now been loaded in game successfully
+- the marker renders on the map
+- the placed stall renders in-world
+- current site is rejected for fair layout because it is too hilly in practice
+- fast travel to the custom marker is currently broken
+- the next site search is focused around Western Watchtower while avoiding its scripted conflict cells
+
+## 5. Git workflow
+
+After the audit:
 
 1. overwrite `docs/AUDIT.md` with the latest verified state,
-2. record:
-   - build result
-   - confirmation that TES4 Author / CNAM is `BarryRim Event Planner`
-   - generated ESP size/hash
-   - deployed ESP size/hash
-   - exact MO2 destination path
-   - whether the mod folder already existed or was created
-   - confirmation that the copied file is byte-identical
-   - confirmation that the mod/plugin were **not enabled**
-3. commit and push the generator change plus refreshed audit to `feat/bootstrap-generator`,
-4. do not commit the generated ESP or any MO2 files to Git,
-5. tell Barry only that the MO2 test build is prepared and ready for him to enable manually, plus any blocker if something went wrong.
+2. include the three ranked site candidates and the fast-travel diagnosis,
+3. commit and push to `feat/bootstrap-generator`,
+4. do not modify generator placement coordinates yet,
+5. do not deploy a new ESP into MO2,
+6. tell Barry the audit is pushed and highlight the recommended candidate plus the fast-travel cause.
 
 Suggested commit message:
 
 ```text
-feat: add BarryRim plugin easter egg
+docs: audit flatter fair sites near watchtower
 ```
 
 The Git history is the audit history. `docs/AUDIT.md` should describe only the latest known state.
