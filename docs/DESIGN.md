@@ -265,3 +265,42 @@ For the final fair marker, use Skyrim's vanilla **Pass** map icon rather than th
 - preferred icon: `Pass`
 - keep the current prototype marker behaviour only as needed for testing
 - when the fast-travel issue is fixed, carry this icon preference into the implementation unless the audit identifies a technical blocker
+
+
+## Fairground foundation art direction
+
+If Site 1 is approved after the next in-game retest, the fair should use a purpose-built flat market terrace rather than trying to fit stalls to Skyrim's natural slope.
+
+The visual target is **not** a large exposed slab.
+
+### Core surface
+
+- central market core should be perfectly flat
+- cobblestone / stone paving should dominate the centre
+- main avenue, traders' crossing, trading rows and stage square should all sit on this level surface
+- the paved core can be roughly 3072 x 3072 for the first full layout pass
+
+### Perimeter treatment
+
+The platform should visually disappear into the tundra.
+
+Use a layered transition:
+
+1. cobblestone market core
+2. narrow grass / rough-earth shoulder
+3. rocky retaining edge or low cliff-like face where elevation is exposed
+4. large stones, shrubs, grass clumps, hay, fences and clutter to break up the silhouette
+5. native tundra beyond
+
+The perimeter should be irregular rather than reading as one perfect rectangle.
+
+### Terrain logic
+
+- high side should meet the native ground as naturally as possible
+- low side can use a rocky retaining face / small cliff treatment
+- main entrance should use a broad, believable ramp or sloped approach
+- avoid clean exposed vertical platform walls
+- avoid making the foundation read as concrete, modern paving, or a dropped-in block
+- archery, stables and future jousting can remain on natural ground outside the paved core
+
+The intended visual story is that this is a recurring fairground that has been deliberately prepared and levelled over time.
