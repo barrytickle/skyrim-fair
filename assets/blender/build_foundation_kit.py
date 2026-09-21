@@ -27,6 +27,7 @@ import os
 import sys
 
 import bpy
+from mathutils import Vector
 
 # --- scale --------------------------------------------------------------------
 #
@@ -109,7 +110,10 @@ def make_paving_material():
         props.specular_enabled = True
         props.specular_mult = 1.0
         props.specular_color = (1.0, 1.0, 1.0)
-        props.vertex_colors_enabled = True
+        # The audited vanilla mesh has a vertex-colour layer and this one does not,
+        # so the flag is deliberately not copied across; claiming colours that are
+        # absent leaves the shader reading undefined data.
+        props.vertex_colors_enabled = False
         return material
 
     material = bpy.data.materials.new("SkyrimFair_Cobble01")
@@ -129,8 +133,35 @@ def make_paving_material():
     return material
 
 
-def apply_paving_material(obj, material, u_phase=0.0, v_phase=0.0):
-    """World-scale 1024u UVs; phases let 512u kit pieces share one large tile."""
+def make_landscape_material(name, diffuse, normal, shininess, spec_mult):
+    """Vanilla landscape material, referenced by game path and never redistributed.
+
+    The structural slab, retaining faces and verge wedge previously shipped with no
+    material at all, so they rendered with the engine default: the flat lavender
+    surfaces visible all over the terrace. They are meant to be hidden behind rock
+    and cliff dressing, but anything that does peek through should read as earth or
+    grass rather than as a missing texture.
+    """
+    material = bpy.data.materials.new(name)
+    props = material.bgs_props
+    props.texture_diffuse = diffuse
+    props.texture_normal = normal
+    props.texture_height = ""
+    props.clamp_mode = "WRAP_S_WRAP_T"
+    props.parallax_enabled = False
+    props.parallax_occlusion_enabled = False
+    props.model_space_normals = False
+    props.shininess = shininess
+    props.specular_enabled = True
+    props.specular_mult = spec_mult
+    props.specular_color = (1.0, 1.0, 1.0)
+    props.vertex_colors_enabled = False
+    return material
+
+
+def apply_paving_material(obj, material, u_phase=0.0, v_phase=0.0, period=None):
+    """World-scale UVs; phases let 512u kit pieces share one larger texture tile."""
+    period = PAVING_TEXTURE_PERIOD if period is None else period
     obj.data.materials.append(material)
     uv_layer = obj.data.uv_layers.new(name="UVMap")
     inv = 1.0 / BLENDER_UNITS_PER_SKYRIM_UNIT
@@ -143,47 +174,64 @@ def apply_paving_material(obj, material, u_phase=0.0, v_phase=0.0):
         for loop_index in polygon.loop_indices:
             vertex = coords[obj.data.loops[loop_index].vertex_index]
             if abs(normal.z) >= max(abs(normal.x), abs(normal.y)):
-                u = (vertex.x - min_x) / PAVING_TEXTURE_PERIOD + u_phase
-                v = (vertex.y - min_y) / PAVING_TEXTURE_PERIOD + v_phase
+                u = (vertex.x - min_x) / period + u_phase
+                v = (vertex.y - min_y) / period + v_phase
             elif abs(normal.x) >= abs(normal.y):
-                u = (vertex.y - min_y) / PAVING_TEXTURE_PERIOD + v_phase
-                v = (vertex.z - min_z) / PAVING_TEXTURE_PERIOD
+                u = (vertex.y - min_y) / period + v_phase
+                v = (vertex.z - min_z) / period
             else:
-                u = (vertex.x - min_x) / PAVING_TEXTURE_PERIOD + u_phase
-                v = (vertex.z - min_z) / PAVING_TEXTURE_PERIOD
+                u = (vertex.x - min_x) / period + u_phase
+                v = (vertex.z - min_z) / period
             uv_layer.data[loop_index].uv = (u, v)
 
 
-def box(name, x0, x1, y0, y1, z0, z1):
+def box(name, x0, x1, y0, y1, z0, z1, open_top=False):
+    """Axis-aligned box with every face wound OUTWARD.
+
+    The winding is not cosmetic. Every face of every piece in this kit used to be
+    wound inward, which makes the whole solid render inside-out: the walking
+    surface becomes a back face and is culled, and what you actually see from
+    above is the inside of the slab's underside, 32 units lower, framed by the
+    rim of the side faces. That is invisible on untextured grey geometry and
+    glaring the moment a normal-mapped stone texture is applied.
+
+    open_top drops the upward face. Used for structural pieces that are capped by
+    a separate thin visual layer, so the two never fight over the same plane.
+    """
     verts = [
         (x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0),
         (x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1),
     ]
     faces = [
-        (0, 1, 2, 3),   # bottom
-        (7, 6, 5, 4),   # top
-        (0, 4, 5, 1),
-        (1, 5, 6, 2),
-        (2, 6, 7, 3),
-        (3, 7, 4, 0),
+        (3, 2, 1, 0),   # bottom, -Z
+        (0, 1, 5, 4),   # -Y
+        (1, 2, 6, 5),   # +X
+        (2, 3, 7, 6),   # +Y
+        (3, 0, 4, 7),   # -X
     ]
+    if not open_top:
+        faces.append((4, 5, 6, 7))   # top, +Z
     return make_object(name, verts, faces)
 
 
-def sloped_box(name, x0, x1, y0, y1, z_bottom, z_near, z_far):
-    """Box whose top face slopes from z_near at y0 down to z_far at y1."""
+def sloped_box(name, x0, x1, y0, y1, z_bottom, z_near, z_far, open_top=False):
+    """Box whose top face slopes from z_near at y0 down to z_far at y1.
+
+    Same outward winding and same open_top contract as box().
+    """
     verts = [
         (x0, y0, z_bottom), (x1, y0, z_bottom), (x1, y1, z_bottom), (x0, y1, z_bottom),
         (x0, y0, z_near), (x1, y0, z_near), (x1, y1, z_far), (x0, y1, z_far),
     ]
     faces = [
-        (0, 1, 2, 3),
-        (7, 6, 5, 4),
-        (0, 4, 5, 1),
-        (1, 5, 6, 2),
-        (2, 6, 7, 3),
-        (3, 7, 4, 0),
+        (3, 2, 1, 0),   # bottom, -Z
+        (0, 1, 5, 4),   # -Y
+        (1, 2, 6, 5),   # +X
+        (2, 3, 7, 6),   # +Y
+        (3, 0, 4, 7),   # -X
     ]
+    if not open_top:
+        faces.append((4, 5, 6, 7))   # sloped top, up and tilted outward
     return make_object(name, verts, faces)
 
 
@@ -195,54 +243,122 @@ def wedge(name, half_x, run, thickness):
         (-half_x, run, -thickness), (half_x, run, -thickness),
     ]
     faces = [
-        (0, 1, 3, 2),   # thick end
-        (0, 4, 5, 1),   # sloped top
-        (2, 3, 5, 4),   # underside
-        (0, 2, 4),      # left
-        (1, 5, 3),      # right
+        (2, 3, 1, 0),   # thick end, -Y
+        (1, 5, 4, 0),   # sloped top, up
+        (4, 5, 3, 2),   # underside, -Z
+        (4, 2, 0),      # left, -X
+        (3, 5, 1),      # right, +X
     ]
     return make_object(name, verts, faces)
 
 
+def quad(name, corners):
+    """Single upward-facing polygon: a visual surface with no thickness.
+
+    A cap has no sides, so tiles laid edge to edge cannot show a vertical face
+    between them, and the paving material cannot appear on anything but the
+    walking surface.
+    """
+    return make_object(name, list(corners), [(0, 1, 2, 3)])
+
+
 def build_kit():
+    """The kit, split into structural bodies and thin top-only visual layers.
+
+    Construction method, settled after the first textured in-game test:
+
+      * a structural body carries collision and the outer earth/rock faces, and
+        has NO upward face at all;
+      * a separate zero-thickness cap carries the paved walking surface and has
+        no collision.
+
+    Two problems drove this. Paving material was reaching vertical faces, because
+    the structural box was textured on all six sides; and every tile boundary
+    showed a raised vertical edge, because what the player could actually see was
+    the rim of each slab's side faces. With the cap architecture the only
+    upward-facing surface in the whole terrace is a flat plane, so adjacent tiles
+    abut with no vertical face between them and the floor reads as continuous.
+    """
     pieces = {}
+    visual_only = set()
     paving = make_paving_material()
+    earth = make_landscape_material(
+        "SkyrimFair_DirtCliffs01_Structural",
+        r"textures\landscape\dirtcliffs\dirtcliffs01.dds",
+        r"textures\landscape\dirtcliffs\dirtcliffs01_n.dds",
+        shininess=30.0, spec_mult=0.15)
+    grass = make_landscape_material(
+        "SkyrimFair_FieldGrass02_Verge",
+        r"textures\landscape\fieldgrass02.dds",
+        r"textures\landscape\fieldgrass02_n.dds",
+        shininess=20.0, spec_mult=0.1)
 
-    # 1. interior fill tile - 9 of these cover a 3072 core
-    pieces["SkyrimFair_FloorFill_1024"] = box(
-        "SkyrimFair_FloorFill_1024", -512, 512, -512, 512, -FLOOR_THICKNESS, 0)
-    apply_paving_material(pieces["SkyrimFair_FloorFill_1024"], paving)
-
-    # 2. half-size edge tile, so the paved outline can step in 512u increments
-    #    and read as irregular rather than rectangular
+    # Phase variants only exist to stop a small texture period stamping visibly.
+    # The vanilla Whiterun floor tiles at 256 units, which divides the 512 grid
+    # exactly, so a phase offset there would break continuity rather than help.
     phase = PAVING_PHASE_STEP
-    for suffix, u_phase, v_phase in (("", 0.0, 0.0), ("_U1", phase, 0.0),
-                                      ("_V1", 0.0, phase), ("_U1V1", phase, phase)):
-        name = "SkyrimFair_FloorEdge_512" + suffix
-        pieces[name] = box(name, -256, 256, -256, 256, -FLOOR_THICKNESS, 0)
-        apply_paving_material(pieces[name], paving, u_phase, v_phase)
+    if phase == 0.0:
+        variants = (("", 0.0, 0.0),)
+    else:
+        variants = (("", 0.0, 0.0), ("_U1", phase, 0.0),
+                    ("_V1", 0.0, phase), ("_U1V1", phase, phase))
 
-    # 3. retaining face, hangs below the floor plane
+    # 1. structural fill body - collision and outer faces, no top
+    pieces["SkyrimFair_FloorFill_1024"] = box(
+        "SkyrimFair_FloorFill_1024", -512, 512, -512, 512, -FLOOR_THICKNESS, 0,
+        open_top=True)
+    apply_paving_material(pieces["SkyrimFair_FloorFill_1024"], earth, period=512)
+
+    # 2. structural edge body, so the paved outline can step in 512u increments
+    pieces["SkyrimFair_FloorEdge_512"] = box(
+        "SkyrimFair_FloorEdge_512", -256, 256, -256, 256, -FLOOR_THICKNESS, 0,
+        open_top=True)
+    apply_paving_material(pieces["SkyrimFair_FloorEdge_512"], earth, period=512)
+
+    # 3. retaining face, hangs below the floor plane, hidden behind cliff dressing
     pieces["SkyrimFair_Retain_512"] = box(
         "SkyrimFair_Retain_512", -256, 256, -RETAIN_DEPTH, 0, -RETAIN_HEIGHT, 0)
+    apply_paving_material(pieces["SkyrimFair_Retain_512"], earth, period=512)
 
     # 4. outer corner for turning the stepped outline
     pieces["SkyrimFair_RetainCorner_128"] = box(
         "SkyrimFair_RetainCorner_128", -RETAIN_DEPTH, 0, -RETAIN_DEPTH, 0, -RETAIN_HEIGHT, 0)
+    apply_paving_material(pieces["SkyrimFair_RetainCorner_128"], earth, period=512)
 
-    # 5. chainable ramp, descends outward in +Y
-    for suffix, u_phase, v_phase in (("", 0.0, 0.0), ("_U1", phase, 0.0),
-                                      ("_V1", 0.0, phase), ("_U1V1", phase, phase)):
-        name = "SkyrimFair_Ramp_512" + suffix
-        pieces[name] = sloped_box(
-            name, -256, 256, 0, RAMP_RUN, -RAMP_DEPTH, 0, -RAMP_RISE)
-        apply_paving_material(pieces[name], paving, u_phase, v_phase)
+    # 5. chainable structural ramp body, descends outward in +Y, no top face
+    pieces["SkyrimFair_Ramp_512"] = sloped_box(
+        "SkyrimFair_Ramp_512", -256, 256, 0, RAMP_RUN, -RAMP_DEPTH, 0, -RAMP_RISE,
+        open_top=True)
+    apply_paving_material(pieces["SkyrimFair_Ramp_512"], earth, period=512)
 
     # 6. rough-earth / grass shoulder laid outside the paving to soften the join
     pieces["SkyrimFair_Shoulder_512"] = wedge(
         "SkyrimFair_Shoulder_512", 256, SHOULDER_RUN, SHOULDER_THICKNESS)
+    apply_paving_material(pieces["SkyrimFair_Shoulder_512"], grass, period=512)
 
-    return pieces
+    # --- visual paving caps: the only upward-facing surfaces on the terrace ---
+    pieces["SkyrimFair_PaveCap_1024"] = quad(
+        "SkyrimFair_PaveCap_1024",
+        [(-512, -512, 0), (512, -512, 0), (512, 512, 0), (-512, 512, 0)])
+    apply_paving_material(pieces["SkyrimFair_PaveCap_1024"], paving)
+    visual_only.add("SkyrimFair_PaveCap_1024")
+
+    for suffix, u_phase, v_phase in variants:
+        name = "SkyrimFair_PaveCap_512" + suffix
+        pieces[name] = quad(name, [(-256, -256, 0), (256, -256, 0),
+                                   (256, 256, 0), (-256, 256, 0)])
+        apply_paving_material(pieces[name], paving, u_phase, v_phase)
+        visual_only.add(name)
+
+    for suffix, u_phase, v_phase in variants:
+        name = "SkyrimFair_RampCap_512" + suffix
+        pieces[name] = quad(name, [(-256, 0, 0), (256, 0, 0),
+                                   (256, RAMP_RUN, -RAMP_RISE),
+                                   (-256, RAMP_RUN, -RAMP_RISE)])
+        apply_paving_material(pieces[name], paving, u_phase, v_phase)
+        visual_only.add(name)
+
+    return pieces, visual_only
 
 
 def select_only(obj):
@@ -262,10 +378,17 @@ def apply_collision(obj, collider="self"):
                        up it, so a separate box child collider is rotated to lie
                        along the slope instead. This is the "Adding Collision
                        using Child Collider Meshes" method from Bethesda's guide.
-    collider="none"  - no collision at all (the shoulder wedge sits on native
-                       ground and would only create a snag lip).
+    collider="none"  - rigidbody but no collider (the shoulder wedge sits on
+                       native ground and would only create a snag lip).
+    collider="visual" - neither rigidbody nor collider, for the paving caps.
+                       Collision belongs to the structural body beneath them.
     """
     result = {"rigidbody": None, "collider": None}
+
+    if collider == "visual":
+        result["rigidbody"] = "intentionally none (visual layer)"
+        result["collider"] = "intentionally none (visual layer)"
+        return result
 
     select_only(obj)
     try:
@@ -336,12 +459,39 @@ def main():
     scene.unit_settings.length_unit = "INCHES"
     scene.unit_settings.scale_length = 1
 
-    pieces = build_kit()
+    pieces, visual_only = build_kit()
     print(f"\nbuilt {len(pieces)} pieces")
+
+    # Guard the bug that made the whole kit render inside-out. Every piece here is
+    # convex, so a face is outward exactly when its normal points away from the mesh
+    # centroid. This is asserted rather than reported: shipping inverted geometry a
+    # second time is not worth the risk of a warning nobody reads.
+    print("")
+    print("=== face orientation ===")
+    for name, obj in pieces.items():
+        mesh = obj.data
+        centroid = sum((v.co for v in mesh.vertices), Vector((0.0, 0.0, 0.0)))
+        centroid /= len(mesh.vertices)
+        inward = sum(1 for poly in mesh.polygons
+                     if poly.normal.dot(poly.center - centroid) <= 0.0)
+        upward = sum(1 for poly in mesh.polygons if poly.normal.z > 0.3)
+        if name in visual_only:
+            print(f"  {name:34s} faces={len(mesh.polygons):2d} upward={upward} (visual cap)")
+        else:
+            print(f"  {name:34s} faces={len(mesh.polygons):2d} inward={inward} upward={upward}")
+        if name in visual_only:
+            if upward != len(mesh.polygons):
+                raise AssertionError(f"{name}: a visual cap must face upward only")
+        elif inward:
+            raise AssertionError(f"{name}: {inward} inward-facing polygons")
 
     collider_mode = {}
     for name in pieces:
-        if name.startswith("SkyrimFair_Ramp_512"):
+        if name in visual_only:
+            # Visual caps get no rigidbody at all. Collision stays on the
+            # structural body underneath, at the same plane.
+            collider_mode[name] = "visual"
+        elif name.startswith("SkyrimFair_Ramp_512"):
             collider_mode[name] = "child"
         elif name == "SkyrimFair_Shoulder_512":
             collider_mode[name] = "none"

@@ -67,6 +67,7 @@ try
         Console.WriteLine($"  {foundation.DressingCount,3} x vanilla references placed in total");
         Console.WriteLine($"  {foundation.OversizedSkipped,3} x rejected as oversized");
         Console.WriteLine($"  {foundation.ChannelSkipped,3} x rejected for blocking the entrance channel");
+        Console.WriteLine($"  {foundation.PavingGuardSkipped,3} x rejected for protruding through the market floor");
         Console.WriteLine($"  {foundation.DisabledCount,3} x named reference disabled (Initially Disabled)");
         foreach (var refusal in foundation.Refused)
         {

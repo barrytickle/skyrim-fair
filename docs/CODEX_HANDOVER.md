@@ -39,6 +39,12 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
 - perimeter naturalisation uses large vanilla tundra rocks, toe rocks, rough-earth verge wedges and vegetation
 - paving and ramp have a material pipeline; the current deployed test references vanilla
   `WRStoneFloor02`, while the structural retaining geometry is hidden by rock/cliff dressing
+- **foundation construction method is settled** (see below): structural body carries
+  collision and has no upward face, a separate zero-thickness cap carries the paving
+- every kit piece now has a material; the retaining faces, corner and verge wedge
+  previously had none and rendered as flat lavender default surfaces
+- a paving exclusion guard prevents generated dressing from protruding through the
+  usable market floor
 - no LAND edits
 - no NAVM edits
 - no NPCs, quests, packages, music or animation records yet
@@ -52,10 +58,14 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
 
 Do not immediately add stalls, NPCs, stage content, navmesh, final textures, or expand the platform.
 
-Barry is currently visually testing the targeted cliff-wall dressing and the vanilla
-`WRStoneFloor02` paving test in game. The project-owned procedural cobble candidate is
-kept as a reproducible comparison, but it is not the current NIF material. Keep the
-wall/cliff decision separate from the floor-material decision.
+A foundation polish pass has just corrected five faults Barry reported from the first
+textured in-game test. The single biggest one: **every face of every piece in the kit was
+wound inward**, so the whole kit rendered inside-out. That had been true since the kit was
+first authored and was invisible on untextured grey geometry. See `docs/AUDIT.md`.
+
+Barry is now re-testing in game. The project-owned procedural cobble candidate is kept as
+a reproducible comparison, but it is not the current NIF material. Keep the wall/cliff
+decision separate from the floor-material decision.
 
 The next implementation step should be based on Barry's verdict from screenshots / in-game testing.
 
@@ -105,6 +115,39 @@ Project-owned mesh work is code-first and reproducible.
 - shoulder wedge intentionally has no collision
 - do not save the authoritative ESP from Creation Kit
 
+### Permanent foundation construction method
+
+Each paved or ramped position is built from two references at the same position,
+rotation and Z:
+
+```
+structural body   collision + outer earth/rock faces, NO upward face
+visual cap        zero-thickness upward polygon, paving material, NO collision
+```
+
+This is the settled method, not an experiment. It exists because a single textured box
+puts paving material on vertical faces, and because adjacent 32-unit slabs show the rim
+of their side faces at every tile boundary. With caps, the only upward-facing surface on
+the terrace is a flat plane, so the floor reads continuous and paving cannot appear on
+anything but a walking surface.
+
+Rules that must not regress:
+
+- **all faces wound outward.** `box()`, `sloped_box()` and `wedge()` do this, and the
+  build script *asserts* it per piece. The whole kit was previously inside-out.
+- **every piece carries a material.** A piece with none renders as flat lavender.
+- **paving material only on upward faces.** Structural bodies use earth, not paving.
+- **UV phase variants only when the texture period does not divide the tile grid.**
+  Vanilla `WRStoneFloor02` repeats every 256 units, which divides 512 exactly, so phasing
+  it breaks continuity. `PhasedRole` falls back to the base role when a variant is absent,
+  so `project_cobble` mode can reintroduce them with no code change.
+- **`DirtCliffs01` is an open shell**, face on local **-Y**, grassy cap on +Z, back absent.
+  It must be rotated to face outward, offset *inward* so the missing back is buried, and
+  sunk below the floor plane so its cap does not shelve across the market floor.
+- **the paving exclusion guard stays.** Dressing whose crown clears the floor plane may
+  not reach inside the paved footprint eroded by `pavingRimAllowance` on outer edges.
+  `wallEdgeOverlap` must stay below `pavingRimAllowance`.
+
 ### Permanent material pipeline
 
 - `assets/blender/build_foundation_kit.py` owns geometry, UVs and BGS material setup
@@ -120,8 +163,13 @@ Project-owned mesh work is code-first and reproducible.
   ENB is not installed; materials must always remain convincing with height/parallax off
 - physical mesh supplies large silhouette, normal maps supply surface detail, and
   optional parallax is restricted to medium/small cracks and relief
-- never copy vanilla `WRStoneFloor` DDS files into the project or mod; reference their
-  game paths directly
+- structural bodies, retaining and corner use vanilla
+  `textures\landscape\dirtcliffs\dirtcliffs01.dds`; the verge wedge uses
+  `textures\landscape\fieldgrass02.dds`; both referenced by game path only
+- never copy vanilla `WRStoneFloor`, dirt-cliff or grass DDS files into the project or
+  mod; reference their game paths directly
+- do not enable `vertex_colors_enabled` unless the mesh actually exports a vertex-colour
+  layer; copying the flag from a vanilla shader that has one is a silent error
 - do not adopt third-party Whiterun replacer assets without explicit reuse and
   redistribution permission
 

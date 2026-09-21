@@ -51,17 +51,23 @@ internal static class FairFoundation
             site.Placement.X + (col - (cols - 1) / 2f) * tile,
             site.Placement.Y + ((rows - 1) / 2f - row) * tile);
 
-        static string PhasedRole(string baseRole, int col, int row)
+        // UV phase variants only exist to stop a small texture period stamping
+        // visibly. The vanilla Whiterun floor repeats every 256 units, which divides
+        // the 512 grid exactly, so phasing it would break continuity instead of
+        // helping and the variants are not built. Fall back to the base role rather
+        // than requiring every mode to declare all four.
+        string PhasedRole(string baseRole, int col, int row)
         {
             var u = ((col % 2) + 2) % 2;
             var v = ((row % 2) + 2) % 2;
-            return (u, v) switch
+            var candidate = (u, v) switch
             {
                 (1, 0) => baseRole + "U1",
                 (0, 1) => baseRole + "V1",
                 (1, 1) => baseRole + "U1V1",
                 _ => baseRole,
             };
+            return f.Pieces.ContainsKey(candidate) ? candidate : baseRole;
         }
 
         var statics = new Dictionary<string, Static>();
@@ -143,7 +149,10 @@ internal static class FairFoundation
 
                 var a = Centre(col, row);
                 var b = Centre(col + 1, row + 1);
-                Put("floorFill", (a.X + b.X) / 2f, (a.Y + b.Y) / 2f, f.FloorZ, 0f);
+                var fx = (a.X + b.X) / 2f;
+                var fy = (a.Y + b.Y) / 2f;
+                Put("floorFill", fx, fy, f.FloorZ, 0f);
+                Put("paveCapFill", fx, fy, f.FloorZ, 0f);
             }
         }
 
@@ -156,6 +165,7 @@ internal static class FairFoundation
 
             var (x, y) = Centre(col, row);
             Put(PhasedRole("floorEdge", col, row), x, y, f.FloorZ, 0f);
+            Put(PhasedRole("paveCapEdge", col, row), x, y, f.FloorZ, 0f);
         }
 
         // ---- perimeter ----------------------------------------------------
@@ -193,6 +203,7 @@ internal static class FairFoundation
                         var oy = ey - dr * tile * i;
                         var oz = f.FloorZ - f.RampRise * i;
                         Put(PhasedRole("ramp", col + dc * i, row + dr * i), ox, oy, oz, rot);
+                        Put(PhasedRole("rampCap", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         rampTiles.Add((ox, oy, oz, dc, dr));
                     }
 
@@ -312,6 +323,49 @@ internal static class FairFoundation
             return maxX <= c.MinX || minX >= c.MaxX || maxY <= c.MinY || minY >= c.MaxY;
         }
 
+        // ---- protected market floor ---------------------------------------
+        // Rocks are meant to interrupt the RIM of the terrace, not to stand on it.
+        // The protected region is the paved footprint eroded inward by the rim
+        // allowance on OUTER edges only - shared edges between two paved cells are
+        // not eroded, or the protection would be full of holes along every internal
+        // boundary. Anything whose crown clears the floor plane is then refused if
+        // its mesh reaches into that region, which is what stops a perimeter rock
+        // from protruding through the usable market surface.
+        var marketFloor = new List<(float MinX, float MinY, float MaxX, float MaxY)>();
+        foreach (var (col, row) in paved)
+        {
+            var (cx, cy) = Centre(col, row);
+            var minX = cx - tile / 2f + (paved.Contains((col - 1, row)) ? 0f : d.PavingRimAllowance);
+            var maxX = cx + tile / 2f - (paved.Contains((col + 1, row)) ? 0f : d.PavingRimAllowance);
+            var minY = cy - tile / 2f + (paved.Contains((col, row + 1)) ? 0f : d.PavingRimAllowance);
+            var maxY = cy + tile / 2f - (paved.Contains((col, row - 1)) ? 0f : d.PavingRimAllowance);
+            if (maxX > minX && maxY > minY)
+            {
+                marketFloor.Add((minX, minY, maxX, maxY));
+            }
+        }
+
+        bool ClearsMarketFloor(float x, float y, float reach, float crownZ)
+        {
+            // Anything that stays below the walking surface cannot intrude on it.
+            if (crownZ <= f.FloorZ + d.PavingClearance)
+            {
+                return true;
+            }
+
+            foreach (var r in marketFloor)
+            {
+                var gx = MathF.Max(MathF.Max(r.MinX - x, x - r.MaxX), 0f);
+                var gy = MathF.Max(MathF.Max(r.MinY - y, y - r.MaxY), 0f);
+                if (MathF.Sqrt(gx * gx + gy * gy) < reach)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         bool InPaving(float x, float y)
         {
             foreach (var r in result.PavedRects)
@@ -382,6 +436,12 @@ internal static class FairFoundation
                 return false;
             }
 
+            if (!ClearsMarketFloor(px, py, radius, surfaceZ + d.WallTopOvershoot))
+            {
+                result.PavingGuardSkipped++;
+                return false;
+            }
+
             // Solve Z from the piece's own bounds. A vanilla rock's origin sits near
             // its base, not its centre, so assuming a fixed offset is exactly what
             // leaves dressing either floating or sunk out of sight.
@@ -448,8 +508,23 @@ internal static class FairFoundation
                         var scale = Math.Clamp((drop + 24f) / cliffBounds.Height, 0.9f, 1.25f);
                         var length = d.CliffMeshLength * scale;
                         var depth = d.CliffMeshDepth * scale;
-                        var px = ex + direction.Dc * d.CliffOutset;
-                        var py = ey - direction.Dr * d.CliffOutset;
+                        // The cliff mesh is an OPEN SHELL, not a solid. Measured from
+                        // the shipped geometry: 82% of DirtCliffs01's face area points
+                        // along local -Y, a separate cap facing +Z forms the grassy top,
+                        // and the +Y side is simply absent - 176 boundary edges on the
+                        // main face alone. Two consequences drive this placement.
+                        //
+                        // First, the piece has to be turned to face the player. The kit
+                        // convention points local +Y outward, which aimed the cliff face
+                        // INTO the platform and left the missing back wall pointing at
+                        // the viewer, so the dressing vanished when seen from outside.
+                        // Adding half a turn puts the real face outward.
+                        //
+                        // Second, with the face outward the body now extends inward, so
+                        // the offset is inward too: the open back ends up buried inside
+                        // the structural slab instead of hanging in the open air.
+                        var px = ex - direction.Dc * d.CliffInset;
+                        var py = ey + direction.Dr * d.CliffInset;
                         // Use the full measured depth as the normal-axis half-extent.
                         // The vanilla mesh origin is not centred in depth
                         // (local Y is -135..330), so this is deliberately conservative
@@ -462,9 +537,14 @@ internal static class FairFoundation
                             continue;
                         }
 
+                        // Sink the cliff so its grassy top cap sits UNDER the paving
+                        // rather than 24 units above it. The cap is a broad horizontal
+                        // surface extending the full depth of the mesh, so any part of
+                        // it left above the floor plane reads as a grass shelf lying
+                        // across the market floor, which is exactly how it looked.
                         PutVanilla(d.CliffFace, px, py,
-                            surfaceZ + 24f - cliffBounds.ZMax * scale,
-                            OutwardRotation[direction.Name], scale);
+                            surfaceZ - d.CliffTopSink - cliffBounds.ZMax * scale,
+                            OutwardRotation[direction.Name] + MathF.PI, scale);
                         result.CliffFaces++;
                         foreach (var item in chunk)
                         {
@@ -546,6 +626,13 @@ internal static class FairFoundation
                     continue;
                 }
 
+                if (!ClearsMarketFloor(px, py, radius,
+                        ground.Value - d.RockSink + b.ZMax * scale))
+                {
+                    result.PavingGuardSkipped++;
+                    continue;
+                }
+
                 PutVanilla(pick, px, py, ground.Value - d.RockSink, Spin(), scale);
                 result.ToeRocks++;
             }
@@ -590,6 +677,13 @@ internal static class FairFoundation
                 var ground = sampleTerrain(px, py);
                 if (!ground.HasValue)
                 {
+                    continue;
+                }
+
+                if (!ClearsMarketFloor(px, py, b.Radius * scale,
+                        ground.Value + b.ZMax * scale))
+                {
+                    result.PavingGuardSkipped++;
                     continue;
                 }
 
@@ -702,6 +796,12 @@ internal static class FairFoundation
                         continue;
                     }
 
+                    if (!ClearsMarketFloor(px, py, radius, f.FloorZ + d.WallTopOvershoot))
+                    {
+                        result.PavingGuardSkipped++;
+                        continue;
+                    }
+
                     var crown = f.FloorZ
                         + (float)rng.NextDouble() * MathF.Min(d.WallTopOvershoot, headroom);
                     PutVanilla(pick, px, py, crown - b.ZMax * scale, Spin(), scale);
@@ -784,6 +884,9 @@ internal sealed class FoundationResult
 
     /// <summary>Picks dropped for being too short to face the edge without floating.</summary>
     public int TooShortSkipped { get; set; }
+
+    /// <summary>Picks refused for protruding through the usable market floor.</summary>
+    public int PavingGuardSkipped { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }

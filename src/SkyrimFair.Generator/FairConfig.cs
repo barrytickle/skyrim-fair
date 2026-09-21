@@ -296,16 +296,15 @@ internal sealed record FoundationConfig
     {
         ["floorFill"] = new() { EditorId = "SkyrimFairFloorFill1024", Model = @"SkyrimFair\SkyrimFair_FloorFill_1024.nif" },
         ["floorEdge"] = new() { EditorId = "SkyrimFairFloorEdge512", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512.nif" },
-        ["floorEdgeU1"] = new() { EditorId = "SkyrimFairFloorEdge512U1", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512_U1.nif" },
-        ["floorEdgeV1"] = new() { EditorId = "SkyrimFairFloorEdge512V1", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512_V1.nif" },
-        ["floorEdgeU1V1"] = new() { EditorId = "SkyrimFairFloorEdge512U1V1", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512_U1V1.nif" },
         ["retain"] = new() { EditorId = "SkyrimFairRetain512", Model = @"SkyrimFair\SkyrimFair_Retain_512.nif" },
         ["retainCorner"] = new() { EditorId = "SkyrimFairRetainCorner128", Model = @"SkyrimFair\SkyrimFair_RetainCorner_128.nif" },
         ["ramp"] = new() { EditorId = "SkyrimFairRamp512", Model = @"SkyrimFair\SkyrimFair_Ramp_512.nif" },
-        ["rampU1"] = new() { EditorId = "SkyrimFairRamp512U1", Model = @"SkyrimFair\SkyrimFair_Ramp_512_U1.nif" },
-        ["rampV1"] = new() { EditorId = "SkyrimFairRamp512V1", Model = @"SkyrimFair\SkyrimFair_Ramp_512_V1.nif" },
-        ["rampU1V1"] = new() { EditorId = "SkyrimFairRamp512U1V1", Model = @"SkyrimFair\SkyrimFair_Ramp_512_U1V1.nif" },
         ["shoulder"] = new() { EditorId = "SkyrimFairShoulder512", Model = @"SkyrimFair\SkyrimFair_Shoulder_512.nif" },
+        // Visual paving caps: the only upward-facing surfaces on the terrace, so
+        // adjacent tiles cannot show a vertical face between them. No collision.
+        ["paveCapFill"] = new() { EditorId = "SkyrimFairPaveCap1024", Model = @"SkyrimFair\SkyrimFair_PaveCap_1024.nif" },
+        ["paveCapEdge"] = new() { EditorId = "SkyrimFairPaveCap512", Model = @"SkyrimFair\SkyrimFair_PaveCap_512.nif" },
+        ["rampCap"] = new() { EditorId = "SkyrimFairRampCap512", Model = @"SkyrimFair\SkyrimFair_RampCap_512.nif" },
     };
 
     public DressingConfig Dressing { get; init; } = new();
@@ -332,9 +331,14 @@ internal sealed record FoundationConfig
             throw new InvalidOperationException("Foundation.Footprint has no paved cells.");
         }
 
-        foreach (var role in new[] { "floorFill", "floorEdge", "floorEdgeU1", "floorEdgeV1",
-            "floorEdgeU1V1", "retain", "retainCorner", "ramp", "rampU1", "rampV1",
-            "rampU1V1", "shoulder" })
+        // Phase variants are optional: they are only built when the paving material
+        // has a period that does not divide the tile grid, and PhasedRole falls back
+        // to the base role when they are absent.
+        foreach (var role in new[]
+        {
+            "floorFill", "floorEdge", "retain", "retainCorner", "ramp", "shoulder",
+            "paveCapFill", "paveCapEdge", "rampCap",
+        })
         {
             if (!Pieces.ContainsKey(role))
             {
@@ -396,8 +400,20 @@ internal sealed record DressingConfig
     /// <summary>Measured shallow axis of DirtCliffs01Tundra01.</summary>
     public float CliffMeshDepth { get; init; } = 465f;
 
-    /// <summary>Small outward offset that leaves the cliff intersecting the wall.</summary>
-    public float CliffOutset { get; init; } = 72f;
+    /// <summary>
+    /// How far the cliff origin sits INWARD of the wall face. The mesh is an open
+    /// shell whose face is on its local -Y side, so once it is turned to face
+    /// outward the body extends inward and this is what buries the missing back
+    /// wall inside the structural slab. It replaced an outward offset, which had
+    /// pushed the open back into plain view.
+    /// </summary>
+    public float CliffInset { get; init; } = 48f;
+
+    /// <summary>
+    /// How far below the floor plane the cliff's top is placed, so its broad grassy
+    /// top cap is hidden beneath the paving instead of shelving across it.
+    /// </summary>
+    public float CliffTopSink { get; init; } = 40f;
 
     /// <summary>
     /// How far beyond the paving edge dressing starts. Vanilla rocks have large
@@ -495,8 +511,26 @@ internal sealed record DressingConfig
     /// </summary>
     public float WallBedding { get; init; } = 80f;
 
-    /// <summary>How far an embankment rock may reach onto the paving.</summary>
-    public float WallEdgeOverlap { get; init; } = 192f;
+    /// <summary>
+    /// How far an embankment rock may reach onto the paving. Enough to interrupt the
+    /// edge line, and no more: at 192 the rocks were standing well inside the market
+    /// floor. Must stay below PavingRimAllowance or the guard will refuse the very
+    /// rim rocks it is meant to permit.
+    /// </summary>
+    public float WallEdgeOverlap { get; init; } = 80f;
+
+    /// <summary>
+    /// Band just inside the paved edge where dressing may still protrude above the
+    /// floor plane. Inside this band the terrace is protected: anything whose crown
+    /// clears the paving is refused, so stalls always have a clean surface.
+    /// </summary>
+    public float PavingRimAllowance { get; init; } = 112f;
+
+    /// <summary>
+    /// How far above the floor plane a piece's crown may reach before the paving
+    /// guard applies. Below this it is under the walking surface and harmless.
+    /// </summary>
+    public float PavingClearance { get; init; } = 8f;
 
     /// <summary>Ceiling on an embankment rock's scaled mesh radius.</summary>
     public float WallMaxRadius { get; init; } = 640f;

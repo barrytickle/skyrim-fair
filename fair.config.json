@@ -69,18 +69,6 @@
           "editorId": "SkyrimFairFloorEdge512",
           "model": "SkyrimFair\\SkyrimFair_FloorEdge_512.nif"
         },
-        "floorEdgeU1": {
-          "editorId": "SkyrimFairFloorEdge512U1",
-          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512_U1.nif"
-        },
-        "floorEdgeV1": {
-          "editorId": "SkyrimFairFloorEdge512V1",
-          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512_V1.nif"
-        },
-        "floorEdgeU1V1": {
-          "editorId": "SkyrimFairFloorEdge512U1V1",
-          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512_U1V1.nif"
-        },
         "retain": {
           "editorId": "SkyrimFairRetain512",
           "model": "SkyrimFair\\SkyrimFair_Retain_512.nif"
@@ -93,21 +81,21 @@
           "editorId": "SkyrimFairRamp512",
           "model": "SkyrimFair\\SkyrimFair_Ramp_512.nif"
         },
-        "rampU1": {
-          "editorId": "SkyrimFairRamp512U1",
-          "model": "SkyrimFair\\SkyrimFair_Ramp_512_U1.nif"
-        },
-        "rampV1": {
-          "editorId": "SkyrimFairRamp512V1",
-          "model": "SkyrimFair\\SkyrimFair_Ramp_512_V1.nif"
-        },
-        "rampU1V1": {
-          "editorId": "SkyrimFairRamp512U1V1",
-          "model": "SkyrimFair\\SkyrimFair_Ramp_512_U1V1.nif"
-        },
         "shoulder": {
           "editorId": "SkyrimFairShoulder512",
           "model": "SkyrimFair\\SkyrimFair_Shoulder_512.nif"
+        },
+        "paveCapFill": {
+          "editorId": "SkyrimFairPaveCap1024",
+          "model": "SkyrimFair\\SkyrimFair_PaveCap_1024.nif"
+        },
+        "paveCapEdge": {
+          "editorId": "SkyrimFairPaveCap512",
+          "model": "SkyrimFair\\SkyrimFair_PaveCap_512.nif"
+        },
+        "rampCap": {
+          "editorId": "SkyrimFairRampCap512",
+          "model": "SkyrimFair\\SkyrimFair_RampCap_512.nif"
         }
       },
       "dressing": {
@@ -118,7 +106,6 @@
         "cliffMaxRunSegments": 4,
         "cliffMeshLength": 1944,
         "cliffMeshDepth": 465,
-        "cliffOutset": 72,
         "minOffset": 192,
         "spread": 384,
         "minScale": 0.7,
@@ -163,14 +150,18 @@
         "wallPerSegment": 3,
         "wallTopOvershoot": 48,
         "wallBedding": 80,
-        "wallEdgeOverlap": 192,
+        "wallEdgeOverlap": 80,
         "wallMaxRadius": 640,
         "toePerSegment": 2,
         "vergePerSegment": 2,
         "vergeMaxLocalStep": 112,
         "rampChannelWidth": 480,
         "rampLandingLength": 512,
-        "shoulderRun": 256
+        "shoulderRun": 256,
+        "cliffInset": 48,
+        "cliffTopSink": 40,
+        "pavingRimAllowance": 112,
+        "pavingClearance": 8
       },
       "retainHeight": 256,
       "clearMargin": 160,
