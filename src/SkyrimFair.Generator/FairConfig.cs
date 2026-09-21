@@ -296,9 +296,15 @@ internal sealed record FoundationConfig
     {
         ["floorFill"] = new() { EditorId = "SkyrimFairFloorFill1024", Model = @"SkyrimFair\SkyrimFair_FloorFill_1024.nif" },
         ["floorEdge"] = new() { EditorId = "SkyrimFairFloorEdge512", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512.nif" },
+        ["floorEdgeU1"] = new() { EditorId = "SkyrimFairFloorEdge512U1", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512_U1.nif" },
+        ["floorEdgeV1"] = new() { EditorId = "SkyrimFairFloorEdge512V1", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512_V1.nif" },
+        ["floorEdgeU1V1"] = new() { EditorId = "SkyrimFairFloorEdge512U1V1", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512_U1V1.nif" },
         ["retain"] = new() { EditorId = "SkyrimFairRetain512", Model = @"SkyrimFair\SkyrimFair_Retain_512.nif" },
         ["retainCorner"] = new() { EditorId = "SkyrimFairRetainCorner128", Model = @"SkyrimFair\SkyrimFair_RetainCorner_128.nif" },
         ["ramp"] = new() { EditorId = "SkyrimFairRamp512", Model = @"SkyrimFair\SkyrimFair_Ramp_512.nif" },
+        ["rampU1"] = new() { EditorId = "SkyrimFairRamp512U1", Model = @"SkyrimFair\SkyrimFair_Ramp_512_U1.nif" },
+        ["rampV1"] = new() { EditorId = "SkyrimFairRamp512V1", Model = @"SkyrimFair\SkyrimFair_Ramp_512_V1.nif" },
+        ["rampU1V1"] = new() { EditorId = "SkyrimFairRamp512U1V1", Model = @"SkyrimFair\SkyrimFair_Ramp_512_U1V1.nif" },
         ["shoulder"] = new() { EditorId = "SkyrimFairShoulder512", Model = @"SkyrimFair\SkyrimFair_Shoulder_512.nif" },
     };
 
@@ -326,7 +332,9 @@ internal sealed record FoundationConfig
             throw new InvalidOperationException("Foundation.Footprint has no paved cells.");
         }
 
-        foreach (var role in new[] { "floorFill", "floorEdge", "retain", "retainCorner", "ramp", "shoulder" })
+        foreach (var role in new[] { "floorFill", "floorEdge", "floorEdgeU1", "floorEdgeV1",
+            "floorEdgeU1V1", "retain", "retainCorner", "ramp", "rampU1", "rampV1",
+            "rampU1V1", "shoulder" })
         {
             if (!Pieces.ContainsKey(role))
             {
@@ -337,6 +345,19 @@ internal sealed record FoundationConfig
         if (!new[] { "N", "S", "E", "W" }.Contains(RampEdge.ToUpperInvariant()))
         {
             throw new InvalidOperationException($"Foundation.RampEdge must be N, S, E or W, but was '{RampEdge}'.");
+        }
+
+        if (Dressing.CliffMinRunSegments < 2
+            || Dressing.CliffMaxRunSegments < Dressing.CliffMinRunSegments)
+        {
+            throw new InvalidOperationException(
+                "Foundation.Dressing cliff run limits must be at least 2 and max must be >= min.");
+        }
+
+        if (Dressing.CliffMeshLength <= 0f || Dressing.CliffMeshDepth <= 0f)
+        {
+            throw new InvalidOperationException(
+                "Foundation.Dressing cliff mesh dimensions must be positive.");
         }
     }
 }
@@ -355,6 +376,28 @@ internal sealed record DressingConfig
     public int Seed { get; init; } = 20260921;
 
     public int PerEdgeSegment { get; init; } = 2;
+
+    /// <summary>
+    /// Elongated vanilla tundra cliff face used as the visible skin over long,
+    /// project-owned structural retaining runs. This mesh has real shallow relief;
+    /// no parallax feature is required for its silhouette.
+    /// </summary>
+    public string CliffFace { get; init; } = "00097065:Skyrim.esm";
+
+    /// <summary>Shortest contiguous straight run replaced by a cliff face.</summary>
+    public int CliffMinRunSegments { get; init; } = 2;
+
+    /// <summary>Maximum 512-unit wall segments covered by one cliff reference.</summary>
+    public int CliffMaxRunSegments { get; init; } = 4;
+
+    /// <summary>Measured long axis of DirtCliffs01Tundra01.</summary>
+    public float CliffMeshLength { get; init; } = 1944f;
+
+    /// <summary>Measured shallow axis of DirtCliffs01Tundra01.</summary>
+    public float CliffMeshDepth { get; init; } = 465f;
+
+    /// <summary>Small outward offset that leaves the cliff intersecting the wall.</summary>
+    public float CliffOutset { get; init; } = 72f;
 
     /// <summary>
     /// How far beyond the paving edge dressing starts. Vanilla rocks have large

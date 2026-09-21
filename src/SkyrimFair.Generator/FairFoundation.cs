@@ -51,6 +51,19 @@ internal static class FairFoundation
             site.Placement.X + (col - (cols - 1) / 2f) * tile,
             site.Placement.Y + ((rows - 1) / 2f - row) * tile);
 
+        static string PhasedRole(string baseRole, int col, int row)
+        {
+            var u = ((col % 2) + 2) % 2;
+            var v = ((row % 2) + 2) % 2;
+            return (u, v) switch
+            {
+                (1, 0) => baseRole + "U1",
+                (0, 1) => baseRole + "V1",
+                (1, 1) => baseRole + "U1V1",
+                _ => baseRole,
+            };
+        }
+
         var statics = new Dictionary<string, Static>();
         Static StaticFor(string role)
         {
@@ -142,7 +155,7 @@ internal static class FairFoundation
             }
 
             var (x, y) = Centre(col, row);
-            Put("floorEdge", x, y, f.FloorZ, 0f);
+            Put(PhasedRole("floorEdge", col, row), x, y, f.FloorZ, 0f);
         }
 
         // ---- perimeter ----------------------------------------------------
@@ -179,7 +192,7 @@ internal static class FairFoundation
                         var ox = ex + dc * tile * i;
                         var oy = ey - dr * tile * i;
                         var oz = f.FloorZ - f.RampRise * i;
-                        Put("ramp", ox, oy, oz, rot);
+                        Put(PhasedRole("ramp", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         rampTiles.Add((ox, oy, oz, dc, dr));
                     }
 
@@ -289,6 +302,16 @@ internal static class FairFoundation
             return MathF.Sqrt(gx * gx + gy * gy) >= reach;
         }
 
+        bool RectClearChannel(float minX, float minY, float maxX, float maxY)
+        {
+            if (channel is not { } c)
+            {
+                return true;
+            }
+
+            return maxX <= c.MinX || minX >= c.MaxX || maxY <= c.MinY || minY >= c.MaxY;
+        }
+
         bool InPaving(float x, float y)
         {
             foreach (var r in result.PavedRects)
@@ -369,11 +392,96 @@ internal static class FairFoundation
             return true;
         }
 
-        // One edge segment: faced with rock, toed into grade, then verged.
-        void Treat(float ex, float ey, int dc, int dr, float rot, float surfaceZ, float drop)
+        // Long, straight structural runs get one elongated tundra cliff skin rather
+        // than three unrelated boulders per segment. Short runs and irregular joins
+        // deliberately keep the established large-rock treatment.
+        var cliffCovered = new HashSet<int>();
+        var cliffBounds = boundsOf(FormKeyHelper.Parse(d.CliffFace));
+        var indexedFaces = faced.Select((segment, index) => (segment, index)).ToList();
+        foreach (var direction in Directions)
+        {
+            var candidates = indexedFaces
+                .Where(v => v.segment.Dc == direction.Dc && v.segment.Dr == direction.Dr
+                    && v.segment.Drop > d.WallMinDrop)
+                .GroupBy(v => direction.Dc == 0 ? v.segment.Ey : v.segment.Ex);
+
+            foreach (var line in candidates)
+            {
+                var ordered = line.OrderBy(v => direction.Dc == 0 ? v.segment.Ex : v.segment.Ey).ToList();
+                var runs = new List<List<(int Index, float Ex, float Ey, int Dc, int Dr,
+                    float Rot, float SurfaceZ, float Drop)>>();
+                foreach (var item in ordered)
+                {
+                    var coordinate = direction.Dc == 0 ? item.segment.Ex : item.segment.Ey;
+                    var runItem = (item.index, item.segment.Ex, item.segment.Ey,
+                        item.segment.Dc, item.segment.Dr, item.segment.Rot,
+                        item.segment.SurfaceZ, item.segment.Drop);
+                    if (runs.Count == 0)
+                    {
+                        runs.Add(new() { runItem });
+                        continue;
+                    }
+
+                    var previous = runs[^1][^1];
+                    var previousCoordinate = direction.Dc == 0 ? previous.Ex : previous.Ey;
+                    if (MathF.Abs(coordinate - previousCoordinate - tile) > 1f)
+                    {
+                        runs.Add(new());
+                    }
+                    runs[^1].Add(runItem);
+                }
+
+                foreach (var run in runs.Where(r => r.Count >= d.CliffMinRunSegments))
+                {
+                    for (var start = 0; start < run.Count; start += d.CliffMaxRunSegments)
+                    {
+                        var chunk = run.Skip(start).Take(d.CliffMaxRunSegments).ToList();
+                        if (chunk.Count < d.CliffMinRunSegments)
+                        {
+                            continue;
+                        }
+
+                        var ex = chunk.Average(v => v.Ex);
+                        var ey = chunk.Average(v => v.Ey);
+                        var surfaceZ = chunk.Max(v => v.SurfaceZ);
+                        var drop = chunk.Max(v => v.Drop);
+                        var scale = Math.Clamp((drop + 24f) / cliffBounds.Height, 0.9f, 1.25f);
+                        var length = d.CliffMeshLength * scale;
+                        var depth = d.CliffMeshDepth * scale;
+                        var px = ex + direction.Dc * d.CliffOutset;
+                        var py = ey - direction.Dr * d.CliffOutset;
+                        // Use the full measured depth as the normal-axis half-extent.
+                        // The vanilla mesh origin is not centred in depth
+                        // (local Y is -135..330), so this is deliberately conservative
+                        // around the entrance rather than assuming a symmetric pivot.
+                        var halfX = direction.Dc == 0 ? length / 2f : depth;
+                        var halfY = direction.Dr == 0 ? length / 2f : depth;
+                        if (!RectClearChannel(px - halfX, py - halfY, px + halfX, py + halfY))
+                        {
+                            result.ChannelSkipped++;
+                            continue;
+                        }
+
+                        PutVanilla(d.CliffFace, px, py,
+                            surfaceZ + 24f - cliffBounds.ZMax * scale,
+                            OutwardRotation[direction.Name], scale);
+                        result.CliffFaces++;
+                        foreach (var item in chunk)
+                        {
+                            cliffCovered.Add(item.Index);
+                            result.CliffCoveredSegments++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // One edge segment: cliff/rock faced, toed into grade, then verged.
+        void Treat(float ex, float ey, int dc, int dr, float rot, float surfaceZ, float drop,
+            bool placeWallRocks = true)
         {
             // --- embankment ---------------------------------------------------
-            if (drop > d.WallMinDrop)
+            if (placeWallRocks && drop > d.WallMinDrop)
             {
                 // Draw only from pieces that can actually reach the top of this wall
                 // at their permitted scale. Without this filter a 180-unit rock gets
@@ -490,9 +598,11 @@ internal static class FairFoundation
             }
         }
 
-        foreach (var seg in faced)
+        for (var i = 0; i < faced.Count; i++)
         {
-            Treat(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop);
+            var seg = faced[i];
+            Treat(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop,
+                !cliffCovered.Contains(i));
         }
 
         // ---- ramp flanks ---------------------------------------------------
@@ -677,6 +787,12 @@ internal sealed class FoundationResult
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }
+
+    /// <summary>Elongated vanilla tundra cliff faces skinning straight retaining runs.</summary>
+    public int CliffFaces { get; set; }
+
+    /// <summary>Structural wall segments whose boulder facing was replaced by cliff skin.</summary>
+    public int CliffCoveredSegments { get; set; }
 
     /// <summary>Low rock piles bedded in at the foot of the embankment.</summary>
     public int ToeRocks { get; set; }

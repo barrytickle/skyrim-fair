@@ -37,7 +37,8 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
 - the ramp seam to the paving is geometrically continuous
 - ramp slab depth was increased to remove visible daylight beneath the head
 - perimeter naturalisation uses large vanilla tundra rocks, toe rocks, rough-earth verge wedges and vegetation
-- project-owned paving / retaining / ramp geometry is still visually grey/untextured
+- paving and ramp have a material pipeline; the current deployed test references vanilla
+  `WRStoneFloor02`, while the structural retaining geometry is hidden by rock/cliff dressing
 - no LAND edits
 - no NAVM edits
 - no NPCs, quests, packages, music or animation records yet
@@ -51,7 +52,10 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
 
 Do not immediately add stalls, NPCs, stage content, navmesh, final textures, or expand the platform.
 
-Barry is currently visually testing the naturalised terrace in game.
+Barry is currently visually testing the targeted cliff-wall dressing and the vanilla
+`WRStoneFloor02` paving test in game. The project-owned procedural cobble candidate is
+kept as a reproducible comparison, but it is not the current NIF material. Keep the
+wall/cliff decision separate from the floor-material decision.
 
 The next implementation step should be based on Barry's verdict from screenshots / in-game testing.
 
@@ -100,6 +104,26 @@ Project-owned mesh work is code-first and reproducible.
 - ramp collision uses the verified rotated child box approach
 - shoulder wedge intentionally has no collision
 - do not save the authoritative ESP from Creation Kit
+
+### Permanent material pipeline
+
+- `assets/blender/build_foundation_kit.py` owns geometry, UVs and BGS material setup
+- default paving comparison mode is `vanilla_whiterun_test`, using vanilla
+  `textures\architecture\whiterun\WRStoneFloor02.dds` and `_n.dds`
+- vanilla `WRStoneFloor02` is mapped at its measured native scale: one UV repeat per
+  256 Skyrim units
+- set environment variable `SKYRIM_FAIR_PAVING_MATERIAL=project_cobble` before the
+  headless Blender build to regenerate the project-owned alternative
+- the project candidate is built by `assets/textures/build_paving_material.py` and has
+  diffuse, tangent-space normal/gloss and optional BC4 `_p` height outputs
+- Community Shaders Extended Materials is active and supports the optional height path;
+  ENB is not installed; materials must always remain convincing with height/parallax off
+- physical mesh supplies large silhouette, normal maps supply surface detail, and
+  optional parallax is restricted to medium/small cracks and relief
+- never copy vanilla `WRStoneFloor` DDS files into the project or mod; reference their
+  game paths directly
+- do not adopt third-party Whiterun replacer assets without explicit reuse and
+  redistribution permission
 
 The Creation Kit and Bethesda art tools are against Barry's separate Steam Skyrim install, while the active modlist uses the stock Skyrim copy under MO2. Plugin records must continue to be generated against the stock data via Mutagen.
 

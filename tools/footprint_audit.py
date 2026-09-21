@@ -290,6 +290,9 @@ def scan_references(path, cells, out):
 PIECE_SIZE = {
     "SkyrimFairFloorFill1024": (1024, 1024),
     "SkyrimFairFloorEdge512": (512, 512),
+    "SkyrimFairFloorEdge512U1": (512, 512),
+    "SkyrimFairFloorEdge512V1": (512, 512),
+    "SkyrimFairFloorEdge512U1V1": (512, 512),
 }
 
 

@@ -15,6 +15,10 @@ assets/
   nif/
     SkyrimFair/
       SkyrimFair_*.nif         AssetWatcher output, ready for the plugin
+  textures/
+    build_paving_material.py   reproducible project-owned texture builder
+    source/                    project-owned generated source bitmap
+    SkyrimFair/                diffuse, normal/gloss and optional height outputs
 ```
 
 The **script is the source of truth**, matching the rest of the project: the `.blend` and `.fbx` files are build outputs and can be regenerated at any time.
@@ -41,11 +45,14 @@ Blender 5.2 cannot be used: both Bethesda addons declare `"blender": (3, 6, 0)` 
 & "C:\Blender\blender-3.6.23-windows-x64\blender-3.6.23-windows-x64\blender.exe" --background --python assets\blender\build_foundation_kit.py
 ```
 
-That regenerates the `.blend` and all six `.fbx` files, applies collision and prints a full geometry and collision report.
+That regenerates the `.blend` and all 12 `.fbx` files, applies collision and prints a full geometry and collision report. There are still six logical kit pieces; edge and ramp each have four UV variants.
 
-## Remaining manual step: FBX to NIF
+## FBX to NIF conversion
 
-**AssetWatcher is a Qt GUI application with no command-line interface**, and Bethesda's guide says to run it as administrator. This step cannot be automated, so it has to be done by hand — once. After the project is saved, AssetWatcher converts automatically on every future export.
+**AssetWatcher is a Qt GUI application with no command-line interface.** Barry has
+already configured the watch project by hand. While it is running with the project ON,
+headless Blender exports are converted automatically. Codex must never operate the GUI;
+if the watch is off, ask Barry to enable it.
 
 Launch:
 
@@ -71,9 +78,15 @@ AssetWatcher **mirrors the Source folder's subfolder structure into the Output f
 ```text
 assets\nif\SkyrimFair\SkyrimFair_FloorFill_1024.nif
                      \SkyrimFair_FloorEdge_512.nif
+                     \SkyrimFair_FloorEdge_512_U1.nif
+                     \SkyrimFair_FloorEdge_512_V1.nif
+                     \SkyrimFair_FloorEdge_512_U1V1.nif
                      \SkyrimFair_Retain_512.nif
                      \SkyrimFair_RetainCorner_128.nif
                      \SkyrimFair_Ramp_512.nif
+                     \SkyrimFair_Ramp_512_U1.nif
+                     \SkyrimFair_Ramp_512_V1.nif
+                     \SkyrimFair_Ramp_512_U1V1.nif
                      \SkyrimFair_Shoulder_512.nif
 ```
 
@@ -112,10 +125,10 @@ All dimensions in Skyrim units, and **verified exact** in the converted NIFs. Se
 | Piece | Footprint | Height | Collision | Purpose |
 | --- | --- | --- | --- | --- |
 | `SkyrimFair_FloorFill_1024` | 1024 x 1024 | 32 thick | self, Box | interior paving. 9 cover a 3072 core |
-| `SkyrimFair_FloorEdge_512` | 512 x 512 | 32 thick | self, Box | outer ring, half size so the outline can step in 512u increments |
+| `SkyrimFair_FloorEdge_512` (+ 3 UV variants) | 512 x 512 | 32 thick | self, Box | outer ring, half size so the outline can step in 512u increments |
 | `SkyrimFair_Retain_512` | 512 x 128 | 256 tall | self, Box | retaining face hanging below the floor plane |
 | `SkyrimFair_RetainCorner_128` | 128 x 128 | 256 tall | self, Box | turns the stepped outline |
-| `SkyrimFair_Ramp_512` | 512 x 512 | rises 64 | **child box rotated 7.13 deg** | 1:8 chainable ramp; 3 cover the ~160u west-edge fall |
+| `SkyrimFair_Ramp_512` (+ 3 UV variants) | 512 x 512 | falls 96 | **child box rotated 10.62 deg** | chainable entrance ramp; 4 tiles reach grade |
 | `SkyrimFair_Shoulder_512` | 512 x 256 | tapers 32 to 0 | **none, intentional** | rough-earth / grass transition outside the paving |
 
 ### Pivot conventions
@@ -133,7 +146,7 @@ For retaining, ramp and shoulder pieces, **+Y points away from the platform cent
 
 - Every piece is an **unyielding rigidbody with mass 0** — static world geometry, not a loose prop. The BGS default is mass 80 with unyielding off, which would have made the platform a physics object.
 - The four box-shaped pieces use their own mesh as the collider. BGS defaults that to a bounding box, which is exactly right for a box.
-- The **ramp** cannot use a bounding box: that would be a solid 512 x 512 x 256 block and would stop the player walking up it. It instead uses a separate box child collider rotated 7.13 degrees to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Verified present in the exported FBX as `SkyrimFair_Ramp_512_Collider`.
+- The **ramp** cannot use a bounding box: that would be a solid 512 x 512 x 384 block and would stop the player walking up it. It instead uses a separate box child collider rotated 10.62 degrees to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Verified present in every ramp-variant FBX.
 - The **shoulder** deliberately has no collider; it sits on native ground and would only create a snag lip.
 
 ### Scale — the one real trap
@@ -148,15 +161,35 @@ If a future piece comes out the wrong size, check this constant first.
 
 Confirmed by parsing `assets/nif/SkyrimFair/*.nif` directly:
 
-- all six are valid SSE NIFs — `Gamebryo File Format, Version 20.2.0.7`, userVersion 12, bsVersion 100
+- all 12 are valid SSE NIFs — `Gamebryo File Format, Version 20.2.0.7`, userVersion 12, bsVersion 100
 - **visual mesh scale is exact**: every bounding sphere matches its expected radius, ratio 1.000
 - **collision half-extents are exact**: 512x512x32, 1024x1024x32, 512x128x256, 128x128x256 as specified
 - the five collision-bearing pieces carry `bhkCollisionObject`, `bhkRigidBodyT`, `bhkBoxShape` and `bhkConvexTransformShape`
-- the **ramp's rotated collider survived conversion** — its transform reads cos 0.992 / sin 0.124, i.e. 7.13 degrees, and its box is 512 x 516 x 64, the 516 being the slope length `hypot(512, 64)`
+- the **ramp's rotated collider survived conversion** — 10.62 degrees, with slope length `hypot(512, 96)` = 520.9 units
 - the **shoulder has no collision blocks at all**, as intended
-- all six carry `BSLightingShaderProperty` and `BSShaderTextureSet`, so a texture slot is ready
+- all visual pieces carry `BSLightingShaderProperty` and `BSShaderTextureSet`; paving and ramp use the selected comparison material
+
+## Paving material comparison
+
+The build script has two reproducible modes:
+
+```powershell
+# Default/current in-game test: vanilla Whiterun stone
+blender.exe --background --python assets\blender\build_foundation_kit.py
+
+# Project-owned procedural comparison
+$env:SKYRIM_FAIR_PAVING_MATERIAL = "project_cobble"
+blender.exe --background --python assets\blender\build_foundation_kit.py
+```
+
+The vanilla test references `WRStoneFloor02.dds` and `_n.dds` directly and maps them at
+the measured Bethesda scale of 256 Skyrim units per UV repeat. No vanilla texture is
+copied. The project-owned candidate uses a 1024-unit period plus four phase variants on
+512-unit floor/ramp modules; its optional BC4 `_p` map is supplemental, never required
+for silhouette.
 
 ### Still unverified
 - **Collider `type` / `layer` / `material` enums.** These are populated by a UI callback and cannot be enumerated in headless Blender, so they remain at BGS defaults (`type='Box'`, `layer='1'`). Review them in the Blender UI before final use.
-- **Material and texture.** No texture is assigned yet. The geometry proof comes first, per the brief. Cobblestone character still needs a material pass.
+- **Final material choice.** Vanilla Whiterun stone is deployed for comparison; the
+  project-owned candidate remains available. Barry's in-game visual verdict is the gate.
 - **The ramp's child collider** is correct by construction but has not been seen in the Creation Kit or in game.

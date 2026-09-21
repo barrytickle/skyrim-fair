@@ -60,6 +60,14 @@ RAMP_RISE = 96
 RAMP_DEPTH = 384
 SHOULDER_RUN = 256
 SHOULDER_THICKNESS = 32
+# Deliberate A/B gate.  Keep the project-owned material build in the repository,
+# but put the current in-game terrace on vanilla Whiterun stone for comparison.
+PAVING_MATERIAL_MODE = os.environ.get(
+    "SKYRIM_FAIR_PAVING_MATERIAL", "vanilla_whiterun_test")
+if PAVING_MATERIAL_MODE not in {"vanilla_whiterun_test", "project_cobble"}:
+    raise ValueError("SKYRIM_FAIR_PAVING_MATERIAL must be vanilla_whiterun_test or project_cobble")
+PAVING_TEXTURE_PERIOD = 256 if PAVING_MATERIAL_MODE == "vanilla_whiterun_test" else 1024
+PAVING_PHASE_STEP = 0.0 if PAVING_MATERIAL_MODE == "vanilla_whiterun_test" else 0.5
 
 
 def clear_scene():
@@ -82,6 +90,68 @@ def make_object(name, verts, faces):
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(obj)
     return obj
+
+
+def make_paving_material():
+    """BGS lighting material for the current vanilla/custom comparison target."""
+    if PAVING_MATERIAL_MODE == "vanilla_whiterun_test":
+        material = bpy.data.materials.new("SkyrimFair_WRStoneFloor02_Test")
+        props = material.bgs_props
+        props.texture_diffuse = r"textures\architecture\whiterun\WRStoneFloor02.dds"
+        props.texture_normal = r"textures\architecture\whiterun\WRStoneFloor02_n.dds"
+        props.texture_height = ""
+        props.clamp_mode = "WRAP_S_WRAP_T"
+        props.parallax_enabled = False
+        props.parallax_occlusion_enabled = False
+        props.model_space_normals = False
+        # Match the audited WRMainRoadMarket vanilla shader values.
+        props.shininess = 80.0
+        props.specular_enabled = True
+        props.specular_mult = 1.0
+        props.specular_color = (1.0, 1.0, 1.0)
+        props.vertex_colors_enabled = True
+        return material
+
+    material = bpy.data.materials.new("SkyrimFair_Cobble01")
+    props = material.bgs_props
+    props.texture_diffuse = r"textures\SkyrimFair\SkyrimFair_Cobble01.dds"
+    props.texture_normal = r"textures\SkyrimFair\SkyrimFair_Cobble01_n.dds"
+    props.texture_height = r"textures\SkyrimFair\SkyrimFair_Cobble01_p.dds"
+    props.clamp_mode = "WRAP_S_WRAP_T"
+    props.parallax_enabled = True
+    props.parallax_occlusion_enabled = True
+    props.model_space_normals = False
+    props.shininess = 18.0
+    props.specular_enabled = True
+    props.specular_mult = 0.22
+    props.specular_color = (0.45, 0.43, 0.39)
+    props.vertex_colors_enabled = False
+    return material
+
+
+def apply_paving_material(obj, material, u_phase=0.0, v_phase=0.0):
+    """World-scale 1024u UVs; phases let 512u kit pieces share one large tile."""
+    obj.data.materials.append(material)
+    uv_layer = obj.data.uv_layers.new(name="UVMap")
+    inv = 1.0 / BLENDER_UNITS_PER_SKYRIM_UNIT
+    coords = [v.co * inv for v in obj.data.vertices]
+    min_x = min(v.x for v in coords)
+    min_y = min(v.y for v in coords)
+    min_z = min(v.z for v in coords)
+    for polygon in obj.data.polygons:
+        normal = polygon.normal
+        for loop_index in polygon.loop_indices:
+            vertex = coords[obj.data.loops[loop_index].vertex_index]
+            if abs(normal.z) >= max(abs(normal.x), abs(normal.y)):
+                u = (vertex.x - min_x) / PAVING_TEXTURE_PERIOD + u_phase
+                v = (vertex.y - min_y) / PAVING_TEXTURE_PERIOD + v_phase
+            elif abs(normal.x) >= abs(normal.y):
+                u = (vertex.y - min_y) / PAVING_TEXTURE_PERIOD + v_phase
+                v = (vertex.z - min_z) / PAVING_TEXTURE_PERIOD
+            else:
+                u = (vertex.x - min_x) / PAVING_TEXTURE_PERIOD + u_phase
+                v = (vertex.z - min_z) / PAVING_TEXTURE_PERIOD
+            uv_layer.data[loop_index].uv = (u, v)
 
 
 def box(name, x0, x1, y0, y1, z0, z1):
@@ -136,15 +206,21 @@ def wedge(name, half_x, run, thickness):
 
 def build_kit():
     pieces = {}
+    paving = make_paving_material()
 
     # 1. interior fill tile - 9 of these cover a 3072 core
     pieces["SkyrimFair_FloorFill_1024"] = box(
         "SkyrimFair_FloorFill_1024", -512, 512, -512, 512, -FLOOR_THICKNESS, 0)
+    apply_paving_material(pieces["SkyrimFair_FloorFill_1024"], paving)
 
     # 2. half-size edge tile, so the paved outline can step in 512u increments
     #    and read as irregular rather than rectangular
-    pieces["SkyrimFair_FloorEdge_512"] = box(
-        "SkyrimFair_FloorEdge_512", -256, 256, -256, 256, -FLOOR_THICKNESS, 0)
+    phase = PAVING_PHASE_STEP
+    for suffix, u_phase, v_phase in (("", 0.0, 0.0), ("_U1", phase, 0.0),
+                                      ("_V1", 0.0, phase), ("_U1V1", phase, phase)):
+        name = "SkyrimFair_FloorEdge_512" + suffix
+        pieces[name] = box(name, -256, 256, -256, 256, -FLOOR_THICKNESS, 0)
+        apply_paving_material(pieces[name], paving, u_phase, v_phase)
 
     # 3. retaining face, hangs below the floor plane
     pieces["SkyrimFair_Retain_512"] = box(
@@ -155,8 +231,12 @@ def build_kit():
         "SkyrimFair_RetainCorner_128", -RETAIN_DEPTH, 0, -RETAIN_DEPTH, 0, -RETAIN_HEIGHT, 0)
 
     # 5. chainable ramp, descends outward in +Y
-    pieces["SkyrimFair_Ramp_512"] = sloped_box(
-        "SkyrimFair_Ramp_512", -256, 256, 0, RAMP_RUN, -RAMP_DEPTH, 0, -RAMP_RISE)
+    for suffix, u_phase, v_phase in (("", 0.0, 0.0), ("_U1", phase, 0.0),
+                                      ("_V1", 0.0, phase), ("_U1V1", phase, phase)):
+        name = "SkyrimFair_Ramp_512" + suffix
+        pieces[name] = sloped_box(
+            name, -256, 256, 0, RAMP_RUN, -RAMP_DEPTH, 0, -RAMP_RISE)
+        apply_paving_material(pieces[name], paving, u_phase, v_phase)
 
     # 6. rough-earth / grass shoulder laid outside the paving to soften the join
     pieces["SkyrimFair_Shoulder_512"] = wedge(
@@ -259,14 +339,14 @@ def main():
     pieces = build_kit()
     print(f"\nbuilt {len(pieces)} pieces")
 
-    collider_mode = {
-        "SkyrimFair_FloorFill_1024": "self",
-        "SkyrimFair_FloorEdge_512": "self",
-        "SkyrimFair_Retain_512": "self",
-        "SkyrimFair_RetainCorner_128": "self",
-        "SkyrimFair_Ramp_512": "child",
-        "SkyrimFair_Shoulder_512": "none",
-    }
+    collider_mode = {}
+    for name in pieces:
+        if name.startswith("SkyrimFair_Ramp_512"):
+            collider_mode[name] = "child"
+        elif name == "SkyrimFair_Shoulder_512":
+            collider_mode[name] = "none"
+        else:
+            collider_mode[name] = "self"
 
     print("\n=== collision ===")
     collision = {}

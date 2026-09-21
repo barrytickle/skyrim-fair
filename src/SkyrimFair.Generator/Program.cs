@@ -57,6 +57,8 @@ try
 
         Console.WriteLine();
         Console.WriteLine("  Terrain integration:");
+        Console.WriteLine($"  {foundation.CliffFaces,3} x tundra cliff face skinning a straight wall run");
+        Console.WriteLine($"  {foundation.CliffCoveredSegments,3} x straight wall segment covered by cliff skin");
         Console.WriteLine($"  {foundation.WallRocks,3} x embankment rock facing an exposed edge");
         Console.WriteLine($"  {foundation.CornerStones,3} x corner stone breaking the outline");
         Console.WriteLine($"  {foundation.ToeRocks,3} x toe rock bedded into native grade");

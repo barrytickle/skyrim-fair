@@ -69,6 +69,18 @@
           "editorId": "SkyrimFairFloorEdge512",
           "model": "SkyrimFair\\SkyrimFair_FloorEdge_512.nif"
         },
+        "floorEdgeU1": {
+          "editorId": "SkyrimFairFloorEdge512U1",
+          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512_U1.nif"
+        },
+        "floorEdgeV1": {
+          "editorId": "SkyrimFairFloorEdge512V1",
+          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512_V1.nif"
+        },
+        "floorEdgeU1V1": {
+          "editorId": "SkyrimFairFloorEdge512U1V1",
+          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512_U1V1.nif"
+        },
         "retain": {
           "editorId": "SkyrimFairRetain512",
           "model": "SkyrimFair\\SkyrimFair_Retain_512.nif"
@@ -81,6 +93,18 @@
           "editorId": "SkyrimFairRamp512",
           "model": "SkyrimFair\\SkyrimFair_Ramp_512.nif"
         },
+        "rampU1": {
+          "editorId": "SkyrimFairRamp512U1",
+          "model": "SkyrimFair\\SkyrimFair_Ramp_512_U1.nif"
+        },
+        "rampV1": {
+          "editorId": "SkyrimFairRamp512V1",
+          "model": "SkyrimFair\\SkyrimFair_Ramp_512_V1.nif"
+        },
+        "rampU1V1": {
+          "editorId": "SkyrimFairRamp512U1V1",
+          "model": "SkyrimFair\\SkyrimFair_Ramp_512_U1V1.nif"
+        },
         "shoulder": {
           "editorId": "SkyrimFairShoulder512",
           "model": "SkyrimFair\\SkyrimFair_Shoulder_512.nif"
@@ -89,6 +113,12 @@
       "dressing": {
         "seed": 20260921,
         "perEdgeSegment": 2,
+        "cliffFace": "00097065:Skyrim.esm",
+        "cliffMinRunSegments": 2,
+        "cliffMaxRunSegments": 4,
+        "cliffMeshLength": 1944,
+        "cliffMeshDepth": 465,
+        "cliffOutset": 72,
         "minOffset": 192,
         "spread": 384,
         "minScale": 0.7,
