@@ -1,4 +1,3 @@
-using System.Globalization;
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Skyrim;
@@ -8,6 +7,8 @@ namespace SkyrimFair.Generator;
 
 internal static class FairPluginGenerator
 {
+    private const int CellSize = 4096;
+
     /// <summary>Exterior cells are grouped 32x32 per block and 8x8 per sub-block.</summary>
     private const int ExteriorBlockSize = 32;
 
@@ -58,62 +59,102 @@ internal static class FairPluginGenerator
         mod.ModHeader.Author = config.Identity.Author;
 
         var site = config.Site;
-
-        var worldspaceKey = ParseFormKey(site.Worldspace);
-        var persistentCellKey = ParseFormKey(site.PersistentCell);
-        var cellKey = ParseFormKey(site.Cell);
+        var worldspaceKey = FormKeyHelper.Parse(site.Worldspace);
+        var persistentCellKey = FormKeyHelper.Parse(site.PersistentCell);
 
         // Overriding a vanilla WRLD/CELL means replacing it wholesale: whatever we omit
         // is lost in game. So when Skyrim.esm is reachable we copy the real records and
         // only add our references. Without it we can still emit a structurally correct
         // plugin, but it would strip regions, water height and map data, so we say so.
         using var master = TryOpenMaster(config, worldspaceKey.ModKey);
+        var vanillaWorldspace = master is null ? null : FindWorldspace(master, worldspaceKey);
 
-        Worldspace worldspace;
-        Cell persistentCell;
-        Cell cell;
+        var worldspace = vanillaWorldspace is not null
+            ? vanillaWorldspace.DeepCopy(WorldspaceHeaderOnly)
+            : new Worldspace(worldspaceKey, SkyrimRelease.SkyrimSE);
 
-        if (master is not null)
-        {
-            var vanillaWorldspace = FindWorldspace(master, worldspaceKey);
-            worldspace = vanillaWorldspace.DeepCopy(WorldspaceHeaderOnly);
-
-            var vanillaPersistentCell = vanillaWorldspace.TopCell
-                ?? throw new InvalidOperationException(
-                    $"{worldspaceKey} has no persistent cell in {master.ModKey.FileName}.");
-
-            if (vanillaPersistentCell.FormKey != persistentCellKey)
-            {
-                throw new InvalidOperationException(
-                    $"Configured persistent cell {persistentCellKey} does not match " +
-                    $"{worldspaceKey}'s actual persistent cell {vanillaPersistentCell.FormKey}.");
-            }
-
-            persistentCell = vanillaPersistentCell.DeepCopy(CellHeaderOnly);
-            cell = FindExteriorCell(vanillaWorldspace, cellKey, site).DeepCopy(CellHeaderOnly);
-        }
-        else
-        {
-            worldspace = new Worldspace(worldspaceKey, SkyrimRelease.SkyrimSE);
-            persistentCell = new Cell(persistentCellKey, SkyrimRelease.SkyrimSE);
-            cell = new Cell(cellKey, SkyrimRelease.SkyrimSE)
-            {
-                Grid = new CellGrid
-                {
-                    Point = new P2Int(site.CellGridX, site.CellGridY),
-                },
-            };
-        }
-
+        // ---- persistent cell: the map marker ------------------------------
         var mapMarker = BuildMapMarker(mod, site);
+        var persistentCell = BuildPersistentCell(vanillaWorldspace, persistentCellKey, worldspaceKey);
         persistentCell.Persistent.Add(mapMarker);
         worldspace.TopCell = persistentCell;
 
-        // Statics belong in the temporary child group, matching vanilla exterior clutter.
-        var testObject = BuildTestObject(mod, site);
-        cell.Temporary.Add(testObject);
+        // ---- exterior cells: everything placed in the world ---------------
+        var byCell = new Dictionary<(int X, int Y), List<PlacedObject>>();
 
-        worldspace.SubCells.Add(BuildBlockChain(site.CellGridX, site.CellGridY, cell));
+        void PlaceAt(IPlacedObjectGetter placed, float x, float y)
+        {
+            var key = ((int)MathF.Floor(x / CellSize), (int)MathF.Floor(y / CellSize));
+            if (!byCell.TryGetValue(key, out var list))
+            {
+                list = new List<PlacedObject>();
+                byCell[key] = list;
+            }
+
+            list.Add((PlacedObject)placed);
+        }
+
+        // With the foundation in place the site centre is paved, so the stall stands
+        // on the platform rather than being buried 48 units under it.
+        var stallZ = site.Foundation.Enabled ? site.Foundation.FloorZ : site.Placement.Z;
+        var testObject = BuildTestObject(mod, site, stallZ);
+        PlaceAt(testObject, site.Placement.X, site.Placement.Y);
+
+        FoundationResult? foundation = null;
+        if (site.Foundation.Enabled)
+        {
+            var terrain = new TerrainSampler(vanillaWorldspace);
+            foundation = FairFoundation.Build(mod, config, terrain.Sample, PlaceAt);
+            foreach (var record in foundation.Statics.Values)
+            {
+                mod.Statics.Add(record);
+            }
+        }
+
+        // Nest each touched cell under its exterior block / sub-block.
+        var blocks = new Dictionary<(int X, int Y), WorldspaceBlock>();
+        var subBlocks = new Dictionary<(int X, int Y), WorldspaceSubBlock>();
+
+        foreach (var ((cx, cy), placedObjects) in byCell.OrderBy(p => p.Key.Y).ThenBy(p => p.Key.X))
+        {
+            var cell = BuildExteriorCell(vanillaWorldspace, cx, cy);
+
+            // Statics belong in the temporary child group, matching vanilla clutter.
+            foreach (var placed in placedObjects)
+            {
+                cell.Temporary.Add(placed);
+            }
+
+            var blockKey = (FloorDivide(cx, ExteriorBlockSize), FloorDivide(cy, ExteriorBlockSize));
+            var subKey = (FloorDivide(cx, ExteriorSubBlockSize), FloorDivide(cy, ExteriorSubBlockSize));
+
+            if (!blocks.TryGetValue(blockKey, out var block))
+            {
+                block = new WorldspaceBlock
+                {
+                    BlockNumberX = (short)blockKey.Item1,
+                    BlockNumberY = (short)blockKey.Item2,
+                    GroupType = GroupTypeEnum.ExteriorCellBlock,
+                };
+                blocks[blockKey] = block;
+                worldspace.SubCells.Add(block);
+            }
+
+            if (!subBlocks.TryGetValue(subKey, out var subBlock))
+            {
+                subBlock = new WorldspaceSubBlock
+                {
+                    BlockNumberX = (short)subKey.Item1,
+                    BlockNumberY = (short)subKey.Item2,
+                    GroupType = GroupTypeEnum.ExteriorCellSubBlock,
+                };
+                subBlocks[subKey] = subBlock;
+                block.Items.Add(subBlock);
+            }
+
+            subBlock.Items.Add(cell);
+        }
+
         mod.Worldspaces.Add(worldspace);
 
         var outputPath = Path.Combine(outputDirectory, mod.ModKey.FileName);
@@ -128,7 +169,60 @@ internal static class FairPluginGenerator
             new FileInfo(outputPath).Length,
             testObject.FormKey,
             mapMarker.FormKey,
-            master is not null);
+            master is not null,
+            byCell.Keys.OrderBy(k => k.Y).ThenBy(k => k.X).ToList(),
+            foundation);
+    }
+
+    private static Cell BuildPersistentCell(
+        IWorldspaceGetter? vanillaWorldspace, FormKey persistentCellKey, FormKey worldspaceKey)
+    {
+        if (vanillaWorldspace is null)
+        {
+            return new Cell(persistentCellKey, SkyrimRelease.SkyrimSE);
+        }
+
+        var vanilla = vanillaWorldspace.TopCell
+            ?? throw new InvalidOperationException(
+                $"{worldspaceKey} has no persistent cell in the master.");
+
+        if (vanilla.FormKey != persistentCellKey)
+        {
+            throw new InvalidOperationException(
+                $"Configured persistent cell {persistentCellKey} does not match " +
+                $"{worldspaceKey}'s actual persistent cell {vanilla.FormKey}.");
+        }
+
+        return vanilla.DeepCopy(CellHeaderOnly);
+    }
+
+    private static Cell BuildExteriorCell(IWorldspaceGetter? vanillaWorldspace, int cx, int cy)
+    {
+        if (vanillaWorldspace is not null)
+        {
+            foreach (var block in vanillaWorldspace.SubCells)
+            {
+                foreach (var subBlock in block.Items)
+                {
+                    foreach (var candidate in subBlock.Items)
+                    {
+                        var grid = candidate.Grid?.Point;
+                        if (grid is not null && grid.Value.X == cx && grid.Value.Y == cy)
+                        {
+                            return candidate.DeepCopy(CellHeaderOnly);
+                        }
+                    }
+                }
+            }
+
+            throw new InvalidOperationException($"Cell at grid {cx}, {cy} was not found in the master.");
+        }
+
+        // Stub fallback: structurally valid, but not safe to load. Program.cs warns.
+        return new Cell(FormKey.Null, SkyrimRelease.SkyrimSE)
+        {
+            Grid = new CellGrid { Point = new P2Int(cx, cy) },
+        };
     }
 
     private static ISkyrimModDisposableGetter? TryOpenMaster(FairConfig config, ModKey masterKey)
@@ -145,12 +239,9 @@ internal static class FairPluginGenerator
         }
 
         var masterPath = Path.Combine(dataPath, masterKey.FileName);
-        if (!File.Exists(masterPath))
-        {
-            return null;
-        }
-
-        return SkyrimMod.CreateFromBinaryOverlay(masterPath, SkyrimRelease.SkyrimSE);
+        return !File.Exists(masterPath)
+            ? null
+            : SkyrimMod.CreateFromBinaryOverlay(masterPath, SkyrimRelease.SkyrimSE);
     }
 
     private static IWorldspaceGetter FindWorldspace(ISkyrimModGetter master, FormKey key)
@@ -167,54 +258,15 @@ internal static class FairPluginGenerator
             $"Worldspace {key} was not found in {master.ModKey.FileName}.");
     }
 
-    private static ICellGetter FindExteriorCell(
-        IWorldspaceGetter worldspace,
-        FormKey key,
-        PrototypeSite site)
-    {
-        var blockX = (short)FloorDivide(site.CellGridX, ExteriorBlockSize);
-        var blockY = (short)FloorDivide(site.CellGridY, ExteriorBlockSize);
-        var subBlockX = (short)FloorDivide(site.CellGridX, ExteriorSubBlockSize);
-        var subBlockY = (short)FloorDivide(site.CellGridY, ExteriorSubBlockSize);
-
-        foreach (var block in worldspace.SubCells)
-        {
-            if (block.BlockNumberX != blockX || block.BlockNumberY != blockY)
-            {
-                continue;
-            }
-
-            foreach (var subBlock in block.Items)
-            {
-                if (subBlock.BlockNumberX != subBlockX || subBlock.BlockNumberY != subBlockY)
-                {
-                    continue;
-                }
-
-                foreach (var candidate in subBlock.Items)
-                {
-                    if (candidate.FormKey == key)
-                    {
-                        return candidate;
-                    }
-                }
-            }
-        }
-
-        throw new InvalidOperationException(
-            $"Cell {key} was not found at grid {site.CellGridX}, {site.CellGridY} " +
-            $"(block {blockX}, {blockY} / sub-block {subBlockX}, {subBlockY}).");
-    }
-
-    private static PlacedObject BuildTestObject(SkyrimMod mod, PrototypeSite site)
+    private static PlacedObject BuildTestObject(SkyrimMod mod, PrototypeSite site, float z)
     {
         return new PlacedObject(mod)
         {
             EditorID = "FairTestMarketStall",
-            Base = new FormLinkNullable<IPlaceableObjectGetter>(ParseFormKey(site.TestObject.FormKey)),
+            Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(site.TestObject.FormKey)),
             Placement = new Placement
             {
-                Position = new P3Float(site.Placement.X, site.Placement.Y, site.Placement.Z),
+                Position = new P3Float(site.Placement.X, site.Placement.Y, z),
                 Rotation = new P3Float(0f, 0f, 0f),
             },
         };
@@ -246,7 +298,7 @@ internal static class FairPluginGenerator
         {
             EditorID = "FairSiteMapMarker",
             MajorRecordFlagsRaw = PersistentRecordFlag,
-            Base = new FormLinkNullable<IPlaceableObjectGetter>(ParseFormKey(marker.BaseObject)),
+            Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(marker.BaseObject)),
             MapMarker = new MapMarker
             {
                 Name = marker.Name,
@@ -256,66 +308,25 @@ internal static class FairPluginGenerator
             Radius = marker.Radius,
             Placement = new Placement
             {
-                Position = new P3Float(site.Placement.X, site.Placement.Y, site.Placement.Z),
+                Position = new P3Float(
+                    marker.Position?.X ?? site.Placement.X,
+                    marker.Position?.Y ?? site.Placement.Y,
+                    marker.Position?.Z ?? site.Placement.Z),
                 Rotation = new P3Float(0f, 0f, 0f),
             },
         };
 
         placed.LocationRefTypes = new ExtendedList<IFormLinkGetter<ILocationReferenceTypeGetter>>
         {
-            new FormLink<ILocationReferenceTypeGetter>(ParseFormKey(marker.LocationRefType)),
+            new FormLink<ILocationReferenceTypeGetter>(FormKeyHelper.Parse(marker.LocationRefType)),
         };
 
         return placed;
     }
 
-    private static WorldspaceBlock BuildBlockChain(int cellX, int cellY, Cell cell)
-    {
-        var subBlock = new WorldspaceSubBlock
-        {
-            BlockNumberX = (short)FloorDivide(cellX, ExteriorSubBlockSize),
-            BlockNumberY = (short)FloorDivide(cellY, ExteriorSubBlockSize),
-            GroupType = GroupTypeEnum.ExteriorCellSubBlock,
-        };
-        subBlock.Items.Add(cell);
-
-        var block = new WorldspaceBlock
-        {
-            BlockNumberX = (short)FloorDivide(cellX, ExteriorBlockSize),
-            BlockNumberY = (short)FloorDivide(cellY, ExteriorBlockSize),
-            GroupType = GroupTypeEnum.ExteriorCellBlock,
-        };
-        block.Items.Add(subBlock);
-
-        return block;
-    }
-
     /// <summary>Floor division, so negative cell coordinates land in the correct block.</summary>
     private static int FloorDivide(int value, int divisor)
         => (int)Math.Floor(value / (double)divisor);
-
-    /// <summary>
-    /// Accepts the eight-digit FormKey notation used across the project docs
-    /// ("00064B87:Skyrim.esm") and hands Mutagen the six-digit form it expects.
-    /// </summary>
-    private static FormKey ParseFormKey(string value)
-    {
-        var parts = value.Split(':', 2);
-        if (parts.Length != 2)
-        {
-            throw new InvalidOperationException(
-                $"'{value}' is not a FormKey in 'FormID:Plugin.esm' form.");
-        }
-
-        var rawId = parts[0].Trim();
-        if (!uint.TryParse(rawId, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var id))
-        {
-            throw new InvalidOperationException($"'{rawId}' is not a hexadecimal FormID.");
-        }
-
-        // Strip the load-order byte; the plugin name carries that information.
-        return FormKey.Factory($"{id & 0xFFFFFF:X6}:{parts[1].Trim()}");
-    }
 }
 
 internal sealed record FairBuildResult(
@@ -323,4 +334,6 @@ internal sealed record FairBuildResult(
     long SizeInBytes,
     FormKey TestObjectFormKey,
     FormKey MapMarkerFormKey,
-    bool CopiedMasterRecords);
+    bool CopiedMasterRecords,
+    IReadOnlyList<(int X, int Y)> CellsTouched,
+    FoundationResult? Foundation);

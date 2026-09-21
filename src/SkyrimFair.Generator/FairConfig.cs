@@ -97,6 +97,8 @@ internal sealed record PrototypeSite
 
     public FairMapMarker MapMarker { get; init; } = new();
 
+    public FoundationConfig Foundation { get; init; } = new();
+
     public void Validate()
     {
         RequireFormKey(Worldspace, nameof(Worldspace));
@@ -109,6 +111,8 @@ internal sealed record PrototypeSite
         {
             throw new InvalidOperationException("MapMarker.Name cannot be empty.");
         }
+
+        Foundation.Validate();
     }
 
     private static void RequireFormKey(string value, string field)
@@ -170,4 +174,168 @@ internal sealed record FairMapMarker
     /// 347 Tamriel map markers.
     /// </summary>
     public string LocationRefType { get; init; } = "0010F63C:Skyrim.esm";
+
+    /// <summary>
+    /// Where the marker sits, if it should not sit at Site.Placement. Once the
+    /// foundation covers the site centre the marker must move off it, or fast travel
+    /// drops the player into the gap between native ground and the paving slab.
+    /// This puts arrival on open ground just beyond the foot of the entrance ramp.
+    /// </summary>
+    public FairPlacement? Position { get; init; }
+}
+
+/// <summary>
+/// The landscaped foundation prototype: an irregular paved area built from the
+/// project-owned tile kit in assets/blender/build_foundation_kit.py.
+/// </summary>
+internal sealed record FoundationConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Grid step, matching the kit's 512 edge tile.</summary>
+    public int TileSize { get; init; } = 512;
+
+    /// <summary>
+    /// Platform floor height. Set to the terrain maximum across the footprint so
+    /// the platform is pure fill with zero cut and needs no LAND edits.
+    /// </summary>
+    public float FloorZ { get; init; } = -5672f;
+
+    /// <summary>
+    /// The visible outline, one character per TileSize cell, '#' paved. Deliberately
+    /// irregular: the player must never see a rectangle or the L-shaped safe envelope.
+    /// First row is north.
+    /// </summary>
+    public IReadOnlyList<string> Footprint { get; init; } = new[]
+    {
+        ".###..",
+        ".#####",
+        "######",
+        ".#####",
+        "..###.",
+    };
+
+    /// <summary>Compass edge carrying the entrance ramp: N, S, E or W.</summary>
+    public string RampEdge { get; init; } = "S";
+
+    /// <summary>Ramp tiles chained outward; each drops RampRise.</summary>
+    public int RampTiles { get; init; } = 2;
+
+    /// <summary>How many perimeter segments wide the entrance is.</summary>
+    public int RampWidth { get; init; } = 2;
+
+    /// <summary>Fall per ramp tile, matching the kit's 1:8 grade over 512 units.</summary>
+    public float RampRise { get; init; } = 64f;
+
+    /// <summary>Gap between the retaining face and the shoulder wedge.</summary>
+    public float ShoulderOffset { get; init; } = 64f;
+
+    /// <summary>
+    /// Minimum step between floor and native ground before a retaining face is worth
+    /// placing. Below this the paving simply meets grade, which is what happens on the
+    /// east side of the site where the tundra rises to meet the platform.
+    /// </summary>
+    public float MinExposure { get; init; } = 16f;
+
+    public Dictionary<string, FoundationPiece> Pieces { get; init; } = new()
+    {
+        ["floorFill"] = new() { EditorId = "SkyrimFairFloorFill1024", Model = @"SkyrimFair\SkyrimFair_FloorFill_1024.nif" },
+        ["floorEdge"] = new() { EditorId = "SkyrimFairFloorEdge512", Model = @"SkyrimFair\SkyrimFair_FloorEdge_512.nif" },
+        ["retain"] = new() { EditorId = "SkyrimFairRetain512", Model = @"SkyrimFair\SkyrimFair_Retain_512.nif" },
+        ["retainCorner"] = new() { EditorId = "SkyrimFairRetainCorner128", Model = @"SkyrimFair\SkyrimFair_RetainCorner_128.nif" },
+        ["ramp"] = new() { EditorId = "SkyrimFairRamp512", Model = @"SkyrimFair\SkyrimFair_Ramp_512.nif" },
+        ["shoulder"] = new() { EditorId = "SkyrimFairShoulder512", Model = @"SkyrimFair\SkyrimFair_Shoulder_512.nif" },
+    };
+
+    public DressingConfig Dressing { get; init; } = new();
+
+    public void Validate()
+    {
+        if (!Enabled)
+        {
+            return;
+        }
+
+        if (Footprint.Count == 0 || Footprint.Any(string.IsNullOrWhiteSpace))
+        {
+            throw new InvalidOperationException("Foundation.Footprint must have at least one non-empty row.");
+        }
+
+        if (Footprint.Select(r => r.Length).Distinct().Count() != 1)
+        {
+            throw new InvalidOperationException("Foundation.Footprint rows must all be the same length.");
+        }
+
+        if (!Footprint.Any(r => r.Contains('#')))
+        {
+            throw new InvalidOperationException("Foundation.Footprint has no paved cells.");
+        }
+
+        foreach (var role in new[] { "floorFill", "floorEdge", "retain", "retainCorner", "ramp", "shoulder" })
+        {
+            if (!Pieces.ContainsKey(role))
+            {
+                throw new InvalidOperationException($"Foundation.Pieces is missing '{role}'.");
+            }
+        }
+
+        if (!new[] { "N", "S", "E", "W" }.Contains(RampEdge.ToUpperInvariant()))
+        {
+            throw new InvalidOperationException($"Foundation.RampEdge must be N, S, E or W, but was '{RampEdge}'.");
+        }
+    }
+}
+
+internal sealed record FoundationPiece
+{
+    public string EditorId { get; init; } = string.Empty;
+
+    /// <summary>Mesh path relative to Data\meshes\.</summary>
+    public string Model { get; init; } = string.Empty;
+}
+
+/// <summary>Vanilla rocks and plants used to break up the hard tile boundary.</summary>
+internal sealed record DressingConfig
+{
+    public int Seed { get; init; } = 20260921;
+
+    public int PerEdgeSegment { get; init; } = 2;
+
+    public float MinOffset { get; init; } = 32f;
+
+    public float Spread { get; init; } = 224f;
+
+    public float MinScale { get; init; } = 0.7f;
+
+    public float MaxScale { get; init; } = 1.4f;
+
+    /// <summary>Rocks are sunk slightly so they read as bedded into the ground.</summary>
+    public float RockSink { get; init; } = 24f;
+
+    public IReadOnlyList<string> Rocks { get; init; } = new[]
+    {
+        "00039224:Skyrim.esm", // RockTundraLand01Tundra01
+        "0003925D:Skyrim.esm", // RockTundraLand02Tundra01
+        "0001BFB0:Skyrim.esm", // RockPileM01FieldGrass01Moss
+        "00024E8F:Skyrim.esm", // RockPileM02FieldGrass01Moss
+        "00021E70:Skyrim.esm", // RockPileS01FieldGrass01
+        "000674BB:Skyrim.esm", // RockPileS02FieldGrass01
+    };
+
+    public IReadOnlyList<string> Shrubs { get; init; } = new[]
+    {
+        "000AAE79:Skyrim.esm", // TreeTundraShrub01
+        "000AAE7A:Skyrim.esm", // TreeTundraShrub02
+        "000AAE7B:Skyrim.esm", // TreeTundraShrub03
+        "000AAE7F:Skyrim.esm", // TreeTundraShrub04
+        "000AAE81:Skyrim.esm", // TreeTundraShrub05
+        "000AAE83:Skyrim.esm", // TreeTundraShrub06
+    };
+
+    public IReadOnlyList<string> Scrub { get; init; } = new[]
+    {
+        "0003A2BC:Skyrim.esm", // TundraScrub01
+        "0003A2BD:Skyrim.esm", // TundraScrub02
+        "0003A2BE:Skyrim.esm", // TundraScrub03
+    };
 }

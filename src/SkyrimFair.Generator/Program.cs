@@ -46,6 +46,22 @@ try
     Console.WriteLine(
         $"  map marker '{site.MapMarker.Name}' placed as {result.MapMarkerFormKey}");
 
+    if (result.Foundation is { } foundation)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Foundation prototype at floor Z {site.Foundation.FloorZ}:");
+        foreach (var (role, count) in foundation.Counts.OrderBy(p => p.Key))
+        {
+            Console.WriteLine($"  {count,3} x {role}");
+        }
+
+        Console.WriteLine($"  {foundation.DressingCount,3} x vanilla rock / shrub / scrub dressing");
+        Console.WriteLine($"  {foundation.Statics.Count} STAT records created");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine($"Cells touched: {string.Join(", ", result.CellsTouched.Select(c => $"{c.X},{c.Y}"))}");
+
     Console.WriteLine();
     if (result.CopiedMasterRecords)
     {

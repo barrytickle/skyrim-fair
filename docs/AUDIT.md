@@ -16,33 +16,149 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Site 1 and the marker fix are confirmed in game
+## Current build — foundation prototype deployed
 
-Barry has tested the current build. All three gates are passed:
+Site 1, the `Pass` icon and fast travel are all confirmed in game. This pass adds the
+landscaped foundation prototype: an irregular paved area built from the project-owned
+tile kit, with vanilla rocks and plants dressing the boundary.
 
-- **fast travel now works** — the `Persistent` flag fix resolved it
-- **the `Pass` icon displays correctly**
-- **Site 1 is approved** as the fairground location
-
-The generated plugin is unchanged since that test. No new ESP was built or deployed in this pass.
+**Not yet seen in game.** Everything below is structurally verified only.
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 46,997 bytes |
-| sha256 | `2fb5379e10d05c9fffef4ba761ae62013edab8672930e4277fc0c3d64800097e` |
-| Deployed to | `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (byte-identical) |
+| Size | **55,865 bytes** |
+| sha256 | `2e19b22caeebeda74db1a9858ec534ec437ee47d1c445037721392ee01f819b1` |
 | Masters | `Skyrim.esm` only |
 | TES4 Author (`CNAM`) | `BarryRim Event Planner` |
-| Records | 1 WRLD, 2 CELL, 2 REFR |
-| Load order | `SkyrimFair.esp` at position 82, correctly **before** `DynDOLOD.esp` (416) and `Occlusion.esp` (417) |
+| Records | **1 WRLD, 5 CELL, 6 STAT, 98 REFR** |
+| Excluded | no LAND, NAVM, NPC, quest, script, package, music or animation records |
+| Load order | position 82, before `DynDOLOD.esp` (416) and `Occlusion.esp` (417) |
 
-| FormKey | EditorID | What it is |
+### STAT records — the tile kit
+
+| FormKey | EditorID | Mesh |
 | --- | --- | --- |
-| `000800:SkyrimFair.esp` | `FairSiteMapMarker` | map marker "The Wanderer's Fair", `Pass` icon |
-| `000801:SkyrimFair.esp` | `FairTestMarketStall` | placed `SMarketStall01` |
+| `000802:SkyrimFair.esp` | `SkyrimFairFloorFill1024` | `SkyrimFair\SkyrimFair_FloorFill_1024.nif` |
+| `000807:SkyrimFair.esp` | `SkyrimFairFloorEdge512` | `SkyrimFair\SkyrimFair_FloorEdge_512.nif` |
+| `00080E:SkyrimFair.esp` | `SkyrimFairRetain512` | `SkyrimFair\SkyrimFair_Retain_512.nif` |
+| `000839:SkyrimFair.esp` | `SkyrimFairRetainCorner128` | `SkyrimFair\SkyrimFair_RetainCorner_128.nif` |
+| `00082E:SkyrimFair.esp` | `SkyrimFairRamp512` | `SkyrimFair\SkyrimFair_Ramp_512.nif` |
+| `000810:SkyrimFair.esp` | `SkyrimFairShoulder512` | `SkyrimFair\SkyrimFair_Shoulder_512.nif` |
 
-Placement: Tamriel cell `00009A28:Skyrim.esm`, grid `-2, -4`, position `X -5632, Y -12800, Z -5720` (native terrain height).
+Mesh paths are relative to `Data\meshes\`.
+
+### What is placed
+
+| Piece | Count |
+| --- | --- |
+| floor fill 1024 | 4 |
+| floor edge 512 | 6 |
+| retaining face | 18 |
+| retaining corner | 2 |
+| ramp | 6 (2 wide x 3 chained) |
+| shoulder wedge | 18 |
+| vanilla rock / shrub / scrub dressing | 44 |
+| map marker + market stall | 2 |
+
+Plus the original two references: `FairSiteMapMarker` and `FairTestMarketStall`.
+
+### Footprint
+
+The outline is driven by an irregular mask in `fair.config.json`, one character per
+512-unit cell, so the paving stays on a clean grid while the silhouette does not read
+as a rectangle or as the L-shaped safe envelope:
+
+```text
+.###..
+.#####
+######
+.#####
+..###.
+```
+
+- paved extent `X -7168..-4096`, `Y -14080..-11520` (3072 x 2560 bounding box, 22 cells paved)
+- floor **Z -5672** — the terrain maximum across the footprint, so the platform is
+  **pure fill with zero cut and no LAND edits**
+- terrain relief under the paving: 120u
+- 4 fill tiles cover the interior via greedy 2x2 blocks; the remaining 6 cells take
+  512 edge tiles, which is what lets the outline step in 512u increments
+
+### Edges
+
+Measured floor exposure above native terrain, per compass edge:
+
+| Edge | Mean | Max | Treatment |
+| --- | --- | --- | --- |
+| West | 74u | 104u | retaining + shoulder |
+| South | 64u | 96u | **entrance ramp** + retaining |
+| North | 63u | 80u | retaining + shoulder |
+| East | 32u | 80u | partly **meets grade** |
+
+Two east segments where native ground reaches within 16u of the floor get **no**
+retaining and no shoulder: there is no step to hide there, so the paving simply meets
+grade. That is the `minExposure` rule in config.
+
+The ramp runs south, chained 3 tiles deep, stepping `-5672 → -5736 → -5800`. It is
+placed on the **south** edge deliberately: 180 degrees is the one rotation that is
+identical under either Z-rotation sign convention, so the most orientation-sensitive
+piece in the kit cannot come out backwards on its first test.
+
+### Two placement problems found and fixed
+
+1. **The stall would have been buried.** It sat at native ground `Z -5720`, which is
+   48 units *below* the new paving at `-5672`. It now stands on the platform at the
+   floor height, giving a familiar object for judging surface level and scale.
+2. **The map marker would have trapped the player.** It was at the site centre at
+   `-5720`, under a 32-unit slab whose underside is at `-5704` — a 16-unit gap. Fast
+   travelling there would have dropped the player beneath the paving. The marker has
+   moved to open native ground beyond the ramp foot at **`(-5632, -15872, -5912)`**,
+   so arrival is now at the fair entrance, facing the ramp.
+
+### Cells touched
+
+| Cell | FormKey | Contents |
+| --- | --- | --- |
+| `-2,-4` | `00009A28:Skyrim.esm` | most of the paving, ramp, stall |
+| `-2,-3` | `00009A07:Skyrim.esm` | northern paving and dressing |
+| `-1,-4` | `00009A27:Skyrim.esm` | eastern dressing only |
+| `-1,-3` | `00009A06:Skyrim.esm` | eastern dressing only |
+| persistent `00000D74` | | map marker |
+
+The two `-1` cells are touched only because dressing spills past the eastern paving
+edge. **All five cell overrides are byte-identical to vanilla** — same subrecord kinds,
+same values.
+
+### Verification
+
+19 structural checks, all passing, by parsing the written ESP independently of Mutagen:
+single master, author intact, 6 STAT records with mesh paths all under `SkyrimFair\`
+and ending `.nif`, 32 references on the floor plane, 6 ramp tiles at exactly three Z
+levels 64u apart sharing one rotation, no shoulder above the floor, dressing varied in
+scale and rotation, marker off the paved area, stall on it, and no LAND / NAVM / NPC /
+quest / script / package / music / animation records.
+
+### MO2 deployment
+
+| Field | Value |
+| --- | --- |
+| Plugin | `mods\Skyrim Fair\SkyrimFair.esp`, byte-identical, sha256 `2e19b22c…f819b1` |
+| Meshes | `mods\Skyrim Fair\meshes\SkyrimFair\*.nif` — all 6, byte-identical |
+
+`modlist.txt`, `plugins.txt` and `loadorder.txt` hashed before and after: **unchanged**.
+Nothing enabled or reordered, no saves touched, Skyrim not launched.
+
+### Known caveats for the in-game test
+
+- **The kit is untextured.** It will render with a default material. Judge geometry,
+  shape and how the edge meets the landscape, not looks.
+- **No navmesh.** NPCs cannot path onto the platform; that is the next milestone.
+- **Z-rotation convention is unconfirmed.** Retaining faces use 0 / 90 / 180 / 270
+  degrees with +Y outward, on the right-handed assumption. If the sign is flipped, the
+  north and south faces will look right and the **east and west ones will be wrong** —
+  that is the diagnostic. The ramp is immune, being at 180.
+- Only north-east style outer corners get a corner piece, for the same reason. Other
+  corners rely on rocks, which is the intended treatment anyway.
 
 ## Site 1 hazards and safe build envelope
 
@@ -416,12 +532,27 @@ All three are archives in `external/` (git-ignored) and **none is installed in M
 
 ## Next local verification
 
-Phases 1, 2, 3 and 5 of `docs/CLAUDE_AFTER_SITE_TEST.md` are complete, and the FBX to NIF conversion is done and verified. **Phase 4 is unblocked.**
+Phase 4 is done and deployed. **Barry's in-game inspection is the gate** before anything else.
 
-The next agent pass can:
+What to judge, in order:
 
-1. register the six pieces as project-owned `STAT` records in `SkyrimFair.esp` through the Mutagen generator, reading the stock Skyrim data path as always — **not** the Creation Kit
-2. place a small irregular test arrangement at Site 1: some paving, at least one retaining edge, one ramp, plus vanilla rocks, shrubs and grass over the join to demonstrate the blend
-3. keep the existing fair marker for travel, and add no NPCs, navmesh, stalls, stage, vendors, music or dancers
+1. **Is the centre genuinely flat?** Walk the paved area. The market stall stands at the
+   centre on the floor plane as a reference.
+2. **Does the outline read as organic?** From a distance and from the ramp, the perimeter
+   should curve and vary, never reading as a rectangle or an L.
+3. **Does the edge treatment work?** Look at where retaining faces, shoulder wedges and
+   vanilla rocks meet native tundra. The join is what this milestone exists to test.
+4. **Does the ramp work?** Walk up and down the south entrance; check the three chained
+   tiles and whether collision carries you smoothly.
+5. **East side.** The paving should meet grade there with no retaining wall. Check it
+   does not float or leave a lip.
+6. **Rotation check.** If retaining faces look right on north and south but wrong on east
+   and west, the Z-rotation sign is inverted — a one-constant fix.
+7. **Fast travel.** Should now arrive on open ground south of the ramp, not under the paving.
 
-Reminder from `docs/DESIGN.md`: the test arrangement must already read as **irregular and organic**, not as a rectangle or the L-shaped safe envelope. Step the outline, vary the reach per side, and hide the stepped silhouette under dressing.
+Then, depending on the result:
+
+- if the foundation reads well, the next milestones are a texture/material pass and then
+  navmesh, which is required before any NPC can use the platform
+- if the shape or edge treatment is wrong, iterate on the footprint mask and dressing in
+  `fair.config.json` — both are data, so no code changes are needed

@@ -36,7 +36,86 @@
       "visible": true,
       "canTravelTo": true,
       "radius": 1800,
-      "locationRefType": "0010F63C:Skyrim.esm"
+      "locationRefType": "0010F63C:Skyrim.esm",
+      "position": {
+        "x": -5632,
+        "y": -15872,
+        "z": -5912
+      }
+    },
+    "foundation": {
+      "enabled": true,
+      "tileSize": 512,
+      "floorZ": -5672,
+      "rampEdge": "S",
+      "rampTiles": 3,
+      "rampWidth": 2,
+      "rampRise": 64,
+      "shoulderOffset": 64,
+      "minExposure": 16,
+      "footprint": [
+        ".###..",
+        ".#####",
+        "######",
+        ".#####",
+        "..###."
+      ],
+      "pieces": {
+        "floorFill": {
+          "editorId": "SkyrimFairFloorFill1024",
+          "model": "SkyrimFair\\SkyrimFair_FloorFill_1024.nif"
+        },
+        "floorEdge": {
+          "editorId": "SkyrimFairFloorEdge512",
+          "model": "SkyrimFair\\SkyrimFair_FloorEdge_512.nif"
+        },
+        "retain": {
+          "editorId": "SkyrimFairRetain512",
+          "model": "SkyrimFair\\SkyrimFair_Retain_512.nif"
+        },
+        "retainCorner": {
+          "editorId": "SkyrimFairRetainCorner128",
+          "model": "SkyrimFair\\SkyrimFair_RetainCorner_128.nif"
+        },
+        "ramp": {
+          "editorId": "SkyrimFairRamp512",
+          "model": "SkyrimFair\\SkyrimFair_Ramp_512.nif"
+        },
+        "shoulder": {
+          "editorId": "SkyrimFairShoulder512",
+          "model": "SkyrimFair\\SkyrimFair_Shoulder_512.nif"
+        }
+      },
+      "dressing": {
+        "seed": 20260921,
+        "perEdgeSegment": 2,
+        "minOffset": 32,
+        "spread": 224,
+        "minScale": 0.7,
+        "maxScale": 1.4,
+        "rockSink": 24,
+        "rocks": [
+          "00039224:Skyrim.esm",
+          "0003925D:Skyrim.esm",
+          "0001BFB0:Skyrim.esm",
+          "00024E8F:Skyrim.esm",
+          "00021E70:Skyrim.esm",
+          "000674BB:Skyrim.esm"
+        ],
+        "shrubs": [
+          "000AAE79:Skyrim.esm",
+          "000AAE7A:Skyrim.esm",
+          "000AAE7B:Skyrim.esm",
+          "000AAE7F:Skyrim.esm",
+          "000AAE81:Skyrim.esm",
+          "000AAE83:Skyrim.esm"
+        ],
+        "scrub": [
+          "0003A2BC:Skyrim.esm",
+          "0003A2BD:Skyrim.esm",
+          "0003A2BE:Skyrim.esm"
+        ]
+      }
     }
   }
 }
