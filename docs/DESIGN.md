@@ -255,3 +255,13 @@ The Wanderer's Fair should feel:
 - recognisably Skyrim
 
 Humour should come from the world itself, such as the inexplicably successful sweetroll stall or petty rival merchants, rather than turning the location into a parody.
+
+
+## Map marker preference
+
+For the final fair marker, use Skyrim's vanilla **Pass** map icon rather than the current Town/Village icon.
+
+- intended marker name: `The Wanderer's Fair`
+- preferred icon: `Pass`
+- keep the current prototype marker behaviour only as needed for testing
+- when the fast-travel issue is fixed, carry this icon preference into the implementation unless the audit identifies a technical blocker
