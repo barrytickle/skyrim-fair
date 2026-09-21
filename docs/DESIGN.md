@@ -95,8 +95,27 @@ Planned atmosphere:
 - additional spectators clapping, cheering, drinking, talking and watching
 - positional music centred on the stage
 - `Round the Green` as the prototype signature performance
+- multiple songs in the stage repertoire rather than one endlessly looping track
 
 Not every audience member should dance. Mixing dancers with ordinary spectators should make the crowd feel natural rather than choreographed.
+
+### Stage set / playlist behaviour
+
+The main stage should feel like a live festival set rather than a jukebox.
+
+Target sequence between songs:
+
+1. current song ends
+2. dancers stop / return to a neutral performance idle
+3. audience performs a short applause / cheer reaction
+4. brief pause of roughly **2 seconds**
+5. next song starts
+6. performers settle into the new track while the crowd continues watching
+7. roughly **5 seconds into the new song**, stage dancers and selected crowd dancers begin dancing again
+
+This timing is a design target rather than a frame-perfect requirement. The goal is to create a believable breath between performances and make each new track feel like a separate live number.
+
+The stage system should support a **playlist of multiple project-owned songs**. Tracks may eventually have their own preferred dance set, crowd-reaction intensity, or performer arrangement, but the first implementation can use one shared transition sequence.
 
 ## Food and drink lane
 
