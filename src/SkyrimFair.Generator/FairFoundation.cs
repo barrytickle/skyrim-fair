@@ -35,6 +35,7 @@ internal static class FairFoundation
         SkyrimMod mod,
         FairConfig config,
         Func<float, float, float?> sampleTerrain,
+        Func<FormKey, float> radiusOf,
         Action<IPlacedObjectGetter, float, float> place)
     {
         var f = config.Site.Foundation;
@@ -198,8 +199,11 @@ internal static class FairFoundation
                 // Shoulder sits on native ground just beyond the retaining face.
                 var sx = ex + dc * (tile / 2f + f.ShoulderOffset);
                 var sy = ey - dr * (tile / 2f + f.ShoulderOffset);
+                // The shoulder is a thin 32-unit verge. It only reads as a soft
+                // transition where the step is small; on a tall faced edge it perches
+                // in mid-air like a sheet of paper, so skip it there.
                 var ground = sampleTerrain(sx, sy);
-                if (ground.HasValue && ground.Value < f.FloorZ)
+                if (ground.HasValue && ground.Value < f.FloorZ && drop <= f.ShoulderMaxDrop)
                 {
                     Put("shoulder", sx, sy, ground.Value, rot);
                 }
@@ -235,8 +239,28 @@ internal static class FairFoundation
                 var (cx, cy) = Centre(col, row);
                 for (var i = 0; i < f.Dressing.PerEdgeSegment; i++)
                 {
+                    // Rocks hug the retaining face and break its silhouette;
+                    // shrubs and scrub sit slightly further out in the grass.
+                    var pool = i == 0 ? f.Dressing.Rocks
+                        : (rng.NextDouble() < 0.5 ? f.Dressing.Shrubs : f.Dressing.Scrub);
+                    var pick = pool[rng.Next(pool.Count)];
+                    var scale = f.Dressing.MinScale
+                        + (float)rng.NextDouble() * (f.Dressing.MaxScale - f.Dressing.MinScale);
+
+                    // Stand each piece off by its OWN mesh radius, allowing a small
+                    // deliberate overlap onto the paving edge to break the silhouette.
+                    // Without this a big landscape boulder swallows the whole platform:
+                    // RockTundraLand02Tundra01 alone has a 1767-unit radius.
+                    var radius = radiusOf(FormKeyHelper.Parse(pick)) * scale;
+                    if (radius > f.Dressing.MaxRadius)
+                    {
+                        result.OversizedSkipped++;
+                        continue;
+                    }
+
                     var along = (float)(rng.NextDouble() - 0.5) * tile;
-                    var out_ = tile / 2f + f.Dressing.MinOffset
+                    var out_ = tile / 2f
+                        + MathF.Max(f.Dressing.MinOffset, radius - f.Dressing.EdgeOverlap)
                         + (float)rng.NextDouble() * f.Dressing.Spread;
 
                     var px = cx + dc * out_ + (dc == 0 ? along : 0f);
@@ -248,14 +272,7 @@ internal static class FairFoundation
                         continue;
                     }
 
-                    // Rocks hug the retaining face and break its silhouette;
-                    // shrubs and scrub sit slightly further out in the grass.
-                    var pool = i == 0 ? f.Dressing.Rocks
-                        : (rng.NextDouble() < 0.5 ? f.Dressing.Shrubs : f.Dressing.Scrub);
-                    var pick = pool[rng.Next(pool.Count)];
                     var rot = (float)(rng.NextDouble() * Math.PI * 2.0);
-                    var scale = f.Dressing.MinScale
-                        + (float)rng.NextDouble() * (f.Dressing.MaxScale - f.Dressing.MinScale);
 
                     // Sink rocks slightly so they read as bedded into the ground.
                     var z = ground.Value - (i == 0 ? f.Dressing.RockSink : 0f);
@@ -325,6 +342,9 @@ internal sealed class FoundationResult
     public List<(float MinX, float MinY, float MaxX, float MaxY)> PavedRects { get; } = new();
 
     public int DisabledCount { get; set; }
+
+    /// <summary>Dressing picks rejected for having an oversized mesh footprint.</summary>
+    public int OversizedSkipped { get; set; }
 
     public Dictionary<string, int> Counts { get; } = new();
 

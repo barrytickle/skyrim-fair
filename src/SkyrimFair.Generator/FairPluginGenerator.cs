@@ -111,7 +111,13 @@ internal static class FairPluginGenerator
         if (site.Foundation.Enabled)
         {
             var terrain = new TerrainSampler(vanillaWorldspace);
-            foundation = FairFoundation.Build(mod, config, terrain.Sample, PlaceAt);
+            var radii = master is null
+                ? new Dictionary<FormKey, float>()
+                : CollectClearableBases(master);
+            foundation = FairFoundation.Build(
+                mod, config, terrain.Sample,
+                key => radii.TryGetValue(key, out var r) ? r : 0f,
+                PlaceAt);
             foreach (var record in foundation.Statics.Values)
             {
                 mod.Statics.Add(record);
@@ -120,38 +126,74 @@ internal static class FairPluginGenerator
 
         // Clear vanilla clutter standing inside the paving, or rocks and shrubs poke
         // straight through the finished surface.
-        if (foundation is not null && vanillaWorldspace is not null)
+        if (site.Foundation.ClearClutter
+            && foundation is not null && vanillaWorldspace is not null && foundation.PavedRects.Count > 0)
         {
             var clearable = CollectClearableBases(master!);
-            foreach (var key in byCell.Keys.ToList())
+            var fnd = site.Foundation;
+
+            // Search a ring of cells around the paving, not just the cells we place
+            // into. A boulder's origin can sit a whole cell away and still cover the
+            // paving with its mesh, so restricting the search to our own cells misses
+            // exactly the biggest rocks.
+            var minX = foundation.PavedRects.Min(r => r.MinX) - fnd.ClearSearchRadius;
+            var maxX = foundation.PavedRects.Max(r => r.MaxX) + fnd.ClearSearchRadius;
+            var minY = foundation.PavedRects.Min(r => r.MinY) - fnd.ClearSearchRadius;
+            var maxY = foundation.PavedRects.Max(r => r.MaxY) + fnd.ClearSearchRadius;
+
+            for (var cy = (int)MathF.Floor(minY / CellSize); cy <= (int)MathF.Floor(maxY / CellSize); cy++)
             {
-                var vanillaCell = FindVanillaCell(vanillaWorldspace, key.X, key.Y);
-                if (vanillaCell is null)
+                for (var cx = (int)MathF.Floor(minX / CellSize); cx <= (int)MathF.Floor(maxX / CellSize); cx++)
                 {
-                    continue;
-                }
-
-                foreach (var existing in vanillaCell.Temporary.OfType<IPlacedObjectGetter>())
-                {
-                    var pos = existing.Placement?.Position;
-                    if (pos is null || !clearable.Contains(existing.Base.FormKey))
+                    var vanillaCell = FindVanillaCell(vanillaWorldspace, cx, cy);
+                    if (vanillaCell is null)
                     {
                         continue;
                     }
 
-                    var margin = site.Foundation.ClearMargin;
-                    var covered = foundation.PavedRects.Any(r =>
-                        pos.Value.X >= r.MinX - margin && pos.Value.X <= r.MaxX + margin &&
-                        pos.Value.Y >= r.MinY - margin && pos.Value.Y <= r.MaxY + margin);
-                    if (!covered)
+                    foreach (var existing in vanillaCell.Temporary.OfType<IPlacedObjectGetter>())
                     {
-                        continue;
-                    }
+                        var pos = existing.Placement?.Position;
+                        if (pos is null ||
+                            !clearable.TryGetValue(existing.Base.FormKey, out var radius))
+                        {
+                            continue;
+                        }
 
-                    var disabled = existing.DeepCopy();
-                    disabled.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
-                    byCell[key].Add(disabled);
-                    foundation.DisabledCount++;
+                        // Landscape-scale meshes (cliffs, mountains) are left alone:
+                        // disabling one would tear a hole in the surrounding world.
+                        if (radius > fnd.ClearMaxRadius)
+                        {
+                            continue;
+                        }
+
+                        // Reach = the object's own mesh radius, scaled, plus a margin,
+                        // so a big rock is cleared by how far it actually spreads.
+                        var reach = radius * (existing.Scale ?? 1f) + fnd.ClearMargin;
+                        var covered = foundation.PavedRects.Any(r =>
+                        {
+                            var dx = MathF.Max(0f, MathF.Max(r.MinX - pos.Value.X, pos.Value.X - r.MaxX));
+                            var dy = MathF.Max(0f, MathF.Max(r.MinY - pos.Value.Y, pos.Value.Y - r.MaxY));
+                            return MathF.Sqrt(dx * dx + dy * dy) <= reach;
+                        });
+                        if (!covered)
+                        {
+                            continue;
+                        }
+
+                        var disabled = existing.DeepCopy();
+                        disabled.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+
+                        var key = (cx, cy);
+                        if (!byCell.TryGetValue(key, out var list))
+                        {
+                            list = new List<PlacedObject>();
+                            byCell[key] = list;
+                        }
+
+                        list.Add(disabled);
+                        foundation.DisabledCount++;
+                    }
                 }
             }
         }
@@ -220,16 +262,31 @@ internal static class FairPluginGenerator
     }
 
     /// <summary>
-    /// Base objects safe to disable: scenery only. Activators, containers, doors and
-    /// anything an NPC or quest might reference are deliberately excluded.
+    /// Base objects safe to disable, mapped to the radius of their mesh footprint.
+    ///
+    /// The radius matters enormously. RockTundraLand02Tundra01 has an object bounds
+    /// radius of 1767 units, so a boulder whose origin sits 500 units clear of the
+    /// paving still blankets it. Testing reference origins alone leaves exactly those
+    /// rocks poking through the finished surface.
+    ///
+    /// Scenery only. Activators, containers, doors, furniture and anything an NPC or
+    /// quest might reference are deliberately excluded.
     /// </summary>
-    private static HashSet<FormKey> CollectClearableBases(ISkyrimModGetter master)
+    private static Dictionary<FormKey, float> CollectClearableBases(ISkyrimModGetter master)
     {
-        var keys = new HashSet<FormKey>();
-        foreach (var record in master.Statics) keys.Add(record.FormKey);
-        foreach (var record in master.Trees) keys.Add(record.FormKey);
-        foreach (var record in master.Florae) keys.Add(record.FormKey);
-        return keys;
+        var radii = new Dictionary<FormKey, float>();
+
+        void Add(FormKey key, IObjectBoundsGetter? bounds)
+        {
+            var hx = bounds is null ? 0f : (bounds.Second.X - bounds.First.X) / 2f;
+            var hy = bounds is null ? 0f : (bounds.Second.Y - bounds.First.Y) / 2f;
+            radii[key] = MathF.Sqrt(hx * hx + hy * hy);
+        }
+
+        foreach (var record in master.Statics) Add(record.FormKey, record.ObjectBounds);
+        foreach (var record in master.Trees) Add(record.FormKey, record.ObjectBounds);
+        foreach (var record in master.Florae) Add(record.FormKey, record.ObjectBounds);
+        return radii;
     }
 
     private static ICellGetter? FindVanillaCell(IWorldspaceGetter worldspace, int cx, int cy)

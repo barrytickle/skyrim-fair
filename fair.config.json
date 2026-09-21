@@ -95,8 +95,6 @@
         "maxScale": 1.4,
         "rockSink": 24,
         "rocks": [
-          "00039224:Skyrim.esm",
-          "0003925D:Skyrim.esm",
           "0001BFB0:Skyrim.esm",
           "00024E8F:Skyrim.esm",
           "00021E70:Skyrim.esm",
@@ -114,10 +112,16 @@
           "0003A2BC:Skyrim.esm",
           "0003A2BD:Skyrim.esm",
           "0003A2BE:Skyrim.esm"
-        ]
+        ],
+        "maxRadius": 500,
+        "edgeOverlap": 64
       },
       "retainHeight": 256,
-      "clearMargin": 160
+      "clearMargin": 160,
+      "shoulderMaxDrop": 112,
+      "clearSearchRadius": 2048,
+      "clearMaxRadius": 2000,
+      "clearClutter": false
     }
   }
 }

@@ -16,133 +16,212 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Current build — foundation moved to the player's position
+## Current build — nothing disabled, audit first
 
-Barry reported vanilla rocks poking through the paving at Site 1 and asked for the fair
-to be moved to where he was standing. Both are done.
-
-**Not yet seen in game.**
+Per Barry's instruction, **auto-disabling of vanilla clutter is switched off**
+(`site.foundation.clearClutter = false`) and the deployed plugin contains no disabled
+overrides. The footprint blueprint and intersection audit below are for review first.
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
-| Size | **59,931 bytes** |
-| sha256 | `eab8eebf37742f6b9d5713b8e30b598841fcb84468f0cc5ca8d67ea00a4f17b6` |
+| Size | 55,123 bytes, sha256 `30e827ab840d6d187bc49b7752a813e18828536b5aa63cef060592480cf0eff6` |
 | Masters | `Skyrim.esm` only |
-| Records | 1 WRLD, 4 CELL, 6 STAT, 156 REFR |
-| Deployed | `mods\Skyrim Fair\SkyrimFair.esp`, byte-identical; 6 NIFs unchanged |
-
-### Player position read from the save
-
-Read directly from `Save50_144F99E7_0_4261727279_Tamriel_000455_20260921172310_7_1.ess`
-(save 50, 2026-09-21 17:23, character "Barry", level 7).
-
-The save is LZ4-compressed, so the body was decompressed with a small pure-Python LZ4
-block decoder and the **Player Location** entry (global data type 1) parsed out:
-
-| Field | Value |
-| --- | --- |
-| worldspace | `0x00003C` = Tamriel |
-| position | **X -5432.4, Y -18253.0, Z -5627.7** |
-| stored cell grid | `-2, -4` — **stale**, the position implies `-2, -5` |
-
-The position is the authoritative field and cross-checks against terrain: native ground
-at that XY is `-5656`, putting the player 28 units above it, exactly right for standing.
-Two useful side confirmations from the save: `SkyrimFair.esp` is in its load order, and
-the save carries 94 regular + 412 light plugins, matching `loadorder.txt`'s 506 lines.
-
-**New fair centre: `X -5376, Y -18304`** — the player's position snapped to the 128-unit
-heightmap grid, 76 units away. Snapping makes every tile corner land on a terrain sample
-point, so floor and exposure calculations are exact rather than interpolated.
-
-### The rocks — cause and fix
-
-**15 vanilla references were standing inside the old paved footprint** and the paving was
-laid straight over them: `RockShelf01FieldGrass01`, `RockTundraLand02Tundra01`,
-`TreeThicket01`, eight tundra and yellow shrubs, and three critter markers.
-
-The generator now overrides vanilla clutter within `clearMargin` (160u) of the paving and
-sets **Initially Disabled** (`0x800`) on it. At the new site that is **56 references**.
-
-This is safe:
-
-- the references are **disabled, not deleted** — non-destructive and reversible
-- **no LAND edit**, so the ground itself is completely untouched; only the objects
-  standing on it stop rendering
-- only `STAT`, `TREE` and `FLOR` base objects qualify. Activators, containers, doors,
-  furniture and anything an NPC or quest might reference are deliberately excluded
-
-Separately, dressing now starts **192u** beyond the paving edge (was 32u) with a 384u
-spread, because vanilla rock meshes are large enough to spill onto the surface from close
-range.
-
-### New site geometry
-
-| Field | Value |
-| --- | --- |
-| Cell | `00009A49:Skyrim.esm` (`TestTundra2`), grid `-2, -5` |
+| Records | 1 WRLD, 4 CELL, 6 STAT, 96 REFR (0 Initially Disabled) |
+| Site centre | `X -5376, Y -18304` (the player's save position, snapped to the 128-unit grid) |
+| Floor Z | -5568 |
 | Cells touched | `-2,-5`, `-1,-5`, `-2,-4` |
-| Floor Z | **-5568** (terrain maximum, pure fill, no LAND edits) |
-| Relief under paving | **392u** |
-| Paved extent | X `-6912..-3840`, Y `-19584..-17024` |
 
-Edge exposure and slope, measured:
+### Why the rocks were swallowing the platform — my bug
 
-| Edge | Mean | Max | Ground beyond |
-| --- | --- | --- | --- |
-| **West** | 224u | **392u** | falls away |
-| **North** | 175u | 320u | **falls away** |
-| South | 92u | 208u | rises |
-| East | 83u | 136u | rises |
+The screenshot showed the platform buried in boulders. The cause was **my own dressing**:
+`RockTundraLand01Tundra01` and `RockTundraLand02Tundra01` were in the edge-rock pool, and
+those are not clutter, they are landscape slabs with mesh radii of **1418 and 1767 units**.
+Placed ~190 units beyond the paving edge, a single one covers the entire footprint.
 
-**The ramp moved from south to north.** At the old site the terrain fell away south; here
-it rises into the hill that way, so a south ramp would have climbed uphill into nothing.
-North both falls away and is rotation-safe (0 degrees), so it keeps the one piece whose
-orientation cannot come out backwards on an unconfirmed rotation convention. Four chained
-tiles drop 256u, stepping `-5568 → -5632 → -5696 → -5760`.
+Fixed three ways:
 
-The map marker moved with it, to the **north ramp foot at `(-5376, -14720, -5792)`** —
-on native ground, on the Whiterun approach, so fast travel arrives facing the ramp.
+1. both landscape slabs removed from the dressing pool, leaving only small and medium
+   rock piles (radii 177–404)
+2. every dressing piece is now offset by **its own mesh radius**, less a deliberate 64-unit
+   edge overlap, so a rock breaks the silhouette instead of engulfing the platform
+3. a hard `dressing.maxRadius` of 500 rejects any oversized pick outright, so this cannot
+   recur
 
-**Retaining now stacks.** A single piece is 256u tall and the west edge needs up to 392u,
-which would have left a gap showing open terrain. Edges deeper than one course now place
-additional courses downward; the build uses two courses at `-5568` and `-5824`.
+### Two findings that matter more than the rocks
 
-### What is placed
+**1. A stream runs straight through the footprint.** The audit found
+`TundraStreamStraight01Tundra01` and `TundraStreamBend01Tundra01` overlapping the
+foundation, plus `TundraStreamTransition01`, `FXRapids`, `FXRapids02` and
+`FXrapidsFallsLine01` — water meshes and rapids effects. The terrain textures confirm it:
+`LRiverMud01` is painted in cells `-2,-5` and `-1,-5`. The platform is currently laid over
+a watercourse.
 
-| Piece | Count |
-| --- | --- |
-| floor fill 1024 / floor edge 512 | 4 / 6 |
-| retaining face (stacked) | 22 |
-| retaining corner | 2 |
-| ramp | 8 (2 wide x 4 chained) |
-| shoulder wedge | 19 |
-| vanilla dressing | 44 |
-| **vanilla clutter disabled** | **56** |
+**2. The rocky look is the terrain itself, not objects.** `LTundraRocks01` is painted
+across all three cells, and **no vanilla rock or boulder reference intersects the footprint
+at all**. The rounded slabs in the screenshot are the sculpted LAND heightmap with a rock
+texture — which is also why this site measures 392u of relief against the audited Site 1's
+120u. **Disabling references cannot flatten this site.** Only a taller platform, a smaller
+footprint, moving, or LAND edits would change it.
 
-### Verification
+## Foundation footprint blueprint
 
-23 structural checks, all passing, by parsing the written ESP independently of Mutagen:
-single master, author intact, 6 STAT records with mesh paths under `SkyrimFair\`, paving
-on the floor plane, 8 ramp tiles at four Z levels 64u apart all at rotation 0, retaining
-stacked in 256u courses, no shoulder above the floor, marker at the ramp foot and outside
-the paving, stall on the paving, 56 vanilla references flagged Initially Disabled and all
-of them vanilla FormKeys, and no LAND / NAVM / NPC / quest / script records.
+Derived from the **actual placements in `dist/SkyrimFair.esp`**, not from config: the
+plugin was parsed, the paving references located, each tile's extent computed from its
+kit dimensions, and the unshared tile edges traced into a closed outline.
 
-All four cell overrides remain byte-identical to vanilla.
+- paving: **22 tiles** on a common 512-unit grid (4 x 1024 fill + 6 x 512 edge)
+- bounding extent: **X -6912 .. -3840**, **Y -19584 .. -17024** (3072 x 2560)
+- floor plane: **Z -5568**
+- the outline is **not rectangular** - it has 14 corners
 
-### Concern: this site is three times less flat
+### Perimeter, closed polygon (world units, in order)
 
-Worth stating plainly. The audited Site 1 had **120u** of relief under the paving; the
-player's position has **392u**. The west side becomes a 392u (about 5.6 m) faced wall.
-That is now structurally handled by stacked retaining and it may well be the look Barry
-wants — he asked about making the platform taller than the rocks — but it is a much
-bigger intervention in the landscape than the original site needed, and the terrain here
-is the lower slope of the hill that rises south and east.
+| # | X | Y | | # | X | Y |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | -6912 | -18560 | | 8 | -3840 | -19072 |
+| 2 | -6400 | -18560 | | 9 | -3840 | -17536 |
+| 3 | -6400 | -19072 | | 10 | -4864 | -17536 |
+| 4 | -5888 | -19072 | | 11 | -4864 | -17024 |
+| 5 | -5888 | -19584 | | 12 | -6400 | -17024 |
+| 6 | -4352 | -19584 | | 13 | -6400 | -18048 |
+| 7 | -4352 | -19072 | | 14 | -6912 | -18048 |
 
-If it reads as too monumental in game, the options are: shrink the footprint onto flatter
-ground, shift back north-west toward the audited site, or keep it and lean into the
-terrace look. All three are config-only changes.
+### Paved tile centres (512-unit grid)
+
+```text
+Y  -17280:    -6144    -5632    -5120
+Y  -17792:    -6144    -5632    -5120    -4608    -4096
+Y  -18304:    -6656    -6144    -5632    -5120    -4608    -4096
+Y  -18816:    -6144    -5632    -5120    -4608    -4096
+Y  -19328:    -5632    -5120    -4608
+```
+
+## Footprint intersection audit
+
+Every placed reference whose **world-space geometry** intersects the footprint or a
+512-unit landscaping margin around it. Bounds come from each base object's `OBND`
+record, scaled and rotated into world space, so large objects whose **origin lies
+outside** the footprint are still caught. Winning records only, resolved through the
+full load order including the implicit masters.
+
+**101 intersecting references** - 64 overlap the foundation itself, 37 only the margin. Our own pieces are excluded.
+
+| Classification | Count | On foundation |
+| --- | --- | --- |
+| vegetation | 86 | 54 |
+| decorative clutter | 11 | 8 |
+| large environment piece | 3 | 2 |
+| UNSAFE - do not touch | 1 | 0 |
+
+**Nothing has been disabled.** `site.foundation.clearClutter` is `false` in
+`fair.config.json` and the deployed plugin contains no disabled overrides.
+
+### Every intersecting reference
+
+| FormID | Base | Type | World X, Y, Z | Scale | Radius | AABB (X / Y) | Overlaps | Class | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `0CB05E:Skyrim.esm` | `0C5209:Skyrim.esm` critterSpawnInsects_Many | ACTI | -6506, -16886, -5748 | 1.0 | 91 | -6570..-6442 / -16950..-16822 | margin | UNSAFE - do not touch | enable-parented, has script, base has script |
+| `016089:Skyrim.esm` | `01542D:Skyrim.esm` TundraStreamBend01Tundra01 | STAT | -6801, -17246, -5821 | 1.0 | 1823 | -8385..-5412 / -18557..-15963 | **foundation** | large environment piece |  |
+| `01608B:Skyrim.esm` | `01542D:Skyrim.esm` TundraStreamBend01Tundra01 | STAT | -2264, -19436, -5569 | 1.0 | 1823 | -3826..-505 / -20958..-17924 | margin | large environment piece |  |
+| `01608C:Skyrim.esm` | `01608F:Skyrim.esm` TundraStreamStraight01Tundra01 | STAT | -4513, -18411, -5688 | 1.0 | 1566 | -5990..-2860 / -19982..-16933 | **foundation** | large environment piece |  |
+| `0CB064:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -6360, -17550, -5721 | 1.0 | 20 | -6368..-6340 / -17569..-17532 | **foundation** | decorative clutter |  |
+| `0CB062:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -6270, -16915, -5730 | 1.0 | 20 | -6273..-6257 / -16938..-16899 | margin | decorative clutter |  |
+| `0CB063:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -5649, -17237, -5730 | 1.0 | 20 | -5672..-5634 / -17246..-17237 | **foundation** | decorative clutter |  |
+| `03919F:Skyrim.esm` | `01B37D:Skyrim.esm` FXRapids | MSTT | -5881, -17486, -5803 | 0.56 | 386 | -6232..-5510 / -17871..-17144 | **foundation** | decorative clutter |  |
+| `03921B:Skyrim.esm` | `01B37D:Skyrim.esm` FXRapids | MSTT | -4015, -18753, -5686 | 0.79 | 544 | -4528..-3465 / -19314..-18247 | **foundation** | decorative clutter |  |
+| `107FB4:Skyrim.esm` | `106A1D:Skyrim.esm` FXRapids02 | MSTT | -7038, -16681, -5843 | 0.65 | 447 | -7388..-6742 / -16998..-16364 | margin | decorative clutter |  |
+| `107FB5:Skyrim.esm` | `106A1D:Skyrim.esm` FXRapids02 | MSTT | -3316, -19317, -5564 | 0.85 | 585 | -3869..-2790 / -19828..-18740 | **foundation** | decorative clutter |  |
+| `0391A4:Skyrim.esm` | `01B37E:Skyrim.esm` FXrapidsFallsLine01 | MSTT | -5156, -17939, -5677 | 0.53 | 436 | -5575..-4729 / -18312..-17472 | **foundation** | decorative clutter |  |
+| `039159:Skyrim.esm` | `03BD73:Skyrim.esm` TundraStreamEnd01Tundra01 | STAT | -7121, -16235, -5837 | 1.0 | 705 | -7809..-6509 / -16893..-15630 | margin | decorative clutter |  |
+| `0390BC:Skyrim.esm` | `043F4B:Skyrim.esm` TundraStreamTransition01 | MSTT | -5590, -17686, -5764 | 1.0 | 413 | -6001..-5178 / -18098..-17275 | **foundation** | decorative clutter |  |
+| `039186:Skyrim.esm` | `043F4B:Skyrim.esm` TundraStreamTransition01 | MSTT | -3723, -19049, -5637 | 1.0 | 413 | -4136..-3310 / -19462..-18636 | **foundation** | decorative clutter |  |
+| `03C08F:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -6716, -16917, -5783 | 0.91 | 214 | -6941..-6517 / -17111..-16743 | margin | vegetation |  |
+| `03C08A:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -6397, -16852, -5805 | 1.07 | 252 | -6665..-6163 / -17085..-16602 | **foundation** | vegetation |  |
+| `03C016:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -5042, -17718, -5638 | 0.7 | 165 | -5143..-4946 / -17846..-17565 | **foundation** | vegetation |  |
+| `03C024:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -4558, -18329, -5670 | 0.85 | 200 | -4764..-4378 / -18495..-18178 | **foundation** | vegetation |  |
+| `03C023:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -4498, -18447, -5648 | 0.75 | 177 | -4620..-4365 / -18623..-18295 | **foundation** | vegetation |  |
+| `03BFC6:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -4407, -18153, -5703 | 0.66 | 156 | -4554..-4246 / -18294..-17993 | **foundation** | vegetation |  |
+| `03C02B:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -3764, -18606, -5666 | 0.99 | 233 | -3957..-3535 / -18762..-18447 | **foundation** | vegetation |  |
+| `03C02A:Skyrim.esm` | `0A731C:Skyrim.esm` TreeDeadShrub | TREE | -3745, -18732, -5669 | 0.87 | 205 | -3928..-3535 / -18884..-18565 | **foundation** | vegetation |  |
+| `0CB05F:Skyrim.esm` | `0BB947:Skyrim.esm` TreeFloraTundraCotton01 | TREE | -5642, -17227, -5795 | 1.0 | 45 | -5686..-5600 / -17238..-17211 | **foundation** | vegetation |  |
+| `03BFCF:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -6875, -17183, -5829 | 0.98 | 137 | -6967..-6778 / -17292..-17073 | margin | vegetation |  |
+| `03C089:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -6535, -16839, -5819 | 0.78 | 109 | -6642..-6424 / -16946..-16736 | margin | vegetation |  |
+| `03BFCD:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -6508, -17032, -5824 | 0.63 | 88 | -6597..-6421 / -17120..-16947 | margin | vegetation |  |
+| `03BFCE:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -6444, -17073, -5829 | 0.75 | 105 | -6534..-6355 / -17151..-16990 | **foundation** | vegetation |  |
+| `03C088:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -6426, -16986, -5831 | 0.82 | 115 | -6520..-6337 / -17088..-16886 | **foundation** | vegetation |  |
+| `03C015:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -5540, -17278, -5789 | 0.85 | 119 | -5632..-5442 / -17383..-17173 | **foundation** | vegetation |  |
+| `03C014:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -5492, -17352, -5785 | 0.95 | 133 | -5623..-5358 / -17479..-17220 | **foundation** | vegetation |  |
+| `03C01F:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4673, -18341, -5690 | 0.74 | 104 | -4777..-4573 / -18437..-18241 | **foundation** | vegetation |  |
+| `03C025:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4663, -18273, -5684 | 0.68 | 95 | -4742..-4585 / -18341..-18202 | **foundation** | vegetation |  |
+| `03C020:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4623, -18444, -5683 | 0.96 | 134 | -4750..-4490 / -18579..-18312 | **foundation** | vegetation |  |
+| `03C022:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4442, -18583, -5687 | 0.98 | 137 | -4556..-4328 / -18681..-18479 | **foundation** | vegetation |  |
+| `03C026:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4348, -18087, -5690 | 0.63 | 88 | -4433..-4266 / -18176..-18001 | **foundation** | vegetation |  |
+| `03C021:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4304, -18514, -5679 | 0.76 | 106 | -4407..-4197 / -18621..-18409 | **foundation** | vegetation |  |
+| `03C027:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -4253, -18201, -5649 | 0.74 | 104 | -4351..-4158 / -18288..-18110 | **foundation** | vegetation |  |
+| `03BFCC:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -3678, -19297, -5603 | 0.95 | 133 | -3794..-3564 / -19397..-19191 | margin | vegetation |  |
+| `03BFCB:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -3568, -19335, -5584 | 0.68 | 95 | -3635..-3497 / -19413..-19257 | margin | vegetation |  |
+| `03C030:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -3496, -18969, -5594 | 0.92 | 129 | -3599..-3397 / -19083..-18858 | margin | vegetation |  |
+| `03C02F:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -3446, -19096, -5589 | 0.92 | 129 | -3562..-3328 / -19201..-18986 | margin | vegetation |  |
+| `03C034:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -3288, -18799, -5571 | 0.63 | 88 | -3357..-3218 / -18861..-18740 | margin | vegetation |  |
+| `03C035:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -3234, -18705, -5576 | 0.71 | 99 | -3334..-3139 / -18803..-18605 | margin | vegetation |  |
+| `03C091:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -6515, -17989, -5749 | 0.8 | 127 | -6602..-6429 / -18085..-17893 | **foundation** | vegetation |  |
+| `03C08C:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -6274, -16910, -5770 | 0.8 | 127 | -6400..-6149 / -17032..-16788 | **foundation** | vegetation |  |
+| `03C092:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -6130, -18184, -5756 | 0.86 | 136 | -6260..-6001 / -18308..-18059 | **foundation** | vegetation |  |
+| `03C00E:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -5290, -16704, -5800 | 0.85 | 135 | -5417..-5163 / -16825..-16583 | margin | vegetation |  |
+| `03C000:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -5280, -18785, -5662 | 0.84 | 133 | -5402..-5159 / -18900..-18670 | **foundation** | vegetation |  |
+| `03C019:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -5041, -18584, -5652 | 0.97 | 154 | -5167..-4916 / -18699..-18468 | **foundation** | vegetation |  |
+| `03C001:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -5003, -18998, -5621 | 0.9 | 143 | -5114..-4891 / -19099..-18897 | **foundation** | vegetation |  |
+| `03C018:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -4973, -17780, -5639 | 0.91 | 144 | -5086..-4861 / -17882..-17677 | **foundation** | vegetation |  |
+| `03C01A:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -4431, -17775, -5630 | 0.91 | 144 | -4558..-4305 / -17908..-17642 | **foundation** | vegetation |  |
+| `03C01D:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -4298, -17642, -5621 | 0.88 | 140 | -4427..-4170 / -17776..-17509 | **foundation** | vegetation |  |
+| `03C029:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -4149, -18120, -5629 | 0.93 | 148 | -4276..-4022 / -18255..-17986 | **foundation** | vegetation |  |
+| `03C02D:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -3867, -19363, -5588 | 0.94 | 149 | -3994..-3740 / -19481..-19245 | margin | vegetation |  |
+| `03C083:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -3609, -18086, -5629 | 0.81 | 128 | -3713..-3506 / -18180..-17991 | margin | vegetation |  |
+| `03C082:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -3226, -17008, -5771 | 0.88 | 140 | -3358..-3095 / -17134..-16882 | margin | vegetation |  |
+| `03BFD3:Skyrim.esm` | `0AAE7B:Skyrim.esm` TreeTundraShrub03 | TREE | -6614, -18611, -5774 | 0.93 | 296 | -6863..-6365 / -18790..-18433 | **foundation** | vegetation |  |
+| `03BFD2:Skyrim.esm` | `0AAE7B:Skyrim.esm` TreeTundraShrub03 | TREE | -6302, -18593, -5769 | 0.93 | 296 | -6587..-6016 / -18888..-18297 | **foundation** | vegetation |  |
+| `03BFD1:Skyrim.esm` | `0AAE7B:Skyrim.esm` TreeTundraShrub03 | TREE | -6010, -18640, -5752 | 0.85 | 271 | -6215..-5804 / -18893..-18386 | **foundation** | vegetation |  |
+| `03BFFF:Skyrim.esm` | `0AAE7B:Skyrim.esm` TreeTundraShrub03 | TREE | -5217, -18639, -5666 | 0.92 | 293 | -5510..-4924 / -18919..-18359 | **foundation** | vegetation |  |
+| `03C006:Skyrim.esm` | `0AAE7B:Skyrim.esm` TreeTundraShrub03 | TREE | -4952, -19929, -5606 | 0.99 | 316 | -5267..-4636 / -20227..-19631 | margin | vegetation |  |
+| `03BFD7:Skyrim.esm` | `0AAE7B:Skyrim.esm` TreeTundraShrub03 | TREE | -3250, -18509, -5606 | 0.86 | 274 | -3418..-3083 / -18741..-18278 | margin | vegetation |  |
+| `03C008:Skyrim.esm` | `0AAE7F:Skyrim.esm` TreeTundraShrub04 | TREE | -5636, -19271, -5656 | 0.97 | 316 | -5942..-5337 / -19520..-18920 | **foundation** | vegetation |  |
+| `03C009:Skyrim.esm` | `0AAE7F:Skyrim.esm` TreeTundraShrub04 | TREE | -5278, -17082, -5780 | 0.94 | 306 | -5576..-5046 / -17387..-16850 | **foundation** | vegetation |  |
+| `03C007:Skyrim.esm` | `0AAE7F:Skyrim.esm` TreeTundraShrub04 | TREE | -5207, -19885, -5608 | 0.91 | 297 | -5546..-4958 / -20161..-19574 | **foundation** | vegetation |  |
+| `03BFE3:Skyrim.esm` | `0AAE7F:Skyrim.esm` TreeTundraShrub04 | TREE | -3878, -19634, -5575 | 0.86 | 280 | -4098..-3586 / -19916..-19409 | margin | vegetation |  |
+| `03BFE4:Skyrim.esm` | `0AAE7F:Skyrim.esm` TreeTundraShrub04 | TREE | -3405, -18659, -5602 | 0.82 | 267 | -3624..-3098 / -18925..-18397 | margin | vegetation |  |
+| `03C08B:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -6599, -16887, -5790 | 0.85 | 140 | -6739..-6458 / -17027..-16747 | margin | vegetation |  |
+| `03C012:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -5437, -17239, -5776 | 0.93 | 153 | -5540..-5335 / -17354..-17125 | **foundation** | vegetation |  |
+| `03C017:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4996, -17603, -5634 | 0.86 | 142 | -5137..-4854 / -17744..-17461 | **foundation** | vegetation |  |
+| `03C011:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4965, -17132, -5739 | 0.95 | 157 | -5121..-4808 / -17288..-16975 | **foundation** | vegetation |  |
+| `03C00F:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4822, -16661, -5748 | 0.82 | 135 | -4952..-4693 / -16794..-16528 | margin | vegetation |  |
+| `03C010:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4709, -16602, -5747 | 0.84 | 139 | -4846..-4573 / -16735..-16469 | margin | vegetation |  |
+| `03C01E:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4385, -19136, -5631 | 0.96 | 158 | -4539..-4231 / -19286..-18987 | **foundation** | vegetation |  |
+| `03C01B:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4380, -17579, -5620 | 0.99 | 163 | -4511..-4248 / -17699..-17458 | **foundation** | vegetation |  |
+| `03C028:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4120, -18261, -5628 | 0.85 | 140 | -4252..-3989 / -18397..-18125 | **foundation** | vegetation |  |
+| `03C093:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -6108, -18254, -5748 | 0.68 | 63 | -6167..-6046 / -18317..-18193 | **foundation** | vegetation |  |
+| `03C094:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -5846, -17954, -5750 | 0.64 | 59 | -5900..-5789 / -18010..-17896 | **foundation** | vegetation |  |
+| `03C004:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -5230, -19414, -5636 | 0.6 | 56 | -5280..-5182 / -19466..-19362 | **foundation** | vegetation |  |
+| `03C00A:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -5091, -17191, -5731 | 0.85 | 79 | -5171..-5014 / -17270..-17114 | **foundation** | vegetation |  |
+| `03C00D:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -5022, -16816, -5782 | 0.99 | 92 | -5093..-4955 / -16892..-16741 | margin | vegetation |  |
+| `03C01C:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -4320, -17742, -5624 | 0.79 | 73 | -4376..-4265 / -17791..-17691 | **foundation** | vegetation |  |
+| `03C02E:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -3841, -19158, -5634 | 1.0 | 93 | -3927..-3758 / -19246..-19069 | **foundation** | vegetation |  |
+| `03C02C:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -3754, -19347, -5570 | 0.77 | 71 | -3824..-3681 / -19418..-19275 | margin | vegetation |  |
+| `03BFE1:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -3634, -19599, -5563 | 0.64 | 59 | -3687..-3581 / -19648..-19548 | margin | vegetation |  |
+| `03C031:Skyrim.esm` | `0AAE85:Skyrim.esm` TreeTundraShrub07 | TREE | -3363, -18976, -5542 | 0.75 | 70 | -3428..-3295 / -19044..-18907 | margin | vegetation |  |
+| `03C08E:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -6650, -16782, -5790 | 0.81 | 87 | -6736..-6581 / -16845..-16703 | margin | vegetation |  |
+| `03C08D:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -6270, -16787, -5774 | 0.78 | 84 | -6365..-6197 / -16874..-16706 | margin | vegetation |  |
+| `03C032:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -3398, -18947, -5555 | 0.63 | 68 | -3445..-3345 / -18995..-18882 | margin | vegetation |  |
+| `03C090:Skyrim.esm` | `0AAE89:Skyrim.esm` TreeTundraShrub09 | TREE | -6687, -18030, -5759 | 0.95 | 303 | -6909..-6465 / -18309..-17751 | **foundation** | vegetation |  |
+| `03BFD0:Skyrim.esm` | `0AAE89:Skyrim.esm` TreeTundraShrub09 | TREE | -5946, -18199, -5752 | 0.88 | 281 | -6120..-5773 / -18437..-17961 | **foundation** | vegetation |  |
+| `03C013:Skyrim.esm` | `0AAE89:Skyrim.esm` TreeTundraShrub09 | TREE | -5546, -17093, -5790 | 0.85 | 271 | -5786..-5305 / -17276..-16909 | **foundation** | vegetation |  |
+| `03C005:Skyrim.esm` | `0AAE89:Skyrim.esm` TreeTundraShrub09 | TREE | -5424, -19431, -5634 | 0.93 | 296 | -5684..-5164 / -19626..-19235 | **foundation** | vegetation |  |
+| `03BFE2:Skyrim.esm` | `0AAE89:Skyrim.esm` TreeTundraShrub09 | TREE | -3530, -19731, -5555 | 0.85 | 271 | -3799..-3260 / -19994..-19467 | margin | vegetation |  |
+| `03C07F:Skyrim.esm` | `0AAE89:Skyrim.esm` TreeTundraShrub09 | TREE | -3097, -17284, -5757 | 0.94 | 300 | -3388..-2807 / -17532..-17036 | margin | vegetation |  |
+| `03C002:Skyrim.esm` | `0AAE73:Skyrim.esm` TreeYellowShrub01 | TREE | -5001, -19477, -5614 | 0.78 | 84 | -5086..-4924 / -19560..-19395 | **foundation** | vegetation |  |
+| `03C00B:Skyrim.esm` | `0AAE73:Skyrim.esm` TreeYellowShrub01 | TREE | -4943, -16646, -5750 | 0.86 | 93 | -5019..-4862 / -16724..-16561 | margin | vegetation |  |
+| `03C003:Skyrim.esm` | `0AAE75:Skyrim.esm` TreeYellowShrub03 | TREE | -5101, -19348, -5633 | 0.98 | 166 | -5268..-4935 / -19514..-19181 | **foundation** | vegetation |  |
+| `03C00C:Skyrim.esm` | `0AAE75:Skyrim.esm` TreeYellowShrub03 | TREE | -4960, -16745, -5770 | 0.87 | 148 | -5068..-4853 / -16859..-16631 | margin | vegetation |  |
 
 ## Site 1 hazards and safe build envelope
 

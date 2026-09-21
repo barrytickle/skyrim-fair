@@ -227,14 +227,40 @@ internal sealed record FoundationConfig
     /// <summary>Fall per ramp tile, matching the kit's 1:8 grade over 512 units.</summary>
     public float RampRise { get; init; } = 64f;
 
+    /// <summary>
+    /// Largest floor-to-ground step that still gets a shoulder wedge. Beyond this the
+    /// edge is a faced wall and a thin verge just floats against it.
+    /// </summary>
+    public float ShoulderMaxDrop { get; init; } = 112f;
+
     /// <summary>Height of one retaining piece. Deeper edges stack several courses.</summary>
     public float RetainHeight { get; init; } = 256f;
 
     /// <summary>
-    /// Vanilla clutter within this distance of the paving is overridden as Initially
-    /// Disabled, so rocks and shrubs stop poking through the paved surface.
+    /// Whether to override intruding vanilla clutter as Initially Disabled.
+    /// Currently OFF: the footprint audit in docs/AUDIT.md lists what would be
+    /// affected, and Barry reviews that before anything is disabled.
+    /// </summary>
+    public bool ClearClutter { get; init; }
+
+    /// <summary>
+    /// Extra margin added to each object's own mesh radius when deciding whether it
+    /// intrudes on the paving.
     /// </summary>
     public float ClearMargin { get; init; } = 160f;
+
+    /// <summary>
+    /// How far beyond the paving to look for intruding clutter. Big tundra boulders
+    /// have mesh radii up to ~1770 units, so their origins can be a whole cell away.
+    /// </summary>
+    public float ClearSearchRadius { get; init; } = 2048f;
+
+    /// <summary>
+    /// Objects with a mesh radius above this are never disabled: they are
+    /// landscape-scale cliffs and mountains, and removing one would tear a hole in
+    /// the surrounding world.
+    /// </summary>
+    public float ClearMaxRadius { get; init; } = 2000f;
 
     /// <summary>Gap between the retaining face and the shoulder wedge.</summary>
     public float ShoulderOffset { get; init; } = 64f;
@@ -325,14 +351,30 @@ internal sealed record DressingConfig
     /// <summary>Rocks are sunk slightly so they read as bedded into the ground.</summary>
     public float RockSink { get; init; } = 24f;
 
+    /// <summary>
+    /// Hard ceiling on a dressing piece's mesh radius. Landscape-scale rocks such as
+    /// RockTundraLand02Tundra01 (radius 1767) will bury the entire platform if placed
+    /// as edge dressing, so they are rejected outright.
+    /// </summary>
+    public float MaxRadius { get; init; } = 500f;
+
+    /// <summary>
+    /// How far a dressing piece is allowed to reach onto the paving, so rocks break
+    /// the edge silhouette instead of sitting in a tidy line beside it.
+    /// </summary>
+    public float EdgeOverlap { get; init; } = 64f;
+
+    /// <summary>
+    /// Edge rocks. Deliberately small and medium piles only - the big
+    /// RockTundraLand landscape slabs are 1400-1770 units across and are not
+    /// dressing, they are terrain features.
+    /// </summary>
     public IReadOnlyList<string> Rocks { get; init; } = new[]
     {
-        "00039224:Skyrim.esm", // RockTundraLand01Tundra01
-        "0003925D:Skyrim.esm", // RockTundraLand02Tundra01
-        "0001BFB0:Skyrim.esm", // RockPileM01FieldGrass01Moss
-        "00024E8F:Skyrim.esm", // RockPileM02FieldGrass01Moss
-        "00021E70:Skyrim.esm", // RockPileS01FieldGrass01
-        "000674BB:Skyrim.esm", // RockPileS02FieldGrass01
+        "0001BFB0:Skyrim.esm", // RockPileM01FieldGrass01Moss, r=404
+        "00024E8F:Skyrim.esm", // RockPileM02FieldGrass01Moss, r=305
+        "00021E70:Skyrim.esm", // RockPileS01FieldGrass01,     r=180
+        "000674BB:Skyrim.esm", // RockPileS02FieldGrass01,     r=177
     };
 
     public IReadOnlyList<string> Shrubs { get; init; } = new[]
