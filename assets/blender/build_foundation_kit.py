@@ -46,7 +46,10 @@ FLOOR_THICKNESS = 32
 RETAIN_HEIGHT = 256      # max measured floor exposure is 160u, so this always covers
 RETAIN_DEPTH = 128
 RAMP_RUN = 512
-RAMP_RISE = 64           # 1:8 grade; chain 3 for the ~160u fall on the west edge
+# 1:5.3 grade. Was 64 (1:8), but at the fair site the ground falls away almost as
+# fast as a 1:8 ramp descends, so a four-tile run still left its foot floating 128
+# units above the terrain. At 96 the foot lands dead on grade over the same length.
+RAMP_RISE = 96
 RAMP_DEPTH = 256         # buried, so local terrain variation never undercuts it
 SHOULDER_RUN = 256
 SHOULDER_THICKNESS = 32

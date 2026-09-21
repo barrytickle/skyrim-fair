@@ -50,7 +50,7 @@
       "rampEdge": "N",
       "rampTiles": 4,
       "rampWidth": 2,
-      "rampRise": 64,
+      "rampRise": 96,
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
