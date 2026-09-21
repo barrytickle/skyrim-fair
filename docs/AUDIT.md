@@ -16,109 +16,157 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Deployed build — prototype moved to Site 1, three rock slabs disabled
+## Deployed build — raised terrace at +192, road-connected ramp
 
-The southern footprint is **rejected and gone**. The same 22-tile prototype, unchanged in
-shape, now sits at the reviewed placement near Site 1.
+The fairground now reads as a deliberate raised terrace, with the entrance ramp
+connecting to the existing vanilla road north of the site.
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
-| Size | **55,397 bytes** |
-| sha256 | `25dcfa621375a00fdad2c70b29321c518992d63af723e99c1dbd6f8138e80350` |
+| Size | **55,730 bytes** |
+| sha256 | `c636a52941265742a277137878a9064b0a90ba21b167374d0bbf8d679c60f19c` |
 | Masters | `Skyrim.esm` only |
-| Records | 1 WRLD, 5 CELL, 6 STAT, 93 REFR |
-| Deployed | `mods\Skyrim Fair\SkyrimFair.esp`, byte-identical; 6 NIFs unchanged |
+| Records | 1 WRLD, 6 CELL, 5 STAT, 96 REFR |
+| Centre | `X -5888, Y -12928` (unchanged) |
+| **Floor Z** | **-5504**, raised **+192** from -5696 |
+| Cells touched | `-3,-4`, `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` |
+| Deployed | byte-identical; 6 NIFs unchanged |
 
-### Placement
+Footprint outline and the 22-tile mask are **unchanged**.
 
-| Field | Was (rejected) | Now |
-| --- | --- | --- |
-| Centre | `-5376, -18304` | **`-5888, -12928`** |
-| Floor Z | `-5568` | **`-5696`** |
-| Terrain relief | 392u | **112u** |
-| Max edge exposure | 392u | **96u** |
-| Water / stream on footprint | 8 references | **none** |
-| Cells | `-2,-5`, `-1,-5` | `-2,-4`, `-2,-3` (+ `-1,-4`, `-1,-3` for dressing spill) |
+### Why the platform previously looked buried
 
-Footprint outline, floor plane and the 22-tile mask are **unchanged**, so this is the same
-geometry judged against better terrain. Extent X `-7424..-4352`, Y `-14208..-11648`.
+Two causes, and neither was terrain poking through — re-sampling every 128-unit
+heightmap point under the paving found **zero** points above the floor.
 
-### Consequences of the gentler terrain
+1. The floor sat at *exactly* the terrain maximum, so it was flush at its highest point
+   and only 0-120u proud elsewhere. It never read as a platform.
+2. **Grass.** `No Grass In Objects` is installed with `Use-grass-cache = true` and
+   `Load-from-BSA = true`, and the cache in `Still in Skyrim - Grass Cache.bsa` predates
+   the platform. NGIO culls grass under objects at **cache generation** time, so grass
+   still renders where the platform now stands. **Regenerating the grass cache would
+   remove it.** At +192 the paving also clears tundra grass height anyway.
 
-Because the deepest edge step is now 96 units rather than 392:
+### Elevation
 
-- retaining drops from 22 pieces to **15**, and no edge needs a second stacked course
-- the ramp drops from 8 tiles to **4** (2 wide x 2 chained), stepping `-5696 → -5760`
-- shoulder wedges rise from 10 to **15**, because far more of the perimeter is now shallow
-  enough for a verge to read properly
-
-The ramp stays on the **north** edge: the ground falls away north here (`-5704` at the edge
-to `-5928` two tiles out) and north is the rotation-safe 0-degree orientation. The map
-marker sits at the ramp foot on native ground, `(-5888, -10368, -5912)`, so fast travel
-arrives facing the approach.
-
-### The three disabled references
-
-Disabled by **explicit FormKey after review** — not by any radius or bulk rule.
-
-| FormID | Base | EditorID | Position | Mesh radius |
-| --- | --- | --- | --- | --- |
-| `00048032:Skyrim.esm` | `00039224` | `RockTundraLand01Tundra01` | -6806, -11401, -5976 | 1418 |
-| `0004801A:Skyrim.esm` | `0003925D` | `RockTundraLand02Tundra01` | -5729, -13941, -5887 | 1767 |
-| `00048031:Skyrim.esm` | `0003925D` | `RockTundraLand02Tundra01` | -4074, -11675, -5846 | 1767 |
-
-Each is overridden with the **Initially Disabled** flag (`0x800`). Verified in the written
-plugin: all three carry only `DATA` and `NAME` subrecords, so no script, link, owner,
-enable parent, location ref type, teleport or encounter zone. No LAND edit, so the ground
-beneath them is untouched.
-
-The generator now refuses to disable anything that is not plain scenery. Before touching a
-named reference it checks the base is a `STAT`/`TREE`/`FLOR` and that the reference carries
-no script, enable parent, linked reference, owner, location ref type, teleport destination,
-encounter zone or persistent flag. Failures are reported rather than applied. Nothing was
-refused in this build, and the bulk radius-based clearing path stays switched off.
-
-### Deliberately left alone
-
-- **`0CB03E:Skyrim.esm` `critterSpawnInsects_Many`** — enable-parented and scripted.
-  Confirmed absent from the plugin entirely; not overridden in any form.
-- **All vegetation** — 11 trees and shrubs stand on the foundation and are untouched.
-- **All other decorative clutter**, including three `CritterLandingMarker_Small`.
-- Everything else flagged unsafe anywhere in the footprint or margin.
-
-### One thing worth a decision
-
-A **fourth** slab of the same family sits on the foundation and was **not** disabled,
-because it was not in the reviewed list of three:
-
-| FormID | EditorID | Position | Mesh radius |
+| Lift | Floor | Exposure min / max / mean | Retaining courses |
 | --- | --- | --- | --- |
-| `00047F8C:Skyrim.esm` | `RockTundraLand02FieldGrass01` | -8642, -13520, -5876 | **1767** |
+| +160 | -5536 | 160 / 256 / 203 | 1 |
+| **+192** | **-5504** | **192 / 288 / 235** | **2** |
+| +208 | -5488 | 208 / 304 / 251 | 2 |
 
-It is the same mesh size as the two `RockTundraLand02Tundra01` slabs and equally plain
-scenery. It was classified as *vegetation* in the earlier audit purely because my keyword
-matcher saw "FieldGrass" in the EditorID — a classifier bug, now known. Its origin is about
-1,200 units west of the paving, so it reaches in from the west rather than sitting on top.
-Adding it is a one-line config change if it obstructs the view.
+Per edge at +192: N 239 mean / 280 max, S 232 / 280, E 221 / 272, W 246 / 288.
+
+Retaining rises to **24 pieces**, two stacked courses on the deeper edges. Two courses
+are intentional: the height is to be disguised later with rocky embankments, earth,
+shrubs and larger stones rather than reduced.
+
+**Shoulder wedges dropped to zero**, and the shoulder `STAT` is no longer created at all
+(hence 5 STAT records, not 6). That is the `shoulderMaxDrop` rule working as designed — a
+32-unit verge only reads as a soft transition against a small step, and every edge now
+exceeds 192u. Embankment treatment for a wall this tall needs different pieces.
+
+### The road, and the ramp that reaches it
+
+The vanilla road is built from **meshes**, not land texture: `RoadStraightLong02`,
+`RoadSCurveR01` and `RoadChunkL/M/S*`, running east-west at Y about -10,050 to -10,750,
+immediately north of the site. `LDirtPath01` exists only about 5,900u away to the WNW and
+is not the relevant approach.
+
+Critically, **the road sits in a dip directly north of the site and climbs eastward**:
+
+| Road point | Z | Grade from floor -5504 |
+| --- | --- | --- |
+| `(-7081, -10064)` | -5992 | 1:3.3 |
+| `(-5960, -10040)` | -5906 | **1:4.0** |
+| `(-4993, -10242)` | -5875 | 1:3.9 |
+| `(-3943, -10360)` | -5748 | **1:7.6** |
+| `(-3034, -10744)` | -5640 | 1:14.2 |
+
+A ramp centred on the north edge — where it previously sat — would have needed **1:4**.
+The ramp therefore moved to the **eastern end of the north edge**, where the road has
+climbed and the intervening ground is flatter. A new `rampAlign` config option controls
+this.
+
+| Field | Value |
+| --- | --- |
+| Orientation | **due north, rotation 0** (rotation-safe) |
+| Position | 2 segments wide at X -5120 and -4608, edge Y -12160 |
+| Length | **4 chained tiles, 2,048u run** |
+| Grade | **1:8** |
+| Surface | -5504 down to -5696, foot at **-5760** |
+| Road Z in that band | -5747 to -5763 |
+| **Vertical gap at the junction** | **0-15 units** |
+
+The ramp foot lands inside the road pieces' own footprint. The map marker moved with it to
+`(-4864, -10112, -5888)`, so fast travel arrives at the roadside.
+
+### References disabled — five, all named explicitly
+
+| FormID | EditorID | Radius | Why |
+| --- | --- | --- | --- |
+| `00048032:Skyrim.esm` | `RockTundraLand01Tundra01` | 1418 | slab over the paving |
+| `0004801A:Skyrim.esm` | `RockTundraLand02Tundra01` | 1767 | slab over the paving |
+| `00048031:Skyrim.esm` | `RockTundraLand02Tundra01` | 1767 | slab over the paving |
+| `00047F8C:Skyrim.esm` | `RockTundraLand02FieldGrass01` | 1767 | slab over the paving |
+| `00023362:Skyrim.esm` | `DirtCliffs01FieldGrass01` | 899 | earth cliff in the ramp corridor |
+
+All five are plain scenery — verified in the written plugin to carry only `DATA`, `NAME`
+and, for the scaled cliff, `XSCL`. No LAND edit, so the ground beneath is untouched.
+
+### Deliberately preserved
+
+- **The road itself** — `047F9B:Skyrim.esm RoadSCurveR01` and every other road piece.
+- **The roadside detail** — both `FenceWoven01` and `HandCart01Wheel`, to keep the
+  entrance feeling inhabited.
+- **`critterSpawnInsects_Many`** and the `LvlAnimalPlainsPrey` spawn — both
+  enable-parented; absent from the plugin entirely.
+- **All vegetation.** Checked against the ramp surface using OBND heights: of the eight
+  references in the ramp corridor, only **one** physically breaks the ramp plane, and that
+  is the handcart, clipping by about 23 units at the extreme foot. Nothing was cleared for
+  tidiness.
+
+### Classifier fix, now committed
+
+`tools/footprint_audit.py` is a standalone, re-runnable audit carrying the fix for the bug
+that hid two large statics:
+
+- Bethesda appends texture variants to EditorIDs, and they mislead.
+  `RockTundraLand02FieldGrass01` is a 1767-unit rock slab and `DirtCliffs01FieldGrass01`
+  an 899-unit earth cliff, but a raw substring match filed both under *vegetation* because
+  of "FieldGrass". Variant suffixes are now stripped before any keyword test, rock and
+  earth tokens are matched before vegetation, and **mesh radius outranks keywords** —
+  anything at or above 600 units is a large mass.
+- It also prepends the implicit masters, which MO2's `plugins.txt` omits. Forgetting them
+  had silently dropped the whole vanilla layer from an earlier pass, reporting 30
+  intersecting references instead of 101.
+
+Both slabs now classify correctly as **large rock / earth mass**.
 
 ### Verification
 
-22 structural checks, all passing, by parsing the written ESP independently of Mutagen:
-single master, author intact, 6 STAT records with mesh paths under `SkyrimFair\`, paving on
-the floor plane, 4 ramp tiles at two Z levels 64u apart all at rotation 0, stall on the
-paving at the new centre, marker persistent and at the ramp foot outside the paving,
-**exactly three** references disabled and all three the named vanilla rocks,
-`critterSpawnInsects_Many` absent, no vegetation disabled, and no LAND / NAVM / NPC /
-quest / script records.
+25 structural checks, all passing, by parsing the written ESP independently of Mutagen:
+single master, author intact, mesh paths under `SkyrimFair\`, 34 references on the floor
+plane, 8 ramp tiles at four Z levels 64u apart all at rotation 0 and on the eastern
+segments, **exactly five** references disabled and exactly the five named, road, fences,
+handcart, vegetation and critter markers all untouched, marker persistent and at the ramp
+foot, and no LAND / NAVM / NPC / quest / script records.
 
-All five cell overrides remain byte-identical to vanilla. `modlist.txt`, `plugins.txt` and
-`loadorder.txt` hashed before and after deployment: unchanged.
+**All six cell overrides byte-identical to vanilla.** `modlist.txt`, `plugins.txt` and
+`loadorder.txt` unchanged.
 
-### Still true
+### What to test in game
 
-The kit is **untextured** and there is **no navmesh**, so expect grey geometry and no NPC
-pathing on the platform.
+1. does the full platform now read clearly above the terrain
+2. does +192 feel substantial without being ridiculous
+3. does the four-tile ramp join the road naturally
+4. does the ramp collision feel smooth up and down
+5. do the surviving fences and handcart help the entrance feel integrated
+6. does the raised terrace match the concept direction
+
+Expect grey untextured geometry, no navmesh, and **grass still growing through the paving
+until the grass cache is regenerated**.
 
 ## Footprint blueprint and intersection audit (deployed placement)
 

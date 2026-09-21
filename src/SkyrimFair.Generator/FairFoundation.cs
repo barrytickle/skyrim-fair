@@ -323,8 +323,12 @@ internal static class FairFoundation
             return chosen;
         }
 
-        var mid = candidates.Count / 2;
-        var start = Math.Max(0, mid - f.RampWidth / 2);
+        var start = f.RampAlign.ToLowerInvariant() switch
+        {
+            "start" => 0,
+            "end" => Math.Max(0, candidates.Count - f.RampWidth),
+            _ => Math.Max(0, candidates.Count / 2 - f.RampWidth / 2),
+        };
         for (var i = start; i < Math.Min(candidates.Count, start + f.RampWidth); i++)
         {
             chosen.Add((candidates[i].Item1, candidates[i].Item2, edge));

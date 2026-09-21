@@ -38,17 +38,17 @@
       "radius": 1800,
       "locationRefType": "0010F63C:Skyrim.esm",
       "position": {
-        "x": -5888,
-        "y": -10368,
-        "z": -5912
+        "x": -4864,
+        "y": -10112,
+        "z": -5888
       }
     },
     "foundation": {
       "enabled": true,
       "tileSize": 512,
-      "floorZ": -5696,
+      "floorZ": -5504,
       "rampEdge": "N",
-      "rampTiles": 2,
+      "rampTiles": 4,
       "rampWidth": 2,
       "rampRise": 64,
       "shoulderOffset": 64,
@@ -125,8 +125,11 @@
       "disableReferences": [
         "00048032:Skyrim.esm",
         "0004801A:Skyrim.esm",
-        "00048031:Skyrim.esm"
-      ]
+        "00048031:Skyrim.esm",
+        "00023362:Skyrim.esm",
+        "00047F8C:Skyrim.esm"
+      ],
+      "rampAlign": "end"
     }
   }
 }

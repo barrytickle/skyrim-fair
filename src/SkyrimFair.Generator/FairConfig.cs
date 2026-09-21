@@ -224,6 +224,17 @@ internal sealed record FoundationConfig
     /// <summary>How many perimeter segments wide the entrance is.</summary>
     public int RampWidth { get; init; } = 2;
 
+    /// <summary>
+    /// Where along the chosen edge the ramp sits: "centre", "start" or "end", ordered
+    /// west-to-east on N/S edges and south-to-north on E/W edges.
+    ///
+    /// This matters more than it looks. A ramp centred on the north edge aims into a
+    /// dip where the road lies 402 units below the platform - a 1:4 drop. From the
+    /// eastern end the road has climbed and the ground is flatter, which is what makes
+    /// a 1:8 connection possible at all.
+    /// </summary>
+    public string RampAlign { get; init; } = "centre";
+
     /// <summary>Fall per ramp tile, matching the kit's 1:8 grade over 512 units.</summary>
     public float RampRise { get; init; } = 64f;
 
