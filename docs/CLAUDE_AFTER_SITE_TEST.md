@@ -153,3 +153,19 @@ Suggested commit message:
 ```text
 feat: prototype landscaped fair foundation
 ```
+
+
+## Important pipeline rule: asset tools vs plugin records
+
+The Creation Kit and Bethesda Art Tools live against Barry's separate Steam Skyrim install, while the active MO2 game uses the stock copy at `E:\Modlists\Still In Skyrim\stock`. Those two `Skyrim.esm` files are not byte-identical.
+
+Therefore:
+
+- use Blender 3.6 + BGS Art Tools + BGS FBX Exporter + AssetWatcher for **project-owned mesh/collision authoring only**
+- use NifSkope / CAO for inspection or asset validation as needed
+- do **not** save SkyrimFair.esp from the Creation Kit
+- do **not** let the Creation Kit become the source of truth for plugin records
+- continue creating / updating STAT and REFR records through the existing Mutagen generator against the stock Skyrim data path
+- if the Creation Kit is opened for visual inspection later, treat it as a viewer/editor convenience only and document any risk from the differing master copy
+
+This keeps the generated plugin aligned with the exact game data Barry actually loads in MO2.
