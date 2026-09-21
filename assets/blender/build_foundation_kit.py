@@ -210,7 +210,9 @@ def apply_collision(obj, collider="self"):
 def main():
     repo = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     blend_path = os.path.join(repo, "assets", "blender", "fair_foundation_kit.blend")
-    fbx_dir = os.path.join(repo, "assets", "fbx")
+    # AssetWatcher mirrors the Source folder's subfolder structure into its Output
+    # folder, so the SkyrimFair subfolder is what puts the NIFs at meshes\SkyrimFair\.
+    fbx_dir = os.path.join(repo, "assets", "fbx", "SkyrimFair")
     os.makedirs(fbx_dir, exist_ok=True)
 
     print("=== Skyrim Fair foundation kit build ===")

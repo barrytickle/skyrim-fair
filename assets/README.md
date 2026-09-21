@@ -10,7 +10,8 @@ assets/
     build_foundation_kit.py      source of truth - generates the whole kit
     fair_foundation_kit.blend    build output, committed for convenience
   fbx/
-    SkyrimFair_*.fbx             BSFBX export, input to AssetWatcher
+    SkyrimFair/
+      SkyrimFair_*.fbx         BSFBX export, input to AssetWatcher
 ```
 
 The **script is the source of truth**, matching the rest of the project: the `.blend` and `.fbx` files are build outputs and can be regenerated at any time.
@@ -41,14 +42,65 @@ That regenerates the `.blend` and all six `.fbx` files, applies collision and pr
 
 ## Remaining manual step: FBX to NIF
 
-**AssetWatcher is a Qt GUI application with no command-line interface**, and Bethesda's guide says to run it as administrator. This step cannot be automated from here, so it is Barry's to run:
+**AssetWatcher is a Qt GUI application with no command-line interface**, and Bethesda's guide says to run it as administrator. This step cannot be automated, so it has to be done by hand — once. After the project is saved, AssetWatcher converts automatically on every future export.
 
-1. launch `...\Skyrim Special Edition\Tools\AssetWatcher\AssetWatcher.exe` as administrator
-2. point it at `assets\fbx\` as the watched folder
-3. let it convert the six `.fbx` files to `.nif`
-4. place the resulting NIFs under a `meshes\SkyrimFair\` path so the plugin can reference them
+Launch:
 
-Until that runs there are no NIFs, so no `STAT` records can usefully be generated yet.
+```text
+E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Tools\AssetWatcher\AssetWatcher.exe
+```
+
+Settings tab → **Create New Project**, then in the Watch Settings window:
+
+| Field | Value |
+| --- | --- |
+| File Types | enable **Meshes** |
+| Platform | ensure **PC** is enabled |
+| **Source folder** | `E:\html\skyrim-fair\skyrim-fair\assets\fbx` |
+| **Output Folder** | `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Data\Meshes` |
+
+Save the project, then click **Save** again in AssetWatcher to persist settings. Check the eye icon shows the project **ON**.
+
+### Why those two paths
+
+AssetWatcher **mirrors the Source folder's subfolder structure into the Output folder**. The FBX files live in `assets\fbx\SkyrimFair\`, so the conversion lands them at:
+
+```text
+E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Data\Meshes\SkyrimFair\SkyrimFair_FloorFill_1024.nif
+                                                                              \SkyrimFair_FloorEdge_512.nif
+                                                                              \SkyrimFair_Retain_512.nif
+                                                                              \SkyrimFair_RetainCorner_128.nif
+                                                                              \SkyrimFair_Ramp_512.nif
+                                                                              \SkyrimFair_Shoulder_512.nif
+```
+
+That gives the in-game mesh paths the plugin will reference, which are **relative to `Data`**:
+
+```text
+meshes\SkyrimFair\SkyrimFair_FloorFill_1024.nif
+```
+
+Set Source to `assets\fbx` — **not** `assets\fbx\SkyrimFair` — or the `SkyrimFair` folder level is lost and the NIFs land loose in `Meshes\`.
+
+The Output folder is the **Steam** Skyrim `Data\Meshes` (the folder Bethesda's guide specifies) rather than the MO2 stock game. That is deliberate: it keeps the art pipeline against the Steam install, lets the Creation Kit preview the NIFs directly, and leaves the MO2 game untouched. Copying the finished NIFs into the MO2 mod folder is a separate deployment step, exactly like the ESP.
+
+### Triggering the conversion
+
+AssetWatcher converts on file change, so with the project ON, re-run the build script and the six FBX files will be rewritten and converted:
+
+```powershell
+& "C:\Blender\blender-3.6.23-windows-x64\blender-3.6.23-windows-x64\blender.exe" --background --python assets\blender\build_foundation_kit.py
+```
+
+### Deployment target
+
+Once NIFs exist, they belong in the MO2 mod alongside the plugin:
+
+```text
+E:\Modlists\Still In Skyrim\mods\Skyrim Fair\meshes\SkyrimFair\*.nif
+```
+
+Until NIFs exist, no `STAT` records can usefully be generated — a static pointing at a missing mesh gives invisible or broken references in game.
 
 ## The kit
 

@@ -9,3 +9,6 @@ dist/
 
 # Local third-party mod archives (never commit)
 external/
+
+# Blender backup saves
+*.blend1

@@ -211,12 +211,12 @@ All six pieces are built, collisioned and exported. **The build is reproducible 
 | --- | --- | --- |
 | `assets/blender/build_foundation_kit.py` | 10,677 B | build script — **source of truth** |
 | `assets/blender/fair_foundation_kit.blend` | 837,612 B | Blender scene, build output |
-| `assets/fbx/SkyrimFair_FloorFill_1024.fbx` | 11,836 B | BSFBX export |
-| `assets/fbx/SkyrimFair_FloorEdge_512.fbx` | 11,836 B | BSFBX export |
-| `assets/fbx/SkyrimFair_Retain_512.fbx` | 11,820 B | BSFBX export |
-| `assets/fbx/SkyrimFair_RetainCorner_128.fbx` | 11,836 B | BSFBX export |
-| `assets/fbx/SkyrimFair_Ramp_512.fbx` | 13,692 B | BSFBX export, includes child collider |
-| `assets/fbx/SkyrimFair_Shoulder_512.fbx` | 11,692 B | BSFBX export |
+| `assets/fbx/SkyrimFair/SkyrimFair_FloorFill_1024.fbx` | 11,836 B | BSFBX export |
+| `assets/fbx/SkyrimFair/SkyrimFair_FloorEdge_512.fbx` | 11,836 B | BSFBX export |
+| `assets/fbx/SkyrimFair/SkyrimFair_Retain_512.fbx` | 11,820 B | BSFBX export |
+| `assets/fbx/SkyrimFair/SkyrimFair_RetainCorner_128.fbx` | 11,836 B | BSFBX export |
+| `assets/fbx/SkyrimFair/SkyrimFair_Ramp_512.fbx` | 13,692 B | BSFBX export, includes child collider |
+| `assets/fbx/SkyrimFair/SkyrimFair_Shoulder_512.fbx` | 11,692 B | BSFBX export |
 | `assets/README.md` | — | pipeline, kit spec, manual conversion step |
 
 Nothing third-party is copied or referenced. All geometry is original box and wedge primitives authored for this project.
@@ -256,10 +256,14 @@ Two corrections were needed against the BGS defaults, both worth knowing for fut
 
 Barry needs to run it:
 
-1. launch `...\Skyrim Special Edition\Tools\AssetWatcher\AssetWatcher.exe` as administrator
-2. point it at `assets\fbx\`
-3. let it convert the six FBX files to NIF
-4. the NIFs should end up under a `meshes\SkyrimFair\` path for the plugin to reference
+1. launch `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Tools\AssetWatcher\AssetWatcher.exe` as administrator
+2. Settings → Create New Project, enable **Meshes** and **PC**, then set:
+   - **Source folder**: `E:\html\skyrim-fair\skyrim-fair\assets\fbx`
+   - **Output Folder**: `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Data\Meshes`
+3. save, confirm the project's eye icon is ON, then re-run the build script to trigger conversion
+4. the NIFs land at `Data\Meshes\SkyrimFair\`, giving plugin mesh paths of `meshes\SkyrimFair\<name>.nif`
+
+AssetWatcher mirrors the Source folder's subfolder structure into the Output folder, which is why the FBX files sit in `assets\fbx\SkyrimFair\` and why Source must be `assets\fbx`, not `assets\fbx\SkyrimFair`. Full field-by-field setup is in `assets/README.md`.
 
 **Phase 4 is blocked until then.** No `STAT` records were generated, because a static pointing at a non-existent mesh would produce invisible or broken references in game. `SkyrimFair.esp` is unchanged.
 
