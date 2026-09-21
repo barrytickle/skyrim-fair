@@ -3,7 +3,8 @@
   "outputDirectory": "dist",
   "identity": {
     "name": "Skyrim Fair",
-    "workingLocation": "Whiterun tundra"
+    "workingLocation": "Whiterun tundra",
+    "author": "BarryRim Event Planner"
   },
   "stage": {
     "enabled": true,

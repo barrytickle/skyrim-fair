@@ -39,6 +39,9 @@ internal sealed record FairIdentity
     public string Name { get; init; } = "Skyrim Fair";
 
     public string WorkingLocation { get; init; } = "Whiterun tundra";
+
+    /// <summary>Written to the plugin's TES4 header as CNAM.</summary>
+    public string Author { get; init; } = "BarryRim Event Planner";
 }
 
 internal sealed record StagePrototype

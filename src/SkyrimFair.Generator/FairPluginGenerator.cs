@@ -45,6 +45,8 @@ internal static class FairPluginGenerator
 
         var modKey = ModKey.FromFileName(config.PluginName);
         var mod = new SkyrimMod(modKey, SkyrimRelease.SkyrimSE);
+        mod.ModHeader.Author = config.Identity.Author;
+
         var site = config.Site;
 
         var worldspaceKey = ParseFormKey(site.Worldspace);

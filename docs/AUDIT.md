@@ -29,8 +29,10 @@ ChatGPT should read the latest version of this file from GitHub before making ch
 ### Generated plugin — first visible build
 
 - output: `dist/SkyrimFair.esp`
-- size: **47,010 bytes**
+- size: **47,039 bytes**
+- sha256: `66e9f53788ce023501e4bd6b73666c141a9e87075a1d492e1363c961cd2d5bd9`
 - masters: **`Skyrim.esm`** (single master, derived from FormKeys, no hardcoded index)
+- TES4 Author (`CNAM`): **`BarryRim Event Planner`** — confirmed present in the written ESP
 - not ESL-flagged
 - HEDR: form version 1.71, next object ID `0x802`
 - records: **1 WRLD, 2 CELL, 2 REFR** (5 records; HEDR counts 10 including groups)
@@ -57,9 +59,32 @@ Verified by parsing the written ESP independently of Mutagen:
 - marker `FNAM` = `0x03` (Visible + CanTravelTo)
 - marker `TNAM` = `0x02` (town/village icon — Mutagen `MarkerType.Town`)
 
+### MO2 test deployment
+
+Prepared for Barry to enable manually. **Nothing has been enabled or launched.**
+
+- destination: `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp`
+- the mod folder **did not exist** and was created by this pass
+- folder contents: `SkyrimFair.esp` only — **no `meta.ini` or other metadata was added**, because MO2 does not require any to recognise a folder in `mods\` (it writes its own metadata on refresh)
+- deployed size: **47,039 bytes**
+- deployed sha256: `66e9f53788ce023501e4bd6b73666c141a9e87075a1d492e1363c961cd2d5bd9`
+- **byte-identical** to `dist/SkyrimFair.esp`, confirmed by matching sha256 and by `cmp`
+
+Confirmed **not** done:
+
+- mod not enabled in MO2's left pane
+- plugin not enabled in the right-hand plugin pane
+- load order not reordered
+- `modlist.txt`, `plugins.txt` and `loadorder.txt` are byte-for-byte unchanged (sha256 captured before and after the copy, identical both times)
+- `stock\Data` untouched; no existing mod, Pandora output or save touched
+- Skyrim and SKSE not launched; DynDOLOD/Occlusion not run
+
+Note on MO2 behaviour: when MO2 next refreshes it will discover the new folder and add it to the active profile's `modlist.txt` itself. Depending on MO2's settings a newly discovered mod can be added **enabled**, and a newly discovered plugin can be added to `plugins.txt` enabled. Barry should confirm the intended enabled/disabled state in both panes after refreshing rather than assuming it arrives disabled.
+
 ### Generator design notes
 
 - All site data lives in `fair.config.json` under `site`; no coordinates or FormKeys in implementation code.
+- The plugin author string lives in `identity.author` and is written to the TES4 header as `CNAM`.
 - FormKeys are accepted in the eight-digit project notation (`00064B87:Skyrim.esm`) and normalised to Mutagen's six-digit form.
 - Exterior block / sub-block numbers are derived by floor division (32 and 8), verified against Skyrim.esm.
 - `MarkerType.Town` (raw `TNAM 0x02`) is used, not Mutagen's `Settlement`. Vanilla uses `0x02` for Riverwood, Rorikstead and Shor's Stone; Mutagen's `Settlement` (`0x03`) is what Honningbrew Meadery and Goldenglow Estate use, so the name is misleading.
@@ -153,7 +178,7 @@ Config field: `site.skyrimDataPath` (currently `E:\Modlists\Still In Skyrim\stoc
 ## Current blockers / cautions
 
 - The prototype marker is Visible + Can Travel To from game start. That is deliberate for testing and should become `FNAM 0x00` (discover-on-approach) before release.
-- `dist/SkyrimFair.esp` has **not** been installed or enabled in MO2, and has never been loaded in game. Nothing here is in-game verified — only structurally verified.
+- `SkyrimFair.esp` is staged in MO2 but has **never been enabled or loaded in game**. Nothing here is in-game verified — only structurally verified.
 - The stall's Z is terrain height. `SMarketStall01`'s mesh origin may need a small offset once seen in game; the NIF bounding box was not read.
 - Generating without `skyrimDataPath` produces a plugin that must not be loaded (see above).
 - Medieval Markets and the banner resource are archives, not live MO2 mods.
@@ -165,4 +190,6 @@ Config field: `site.skyrimDataPath` (currently `E:\Modlists\Still In Skyrim\stoc
 
 The next local pass should verify whatever ChatGPT most recently changed in the generator, confirm the generated plugin structure, and update this file with any new exact paths, FormKeys, asset provenance, integration findings, warnings, or blockers.
 
-The obvious next step is for Barry to install `dist/SkyrimFair.esp` into MO2, enable it last, and confirm in game that the marker appears and the stall is standing on the ground at the test site.
+The plugin is now staged at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\`. The next step is Barry's: refresh MO2, enable the `Skyrim Fair` mod and its plugin last in the load order, then confirm in game that "The Wanderer's Fair" appears on the map and that the market stall is standing on the ground at the test site.
+
+Things worth reporting back from that run: whether the marker is where expected, whether the stall clips into or floats above the terrain, and whether cell `2, -2` still behaves normally (weather, ambient sound, water) given the worldspace and cell overrides.
