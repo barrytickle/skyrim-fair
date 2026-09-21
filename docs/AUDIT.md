@@ -16,22 +16,24 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Deployed build — raised terrace at +192, road-connected ramp
+## Deployed build — raised terrace at +192, ramp landing on grade
 
-The fairground now reads as a deliberate raised terrace, with the entrance ramp
-connecting to the existing vanilla road north of the site.
+The fairground reads as a deliberate raised terrace, with the entrance ramp descending
+from the north-east corner to the existing vanilla road. The ramp was re-cut this pass:
+at 1:8 its foot hung **128 units in the air**, because the ground north of the site falls
+away almost as fast as a 1:8 ramp descends. At **1:5.3** it lands dead on grade.
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
 | Size | **55,730 bytes** |
-| sha256 | `c636a52941265742a277137878a9064b0a90ba21b167374d0bbf8d679c60f19c` |
+| sha256 | `32e8f98388e89d4e297c44a3febe927ae0734f2cbaac7eb29808a4fc810783de` |
 | Masters | `Skyrim.esm` only |
 | Records | 1 WRLD, 6 CELL, 5 STAT, 96 REFR |
 | Centre | `X -5888, Y -12928` (unchanged) |
 | **Floor Z** | **-5504**, raised **+192** from -5696 |
 | Cells touched | `-3,-4`, `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` |
-| Deployed | byte-identical; 6 NIFs unchanged |
+| Deployed | byte-identical; `SkyrimFair_Ramp_512.nif` rebuilt and redeployed, other 5 NIFs unchanged |
 
 Footprint outline and the 22-tile mask are **unchanged**.
 
@@ -89,18 +91,42 @@ The ramp therefore moved to the **eastern end of the north edge**, where the roa
 climbed and the intervening ground is flatter. A new `rampAlign` config option controls
 this.
 
+The first cut of that ramp used 1:8, and in game its foot floated clearly above the
+ground. Re-measuring along the ramp centreline (`x -4864`) showed why: the terrain there
+drops about 1:6 going north, so a 1:8 ramp *loses* ground the further it runs. The fix is
+a steeper ramp, not a longer one.
+
+| Rise per tile | Grade | Tiles | Run | Foot Z | Ground Z | Gap |
+| --- | --- | --- | --- | --- | --- | --- |
+| 64 | 1:8.0 | 5 | 2,560 | -5824 | -5832 | +8 |
+| **96** | **1:5.3** | **4** | **2,048** | **-5888** | **-5888** | **0** |
+| 128 | 1:4.0 | 2 | 1,024 | -5760 | -5776 | +16 |
+
+96 wins on every count: it lands exactly on grade, keeps the same four-tile run, and needs
+no new tile length — only `RAMP_RISE` in the kit script changes, so the ramp mesh is
+re-exported rather than redesigned.
+
 | Field | Value |
 | --- | --- |
 | Orientation | **due north, rotation 0** (rotation-safe) |
 | Position | 2 segments wide at X -5120 and -4608, edge Y -12160 |
 | Length | **4 chained tiles, 2,048u run** |
-| Grade | **1:8** |
-| Surface | -5504 down to -5696, foot at **-5760** |
-| Road Z in that band | -5747 to -5763 |
-| **Vertical gap at the junction** | **0-15 units** |
+| Grade | **1:5.3** (96u rise per 512u tile) |
+| Tile Z levels | -5504, -5600, -5696, -5792 |
+| Surface | -5504 at the terrace down to a foot at **-5888** |
+| Total fall | **384u** |
+| Native ground at the foot | **-5888** |
+| **Vertical gap at the foot** | **0 units** |
 
-The ramp foot lands inside the road pieces' own footprint. The map marker moved with it to
-`(-4864, -10112, -5888)`, so fast travel arrives at the roadside.
+The nearest road piece is `047F9B:Skyrim.esm RoadSCurveR01`, origin `(-4993, -10242, -5875)`
+with a 1,282-unit mesh radius, so the ramp foot at `(-4864, -10112)` sits **183 units from
+its origin, well inside its own footprint**. Its origin Z of -5875 is 13 units above native
+ground, which is what a road mesh laid on the terrain should be. An earlier pass quoted
+"road Z -5747 to -5763" for this junction; those figures belong to the `RoadChunk` pieces
+900-1,000 units further **east**, not to the piece the ramp actually meets.
+
+The map marker sits at the ramp foot, `(-4864, -10112, -5888)`, so fast travel arrives at
+the roadside and the approach is up the ramp.
 
 ### References disabled — five, all named explicitly
 
@@ -148,8 +174,8 @@ Both slabs now classify correctly as **large rock / earth mass**.
 
 25 structural checks, all passing, by parsing the written ESP independently of Mutagen:
 single master, author intact, mesh paths under `SkyrimFair\`, 34 references on the floor
-plane, 8 ramp tiles at four Z levels 64u apart all at rotation 0 and on the eastern
-segments, **exactly five** references disabled and exactly the five named, road, fences,
+plane, 8 ramp tiles at four Z levels 96u apart all at rotation 0 and on the eastern
+segments, the ramp foot landing at exactly -5888 where native ground is -5888, **exactly five** references disabled and exactly the five named, road, fences,
 handcart, vegetation and critter markers all untouched, marker persistent and at the ramp
 foot, and no LAND / NAVM / NPC / quest / script records.
 
@@ -158,12 +184,12 @@ foot, and no LAND / NAVM / NPC / quest / script records.
 
 ### What to test in game
 
-1. does the full platform now read clearly above the terrain
-2. does +192 feel substantial without being ridiculous
-3. does the four-tile ramp join the road naturally
-4. does the ramp collision feel smooth up and down
-5. do the surviving fences and handcart help the entrance feel integrated
-6. does the raised terrace match the concept direction
+1. **does the foot of the ramp now meet the ground cleanly** — the point of this pass
+2. does 1:5.3 feel walkable, or steep enough to fight the player's step-up
+3. does the ramp collision feel smooth up and down, with no snag at the top or bottom
+4. does the ramp read as joining the road, rather than merely ending near it
+5. does +192 still feel substantial without being ridiculous
+6. do the surviving fences and handcart help the entrance feel integrated
 
 Expect grey untextured geometry, no navmesh, and **grass still growing through the paving
 until the grass cache is regenerated**.
@@ -381,7 +407,7 @@ Grid: **128 units**, matching Skyrim's architectural grid and the exterior heigh
 | **Floor edge tile** | 512 x 512 | 32u thick | the outer ring, at half the fill size so the outline can step in 512u increments and read as irregular |
 | **Retaining edge** | 512 wide x 128 deep | 256u tall | rough stone face hanging below the floor plane. Max measured exposure is 160u, so one height covers every case and the surplus buries in terrain |
 | **Retaining corner** | 128 x 128 | 256u tall | outer and inner corner variants to turn the stepped outline |
-| **Ramp tile** | 512 x 512 | rises 64u | 1:8 grade, chainable. 160u of fall needs 3 chained tiles over ~1,536u |
+| **Ramp tile** | 512 x 512 | rises 96u | 1:5.3 grade, chainable. The deployed 192u terrace uses 4 chained tiles over 2,048u, falling 384u to meet the ground |
 | **Shoulder wedge** | 512 x 256 | tapers 32u to 0u | rough-earth/grass transition strip laid outside the paving to soften the join |
 
 Pivot convention, chosen so the generator needs no offset arithmetic:
@@ -446,13 +472,13 @@ Pivot conventions as specified in Phase 2 and implemented exactly: floor and ram
 | `FloorEdge_512` | unyielding, mass 0 | self, Box |
 | `Retain_512` | unyielding, mass 0 | self, Box |
 | `RetainCorner_128` | unyielding, mass 0 | self, Box |
-| `Ramp_512` | unyielding, mass 0 | **child box rotated 7.13 deg** (`SkyrimFair_Ramp_512_Collider`) |
+| `Ramp_512` | unyielding, mass 0 | **child box rotated 10.62 deg** (`SkyrimFair_Ramp_512_Collider`) |
 | `Shoulder_512` | unyielding, mass 0 | **none, intentional** |
 
 Two corrections were needed against the BGS defaults, both worth knowing for future assets:
 
 1. **The default rigidbody is a movable prop** — mass 80, `unyielding` off. For static world geometry that is wrong, so every piece is now set `unyielding = True, mass = 0`.
-2. **A bounding-box collider on the ramp would be a solid 512 x 512 x 256 block** and would stop the player walking up the slope. The ramp instead uses a separate box child collider rotated 7.13 degrees (`atan(64/512)`) to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Confirmed present in the exported FBX.
+2. **A bounding-box collider on the ramp would be a solid 512 x 512 x 256 block** and would stop the player walking up the slope. The ramp instead uses a separate box child collider rotated 10.62 degrees (`atan(96/512)`) to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Confirmed present in the exported FBX.
 
 ### FBX to NIF conversion — DONE, and verified
 
@@ -473,7 +499,7 @@ if\SkyrimFair\*.nif`, giving plugin mesh paths of `meshes\SkyrimFair\<name>.nif`
 - **visual mesh scale exact** — every bounding sphere matches its expected radius, ratio 1.000
 - **collision half-extents exact** — 512x512x32, 1024x1024x32, 512x128x256, 128x128x256 as specified
 - five pieces carry `bhkCollisionObject`, `bhkRigidBodyT`, `bhkBoxShape`, `bhkConvexTransformShape`
-- the **ramp's rotated collider survived conversion** — transform reads cos 0.992 / sin 0.124 (7.13 deg), box 512 x 516 x 64, the 516 being the slope length `hypot(512, 64)`
+- the **ramp's rotated collider survived conversion** — transform reads cos 0.983 / sin 0.184 (10.62 deg), box 512 x 520.9 x 64, the 520.9 being the slope length `hypot(512, 96)`
 - the **shoulder has no collision blocks**, as intended
 - all six carry `BSLightingShaderProperty` and `BSShaderTextureSet`, so a texture slot is ready
 
