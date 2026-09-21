@@ -76,6 +76,43 @@ The target footprint should be large enough for the current design direction:
 
 Prefer one broad, naturally flat area over several smaller terraces.
 
+### Hard requirement: the market core must be flat
+
+The fair's commercial core should be genuinely level in game. Do not recommend a site that only looks acceptable numerically if the actual footprint has enough slope to make rows of stalls, tables, crowds or stage placement look awkward.
+
+If no naturally flat candidate is good enough, report that clearly rather than forcing the design onto unsuitable terrain.
+
+### Plan B: purpose-built flat fairground platform
+
+If natural terrain cannot provide a sufficiently large, safe, flat site, assess a purpose-built raised/levelled fairground as the fallback.
+
+The intended concept is:
+
+- a broad **perfectly flat cobblestone / stone-paved market floor**
+- the central fair, trading rows and stage square sit on this level surface
+- the outer edges transition back into native tundra through deliberate blending rather than a visible rectangular slab
+- possible edge treatments include shallow ramps, packed-earth embankments, retaining stone, rocks, fences, hay, shrubs, steps and stall placement that hides transitions
+- archery, stable and future jousting areas may remain on more natural ground outside the paved core if that improves visual integration
+
+For this fallback, report:
+
+- a sensible approximate platform footprint for the current fair layout
+- likely platform elevation at each candidate site
+- maximum height difference between the proposed flat floor and surrounding terrain
+- where ramps / slopes / steps would be needed
+- whether vanilla Skyrim statics can plausibly create a cobblestone or stone-paved surface
+- candidate vanilla floor / road / courtyard / stone platform meshes or modular pieces, with exact EditorIDs/FormKeys where identifiable
+- whether a custom static mesh would be substantially cleaner than assembling vanilla pieces
+- collision implications
+- navmesh implications for merchants, crowds, Garrick, Claudius and performers
+- how the platform could connect safely to existing exterior navmesh
+- whether the solution can avoid LAND edits
+- expected compatibility implications compared with directly flattening the landscape
+
+Do **not** build the platform during this audit.
+
+The preferred fallback is a static/platform solution rather than editing LAND, provided it can be made visually convincing and navmeshed safely. The goal is to preserve compatibility while giving the fair a reliable flat foundation.
+
 ## 2. Check current site against the in-game observation
 
 Revisit the current prototype site:
@@ -137,6 +174,7 @@ Update `docs/AUDIT.md` to record that:
 - current site is rejected for fair layout because it is too hilly in practice
 - fast travel to the custom marker is currently broken
 - the next site search is focused around Western Watchtower while avoiding its scripted conflict cells
+- a flat cobblestone platform is the approved fallback if no suitable natural site exists
 
 ## 5. Git workflow
 
@@ -144,10 +182,11 @@ After the audit:
 
 1. overwrite `docs/AUDIT.md` with the latest verified state,
 2. include the three ranked site candidates and the fast-travel diagnosis,
-3. commit and push to `feat/bootstrap-generator`,
-4. do not modify generator placement coordinates yet,
-5. do not deploy a new ESP into MO2,
-6. tell Barry the audit is pushed and highlight the recommended candidate plus the fast-travel cause.
+3. include the Plan B platform assessment if no natural candidate meets the flat-floor requirement,
+4. commit and push to `feat/bootstrap-generator`,
+5. do not modify generator placement coordinates yet,
+6. do not deploy a new ESP into MO2,
+7. tell Barry the audit is pushed and highlight the recommended candidate plus the fast-travel cause.
 
 Suggested commit message:
 
