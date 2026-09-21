@@ -1,0 +1,14 @@
+{
+  "pluginName": "SkyrimFair.esp",
+  "outputDirectory": "dist",
+  "identity": {
+    "name": "Skyrim Fair",
+    "workingLocation": "Whiterun tundra"
+  },
+  "stage": {
+    "enabled": true,
+    "dancerCount": 2,
+    "bardCount": 2,
+    "track": "Round the Green"
+  }
+}
