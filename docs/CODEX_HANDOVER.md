@@ -63,11 +63,13 @@ textured in-game test. The single biggest one: **every face of every piece in th
 wound inward**, so the whole kit rendered inside-out. That had been true since the kit was
 first authored and was invisible on untextured grey geometry. See `docs/AUDIT.md`.
 
-Barry is now re-testing in game. The project-owned procedural cobble candidate is kept as
-a reproducible comparison, but it is not the current NIF material. Keep the wall/cliff
-decision separate from the floor-material decision.
+Barry reviewed that build and it reads much better, but still blocky. That review
+produced the direction decisions recorded below, and the next implementation step is the
+**approach from the road**, not further edge polish.
 
-The next implementation step should be based on Barry's verdict from screenshots / in-game testing.
+The project-owned procedural cobble candidate is kept as a reproducible comparison, but
+it is not the current NIF material. Keep the wall/cliff decision separate from the
+floor-material decision.
 
 Likely near-term directions, only after approval:
 
@@ -77,9 +79,95 @@ Likely near-term directions, only after approval:
 - rough-zone the terrace for stage, market lanes, food, crowd space and specialist stalls
 - only after the geometry/layout is accepted, perform a dedicated navmesh milestone
 
+## Direction decided 2026-09-21: terraced in-world, approach as hero
+
+Barry reviewed the first fully textured build in game and supplied two concept
+references. The following are **decisions**, not suggestions. See
+`docs/DESIGN.md` for the art-direction reasoning and the measurements behind them.
+
+### Decided
+
+1. **Stay in the Tamriel worldspace at the approved site.** Three alternatives were
+   put up and rejected: an interior-cell instance, our own exterior worldspace behind
+   a city door, and re-siting toward Whiterun for the backdrop. The project's north
+   star is a fair worked into the landscape, and the site's placement, fast travel,
+   road connection and clutter conflicts are already solved.
+2. **The platform must be stepped, not just bigger.** A single flat level at the wanted
+   3,482 span needs a 444-unit wall on its deep side. Two or three levels bring that to
+   ~204-221. Stepping is what makes the size affordable.
+3. **Footprint grows to roughly 37 cells, 3,482 span, on three authored levels**
+   cascading north-west toward the road. Approved by Barry.
+4. **Edge language follows the second concept, not the first**: low, irregular, mostly
+   natural rock outcrop, with drystone walling only where something is genuinely being
+   retained. Proposed as a refinement of (3) and agreed in principle; the exact balance
+   of terracing versus outcrop is the open question for the next pass.
+5. **The approach from the road is the priority piece of work.** A signposted junction
+   on the existing vanilla road, a dirt spur curving off it, steps for the final climb.
+   It should read as a path worn to somewhere new.
+6. **The Whiterun backdrop is out of scope.** Measured: the Western Watchtower is 5,888
+   units away, Whiterun's outer cells 18,176, the city proper 38,810. Barry has
+   explicitly ruled it out rather than re-site. Do not re-open it unprompted.
+
+### Still to confirm before building
+
+- how much of the perimeter is drystone terracing versus natural rock outcrop
+- whether the three levels stay as approved once the outcrop edge language is applied
+
+## Vanilla asset palette for the fair
+
+Researched against `Skyrim.esm` so a later pass does not repeat it. All are referenced
+by FormID and game path; nothing vanilla is ever copied into the project or the mod.
+
+### Drystone terracing kit — 512 grid, 172u crest
+
+A complete purpose-built set, already on the same grid as our paving, with tundra
+`FieldGrass01` variants. Measured from the shipped meshes: the retaining face is on
+**local -Y**, the crest sits at `Y -256` reaching `Z 172`, and the ground behind falls
+gently to 96 by `Y +256`. It is a wall plus the field behind it, not a thin wall.
+
+| FormID | EditorID | Size | Use |
+| --- | --- | --- | --- |
+| `0009CC` | `StonewallTerraceLong01` | 512 x 581 x 174 | straight run |
+| `0009C6` / `000A6C` | `StonewallTerrace01` / `02` | 256 deep | short run |
+| `000A74` | `StonewallTerraceCorner01` | 583 x 581 | corner |
+| `000A70` / `000A73` | `StonewallTerraceEndL01` / `EndR01` | 512 x 678 | wall ends |
+| `0009D0` | `StonewallTerraceStairs01` | 512 x 578 | **stairs through the wall** |
+| `000A72` / `000A71` | `StonewallTerraceRampUp01` / `Down01` | 512 x 597 x 235 | ramp through the wall |
+
+Note: `Nordic Stonewalls` in Barry's load order replaces the plain `Stonewall01/02/End`
+meshes but **not** the terrace pieces, so those come from the vanilla BSA.
+
+### Fair dressing
+
+| FormID | EditorID | Notes |
+| --- | --- | --- |
+| `1083D7` | `FarmBannerPost01` | 422u tall banner post, rural vernacular; also a bunting anchor |
+| `0D2025`-`0D2028` | `CityBannerWhiterun01`-`04` | MSTT, animated cloth, Whiterun horse heraldry |
+| `01ED86` | `BannerAnchor01` | what a banner hangs from |
+| `0F3C72` / `0F3C73` | `WHMarketStall01` / `02` | 216u Whiterun market stalls |
+| `0BE2A3` / `0BE2A2` | `ImperialTentLarge` / `Small` | 318u / 187u canvas tents |
+| `03AF9D` | `RoadSignPost` | 256u signpost upright |
+| `0D8D9D`-`0D8DAB` etc. | `RoadSign<City>01L/R` | 28 sign boards, city names baked in |
+| `093A89` | `WHfirebrazier01` | 167u Whiterun brazier |
+| `08278D` | `WRBrazier01` | 121u |
+| `0F491C` | `Campfire01LandOffRocks01` | firepit bedded in rocks |
+
+### Not in vanilla — must be project-authored
+
+- **Bunting / triangular pennants.** Genuinely absent from Skyrim. A catenary strip of
+  pennants is one mesh plus one texture and we own the Blender to NIF pipeline, so this
+  is project-owned with no permission question.
+- **Custom signpost text** ("Whiterun Fair"). Vanilla sign boards have their city names
+  baked into the texture. A custom board is a plane plus a project-owned texture.
+- **A large open-sided timber pavilion.** No single vanilla equivalent. Either assembled
+  from vanilla timber, clustered `WHMarketStall01/02`, or Medieval Markets, which is
+  already a permissioned candidate in `CREDITS.md`.
+
 ## Expansion rule
 
-The current footprint is not permanently locked.
+The current 22-cell footprint is **superseded**: Barry has approved growing it to roughly
+37 cells on three authored levels (see the direction decisions above). The rules below
+still govern how any expansion is done.
 
 It may be expanded later if the festival layout needs more room. Preserve the modular approach:
 

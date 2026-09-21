@@ -286,6 +286,87 @@ For the final fair marker, use Skyrim's vanilla **Pass** map icon rather than th
 - when the fast-travel issue is fixed, carry this icon preference into the implementation unless the audit identifies a technical blocker
 
 
+## Concept references and the agreed visual direction
+
+Two concept images were supplied as inspiration. Both read as concept renders rather
+than in-game screenshots, so they are mood and language, not blueprints. What matters is
+which parts of each we are actually taking.
+
+### Reference A — the grand terraced approach
+
+A broad cobbled stair climbing between stepped, curved drystone terraces, with an
+open-sided timber market hall at the top, tents either side, bunting, heraldic banner
+poles and braziers. Whiterun's walls behind.
+
+**Taken from it:** the spatial idea that the fair is *ascended into* rather than walked
+onto, and the dressing language — bunting, banner poles, braziers, awnings, plants
+spilling over walls.
+
+**Not taken:** the scale of the stone terracing. Measurement showed why (below).
+
+### Reference B — the fair on a rocky rise beside the road
+
+A signposted junction on the cobbled main road, a dirt spur curving off it, and a low
+rocky knoll carrying a timber pavilion and a few tents. Stone steps up the knoll. The
+edges are natural rock outcrop and grass with drystone only here and there.
+
+**Taken from it:** the whole edge language, and the approach. This is the closer target.
+
+### The agreed synthesis
+
+Reference B is lower, smaller and more modest than Reference A, and dressing a grand
+terraced complex to look like B would have the two fighting each other. The resolution:
+
+1. **Content scale from A.** The footprint has to be large enough for a stage, market
+   lanes, a food lane, games and specialist rows. Reference B has no room for any of it.
+2. **Edge language from B.** Low, irregular, mostly natural rock outcrop, with drystone
+   walling only where something is genuinely being retained. This kills the engineered
+   platform read far more effectively than neat terracing would.
+3. **The approach is the hero.** A signposted junction on the existing vanilla road, a
+   dirt spur curving off it, and steps for the final climb. The fair should read as a
+   path that has been worn to somewhere new, not as a structure dropped beside the road.
+
+### Explicit non-goal: the backdrop
+
+Both references put Whiterun's walls in the mid-distance. Measured from the approved
+site, that is not available:
+
+| Landmark | Distance |
+| --- | --- |
+| Western Watchtower | 5,888 units |
+| Whiterun outer exterior cells | 18,176 units |
+| Whiterun city proper | 38,810 units |
+
+What the site actually offers is the **Western Watchtower** in the mid-distance with
+Whiterun as a distant silhouette. Barry has ruled the backdrop out of scope rather than
+re-siting for it. Do not re-open this without an explicit instruction.
+
+### Why the platform must be stepped rather than simply bigger
+
+This is the measurement that shapes the whole foundation, taken from vanilla LAND under
+the approved centre:
+
+| Footprint | Scheme | Deepest outer wall |
+| --- | --- | --- |
+| 2,867 span (21 cells) | one flat level | 301u |
+| 3,482 span (37 cells) | one flat level | **444u** |
+| 3,482 span (37 cells) | two levels | 221u |
+| 3,482 span (37 cells) | three levels | 204u |
+
+A single flat platform at the wanted size needs a 444-unit wall on its deep side, which
+is a castle plinth and exactly the blockiness being designed out. Stepping halves it.
+**Size and "not blocky" are not competing goals — stepping is what buys the size.**
+
+The ground itself is gentler than either reference suggests: the mean trend across a
+3,482 footprint is about 100 units west-to-east, rising eastward, with a crown around
+`Y -13,200` falling away north and far south. So the terracing is **authored**, not
+terrain-following. That is on-message: a fairground prepared and levelled over years is
+exactly authored terracing.
+
+Usefully, the high ground is south-east and the road is north, so the natural
+arrangement is to arrive at the low side and climb south-east into the fair — which is
+the arrangement both references show.
+
 ## Fairground foundation art direction
 
 If Site 1 is approved after the next in-game retest, the fair should use a purpose-built flat market terrace rather than trying to fit stalls to Skyrim's natural slope.

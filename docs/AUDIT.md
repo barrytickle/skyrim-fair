@@ -4,7 +4,12 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass and decision gate
 
-Focused foundation polish pass, driven by Barry's first textured in-game test. No stalls, NPCs, navmesh, stage content or terrace expansion. The approved footprint, elevation and entrance are unchanged.
+The deployed build below is the foundation polish pass. Since it was deployed, one
+further **exploratory pass** has run: site and asset measurement for the agreed
+terraced direction, which changed no plugin, mesh or deployed file. Its findings are
+recorded under "Site and asset measurement pass" below.
+
+Foundation polish pass, driven by Barry's first textured in-game test. No stalls, NPCs, navmesh, stage content or terrace expansion. The approved footprint, elevation and entrance are unchanged.
 
 Five faults were reported from screenshots. All five traced back to three underlying causes, and all five are fixed:
 
@@ -17,6 +22,107 @@ Five faults were reported from screenshots. All five traced back to three underl
 | Perimeter rocks clipping into the paved floor | rocks were allowed 192 units of overlap onto the paving with no upper bound on how far a large mesh could reach | overlap cut to 80 and a paving exclusion guard added |
 
 The decision gate is again Barry's in-game visual review. Codex/Claude did not operate Skyrim, MO2, AssetWatcher's GUI, or any other GUI tool.
+
+## Site and asset measurement pass (no plugin change)
+
+Exploratory pass after Barry's in-game review of the polished build. **The plugin,
+meshes and deployment below are unchanged** — nothing was regenerated or redeployed.
+These are the measurements that the agreed direction rests on, recorded so a later pass
+does not repeat them. See `docs/CODEX_HANDOVER.md` for the decisions and
+`docs/DESIGN.md` for the art-direction reasoning.
+
+### Terrain under a larger footprint
+
+Sampled from vanilla LAND on a 256-unit grid, centred on the approved
+`X -5888, Y -12928`. "Floor +192" keeps the current rule of sitting 192 above the
+highest ground under the footprint.
+
+| Span | Cells | Paved area | Ground min | max | Relief | Floor +192 | Deepest wall |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2,253 | 13 | 3.41 M | -5792 | -5696 | 96 | -5504 | 288 |
+| 2,867 | 21 | 5.51 M | -5808 | -5688 | 120 | -5496 | 312 |
+| **3,482** | **37** | **9.70 M** | -5912 | -5640 | **272** | -5448 | **464** |
+| 4,096 | 49 | 12.85 M | -5928 | -5552 | 376 | -5360 | 568 |
+
+Splitting the same 3,482 footprint into levels, each level floored 40 above its own
+local high point:
+
+| Scheme | Floors | Cells per level | Deepest wall | Risers |
+| --- | --- | --- | --- | --- |
+| one flat level | -5456 | 37 | 444u (2.6 courses) | — |
+| two levels | -5608, -5679 | 23 / 14 | 221u (1.3 courses) | 71 |
+| three levels | -5608, -5655, -5712 | 4 / 29 / 4 | 204u (1.2 courses) | 47, 56 |
+
+"Courses" is against the 172-unit vanilla terrace crest. The risers the terrain itself
+suggests are only 47-71, so the level steps have to be **authored** rather than
+terrain-following.
+
+### Slope direction
+
+Mean ground height across a 3,482 footprint:
+
+| Axis | Trend |
+| --- | --- |
+| north to south | -5787 at `Y -11136`, crowning about -5710 at `Y -13184` to `-13696`, falling to -5798 by `Y -14720` |
+| west to east | rises steadily from -5805 at `X -7680` to -5703 at `X -4096`, about 100 units, a 1:36 grade |
+
+High ground is **south-east**, falling away **north-west**, and the road is north. So the
+natural arrangement is to arrive at the low side and climb south-east into the fair.
+
+### Conflicts at each size
+
+Vanilla references whose mesh radius reaches inside the footprint:
+
+| Span | Cells | Rock/earth | Vegetation | Road | Other | Total |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2,253 | 13 | 5 | 9 | 0 | 2 | 16 |
+| 2,867 | 21 | 5 | 9 | 0 | 3 | 17 |
+| 3,482 | 37 | 7 | 16 | **2** | 3 | **28** |
+
+Growing to 3,482 first brings **road pieces** inside the footprint. Those must not be
+disabled — the road is part of the site's integration and is explicitly protected.
+
+### Distance to Whiterun
+
+| Landmark | Nearest edge from site centre |
+| --- | --- |
+| Western Watchtower (`WhiterunWatchtowerExterior`, cell 0,-4) | 5,888 units |
+| `WhiterunWatchtowerExterior02` (cell 1,-4) | 9,984 units |
+| `WhiterunExterior15` (cell 3,-4) | 18,176 units |
+| `Whiterun` (cell 8,-5) | 38,810 units |
+
+The concept references put Whiterun's walls in the mid-distance; at this site that is not
+available. Barry has ruled the backdrop out of scope.
+
+### Vanilla terrace kit, measured from the shipped meshes
+
+Parsed from `stonewallterrace*_lod_0.nif`, which DynDOLOD generates from the full
+meshes, so silhouette and orientation are preserved.
+
+`StonewallTerraceLong01`: bounds `X -256..257`, `Y -325..256`, `Z 0..172`. Upward-facing
+height by Y: `-256 -> 172`, `-128 -> 146`, `0 -> 135`, `+256 -> 96`. 19% of its area
+faces **local -Y**, dropping from 172 to 0 over the last 69 units.
+
+So the retaining face is on **local -Y** with the crest at `Y -256`, and the ground
+behind it falls gently away to `+Y`. It is a wall **plus the field behind it**, not a
+thin wall — the origin sits 256 units behind the crest. Placing it as a perimeter wall
+means offsetting the origin 256 inward of the paving edge and rotating so local -Y faces
+out. This is the same face-direction convention as `DirtCliffs01`, which is worth
+remembering: assuming the opposite is what pointed the cliff dressing backwards.
+
+### Vanilla dressing availability
+
+Full palette with FormIDs is in `docs/CODEX_HANDOVER.md`. Summary of what the concepts
+need:
+
+- **available in vanilla**: drystone terracing kit with stairs and ramp variants, farm
+  banner posts, Whiterun heraldic banners, Whiterun market stalls, Imperial canvas
+  tents, road signposts, Whiterun braziers, woven fences, rock outcrop
+- **absent from vanilla, project must author**: bunting/pennants, custom signpost text,
+  a large open-sided timber pavilion
+
+Confirmed absent by scanning STAT, MSTT, FURN and ACTI in `Skyrim.esm`: there is no
+bunting or pennant-line asset of any kind.
 
 ## The root cause worth remembering
 
