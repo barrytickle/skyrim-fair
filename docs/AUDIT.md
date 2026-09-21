@@ -16,9 +16,126 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Current build — nothing disabled, audit first
+## Proposed placement — back at Site 1, not yet deployed
 
-Per Barry's instruction, **auto-disabling of vanilla clutter is switched off**
+The southern footprint is **rejected**. It sat about 5,500 units south of the approved
+Site 1 centre, on the terrain transition toward the mountain — which is exactly what the
+392u relief, the `LTundraRocks01` terrain and the stream intersection were telling us.
+
+**The deployed plugin has not been changed.** It still contains the rejected southern
+placement, and nothing is disabled. This proposal is for review first.
+
+### Search method
+
+The same 22-tile prototype was slid over a 256-unit grid within 3,072 units of Site 1
+(499 placements), then refined on a 128-unit grid within 1,024 units. Each placement was
+scored on terrain relief under the paving, and on every winning reference in the region
+whose **transformed OBND** (scaled, Z-rotated, in world space) intersects the footprint or
+a 512-unit margin. Placements overlapping scripted or named vanilla cells were excluded
+outright, as were any with water or stream geometry anywhere in footprint or margin.
+
+2,393 winning references were resolved across the region for this, through the full load
+order including the implicit masters.
+
+### The proposal
+
+| Field | Value |
+| --- | --- |
+| Centre | **X -5888, Y -12928** |
+| Distance from original Site 1 | **286 units** |
+| Cells | `-2,-4` (`00009A28`) and `-2,-3` (`00009A07`), both unnamed vanilla |
+| Extent | X -7424 .. -4352, Y -14208 .. -11648 (3072 x 2560) |
+| Terrain relief under paving | **112u** |
+| Floor Z | **-5696** (terrain maximum, pure fill, no LAND edits) |
+| Water / stream geometry | **none**, in footprint or margin |
+
+Compared with the two placements already tried:
+
+| Placement | Relief | Water on foundation | Max edge exposure |
+| --- | --- | --- | --- |
+| **Proposed (-5888, -12928)** | **112u** | **none** | **96u** |
+| Original Site 1 (-5632, -12800) | 120u | none | 160u |
+| Rejected south (-5376, -18304) | 392u | 8 references | 392u |
+
+Edge exposure is the big practical gain. The rejected site needed a 392-unit faced wall on
+its west side; here the deepest point is 96 units, so the platform reads as a low terrace
+rather than a plinth, and a two-tile ramp covers the fall.
+
+| Edge | Mean | Max | Min |
+| --- | --- | --- | --- |
+| North | 47u | 88u | 0u |
+| South | 40u | 88u | 0u |
+| East | 29u | 80u | 8u |
+| West | 54u | 96u | 24u |
+
+### Footprint perimeter, closed polygon (14 corners)
+
+| # | X | Y | | # | X | Y |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | -7424 | -13184 | | 8 | -4352 | -13696 |
+| 2 | -6912 | -13184 | | 9 | -4352 | -12160 |
+| 3 | -6912 | -13696 | | 10 | -5376 | -12160 |
+| 4 | -6400 | -13696 | | 11 | -5376 | -11648 |
+| 5 | -6400 | -14208 | | 12 | -6912 | -11648 |
+| 6 | -4864 | -14208 | | 13 | -6912 | -12672 |
+| 7 | -4864 | -13696 | | 14 | -7424 | -12672 |
+
+### Intersecting references: 33 total, 18 on the foundation
+
+| Class | Total | On foundation |
+| --- | --- | --- |
+| UNSAFE | 2 | 1 |
+| decorative clutter | 4 | 3 |
+| rock / boulder | 3 | 3 |
+| vegetation | 24 | 11 |
+
+**Nothing is disabled.** For reference, if clearing were later approved the three
+`RockTundraLand` slabs and the vegetation are plain `STAT`/`TREE` records with no flags,
+scripts, links or ownership. The one unsafe reference on the foundation is an invisible
+insect spawner and needs no action either way — it should simply be left alone.
+
+| FormID | Base | Type | World X, Y, Z | Scale | Radius | AABB (X / Y) | Overlaps | Class | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `0DC5B5:Skyrim.esm` | `0422B1:Skyrim.esm` LvlAnimalPlainsPrey | NPC_ | -6611, -14689, -5853 | 1.0 | 0 | -6611..-6611 / -14689..-14689 | margin | UNSAFE | enable-parented, ACTOR |
+| `0CB03E:Skyrim.esm` | `0C5209:Skyrim.esm` critterSpawnInsects_Many | ACTI | -5259, -13344, -5704 | 1.0 | 91 | -5323..-5195 / -13408..-13280 | **foundation** | UNSAFE | enable-parented, base has script |
+| `048032:Skyrim.esm` | `039224:Skyrim.esm` RockTundraLand01Tundra01 | STAT | -6806, -11401, -5976 | 1.0 | 1418 | -8241..-5513 / -12695..-10337 | **foundation** | rock / boulder |  |
+| `04801A:Skyrim.esm` | `03925D:Skyrim.esm` RockTundraLand02Tundra01 | STAT | -5729, -13941, -5887 | 1.0 | 1767 | -7085..-3860 / -15823..-12288 | **foundation** | rock / boulder |  |
+| `048031:Skyrim.esm` | `03925D:Skyrim.esm` RockTundraLand02Tundra01 | STAT | -4074, -11675, -5846 | 1.0 | 1767 | -5871..-2506 / -12749..-10087 | **foundation** | rock / boulder |  |
+| `0CB048:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -7375, -11444, -5808 | 1.0 | 20 | -7379..-7363 / -11469..-11430 | margin | decorative clutter |  |
+| `0CB041:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -5514, -13834, -5660 | 1.0 | 20 | -5530..-5510 / -13851..-13812 | **foundation** | decorative clutter |  |
+| `0CB03F:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -5469, -13142, -5661 | 1.0 | 20 | -5491..-5458 / -13159..-13125 | **foundation** | decorative clutter |  |
+| `0CB040:Skyrim.esm` | `022201:Skyrim.esm` CritterLandingMarker_Small | STAT | -4762, -13127, -5699 | 1.0 | 20 | -4777..-4759 / -13143..-13104 | **foundation** | decorative clutter |  |
+| `0CB03D:Skyrim.esm` | `03554E:Skyrim.esm` RockShelf01FieldGrass01 | STAT | -4971, -13024, -5713 | 1.0 | 660 | -5631..-4388 / -13529..-12562 | **foundation** | vegetation |  |
+| `047F8B:Skyrim.esm` | `03925C:Skyrim.esm` RockTundraLand02FieldGrass01 | STAT | -9356, -11877, -6087 | 1.0 | 1767 | -11020..-7494 / -13183..-10046 | margin | vegetation |  |
+| `047F8C:Skyrim.esm` | `03925C:Skyrim.esm` RockTundraLand02FieldGrass01 | STAT | -8642, -13520, -5876 | 1.0 | 1767 | -10179..-6752 / -15047..-11557 | **foundation** | vegetation |  |
+| `048023:Skyrim.esm` | `0A7329:Skyrim.esm` TreeThicket01 | TREE | -5139, -13619, -5734 | 0.9 | 126 | -5254..-5026 / -13721..-13512 | **foundation** | vegetation |  |
+| `048054:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -7344, -11460, -5840 | 0.85 | 135 | -7451..-7237 / -11558..-11363 | margin | vegetation |  |
+| `048051:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -6415, -11175, -5775 | 0.98 | 155 | -6543..-6287 / -11293..-11057 | margin | vegetation |  |
+| `048021:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -5521, -13780, -5721 | 0.99 | 157 | -5678..-5364 / -13936..-13624 | **foundation** | vegetation |  |
+| `048024:Skyrim.esm` | `0AAE7A:Skyrim.esm` TreeTundraShrub02 | TREE | -5470, -13125, -5708 | 0.86 | 136 | -5589..-5351 / -13236..-13014 | **foundation** | vegetation |  |
+| `04802C:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -8077, -12204, -5889 | 0.87 | 144 | -8218..-7936 / -12347..-12061 | margin | vegetation |  |
+| `048052:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -6209, -11104, -5763 | 0.91 | 150 | -6357..-6061 / -11249..-10960 | margin | vegetation |  |
+| `048027:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -6037, -12587, -5729 | 0.82 | 135 | -6142..-5932 / -12682..-12492 | **foundation** | vegetation |  |
+| `04805B:Skyrim.esm` | `0AAE81:Skyrim.esm` TreeTundraShrub05 | TREE | -4292, -11668, -5746 | 0.82 | 135 | -4399..-4185 / -11784..-11553 | margin | vegetation |  |
+| `048053:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -7179, -11336, -5818 | 0.99 | 107 | -7293..-7089 / -11448..-11238 | margin | vegetation |  |
+| `048050:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -6560, -11130, -5791 | 0.87 | 94 | -6638..-6457 / -11216..-11043 | margin | vegetation |  |
+| `048028:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -6148, -12417, -5729 | 0.7 | 75 | -6204..-6101 / -12485..-12367 | **foundation** | vegetation |  |
+| `04801F:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -5962, -14469, -5777 | 0.66 | 71 | -6042..-5900 / -14539..-14401 | margin | vegetation |  |
+| `048022:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -5336, -13734, -5708 | 0.83 | 89 | -5416..-5243 / -13826..-13661 | **foundation** | vegetation |  |
+| `04805A:Skyrim.esm` | `0AAE87:Skyrim.esm` TreeTundraShrub08 | TREE | -4328, -11796, -5746 | 0.79 | 85 | -4423..-4255 / -11879..-11715 | margin | vegetation |  |
+| `04802A:Skyrim.esm` | `0AAE74:Skyrim.esm` TreeYellowShrub02 | TREE | -7470, -12436, -5849 | 0.87 | 148 | -7603..-7338 / -12564..-12308 | margin | vegetation |  |
+| `048020:Skyrim.esm` | `0AAE74:Skyrim.esm` TreeYellowShrub02 | TREE | -5806, -14665, -5800 | 0.85 | 144 | -5908..-5705 / -14773..-14557 | margin | vegetation |  |
+| `048025:Skyrim.esm` | `0AAE74:Skyrim.esm` TreeYellowShrub02 | TREE | -5526, -12946, -5712 | 0.93 | 158 | -5638..-5414 / -13064..-12827 | **foundation** | vegetation |  |
+| `04802B:Skyrim.esm` | `0AAE75:Skyrim.esm` TreeYellowShrub03 | TREE | -7746, -12406, -5862 | 1.01 | 171 | -7916..-7575 / -12577..-12234 | margin | vegetation |  |
+| `048029:Skyrim.esm` | `0AAE75:Skyrim.esm` TreeYellowShrub03 | TREE | -5963, -12407, -5750 | 0.92 | 156 | -6102..-5825 / -12550..-12264 | **foundation** | vegetation |  |
+| `048026:Skyrim.esm` | `0AAE75:Skyrim.esm` TreeYellowShrub03 | TREE | -5266, -13343, -5706 | 1.06 | 180 | -5414..-5119 / -13498..-13189 | **foundation** | vegetation |  |
+
+## Deployed build — REJECTED southern placement, nothing disabled
+
+This is what is currently deployed, and it is **superseded by the proposal above**.
+The placement is rejected; it has not been re-deployed yet.
+
+Auto-disabling of vanilla clutter is switched off
 (`site.foundation.clearClutter = false`) and the deployed plugin contains no disabled
 overrides. The footprint blueprint and intersection audit below are for review first.
 
