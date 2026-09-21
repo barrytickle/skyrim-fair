@@ -34,10 +34,32 @@ try
         $"Prototype stage: {config.Stage.BardCount} bard(s), " +
         $"{config.Stage.DancerCount} dancer(s), track '{config.Stage.Track}'");
 
-    var outputPath = FairPluginGenerator.Generate(config);
+    var result = FairPluginGenerator.Generate(config);
+
+    var site = config.Site;
+    Console.WriteLine();
+    Console.WriteLine(
+        $"Fair site: Tamriel cell {site.CellGridX}, {site.CellGridY} " +
+        $"at ({site.Placement.X}, {site.Placement.Y}, {site.Placement.Z})");
+    Console.WriteLine(
+        $"  {site.TestObject.EditorId} placed as {result.TestObjectFormKey}");
+    Console.WriteLine(
+        $"  map marker '{site.MapMarker.Name}' placed as {result.MapMarkerFormKey}");
 
     Console.WriteLine();
-    Console.WriteLine($"Generated: {outputPath}");
+    if (result.CopiedMasterRecords)
+    {
+        Console.WriteLine("Overridden Tamriel worldspace and cell records copied from Skyrim.esm.");
+    }
+    else
+    {
+        Console.WriteLine(
+            "WARNING: Skyrim.esm was not read, so the overridden worldspace and cell records " +
+            "are stubs. They would strip vanilla regions, water height and map data. " +
+            "Set Site.SkyrimDataPath (or SKYRIM_DATA_PATH) before loading this plugin in game.");
+    }
+
+    Console.WriteLine($"Generated: {result.OutputPath} ({result.SizeInBytes} bytes)");
     Console.WriteLine("Milestone unlocked: C# -> Mutagen -> Skyrim plugin.");
     return 0;
 }

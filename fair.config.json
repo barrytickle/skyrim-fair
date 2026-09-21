@@ -10,5 +10,29 @@
     "dancerCount": 2,
     "bardCount": 2,
     "track": "Round the Green"
+  },
+  "site": {
+    "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",
+    "worldspace": "0000003C:Skyrim.esm",
+    "persistentCell": "00000D74:Skyrim.esm",
+    "cell": "000095FE:Skyrim.esm",
+    "cellGridX": 2,
+    "cellGridY": -2,
+    "placement": {
+      "x": 10880,
+      "y": -7552,
+      "z": -4616
+    },
+    "testObject": {
+      "editorId": "SMarketStall01",
+      "formKey": "00064B87:Skyrim.esm"
+    },
+    "mapMarker": {
+      "baseObject": "00000010:Skyrim.esm",
+      "name": "The Wanderer's Fair",
+      "type": "Town",
+      "visible": true,
+      "canTravelTo": true
+    }
   }
 }

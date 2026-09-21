@@ -6,3 +6,6 @@ dist/
 *.user
 *.suo
 *.cache
+
+# Local third-party mod archives (never commit)
+external/
