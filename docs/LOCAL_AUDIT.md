@@ -8,6 +8,8 @@ Do not change the Skyrim installation yet.
 
 Inspect the local environment so the next generator commit can place one visible vanilla object into a safe exterior Skyrim cell without guessing FormIDs, paths, or load-order assumptions.
 
+Barry has now installed the .NET 10 SDK and has also added Medieval Markets to the local mod setup, so verify both of those changes in this pass.
+
 ## 1. Verify the repository toolchain
 
 From the repository root:
@@ -87,6 +89,30 @@ If Professional Dancer is installed, report:
 
 Do not modify, unpack, redistribute, or copy its animation assets.
 
+## 6. Inspect Medieval Markets
+
+Barry has added Medieval Markets:
+
+- Nexus mod ID: 161479
+- Project credits currently identify the mod author as JJerem
+- We may want to reuse selected market stall, tent, shelving, table, basket, produce-display, and general market-dressing assets
+
+Inspect the installed mod read-only and report:
+
+- installed version
+- plugin name(s), if any
+- exact mod folder/path in MO2
+- list of meshes and textures that look useful for Skyrim Fair
+- for each promising asset, its exact relative file path
+- whether that asset appears to be authored directly by JJerem or comes from another credited source
+- any bundled credits/readme/permissions information relevant to redistribution
+- whether the asset can safely be referenced as an external dependency instead of copied into Skyrim Fair
+- if plugin records already place or reference those assets, provide useful EditorIDs/FormKeys where safe to do so
+
+Pay special attention to provenance. Medieval Markets credits third-party assets from authors including PraedythXVI, Brumbek, gooball60, and JPSteel2. Do not assume JJerem's permission covers those files.
+
+Do not modify, repack, redistribute, or copy any Medieval Markets assets during this audit.
+
 ## Output format
 
 Return a concise report under these headings:
@@ -98,6 +124,7 @@ Return a concise report under these headings:
 5. Recommended first test cell
 6. Recommended vanilla test object
 7. Professional Dancer integration notes
-8. Unknowns / blockers
+8. Medieval Markets asset audit
+9. Unknowns / blockers
 
 Include exact paths and identifiers where relevant. Do not guess missing values.
