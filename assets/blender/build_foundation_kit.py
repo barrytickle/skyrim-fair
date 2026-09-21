@@ -28,6 +28,18 @@ import sys
 
 import bpy
 
+# --- scale --------------------------------------------------------------------
+#
+# Measured empirically from the NIFs AssetWatcher produced: 1 Blender unit comes
+# out as exactly 40 Skyrim units, on both the visual mesh and the Havok collision.
+# Blender's scene unit settings do not affect this - building with system "NONE"
+# and with Bethesda's recommended IMPERIAL/INCHES/1 gave identical output - so the
+# factor lives in the FBX to NIF conversion itself.
+#
+# Every dimension below is therefore written in readable Skyrim units and divided
+# by this factor at mesh-construction time.
+BLENDER_UNITS_PER_SKYRIM_UNIT = 1.0 / 40.0
+
 # --- kit dimensions, all in Skyrim units -------------------------------------
 
 FLOOR_THICKNESS = 32
@@ -50,6 +62,9 @@ def clear_scene():
 
 
 def make_object(name, verts, faces):
+    """Vertices arrive in Skyrim units and are converted to Blender units here."""
+    s = BLENDER_UNITS_PER_SKYRIM_UNIT
+    verts = [(x * s, y * s, z * s) for x, y, z in verts]
     mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(verts, [], faces)
     mesh.validate()
@@ -193,8 +208,9 @@ def apply_collision(obj, collider="self"):
     child = box(obj.name + "_Collider", -256, 256,
                 -slope_len / 2.0, slope_len / 2.0, -thickness, 0)
     child.rotation_euler = (-angle, 0.0, 0.0)
-    # centre of the sloped top face, in the ramp's local space
-    child.location = (0.0, RAMP_RUN / 2.0, -RAMP_RISE / 2.0)
+    # centre of the sloped top face, in the ramp's local space (Skyrim units -> Blender)
+    s = BLENDER_UNITS_PER_SKYRIM_UNIT
+    child.location = (0.0, RAMP_RUN / 2.0 * s, -RAMP_RISE / 2.0 * s)
     child.parent = obj
     child.matrix_parent_inverse = obj.matrix_world.inverted()
     select_only(child)
@@ -220,9 +236,15 @@ def main():
 
     clear_scene()
 
-    # Build 1:1 in Skyrim units; no unit scaling is applied on export.
+    # Bethesda's own scene units, copied from BGS_SKYRIM_OT_set_recommended_unit_scale
+    # in bgs_skyrim_tools/operators/export_ops.py. That operator needs UI context and
+    # cannot be invoked headlessly, so its constants are applied directly.
+    # Getting this wrong is not subtle: building with system="NONE" produced meshes and
+    # collision exactly 40x too large.
     scene = bpy.context.scene
-    scene.unit_settings.system = "NONE"
+    scene.unit_settings.system = "IMPERIAL"
+    scene.unit_settings.length_unit = "INCHES"
+    scene.unit_settings.scale_length = 1
 
     pieces = build_kit()
     print(f"\nbuilt {len(pieces)} pieces")
@@ -243,10 +265,11 @@ def main():
         print(f"  {name:32s} rigidbody={collision[name]['rigidbody']}")
         print(f"  {'':32s} collider={collision[name]['collider']}")
 
-    print("\n=== geometry report ===")
+    print("\n=== geometry report (Skyrim units) ===")
+    inv = 1.0 / BLENDER_UNITS_PER_SKYRIM_UNIT
     for name, obj in pieces.items():
         bb = [obj.matrix_world @ v.co for v in obj.data.vertices]
-        xs = [p.x for p in bb]; ys = [p.y for p in bb]; zs = [p.z for p in bb]
+        xs = [p.x * inv for p in bb]; ys = [p.y * inv for p in bb]; zs = [p.z * inv for p in bb]
         print(f"  {name:32s} verts={len(obj.data.vertices):3d} "
               f"X[{min(xs):7.0f},{max(xs):7.0f}] "
               f"Y[{min(ys):7.0f},{max(ys):7.0f}] "
@@ -270,7 +293,7 @@ def main():
                 check_existing=False,
                 use_selection=True,
                 export_centered_at_origin=False,   # our pivots are deliberate
-                apply_unit_scale=False,
+                apply_unit_scale=True,             # BGS exporter default
                 global_scale=1.0,
                 use_bgs_materials=True,
                 object_types={"MESH", "EMPTY"},

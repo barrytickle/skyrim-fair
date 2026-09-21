@@ -12,6 +12,9 @@ assets/
   fbx/
     SkyrimFair/
       SkyrimFair_*.fbx         BSFBX export, input to AssetWatcher
+  nif/
+    SkyrimFair/
+      SkyrimFair_*.nif         AssetWatcher output, ready for the plugin
 ```
 
 The **script is the source of truth**, matching the rest of the project: the `.blend` and `.fbx` files are build outputs and can be regenerated at any time.
@@ -57,7 +60,7 @@ Settings tab → **Create New Project**, then in the Watch Settings window:
 | File Types | enable **Meshes** |
 | Platform | ensure **PC** is enabled |
 | **Source folder** | `E:\html\skyrim-fair\skyrim-fair\assets\fbx` |
-| **Output Folder** | `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Data\Meshes` |
+| **Output Folder** | `E:\html\skyrim-fair\skyrim-fair\assets\nif` |
 
 Save the project, then click **Save** again in AssetWatcher to persist settings. Check the eye icon shows the project **ON**.
 
@@ -66,23 +69,23 @@ Save the project, then click **Save** again in AssetWatcher to persist settings.
 AssetWatcher **mirrors the Source folder's subfolder structure into the Output folder**. The FBX files live in `assets\fbx\SkyrimFair\`, so the conversion lands them at:
 
 ```text
-E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Data\Meshes\SkyrimFair\SkyrimFair_FloorFill_1024.nif
-                                                                              \SkyrimFair_FloorEdge_512.nif
-                                                                              \SkyrimFair_Retain_512.nif
-                                                                              \SkyrimFair_RetainCorner_128.nif
-                                                                              \SkyrimFair_Ramp_512.nif
-                                                                              \SkyrimFair_Shoulder_512.nif
+assets\nif\SkyrimFair\SkyrimFair_FloorFill_1024.nif
+                     \SkyrimFair_FloorEdge_512.nif
+                     \SkyrimFair_Retain_512.nif
+                     \SkyrimFair_RetainCorner_128.nif
+                     \SkyrimFair_Ramp_512.nif
+                     \SkyrimFair_Shoulder_512.nif
 ```
 
-That gives the in-game mesh paths the plugin will reference, which are **relative to `Data`**:
+That `SkyrimFair` folder level is what gives the plugin its mesh paths, which are **relative to `Data`**:
 
 ```text
 meshes\SkyrimFair\SkyrimFair_FloorFill_1024.nif
 ```
 
-Set Source to `assets\fbx` — **not** `assets\fbx\SkyrimFair` — or the `SkyrimFair` folder level is lost and the NIFs land loose in `Meshes\`.
+Set Source to `assets\fbx` — **not** `assets\fbx\SkyrimFair` — or that folder level is lost and the NIFs land loose.
 
-The Output folder is the **Steam** Skyrim `Data\Meshes` (the folder Bethesda's guide specifies) rather than the MO2 stock game. That is deliberate: it keeps the art pipeline against the Steam install, lets the Creation Kit preview the NIFs directly, and leaves the MO2 game untouched. Copying the finished NIFs into the MO2 mod folder is a separate deployment step, exactly like the ESP.
+Output goes to `assets\nif` inside the repo rather than a game `Data\Meshes`, which keeps every project-owned artefact in one place and writes into neither the Steam install nor the MO2 game. Deployment into the MO2 mod folder is a separate step, exactly like the ESP. Bethesda's guide suggests pointing Output at `Data\Meshes` instead, which is fine if you want the Creation Kit to find the NIFs automatically for preview.
 
 ### Triggering the conversion
 
@@ -100,11 +103,11 @@ Once NIFs exist, they belong in the MO2 mod alongside the plugin:
 E:\Modlists\Still In Skyrim\mods\Skyrim Fair\meshes\SkyrimFair\*.nif
 ```
 
-Until NIFs exist, no `STAT` records can usefully be generated — a static pointing at a missing mesh gives invisible or broken references in game.
+The NIFs now exist and are verified, so `STAT` records can be generated. Their in-game mesh paths are `meshes\SkyrimFair\<name>.nif`.
 
 ## The kit
 
-All dimensions in Skyrim units. Built 1:1 in Blender units and exported with no unit scaling, so **scale must be confirmed on first Creation Kit import**.
+All dimensions in Skyrim units, and **verified exact** in the converted NIFs. See the scale note below.
 
 | Piece | Footprint | Height | Collision | Purpose |
 | --- | --- | --- | --- | --- |
@@ -133,9 +136,27 @@ For retaining, ramp and shoulder pieces, **+Y points away from the platform cent
 - The **ramp** cannot use a bounding box: that would be a solid 512 x 512 x 256 block and would stop the player walking up it. It instead uses a separate box child collider rotated 7.13 degrees to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Verified present in the exported FBX as `SkyrimFair_Ramp_512_Collider`.
 - The **shoulder** deliberately has no collider; it sits on native ground and would only create a snag lip.
 
-### Unverified
+### Scale — the one real trap
 
-- **Scale.** Built 1:1 in Blender units with no unit scaling on export. Confirm on first CK import.
+**1 Blender unit converts to exactly 40 Skyrim units.** Every dimension in the build script is written in readable Skyrim units and divided by `BLENDER_UNITS_PER_SKYRIM_UNIT` (1/40) at mesh-construction time.
+
+This was found by parsing the converted NIFs, not assumed. The first build came out **exactly 40x too large** on every piece, on both the visual mesh and the Havok collision. Blender's scene unit settings make no difference — building with `system="NONE"` and with Bethesda's own recommended `IMPERIAL` / `INCHES` / `scale_length=1` produced byte-identical oversized output — so the factor lives in the FBX to NIF conversion itself, not in Blender.
+
+If a future piece comes out the wrong size, check this constant first.
+
+### Verified in the converted NIFs
+
+Confirmed by parsing `assets/nif/SkyrimFair/*.nif` directly:
+
+- all six are valid SSE NIFs — `Gamebryo File Format, Version 20.2.0.7`, userVersion 12, bsVersion 100
+- **visual mesh scale is exact**: every bounding sphere matches its expected radius, ratio 1.000
+- **collision half-extents are exact**: 512x512x32, 1024x1024x32, 512x128x256, 128x128x256 as specified
+- the five collision-bearing pieces carry `bhkCollisionObject`, `bhkRigidBodyT`, `bhkBoxShape` and `bhkConvexTransformShape`
+- the **ramp's rotated collider survived conversion** — its transform reads cos 0.992 / sin 0.124, i.e. 7.13 degrees, and its box is 512 x 516 x 64, the 516 being the slope length `hypot(512, 64)`
+- the **shoulder has no collision blocks at all**, as intended
+- all six carry `BSLightingShaderProperty` and `BSShaderTextureSet`, so a texture slot is ready
+
+### Still unverified
 - **Collider `type` / `layer` / `material` enums.** These are populated by a UI callback and cannot be enumerated in headless Blender, so they remain at BGS defaults (`type='Box'`, `layer='1'`). Review them in the Blender UI before final use.
 - **Material and texture.** No texture is assigned yet. The geometry proof comes first, per the brief. Cobblestone character still needs a material pass.
 - **The ramp's child collider** is correct by construction but has not been seen in the Creation Kit or in game.

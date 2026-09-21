@@ -250,29 +250,43 @@ Two corrections were needed against the BGS defaults, both worth knowing for fut
 1. **The default rigidbody is a movable prop** — mass 80, `unyielding` off. For static world geometry that is wrong, so every piece is now set `unyielding = True, mass = 0`.
 2. **A bounding-box collider on the ramp would be a solid 512 x 512 x 256 block** and would stop the player walking up the slope. The ramp instead uses a separate box child collider rotated 7.13 degrees (`atan(64/512)`) to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Confirmed present in the exported FBX.
 
-### Blocker — FBX to NIF conversion is manual
+### FBX to NIF conversion — DONE, and verified
 
-**AssetWatcher is a Qt GUI application with no command-line interface**, and Bethesda's guide instructs running it as administrator. Its converter is a plugin DLL (`Plugins\Skyrim\BSFBXDLL.dll`) driven by the GUI's folder watcher. This cannot be automated from here.
+AssetWatcher is a Qt GUI app with no CLI, so Barry configured the watch project by hand:
 
-Barry needs to run it:
+| Field | Value |
+| --- | --- |
+| Source folder | `E:\html\skyrim-fair\skyrim-fairssetsbx` |
+| Output Folder | `E:\html\skyrim-fair\skyrim-fairssets
+if` |
 
-1. launch `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Tools\AssetWatcher\AssetWatcher.exe` as administrator
-2. Settings → Create New Project, enable **Meshes** and **PC**, then set:
-   - **Source folder**: `E:\html\skyrim-fair\skyrim-fair\assets\fbx`
-   - **Output Folder**: `E:\SteamLibrary\steamapps\common\Skyrim Special Edition\Data\Meshes`
-3. save, confirm the project's eye icon is ON, then re-run the build script to trigger conversion
-4. the NIFs land at `Data\Meshes\SkyrimFair\`, giving plugin mesh paths of `meshes\SkyrimFair\<name>.nif`
+AssetWatcher mirrors the Source subfolder structure into Output, so the FBX living in `assetsbx\SkyrimFair\` produce `assets
+if\SkyrimFair\*.nif`, giving plugin mesh paths of `meshes\SkyrimFair\<name>.nif`. It converts on file change, so re-running the build script triggers it.
 
-AssetWatcher mirrors the Source folder's subfolder structure into the Output folder, which is why the FBX files sit in `assets\fbx\SkyrimFair\` and why Source must be `assets\fbx`, not `assets\fbx\SkyrimFair`. Full field-by-field setup is in `assets/README.md`.
+**All six NIFs exist and were verified by parsing them directly:**
 
-**Phase 4 is blocked until then.** No `STAT` records were generated, because a static pointing at a non-existent mesh would produce invisible or broken references in game. `SkyrimFair.esp` is unchanged.
+- valid SSE NIFs — `Gamebryo File Format, Version 20.2.0.7`, userVersion 12, bsVersion 100
+- **visual mesh scale exact** — every bounding sphere matches its expected radius, ratio 1.000
+- **collision half-extents exact** — 512x512x32, 1024x1024x32, 512x128x256, 128x128x256 as specified
+- five pieces carry `bhkCollisionObject`, `bhkRigidBodyT`, `bhkBoxShape`, `bhkConvexTransformShape`
+- the **ramp's rotated collider survived conversion** — transform reads cos 0.992 / sin 0.124 (7.13 deg), box 512 x 516 x 64, the 516 being the slope length `hypot(512, 64)`
+- the **shoulder has no collision blocks**, as intended
+- all six carry `BSLightingShaderProperty` and `BSShaderTextureSet`, so a texture slot is ready
 
-### Unverified in this pass
+### Scale — a real trap, found and fixed
 
-- **Scale.** Built 1:1 in Blender units with no unit scaling on export. Must be confirmed on first Creation Kit import — a scale error would be immediately obvious and the script is parametric, so it is cheap to correct.
+**1 Blender unit converts to exactly 40 Skyrim units.**
+
+The first converted build was **exactly 40x too large** on every piece, on both visual mesh and Havok collision. This was caught by parsing the NIFs, not by eye — the FBX and the Blender scene both looked correct.
+
+Blender's scene unit settings do **not** affect it. Building with `system="NONE"` and with Bethesda's own recommended `IMPERIAL` / `INCHES` / `scale_length=1` (read from `BGS_SKYRIM_OT_set_recommended_unit_scale` in `bgs_skyrim_tools/operators/export_ops.py`, since that operator needs UI context and cannot be invoked headlessly) produced identical oversized output. The factor lives in the FBX to NIF conversion itself.
+
+The build script now writes every dimension in readable Skyrim units and divides by `BLENDER_UNITS_PER_SKYRIM_UNIT` (1/40) at mesh-construction time. **Any future project-owned mesh must use the same constant.**
+
+### Still unverified
 - **Collider `type` / `layer` / `material` enums.** Populated by a UI callback, so they cannot be enumerated in headless Blender. Left at BGS defaults (`type='Box'`, `layer='1'`) and should be reviewed in the Blender UI.
 - **Material and texture.** No texture assigned. Geometry proof first, per the brief. Cobblestone character still needs a material pass — and note that vanilla Skyrim has no generic cobblestone paving texture path confirmed by this audit either.
-- **The ramp's child collider** is correct by construction but has not been seen in the Creation Kit or in game.
+- **In-game appearance.** Nothing has been placed or seen in game yet; the kit is untextured, so it will render with a default material until a texture pass happens.
 
 ## Phase 5 — navmesh assessment
 
@@ -402,14 +416,9 @@ All three are archives in `external/` (git-ignored) and **none is installed in M
 
 ## Next local verification
 
-Phases 1, 2, 3 and 5 of `docs/CLAUDE_AFTER_SITE_TEST.md` are complete. **Phase 4 is blocked on the manual FBX to NIF conversion.**
+Phases 1, 2, 3 and 5 of `docs/CLAUDE_AFTER_SITE_TEST.md` are complete, and the FBX to NIF conversion is done and verified. **Phase 4 is unblocked.**
 
-What Barry needs to do:
-
-1. run **AssetWatcher as administrator** against `assets\fbx\` to produce the six NIFs, and put them under `meshes\SkyrimFair\`
-2. ideally open one in NifSkope or the Creation Kit to sanity-check **scale** and that the ramp's child collider survived conversion
-
-Then the next agent pass can:
+The next agent pass can:
 
 1. register the six pieces as project-owned `STAT` records in `SkyrimFair.esp` through the Mutagen generator, reading the stock Skyrim data path as always — **not** the Creation Kit
 2. place a small irregular test arrangement at Site 1: some paving, at least one retaining edge, one ramp, plus vanilla rocks, shrubs and grass over the join to demonstrate the blend
