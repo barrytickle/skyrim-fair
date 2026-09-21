@@ -16,14 +16,14 @@
     "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",
     "worldspace": "0000003C:Skyrim.esm",
     "persistentCell": "00000D74:Skyrim.esm",
-    "cell": "00009A28:Skyrim.esm",
+    "cell": "00009A49:Skyrim.esm",
     "cellGridX": -2,
-    "cellGridY": -4,
+    "cellGridY": -5,
     "plannedPlatformFloorZ": -5672,
     "placement": {
-      "x": -5632,
-      "y": -12800,
-      "z": -5720
+      "x": -5376,
+      "y": -18304,
+      "z": -5656
     },
     "testObject": {
       "editorId": "SMarketStall01",
@@ -38,17 +38,17 @@
       "radius": 1800,
       "locationRefType": "0010F63C:Skyrim.esm",
       "position": {
-        "x": -5632,
-        "y": -15872,
-        "z": -5912
+        "x": -5376,
+        "y": -14720,
+        "z": -5792
       }
     },
     "foundation": {
       "enabled": true,
       "tileSize": 512,
-      "floorZ": -5672,
-      "rampEdge": "S",
-      "rampTiles": 3,
+      "floorZ": -5568,
+      "rampEdge": "N",
+      "rampTiles": 4,
       "rampWidth": 2,
       "rampRise": 64,
       "shoulderOffset": 64,
@@ -89,8 +89,8 @@
       "dressing": {
         "seed": 20260921,
         "perEdgeSegment": 2,
-        "minOffset": 32,
-        "spread": 224,
+        "minOffset": 192,
+        "spread": 384,
         "minScale": 0.7,
         "maxScale": 1.4,
         "rockSink": 24,
@@ -115,7 +115,9 @@
           "0003A2BD:Skyrim.esm",
           "0003A2BE:Skyrim.esm"
         ]
-      }
+      },
+      "retainHeight": 256,
+      "clearMargin": 160
     }
   }
 }

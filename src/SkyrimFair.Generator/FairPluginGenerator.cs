@@ -38,6 +38,13 @@ internal static class FairPluginGenerator
         LargeReferences = false,
     };
 
+    /// <summary>
+    /// Initially Disabled. Vanilla rocks and shrubs standing inside the paved area are
+    /// overridden with this flag rather than deleted: non-destructive, reversible, and
+    /// it leaves the original records intact for any other mod that references them.
+    /// </summary>
+    private const int InitiallyDisabledFlag = 0x800;
+
     /// <summary>Copies a cell's own fields without dragging in its existing contents.</summary>
     private static readonly Cell.TranslationMask CellHeaderOnly = new(defaultOn: true)
     {
@@ -111,6 +118,44 @@ internal static class FairPluginGenerator
             }
         }
 
+        // Clear vanilla clutter standing inside the paving, or rocks and shrubs poke
+        // straight through the finished surface.
+        if (foundation is not null && vanillaWorldspace is not null)
+        {
+            var clearable = CollectClearableBases(master!);
+            foreach (var key in byCell.Keys.ToList())
+            {
+                var vanillaCell = FindVanillaCell(vanillaWorldspace, key.X, key.Y);
+                if (vanillaCell is null)
+                {
+                    continue;
+                }
+
+                foreach (var existing in vanillaCell.Temporary.OfType<IPlacedObjectGetter>())
+                {
+                    var pos = existing.Placement?.Position;
+                    if (pos is null || !clearable.Contains(existing.Base.FormKey))
+                    {
+                        continue;
+                    }
+
+                    var margin = site.Foundation.ClearMargin;
+                    var covered = foundation.PavedRects.Any(r =>
+                        pos.Value.X >= r.MinX - margin && pos.Value.X <= r.MaxX + margin &&
+                        pos.Value.Y >= r.MinY - margin && pos.Value.Y <= r.MaxY + margin);
+                    if (!covered)
+                    {
+                        continue;
+                    }
+
+                    var disabled = existing.DeepCopy();
+                    disabled.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+                    byCell[key].Add(disabled);
+                    foundation.DisabledCount++;
+                }
+            }
+        }
+
         // Nest each touched cell under its exterior block / sub-block.
         var blocks = new Dictionary<(int X, int Y), WorldspaceBlock>();
         var subBlocks = new Dictionary<(int X, int Y), WorldspaceSubBlock>();
@@ -172,6 +217,39 @@ internal static class FairPluginGenerator
             master is not null,
             byCell.Keys.OrderBy(k => k.Y).ThenBy(k => k.X).ToList(),
             foundation);
+    }
+
+    /// <summary>
+    /// Base objects safe to disable: scenery only. Activators, containers, doors and
+    /// anything an NPC or quest might reference are deliberately excluded.
+    /// </summary>
+    private static HashSet<FormKey> CollectClearableBases(ISkyrimModGetter master)
+    {
+        var keys = new HashSet<FormKey>();
+        foreach (var record in master.Statics) keys.Add(record.FormKey);
+        foreach (var record in master.Trees) keys.Add(record.FormKey);
+        foreach (var record in master.Florae) keys.Add(record.FormKey);
+        return keys;
+    }
+
+    private static ICellGetter? FindVanillaCell(IWorldspaceGetter worldspace, int cx, int cy)
+    {
+        foreach (var block in worldspace.SubCells)
+        {
+            foreach (var subBlock in block.Items)
+            {
+                foreach (var cell in subBlock.Items)
+                {
+                    var grid = cell.Grid?.Point;
+                    if (grid is not null && grid.Value.X == cx && grid.Value.Y == cy)
+                    {
+                        return cell;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     private static Cell BuildPersistentCell(

@@ -70,6 +70,12 @@ internal static class FairFoundation
 
         var result = new FoundationResult();
 
+        foreach (var (col, row) in paved)
+        {
+            var (px, py) = Centre(col, row);
+            result.PavedRects.Add((px - tile / 2f, py - tile / 2f, px + tile / 2f, py + tile / 2f));
+        }
+
         void Put(string role, float x, float y, float z, float rotZ)
         {
             var baseRecord = StaticFor(role);
@@ -179,8 +185,15 @@ internal static class FairFoundation
                     continue;
                 }
 
-                // Retaining face hangs below the floor plane; surplus buries.
-                Put("retain", ex, ey, f.FloorZ, rot);
+                // Retaining face hangs below the floor plane; surplus buries. One
+                // piece only covers RetainHeight, so deep edges stack downward -
+                // otherwise a steep side leaves a gap showing open terrain.
+                var drop = edgeGround.HasValue ? f.FloorZ - edgeGround.Value : f.RetainHeight;
+                var courses = Math.Max(1, (int)MathF.Ceiling(drop / f.RetainHeight));
+                for (var c = 0; c < courses; c++)
+                {
+                    Put("retain", ex, ey, f.FloorZ - f.RetainHeight * c, rot);
+                }
 
                 // Shoulder sits on native ground just beyond the retaining face.
                 var sx = ex + dc * (tile / 2f + f.ShoulderOffset);
@@ -307,6 +320,11 @@ internal static class FairFoundation
 internal sealed class FoundationResult
 {
     public Dictionary<string, Static> Statics { get; set; } = new();
+
+    /// <summary>Paved tile bounds (minX, minY, maxX, maxY), for clearing vanilla clutter.</summary>
+    public List<(float MinX, float MinY, float MaxX, float MaxY)> PavedRects { get; } = new();
+
+    public int DisabledCount { get; set; }
 
     public Dictionary<string, int> Counts { get; } = new();
 

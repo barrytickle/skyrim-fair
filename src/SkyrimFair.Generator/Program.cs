@@ -56,6 +56,7 @@ try
         }
 
         Console.WriteLine($"  {foundation.DressingCount,3} x vanilla rock / shrub / scrub dressing");
+        Console.WriteLine($"  {foundation.DisabledCount,3} x vanilla clutter disabled under the paving");
         Console.WriteLine($"  {foundation.Statics.Count} STAT records created");
     }
 

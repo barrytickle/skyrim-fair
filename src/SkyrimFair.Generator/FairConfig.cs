@@ -227,6 +227,15 @@ internal sealed record FoundationConfig
     /// <summary>Fall per ramp tile, matching the kit's 1:8 grade over 512 units.</summary>
     public float RampRise { get; init; } = 64f;
 
+    /// <summary>Height of one retaining piece. Deeper edges stack several courses.</summary>
+    public float RetainHeight { get; init; } = 256f;
+
+    /// <summary>
+    /// Vanilla clutter within this distance of the paving is overridden as Initially
+    /// Disabled, so rocks and shrubs stop poking through the paved surface.
+    /// </summary>
+    public float ClearMargin { get; init; } = 160f;
+
     /// <summary>Gap between the retaining face and the shoulder wedge.</summary>
     public float ShoulderOffset { get; init; } = 64f;
 
@@ -301,9 +310,13 @@ internal sealed record DressingConfig
 
     public int PerEdgeSegment { get; init; } = 2;
 
-    public float MinOffset { get; init; } = 32f;
+    /// <summary>
+    /// How far beyond the paving edge dressing starts. Vanilla rocks have large
+    /// meshes, so placing them close to the edge spills them onto the paved surface.
+    /// </summary>
+    public float MinOffset { get; init; } = 192f;
 
-    public float Spread { get; init; } = 224f;
+    public float Spread { get; init; } = 384f;
 
     public float MinScale { get; init; } = 0.7f;
 

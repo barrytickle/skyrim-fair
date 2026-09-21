@@ -16,149 +16,133 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Current build — foundation prototype deployed
+## Current build — foundation moved to the player's position
 
-Site 1, the `Pass` icon and fast travel are all confirmed in game. This pass adds the
-landscaped foundation prototype: an irregular paved area built from the project-owned
-tile kit, with vanilla rocks and plants dressing the boundary.
+Barry reported vanilla rocks poking through the paving at Site 1 and asked for the fair
+to be moved to where he was standing. Both are done.
 
-**Not yet seen in game.** Everything below is structurally verified only.
+**Not yet seen in game.**
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
-| Size | **55,865 bytes** |
-| sha256 | `2e19b22caeebeda74db1a9858ec534ec437ee47d1c445037721392ee01f819b1` |
+| Size | **59,931 bytes** |
+| sha256 | `eab8eebf37742f6b9d5713b8e30b598841fcb84468f0cc5ca8d67ea00a4f17b6` |
 | Masters | `Skyrim.esm` only |
-| TES4 Author (`CNAM`) | `BarryRim Event Planner` |
-| Records | **1 WRLD, 5 CELL, 6 STAT, 98 REFR** |
-| Excluded | no LAND, NAVM, NPC, quest, script, package, music or animation records |
-| Load order | position 82, before `DynDOLOD.esp` (416) and `Occlusion.esp` (417) |
+| Records | 1 WRLD, 4 CELL, 6 STAT, 156 REFR |
+| Deployed | `mods\Skyrim Fair\SkyrimFair.esp`, byte-identical; 6 NIFs unchanged |
 
-### STAT records — the tile kit
+### Player position read from the save
 
-| FormKey | EditorID | Mesh |
-| --- | --- | --- |
-| `000802:SkyrimFair.esp` | `SkyrimFairFloorFill1024` | `SkyrimFair\SkyrimFair_FloorFill_1024.nif` |
-| `000807:SkyrimFair.esp` | `SkyrimFairFloorEdge512` | `SkyrimFair\SkyrimFair_FloorEdge_512.nif` |
-| `00080E:SkyrimFair.esp` | `SkyrimFairRetain512` | `SkyrimFair\SkyrimFair_Retain_512.nif` |
-| `000839:SkyrimFair.esp` | `SkyrimFairRetainCorner128` | `SkyrimFair\SkyrimFair_RetainCorner_128.nif` |
-| `00082E:SkyrimFair.esp` | `SkyrimFairRamp512` | `SkyrimFair\SkyrimFair_Ramp_512.nif` |
-| `000810:SkyrimFair.esp` | `SkyrimFairShoulder512` | `SkyrimFair\SkyrimFair_Shoulder_512.nif` |
+Read directly from `Save50_144F99E7_0_4261727279_Tamriel_000455_20260921172310_7_1.ess`
+(save 50, 2026-09-21 17:23, character "Barry", level 7).
 
-Mesh paths are relative to `Data\meshes\`.
+The save is LZ4-compressed, so the body was decompressed with a small pure-Python LZ4
+block decoder and the **Player Location** entry (global data type 1) parsed out:
+
+| Field | Value |
+| --- | --- |
+| worldspace | `0x00003C` = Tamriel |
+| position | **X -5432.4, Y -18253.0, Z -5627.7** |
+| stored cell grid | `-2, -4` — **stale**, the position implies `-2, -5` |
+
+The position is the authoritative field and cross-checks against terrain: native ground
+at that XY is `-5656`, putting the player 28 units above it, exactly right for standing.
+Two useful side confirmations from the save: `SkyrimFair.esp` is in its load order, and
+the save carries 94 regular + 412 light plugins, matching `loadorder.txt`'s 506 lines.
+
+**New fair centre: `X -5376, Y -18304`** — the player's position snapped to the 128-unit
+heightmap grid, 76 units away. Snapping makes every tile corner land on a terrain sample
+point, so floor and exposure calculations are exact rather than interpolated.
+
+### The rocks — cause and fix
+
+**15 vanilla references were standing inside the old paved footprint** and the paving was
+laid straight over them: `RockShelf01FieldGrass01`, `RockTundraLand02Tundra01`,
+`TreeThicket01`, eight tundra and yellow shrubs, and three critter markers.
+
+The generator now overrides vanilla clutter within `clearMargin` (160u) of the paving and
+sets **Initially Disabled** (`0x800`) on it. At the new site that is **56 references**.
+
+This is safe:
+
+- the references are **disabled, not deleted** — non-destructive and reversible
+- **no LAND edit**, so the ground itself is completely untouched; only the objects
+  standing on it stop rendering
+- only `STAT`, `TREE` and `FLOR` base objects qualify. Activators, containers, doors,
+  furniture and anything an NPC or quest might reference are deliberately excluded
+
+Separately, dressing now starts **192u** beyond the paving edge (was 32u) with a 384u
+spread, because vanilla rock meshes are large enough to spill onto the surface from close
+range.
+
+### New site geometry
+
+| Field | Value |
+| --- | --- |
+| Cell | `00009A49:Skyrim.esm` (`TestTundra2`), grid `-2, -5` |
+| Cells touched | `-2,-5`, `-1,-5`, `-2,-4` |
+| Floor Z | **-5568** (terrain maximum, pure fill, no LAND edits) |
+| Relief under paving | **392u** |
+| Paved extent | X `-6912..-3840`, Y `-19584..-17024` |
+
+Edge exposure and slope, measured:
+
+| Edge | Mean | Max | Ground beyond |
+| --- | --- | --- | --- |
+| **West** | 224u | **392u** | falls away |
+| **North** | 175u | 320u | **falls away** |
+| South | 92u | 208u | rises |
+| East | 83u | 136u | rises |
+
+**The ramp moved from south to north.** At the old site the terrain fell away south; here
+it rises into the hill that way, so a south ramp would have climbed uphill into nothing.
+North both falls away and is rotation-safe (0 degrees), so it keeps the one piece whose
+orientation cannot come out backwards on an unconfirmed rotation convention. Four chained
+tiles drop 256u, stepping `-5568 → -5632 → -5696 → -5760`.
+
+The map marker moved with it, to the **north ramp foot at `(-5376, -14720, -5792)`** —
+on native ground, on the Whiterun approach, so fast travel arrives facing the ramp.
+
+**Retaining now stacks.** A single piece is 256u tall and the west edge needs up to 392u,
+which would have left a gap showing open terrain. Edges deeper than one course now place
+additional courses downward; the build uses two courses at `-5568` and `-5824`.
 
 ### What is placed
 
 | Piece | Count |
 | --- | --- |
-| floor fill 1024 | 4 |
-| floor edge 512 | 6 |
-| retaining face | 18 |
+| floor fill 1024 / floor edge 512 | 4 / 6 |
+| retaining face (stacked) | 22 |
 | retaining corner | 2 |
-| ramp | 6 (2 wide x 3 chained) |
-| shoulder wedge | 18 |
-| vanilla rock / shrub / scrub dressing | 44 |
-| map marker + market stall | 2 |
-
-Plus the original two references: `FairSiteMapMarker` and `FairTestMarketStall`.
-
-### Footprint
-
-The outline is driven by an irregular mask in `fair.config.json`, one character per
-512-unit cell, so the paving stays on a clean grid while the silhouette does not read
-as a rectangle or as the L-shaped safe envelope:
-
-```text
-.###..
-.#####
-######
-.#####
-..###.
-```
-
-- paved extent `X -7168..-4096`, `Y -14080..-11520` (3072 x 2560 bounding box, 22 cells paved)
-- floor **Z -5672** — the terrain maximum across the footprint, so the platform is
-  **pure fill with zero cut and no LAND edits**
-- terrain relief under the paving: 120u
-- 4 fill tiles cover the interior via greedy 2x2 blocks; the remaining 6 cells take
-  512 edge tiles, which is what lets the outline step in 512u increments
-
-### Edges
-
-Measured floor exposure above native terrain, per compass edge:
-
-| Edge | Mean | Max | Treatment |
-| --- | --- | --- | --- |
-| West | 74u | 104u | retaining + shoulder |
-| South | 64u | 96u | **entrance ramp** + retaining |
-| North | 63u | 80u | retaining + shoulder |
-| East | 32u | 80u | partly **meets grade** |
-
-Two east segments where native ground reaches within 16u of the floor get **no**
-retaining and no shoulder: there is no step to hide there, so the paving simply meets
-grade. That is the `minExposure` rule in config.
-
-The ramp runs south, chained 3 tiles deep, stepping `-5672 → -5736 → -5800`. It is
-placed on the **south** edge deliberately: 180 degrees is the one rotation that is
-identical under either Z-rotation sign convention, so the most orientation-sensitive
-piece in the kit cannot come out backwards on its first test.
-
-### Two placement problems found and fixed
-
-1. **The stall would have been buried.** It sat at native ground `Z -5720`, which is
-   48 units *below* the new paving at `-5672`. It now stands on the platform at the
-   floor height, giving a familiar object for judging surface level and scale.
-2. **The map marker would have trapped the player.** It was at the site centre at
-   `-5720`, under a 32-unit slab whose underside is at `-5704` — a 16-unit gap. Fast
-   travelling there would have dropped the player beneath the paving. The marker has
-   moved to open native ground beyond the ramp foot at **`(-5632, -15872, -5912)`**,
-   so arrival is now at the fair entrance, facing the ramp.
-
-### Cells touched
-
-| Cell | FormKey | Contents |
-| --- | --- | --- |
-| `-2,-4` | `00009A28:Skyrim.esm` | most of the paving, ramp, stall |
-| `-2,-3` | `00009A07:Skyrim.esm` | northern paving and dressing |
-| `-1,-4` | `00009A27:Skyrim.esm` | eastern dressing only |
-| `-1,-3` | `00009A06:Skyrim.esm` | eastern dressing only |
-| persistent `00000D74` | | map marker |
-
-The two `-1` cells are touched only because dressing spills past the eastern paving
-edge. **All five cell overrides are byte-identical to vanilla** — same subrecord kinds,
-same values.
+| ramp | 8 (2 wide x 4 chained) |
+| shoulder wedge | 19 |
+| vanilla dressing | 44 |
+| **vanilla clutter disabled** | **56** |
 
 ### Verification
 
-19 structural checks, all passing, by parsing the written ESP independently of Mutagen:
-single master, author intact, 6 STAT records with mesh paths all under `SkyrimFair\`
-and ending `.nif`, 32 references on the floor plane, 6 ramp tiles at exactly three Z
-levels 64u apart sharing one rotation, no shoulder above the floor, dressing varied in
-scale and rotation, marker off the paved area, stall on it, and no LAND / NAVM / NPC /
-quest / script / package / music / animation records.
+23 structural checks, all passing, by parsing the written ESP independently of Mutagen:
+single master, author intact, 6 STAT records with mesh paths under `SkyrimFair\`, paving
+on the floor plane, 8 ramp tiles at four Z levels 64u apart all at rotation 0, retaining
+stacked in 256u courses, no shoulder above the floor, marker at the ramp foot and outside
+the paving, stall on the paving, 56 vanilla references flagged Initially Disabled and all
+of them vanilla FormKeys, and no LAND / NAVM / NPC / quest / script records.
 
-### MO2 deployment
+All four cell overrides remain byte-identical to vanilla.
 
-| Field | Value |
-| --- | --- |
-| Plugin | `mods\Skyrim Fair\SkyrimFair.esp`, byte-identical, sha256 `2e19b22c…f819b1` |
-| Meshes | `mods\Skyrim Fair\meshes\SkyrimFair\*.nif` — all 6, byte-identical |
+### Concern: this site is three times less flat
 
-`modlist.txt`, `plugins.txt` and `loadorder.txt` hashed before and after: **unchanged**.
-Nothing enabled or reordered, no saves touched, Skyrim not launched.
+Worth stating plainly. The audited Site 1 had **120u** of relief under the paving; the
+player's position has **392u**. The west side becomes a 392u (about 5.6 m) faced wall.
+That is now structurally handled by stacked retaining and it may well be the look Barry
+wants — he asked about making the platform taller than the rocks — but it is a much
+bigger intervention in the landscape than the original site needed, and the terrain here
+is the lower slope of the hill that rises south and east.
 
-### Known caveats for the in-game test
-
-- **The kit is untextured.** It will render with a default material. Judge geometry,
-  shape and how the edge meets the landscape, not looks.
-- **No navmesh.** NPCs cannot path onto the platform; that is the next milestone.
-- **Z-rotation convention is unconfirmed.** Retaining faces use 0 / 90 / 180 / 270
-  degrees with +Y outward, on the right-handed assumption. If the sign is flipped, the
-  north and south faces will look right and the **east and west ones will be wrong** —
-  that is the diagnostic. The ramp is immune, being at 180.
-- Only north-east style outer corners get a corner piece, for the same reason. Other
-  corners rely on rocks, which is the intended treatment anyway.
+If it reads as too monumental in game, the options are: shrink the footprint onto flatter
+ground, shift back north-west toward the audited site, or keep it and lean into the
+terrace look. All three are config-only changes.
 
 ## Site 1 hazards and safe build envelope
 
@@ -532,27 +516,22 @@ All three are archives in `external/` (git-ignored) and **none is installed in M
 
 ## Next local verification
 
-Phase 4 is done and deployed. **Barry's in-game inspection is the gate** before anything else.
+The foundation has moved to the player's position and the vanilla clutter under it is
+disabled. Barry's in-game look is the gate.
 
-What to judge, in order:
+What to check:
 
-1. **Is the centre genuinely flat?** Walk the paved area. The market stall stands at the
-   centre on the floor plane as a reference.
-2. **Does the outline read as organic?** From a distance and from the ramp, the perimeter
-   should curve and vary, never reading as a rectangle or an L.
-3. **Does the edge treatment work?** Look at where retaining faces, shoulder wedges and
-   vanilla rocks meet native tundra. The join is what this milestone exists to test.
-4. **Does the ramp work?** Walk up and down the south entrance; check the three chained
-   tiles and whether collision carries you smoothly.
-5. **East side.** The paving should meet grade there with no retaining wall. Check it
-   does not float or leave a lip.
-6. **Rotation check.** If retaining faces look right on north and south but wrong on east
-   and west, the Z-rotation sign is inverted — a one-constant fix.
-7. **Fast travel.** Should now arrive on open ground south of the ramp, not under the paving.
+1. **Are the rocks gone?** No boulders or shrubs poking through the paved surface. 56
+   references are disabled; if anything still pokes through, tell me what it looks like
+   and I will widen `clearMargin` or add its base type to the clearable set.
+2. **Is the centre flat?** The market stall stands at the centre on the floor plane.
+3. **The north ramp.** Four chained tiles dropping 256u, on the Whiterun approach. Fast
+   travel now arrives at its foot. Walk up it.
+4. **The west side.** This is the tall one — up to 392u faced in two stacked courses.
+   Does it read as a rocky terrace or as a wall? This is the main open question.
+5. **Does the outline still read as organic** rather than a rectangle?
+6. **Rotation check.** North and south retaining faces should look right regardless. If
+   east and west are wrong, the Z-rotation sign is inverted — a one-constant fix.
 
-Then, depending on the result:
-
-- if the foundation reads well, the next milestones are a texture/material pass and then
-  navmesh, which is required before any NPC can use the platform
-- if the shape or edge treatment is wrong, iterate on the footprint mask and dressing in
-  `fair.config.json` — both are data, so no code changes are needed
+Still outstanding regardless of the result: the kit is **untextured**, and there is **no
+navmesh**, so NPCs cannot use the platform. Both are their own milestones.
