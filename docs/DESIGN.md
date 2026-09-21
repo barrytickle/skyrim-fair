@@ -208,6 +208,39 @@ Current external/resource candidates include:
 
 Avoid expanding the dependency list simply for convenience. The fair should remain relatively lightweight and easy to understand.
 
+## Recurring ambient easter-egg NPCs
+
+Two named background NPCs should appear around the fair as subtle creator cameos. They do not need quests, dialogue, follower functionality, or player interaction.
+
+### Garrick Tallow
+
+- Bosmer
+- cheerful wandering festival bard / entertainer
+- moves around the fair rather than being tied permanently to the main stage
+- uses suitable vanilla bard / lute idles
+- likely routes include the main lane, food stalls, trading rows and stage square
+- visually warm, friendly and relaxed
+- should feel like someone who is simply delighted that the fair exists
+- may occasionally linger near the sweetroll stall
+
+### Claudius Vale
+
+- Imperial
+- reserved fair inspector / records keeper
+- neat, practical Imperial-flavoured clothing
+- uses a vanilla ledger-writing / checklist idle where practical, inspired by the Helgen prisoner-list sequence
+- tends to remain around the entrance, trader crossroads or other places that look like they require paperwork
+- should visually read as methodical, observant and quietly judgemental
+
+### Pair dynamic
+
+Their contrast is intentional:
+
+- Garrick = roaming, sociable, musical, upbeat
+- Claudius = purposeful, administrative, exacting
+
+They should read as a playful cat-and-dog pairing without needing dialogue to explain it.
+
 ## Tone
 
 The Wanderer's Fair should feel:
