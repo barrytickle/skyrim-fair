@@ -31,7 +31,12 @@
 
 - [ ] Select final flat exterior site
 - [ ] Conflict scan against Barry's load order
+- [ ] Build the dense Christmas-market-inspired main avenue and side trading rows
 - [ ] Stalls, tents, fences, lanterns and seating
+- [ ] Food lane: sweetroll-only stall, pies, mead/ale and other specialist food traders
+- [ ] Trading rows: iron/steel, Imperial, Stormcloak, Dwemer, Elven, mage, alchemy and jewellery
+- [ ] Put the Imperial and Stormcloak gear stalls opposite each other as rival traders
+- [ ] Establish the stage square with dancing crowd and ambient spectators
 - [ ] Fair opening hours / schedule
 - [ ] Vendors and ambient NPCs
 - [ ] Evening lighting state
