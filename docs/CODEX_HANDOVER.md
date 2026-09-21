@@ -1,8 +1,8 @@
 # Codex handover
 
-This document hands the local Skyrim Fair implementation workflow from Claude to Codex.
+This is the living agent handover for Skyrim Fair. It should stay usable in both directions: Codex can take over from Claude, and Claude can later take over from Codex without relying on chat history.
 
-Codex should treat the repository and the latest local audit as authoritative. Do not rely on chat memory when the repo says something different.
+The active implementation agent should treat the repository and the latest local audit as authoritative. Do not rely on chat memory when the repo says something different.
 
 ## First things to read
 
@@ -155,7 +155,26 @@ Do not touch Barry's save files, Pandora output, DynDOLOD, Occlusion, load order
 
 ## Git and documentation workflow
 
-Barry wants Codex to document the work continuously, not just dump a summary at the end.
+Barry wants the active coding agent to document the work continuously, not just dump a summary at the end.
+
+### Keep this handover current
+
+`docs/CODEX_HANDOVER.md` is a living cross-agent handover, not a one-time onboarding note. Whenever a **meaningful project change** occurs, update this file in the same implementation pass so another agent can take over immediately.
+
+Meaningful changes include, for example:
+
+- approved site / footprint / elevation / entrance changes
+- new or changed asset pipeline steps
+- new meshes, materials, textures, collision rules or conversion quirks
+- changes to generator architecture or config structure
+- newly accepted technical debt, compatibility constraints or safety rules
+- completion of a major milestone such as naturalisation, floor texturing, navmesh, stage systems or NPC systems
+- any new local path / tool / dependency that a replacement agent would need
+- a major design decision that materially changes what should be built next
+
+Do **not** churn this file for tiny implementation details already captured in `docs/AUDIT.md`. Keep it concise enough to onboard another agent quickly, while preserving the durable decisions and current direction.
+
+When handing work back to Claude, Claude should read `docs/CODEX_HANDOVER.md`, then `docs/AUDIT.md`, then `docs/DESIGN.md` before making changes.
 
 For every meaningful implementation pass:
 
@@ -176,9 +195,10 @@ For every meaningful implementation pass:
    - verification performed
    - known deviations / unresolved issues
    - what Barry should test in game
-7. commit with a descriptive message
-8. push to `feat/bootstrap-generator`
-9. do not merge
+7. if the pass changes durable project state or direction, update `docs/CODEX_HANDOVER.md` in the same pass
+8. commit with a descriptive message
+9. push to `feat/bootstrap-generator`
+10. do not merge
 
 Do not append old audit reports inside `docs/AUDIT.md`. Git history is the history. The file should describe the latest state in full.
 
