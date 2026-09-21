@@ -1,4 +1,4 @@
-# Claude next task: first visible Skyrim Fair build
+# Claude next task: prepare the first MO2 test build
 
 Work from the latest `feat/bootstrap-generator` branch.
 
@@ -6,53 +6,41 @@ Read `docs/AUDIT.md` first. Treat it as the current source of truth for Barry's 
 
 ## Goal
 
-Upgrade the C# / Mutagen generator from the current header-only ESP into the first **visible in-game proof** of Skyrim Fair.
+Prepare the first generated Skyrim Fair plugin for an in-game test through Mod Organizer 2.
 
-This milestone should generate an ESP containing:
+The generated ESP has already been structurally verified. This task is only to place it into a dedicated MO2 mod folder so Barry can enable it manually.
 
-1. one vanilla market stall at the audited fair test site, and
-2. a temporary map marker named **The Wanderer's Fair** so Barry can reach the site easily during testing.
+## Safety boundary
 
-Do not install or enable the ESP in MO2 yet. Do not modify Skyrim, MO2, the load order, Pandora output, or any installed mod files.
+You may create files and folders inside the MO2 `mods` directory for this dedicated project mod.
 
-## Known-good audited data
+Do **not**:
 
-### Test exterior cell
+- enable the mod in MO2
+- enable the plugin in the right-hand plugin pane
+- reorder the load order
+- edit Barry's active profile
+- launch Skyrim
+- launch SKSE
+- modify `stock\Data`
+- modify any existing mod
+- modify Pandora output
+- run DynDOLOD/Occlusion
+- touch Barry's saves
 
-- Worldspace: Tamriel
-- cell grid: `2, -2`
-- cell FormKey: `000095FE:Skyrim.esm`
-- placement: `X 10880, Y -7552, Z -4616`
+Barry will perform the enable-and-launch step manually.
 
-### Test object
+## Known paths
 
-- EditorID: `SMarketStall01`
-- type: `STAT`
-- FormKey: `00064B87:Skyrim.esm`
+From the latest audit:
 
-### Map marker
+- MO2 instance: `E:\Modlists\Still In Skyrim`
+- MO2 mods directory: `E:\Modlists\Still In Skyrim\mods`
+- project output: `dist\SkyrimFair.esp`
 
-- base object: `MapMarker`
-- FormKey: `00000010:Skyrim.esm`
-- display name: `The Wanderer's Fair`
-- place the marker in Tamriel's persistent cell, as vanilla exterior markers are structured
-- for this prototype, make it visible and fast-travelable immediately so Barry can reach the test site easily
-- use the village / settlement-style marker icon identified in the audit unless Mutagen exposes a clearer typed equivalent
+## Required work
 
-## Implementation requirements
-
-- Use Mutagen APIs, not binary patching or hand-written ESP bytes.
-- Reference records with `FormKey` / typed FormLinks. Never hardcode a load-order index.
-- Ensure `Skyrim.esm` is present as a master in the generated plugin.
-- Preserve the existing config-driven generator structure where practical.
-- Prefer adding explicit prototype-site configuration fields over scattering raw coordinates through implementation code.
-- Keep this milestone minimal. Do not add Medieval Markets, banner assets, dancers, music, NPCs, navmesh, LAND edits, scripts, packages, or DynDOLOD work yet.
-- Do not write into Skyrim's `Data` directory.
-- Output remains `dist/SkyrimFair.esp`.
-
-## Verification
-
-Run:
+1. Rebuild the project from the repository root:
 
 ```powershell
 dotnet restore SkyrimFair.sln
@@ -60,37 +48,58 @@ dotnet build SkyrimFair.sln -c Release
 dotnet run --project src/SkyrimFair.Generator -- fair.config.json
 ```
 
-Then inspect the generated ESP read-only and verify:
+2. Verify `dist\SkyrimFair.esp` exists and matches the expected first-visible-build structure from `docs/AUDIT.md`.
 
-- it parses successfully
-- `Skyrim.esm` is a master
-- it contains a placed reference whose base is `00064B87:Skyrim.esm`
-- that reference resolves under Tamriel cell `000095FE:Skyrim.esm`
-- its position is the intended test-site coordinate
-- it contains a map-marker reference using base `00000010:Skyrim.esm`
-- the marker name is `The Wanderer's Fair`
-- the marker is visible + fast-travelable for the prototype
-- no navmesh, LAND, NPC, quest, script, package, music, or animation records were accidentally added
-
-If Mutagen requires a different structural approach for exterior-cell overrides or persistent worldspace references, use the correct Mutagen-native approach and document it. Do not fake the result merely to satisfy the expected shape.
-
-## Git workflow
-
-You may edit the generator/config/tests/docs required for this milestone.
-
-When complete:
-
-1. overwrite `docs/AUDIT.md` with the latest verified local state,
-2. include the generated ESP size, record counts, exact new FormKeys allocated by Skyrim Fair, build result, and any caveats,
-3. commit all code changes and the refreshed audit,
-4. push them to `feat/bootstrap-generator`,
-5. do not merge the PR,
-6. tell Barry that the first visible build has been pushed, or clearly report the blocker if it cannot be completed.
-
-Suggested final commit message:
+3. Create this dedicated MO2 mod folder if it does not already exist:
 
 ```text
-feat: generate first visible fair site
+E:\Modlists\Still In Skyrim\mods\Skyrim Fair\
 ```
 
-The Git history is the audit history. `docs/AUDIT.md` must describe only the latest known state.
+4. Copy the generated plugin to:
+
+```text
+E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp
+```
+
+5. Verify the copied file exists and is byte-identical to `dist\SkyrimFair.esp`.
+
+6. Do not add any other files unless MO2 itself requires metadata to recognise the folder. If metadata is created, document exactly what was added and why.
+
+## Expected state when finished
+
+The filesystem should contain:
+
+```text
+E:\Modlists\Still In Skyrim\mods\Skyrim Fair\
+└── SkyrimFair.esp
+```
+
+The mod may appear in MO2's left pane after refresh/restart, but it must remain disabled.
+
+The plugin must not be enabled in Barry's active load order.
+
+## Git / audit workflow
+
+After preparing the folder:
+
+1. overwrite `docs/AUDIT.md` with the latest verified state,
+2. record:
+   - build result
+   - generated ESP size/hash
+   - deployed ESP size/hash
+   - exact MO2 destination path
+   - whether the mod folder already existed or was created
+   - confirmation that the copied file is byte-identical
+   - confirmation that the mod/plugin were **not enabled**
+3. commit and push the refreshed audit to `feat/bootstrap-generator`,
+4. do not commit the generated ESP or any MO2 files to Git,
+5. tell Barry only that the MO2 test build is prepared and ready for him to enable manually, plus any blocker if something went wrong.
+
+Suggested commit message:
+
+```text
+docs: record prepared MO2 test build
+```
+
+The Git history is the audit history. `docs/AUDIT.md` should describe only the latest known state.
