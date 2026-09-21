@@ -832,35 +832,82 @@ internal static class FairFoundation
     }
 
     /// <summary>
-    /// Picks the middle run of perimeter segments on the configured ramp edge, so
-    /// the entrance reads as one deliberate approach rather than scattered ramps.
+    /// Picks one contiguous run of perimeter segments on the ramp edge.
+    ///
+    /// The run has to be contiguous AND share the same perpendicular coordinate, or
+    /// the ramp lanes come out staggered: on an irregular outline the outermost
+    /// segments of an edge are not all in the same row, and simply taking the last
+    /// N candidates by column produced two lanes starting a whole tile apart.
+    ///
+    /// Where several rows offer a long enough run, the outermost one wins, so the
+    /// ramp leaves from the edge of the outline rather than out of a notch in it.
     /// </summary>
     private static HashSet<(int, int, string)> ChooseRampSegments(
         HashSet<(int, int)> paved, FoundationConfig f, int cols, int rows)
     {
         var edge = f.RampEdge.ToUpperInvariant();
         var (dc, dr) = Directions.First(d => d.Name == edge) switch { var d => (d.Dc, d.Dr) };
+        var chosen = new HashSet<(int, int, string)>();
 
         var candidates = paved
             .Where(c => !paved.Contains((c.Item1 + dc, c.Item2 + dr)))
-            .OrderBy(c => dc == 0 ? c.Item1 : c.Item2)
             .ToList();
-
-        var chosen = new HashSet<(int, int, string)>();
         if (candidates.Count == 0)
         {
             return chosen;
         }
 
+        // Along = the axis the ramp is wide in; across = the one it descends along.
+        static int Along((int Col, int Row) c, int dc) => dc == 0 ? c.Col : c.Row;
+        static int Across((int Col, int Row) c, int dc) => dc == 0 ? c.Row : c.Col;
+
+        var runs = new List<List<(int Col, int Row)>>();
+        foreach (var line in candidates
+            .Select(c => (Col: c.Item1, Row: c.Item2))
+            .GroupBy(c => Across(c, dc)))
+        {
+            var ordered = line.OrderBy(c => Along(c, dc)).ToList();
+            var run = new List<(int Col, int Row)> { ordered[0] };
+            foreach (var cell in ordered.Skip(1))
+            {
+                if (Along(cell, dc) - Along(run[^1], dc) == 1)
+                {
+                    run.Add(cell);
+                }
+                else
+                {
+                    runs.Add(run);
+                    run = new List<(int Col, int Row)> { cell };
+                }
+            }
+
+            runs.Add(run);
+        }
+
+        var usable = runs.Where(r => r.Count >= f.RampWidth).ToList();
+        if (usable.Count == 0)
+        {
+            // Nothing wide enough: fall back to the longest run there is, so the
+            // entrance is still contiguous even if it ends up narrower than asked.
+            usable = new List<List<(int Col, int Row)>> { runs.OrderByDescending(r => r.Count).First() };
+        }
+
+        // Outermost line first, so the ramp leaves the outline rather than a notch.
+        var pick = usable
+            .OrderBy(r => dr != 0 ? Across(r[0], dc) * dr : Across(r[0], dc) * -dc)
+            .ThenByDescending(r => r.Count)
+            .First();
+
+        var width = Math.Min(f.RampWidth, pick.Count);
         var start = f.RampAlign.ToLowerInvariant() switch
         {
             "start" => 0,
-            "end" => Math.Max(0, candidates.Count - f.RampWidth),
-            _ => Math.Max(0, candidates.Count / 2 - f.RampWidth / 2),
+            "end" => pick.Count - width,
+            _ => Math.Max(0, pick.Count / 2 - width / 2),
         };
-        for (var i = start; i < Math.Min(candidates.Count, start + f.RampWidth); i++)
+        for (var i = start; i < start + width; i++)
         {
-            chosen.Add((candidates[i].Item1, candidates[i].Item2, edge));
+            chosen.Add((pick[i].Col, pick[i].Row, edge));
         }
 
         return chosen;

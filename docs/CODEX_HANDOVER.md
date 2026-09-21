@@ -29,8 +29,8 @@ The current site, footprint, height and entrance are approved unless Barry expli
 
 Read `docs/AUDIT.md` for exact current values and hashes. At handover time the important state is:
 
-- centre approximately `X -5888, Y -12928`
-- floor `Z -5504`
+- centre `X -5888, Y -12928`
+- floor `Z -5592`
 - the platform was deliberately raised by +192 from the earlier test
 - irregular 22-tile paving footprint
 - broad ramp connects toward the existing road
@@ -95,8 +95,16 @@ references. The following are **decisions**, not suggestions. See
 2. **The platform must be stepped, not just bigger.** A single flat level at the wanted
    3,482 span needs a 444-unit wall on its deep side. Two or three levels bring that to
    ~204-221. Stepping is what makes the size affordable.
-3. **Footprint grows to roughly 37 cells, 3,482 span, on three authored levels**
-   cascading north-west toward the road. Approved by Barry.
+3. **Footprint grew to 33 cells, 8.65 M sq units, single level, floor -5592.**
+   Built. Two earlier intentions did not survive measurement and were dropped:
+   - *three levels*: the ground under the footprint sits almost entirely in one
+     128-unit band, so levels banded by terrain collapsed into one, and levels built
+     up on flat ground made the outer walls worse (402-422u). What stops it reading
+     as a plinth is that the wall now **varies 120-222** instead of a uniform
+     192-288 band - the variation comes from the terrain, not from architecture.
+   - *moving the site 512 south*: checked, and the only gain was the deepest corner
+     dropping 311 -> 274 with min and median identical. Not worth moving an approved,
+     tested placement. **The site centre is unchanged at X -5888, Y -12928.**
 4. **Edge language follows the second concept, not the first**: low, irregular, mostly
    natural rock outcrop. **Confirmed by Barry:** rock is the *default* edge treatment;
    drystone terrace walling appears only on the long straight runs that are genuinely

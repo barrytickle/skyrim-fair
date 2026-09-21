@@ -38,27 +38,29 @@
       "radius": 1800,
       "locationRefType": "0010F63C:Skyrim.esm",
       "position": {
-        "x": -4864,
+        "x": -6144,
         "y": -10112,
-        "z": -5888
+        "z": -5904
       }
     },
     "foundation": {
       "enabled": true,
       "tileSize": 512,
-      "floorZ": -5504,
+      "floorZ": -5592,
       "rampEdge": "N",
-      "rampTiles": 4,
+      "rampTiles": 2,
       "rampWidth": 2,
-      "rampRise": 96,
+      "rampRise": 168,
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
-        ".###..",
-        ".#####",
-        "######",
-        ".#####",
-        "..###."
+        "..###..",
+        ".#####.",
+        ".######",
+        ".######",
+        ".######",
+        ".#####.",
+        "...##.."
       ],
       "pieces": {
         "floorFill": {
@@ -102,7 +104,7 @@
         "seed": 20260921,
         "perEdgeSegment": 2,
         "cliffFace": "00097065:Skyrim.esm",
-        "cliffMinRunSegments": 2,
+        "cliffMinRunSegments": 3,
         "cliffMaxRunSegments": 4,
         "cliffMeshLength": 1944,
         "cliffMeshDepth": 465,
@@ -146,7 +148,7 @@
           "000332C7:Skyrim.esm",
           "0001A6E2:Skyrim.esm"
         ],
-        "wallMinDrop": 140,
+        "wallMinDrop": 96,
         "wallPerSegment": 3,
         "wallTopOvershoot": 48,
         "wallBedding": 80,
@@ -170,13 +172,12 @@
       "clearMaxRadius": 2000,
       "clearClutter": false,
       "disableReferences": [
-        "00048032:Skyrim.esm",
         "0004801A:Skyrim.esm",
         "00048031:Skyrim.esm",
-        "00023362:Skyrim.esm",
-        "00047F8C:Skyrim.esm"
+        "00047F8C:Skyrim.esm",
+        "00048026:Skyrim.esm"
       ],
-      "rampAlign": "end"
+      "rampAlign": "centre"
     }
   }
 }

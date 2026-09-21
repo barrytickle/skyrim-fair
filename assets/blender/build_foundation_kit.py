@@ -50,10 +50,12 @@ FLOOR_THICKNESS = 32
 RETAIN_HEIGHT = 256
 RETAIN_DEPTH = 128
 RAMP_RUN = 512
-# 1:5.3 grade. Was 64 (1:8), but at the fair site the ground falls away almost as
-# fast as a 1:8 ramp descends, so a four-tile run still left its foot floating 128
-# units above the terrain. At 96 the foot lands dead on grade over the same length.
-RAMP_RISE = 96
+# 1:3.0 grade. The terrace floor moved down to -5592 with the larger footprint, but
+# the ground between its north edge and the road falls harder than the ramp did -
+# 189 units over the first 1024, with a 1:2.2 pitch in the middle of it. A gentler
+# ramp simply floats, and a longer one overshoots the road entirely. 168 over 512
+# matches the bank it is cut into and lands the foot on grade at the roadside.
+RAMP_RISE = 168
 # Deep enough that the underside never surfaces. This is a measured figure, not a
 # guess: the ramp head stands 288 units above native ground on its western flank, so
 # at 256 the slab's underside sat 32 units clear of the ground and you could see
