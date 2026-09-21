@@ -359,10 +359,36 @@ def main():
     parser.add_argument("--mods", required=True, help="MO2 mods folder")
     parser.add_argument("--esp", default="dist/SkyrimFair.esp")
     parser.add_argument("--margin", type=float, default=512.0)
+    parser.add_argument(
+        "--floor", type=float, default=None,
+        help="Floor plane Z. With this, each reference reports whether its mesh "
+             "would stand PROUD of the paving, which is the difference between a "
+             "harmless buried overlap and something poking through the market floor.")
+    parser.add_argument(
+        "--rect", default=None,
+        help="Audit a PROPOSED footprint instead of the built one: "
+             "cx,cy,radiusTiles[,tile]. Lets a layout be checked for conflicts "
+             "before anything is generated or deployed.")
     parser.add_argument("--search", type=float, default=2048.0)
     args = parser.parse_args()
 
-    rects = read_footprint(args.esp)
+    if args.rect:
+        parts = [float(v) for v in args.rect.split(",")]
+        cx, cy, radius = parts[0], parts[1], parts[2]
+        tile = parts[3] if len(parts) > 3 else 512.0
+        span = int(math.ceil(radius)) + 1
+        rects = []
+        for row in range(-span, span + 1):
+            for col in range(-span, span + 1):
+                if math.hypot(col, row) > radius:
+                    continue
+                x = cx + col * tile
+                y = cy - row * tile
+                rects.append((x - tile / 2, y - tile / 2, x + tile / 2, y + tile / 2))
+        print(f"auditing PROPOSED footprint: centre {cx:.0f},{cy:.0f} "
+              f"radius {radius} tiles -> {len(rects)} cells")
+    else:
+        rects = read_footprint(args.esp)
     if not rects:
         raise SystemExit("no paving found in the plugin - nothing to audit")
     min_x = min(r[0] for r in rects) - args.search
@@ -415,6 +441,8 @@ def main():
             "base_type": base_type, "source": ref["source"],
             "pos": [round(v) for v in ref["pos"]], "scale": round(ref["scale"], 2),
             "radius": round(radius), "box": [round(v) for v in box],
+            "top": (round(ref["pos"][2] + bounds[5] * ref["scale"])
+                    if bounds else None),
             "on_foundation": overlaps(box, rects),
             "category": classify(editor_id, base_type, radius, reasons),
             "reasons": reasons,
@@ -428,6 +456,17 @@ def main():
                      if r["category"] == category and r["on_foundation"])
         print(f"  {count:4d}  {category}  ({inside} on foundation)")
 
+    if args.floor is not None:
+        proud = [r for r in rows if r["on_foundation"] and r["top"] is not None
+                 and r["top"] > args.floor and "initially-disabled" not in r["reasons"]]
+        print("")
+        print(f"  standing proud of floor {args.floor:.0f}: " f"{len(proud)} reference(s) on the foundation")
+        for r in sorted(proud, key=lambda r: -(r["top"] - args.floor)):
+            unsafe = " UNSAFE" if any("ACTOR" in x or "script" in x or "parent" in x
+                                      for x in r["reasons"]) else ""
+            print(f"      +{r['top'] - args.floor:4.0f}u  {r['key']:22s} "
+                  f"{str(r['editor_id']):34s}{unsafe}")
+
     order_key = {"disabled by Skyrim Fair": 0, "water / stream": 1,
                  "UNSAFE - do not touch": 2, "large rock / earth mass": 3,
                  "large environment piece": 4, "rock / boulder": 5,
@@ -437,9 +476,13 @@ def main():
     for row in rows:
         where = "FOUNDATION" if row["on_foundation"] else "margin    "
         note = f"  [{', '.join(row['reasons'])}]" if row["reasons"] else ""
+        stand = ""
+        if args.floor is not None and row["top"] is not None:
+            over = row["top"] - args.floor
+            stand = (f"  PROUD +{over:.0f}" if over > 0 else f"  buried {over:.0f}")
         print(f"  {row['category']:24s} {where} {row['key']:22s} "
               f"{row['base_type']:5s} {str(row['editor_id']):34s} "
-              f"r={row['radius']:5d} pos={row['pos']}{note}")
+              f"r={row['radius']:5d} pos={row['pos']}{stand}{note}")
 
 
 if __name__ == "__main__":

@@ -98,9 +98,10 @@ references. The following are **decisions**, not suggestions. See
 3. **Footprint grows to roughly 37 cells, 3,482 span, on three authored levels**
    cascading north-west toward the road. Approved by Barry.
 4. **Edge language follows the second concept, not the first**: low, irregular, mostly
-   natural rock outcrop, with drystone walling only where something is genuinely being
-   retained. Proposed as a refinement of (3) and agreed in principle; the exact balance
-   of terracing versus outcrop is the open question for the next pass.
+   natural rock outcrop. **Confirmed by Barry:** rock is the *default* edge treatment;
+   drystone terrace walling appears only on the long straight runs that are genuinely
+   retaining something, and around the entrance. The terrace should read as a rocky rise
+   someone levelled off, not as a constructed terrace.
 5. **The approach from the road is the priority piece of work.** A signposted junction
    on the existing vanilla road, a dirt spur curving off it, steps for the final climb.
    It should read as a path worn to somewhere new.
@@ -108,10 +109,13 @@ references. The following are **decisions**, not suggestions. See
    units away, Whiterun's outer cells 18,176, the city proper 38,810. Barry has
    explicitly ruled it out rather than re-site. Do not re-open it unprompted.
 
-### Still to confirm before building
+### Open
 
-- how much of the perimeter is drystone terracing versus natural rock outcrop
-- whether the three levels stay as approved once the outcrop edge language is applied
+Nothing is blocking. The one remaining judgement is whether three levels survive
+contact with the terrain: the site only falls about 100 units on its mean trend, so
+levels that step *down* quickly end up below grade. Building levels *up* from the
+current floor is the workable direction. This is a measurement question, not a decision
+for Barry.
 
 ## Vanilla asset palette for the fair
 
