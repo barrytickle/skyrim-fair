@@ -55,7 +55,16 @@ try
             Console.WriteLine($"  {count,3} x {role}");
         }
 
-        Console.WriteLine($"  {foundation.DressingCount,3} x vanilla rock / shrub / scrub dressing");
+        Console.WriteLine();
+        Console.WriteLine("  Terrain integration:");
+        Console.WriteLine($"  {foundation.WallRocks,3} x embankment rock facing an exposed edge");
+        Console.WriteLine($"  {foundation.CornerStones,3} x corner stone breaking the outline");
+        Console.WriteLine($"  {foundation.ToeRocks,3} x toe rock bedded into native grade");
+        Console.WriteLine($"  {foundation.VergeWedges,3} x rough-earth verge wedge");
+        Console.WriteLine($"  {foundation.VergePlants,3} x shrub / scrub in the verge");
+        Console.WriteLine($"  {foundation.DressingCount,3} x vanilla references placed in total");
+        Console.WriteLine($"  {foundation.OversizedSkipped,3} x rejected as oversized");
+        Console.WriteLine($"  {foundation.ChannelSkipped,3} x rejected for blocking the entrance channel");
         Console.WriteLine($"  {foundation.DisabledCount,3} x named reference disabled (Initially Disabled)");
         foreach (var refusal in foundation.Refused)
         {

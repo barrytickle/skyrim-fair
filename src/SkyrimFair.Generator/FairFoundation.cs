@@ -35,7 +35,7 @@ internal static class FairFoundation
         SkyrimMod mod,
         FairConfig config,
         Func<float, float, float?> sampleTerrain,
-        Func<FormKey, float> radiusOf,
+        Func<FormKey, PieceBounds> boundsOf,
         Action<IPlacedObjectGetter, float, float> place)
     {
         var f = config.Site.Foundation;
@@ -149,6 +149,14 @@ internal static class FairFoundation
         // Ramp segments are reserved first so no retaining wall blocks the way in.
         var rampSegments = ChooseRampSegments(paved, f, cols, rows);
 
+        // Every placed ramp tile, kept so the naturalisation pass can face the ramp's
+        // flanks and keep its walking channel clear.
+        var rampTiles = new List<(float X, float Y, float Z, int Dc, int Dr)>();
+
+        // Perimeter segments that got a retaining face, with the exposure measured at
+        // the face. The embankment pass works from these rather than re-deriving them.
+        var faced = new List<(float Ex, float Ey, int Dc, int Dr, float Rot, float SurfaceZ, float Drop)>();
+
         foreach (var (col, row) in paved.OrderBy(c => c.Item2).ThenBy(c => c.Item1))
         {
             foreach (var (name, dc, dr) in Directions)
@@ -170,7 +178,9 @@ internal static class FairFoundation
                     {
                         var ox = ex + dc * tile * i;
                         var oy = ey - dr * tile * i;
-                        Put("ramp", ox, oy, f.FloorZ - f.RampRise * i, rot);
+                        var oz = f.FloorZ - f.RampRise * i;
+                        Put("ramp", ox, oy, oz, rot);
+                        rampTiles.Add((ox, oy, oz, dc, dr));
                     }
 
                     continue;
@@ -190,23 +200,13 @@ internal static class FairFoundation
                 // piece only covers RetainHeight, so deep edges stack downward -
                 // otherwise a steep side leaves a gap showing open terrain.
                 var drop = edgeGround.HasValue ? f.FloorZ - edgeGround.Value : f.RetainHeight;
+                faced.Add((ex, ey, dc, dr, rot, f.FloorZ, drop));
                 var courses = Math.Max(1, (int)MathF.Ceiling(drop / f.RetainHeight));
                 for (var c = 0; c < courses; c++)
                 {
                     Put("retain", ex, ey, f.FloorZ - f.RetainHeight * c, rot);
                 }
 
-                // Shoulder sits on native ground just beyond the retaining face.
-                var sx = ex + dc * (tile / 2f + f.ShoulderOffset);
-                var sy = ey - dr * (tile / 2f + f.ShoulderOffset);
-                // The shoulder is a thin 32-unit verge. It only reads as a soft
-                // transition where the step is small; on a tall faced edge it perches
-                // in mid-air like a sheet of paper, so skip it there.
-                var ground = sampleTerrain(sx, sy);
-                if (ground.HasValue && ground.Value < f.FloorZ && drop <= f.ShoulderMaxDrop)
-                {
-                    Put("shoulder", sx, sy, ground.Value, rot);
-                }
             }
         }
 
@@ -225,58 +225,377 @@ internal static class FairFoundation
             Put("retainCorner", cx + tile / 2f, cy + tile / 2f, f.FloorZ, 0f);
         }
 
-        // ---- dressing ------------------------------------------------------
-        var rng = new Random(f.Dressing.Seed);
-        foreach (var (col, row) in paved.OrderBy(c => c.Item2).ThenBy(c => c.Item1))
+        // ---- naturalisation: banded edge treatment -------------------------
+        //
+        // Every segment of the approved footprint is exposed between 192 and 288
+        // units, so the whole perimeter is a wall and there is no gentle edge left to
+        // soften. The treatment is therefore banded by measured exposure rather than
+        // applied uniformly:
+        //
+        //   exposure > WallMinDrop   rock embankment, each piece scaled to the wall
+        //                            it faces and placed so its crown reaches the
+        //                            floor plane, some overshooting to break the
+        //                            outline seen from on the terrace
+        //   always                   a toe of low rock piles bedded into grade
+        //   gentle local ground      the project-owned rough-earth verge wedge, plus
+        //                            shrubs and scrub, so rock gives way to grass
+        //
+        // The ramp flanks are treated as segments too, and that is where the small
+        // height differences actually live: the ramp stands 288 above grade at its
+        // head and 24 at its foot, so it picks up rock high up and earth low down.
+        var d = f.Dressing;
+        var rng = new Random(d.Seed);
+
+        // Clear walking channel down the middle of the entrance, continued past the
+        // foot toward the road. Nothing is placed whose mesh reaches into it, which is
+        // what lets rock hug both ramp flanks without the way in becoming an obstacle.
+        (float MinX, float MinY, float MaxX, float MaxY)? channel = null;
+        if (rampTiles.Count > 0)
         {
-            foreach (var (name, dc, dr) in Directions)
+            var rdc = rampTiles[0].Dc;
+            var rdr = rampTiles[0].Dr;
+            var minX = rampTiles.Min(t => t.X) - tile / 2f;
+            var maxX = rampTiles.Max(t => t.X) + tile / 2f;
+            var minY = rampTiles.Min(t => t.Y) - tile / 2f;
+            var maxY = rampTiles.Max(t => t.Y) + tile / 2f;
+
+            if (rdc == 0)
             {
-                if (paved.Contains((col + dc, row + dr)))
+                var mid = (minX + maxX) / 2f;
+                minX = mid - d.RampChannelWidth / 2f;
+                maxX = mid + d.RampChannelWidth / 2f;
+                if (rdr < 0) { maxY += d.RampLandingLength; } else { minY -= d.RampLandingLength; }
+            }
+            else
+            {
+                var mid = (minY + maxY) / 2f;
+                minY = mid - d.RampChannelWidth / 2f;
+                maxY = mid + d.RampChannelWidth / 2f;
+                if (rdc > 0) { maxX += d.RampLandingLength; } else { minX -= d.RampLandingLength; }
+            }
+
+            channel = (minX, minY, maxX, maxY);
+        }
+
+        bool ChannelClear(float x, float y, float reach)
+        {
+            if (channel is not { } c)
+            {
+                return true;
+            }
+
+            var gx = MathF.Max(MathF.Max(c.MinX - x, x - c.MaxX), 0f);
+            var gy = MathF.Max(MathF.Max(c.MinY - y, y - c.MaxY), 0f);
+            return MathF.Sqrt(gx * gx + gy * gy) >= reach;
+        }
+
+        bool InPaving(float x, float y)
+        {
+            foreach (var r in result.PavedRects)
+            {
+                if (x >= r.MinX && x <= r.MaxX && y >= r.MinY && y <= r.MaxY)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        float Spin() => (float)(rng.NextDouble() * Math.PI * 2.0);
+
+        // One embankment rock, scaled to the wall it faces and bedded into the ground
+        // beneath itself. Returns false when nothing was placed, so the caller can
+        // retry with a slimmer piece.
+        bool TryWallRock(string pick, float ex, float ey, int dc, int dr, float surfaceZ, float drop)
+        {
+            var b = boundsOf(FormKeyHelper.Parse(pick));
+            if (b.Height <= 1f)
+            {
+                result.OversizedSkipped++;
+                return false;
+            }
+
+            // Provisional scale, from the exposure at the face, purely to get the
+            // stand-off distance right.
+            var scale = Math.Clamp((drop + d.WallBedding) / b.Height, d.MinScale, d.MaxScale);
+            var along = (float)(rng.NextDouble() - 0.5) * tile;
+            var outward = MathF.Max(0f, b.Radius * scale - d.WallEdgeOverlap);
+            var px = ex + dc * outward + (dc == 0 ? along : 0f);
+            var py = ey - dr * outward + (dr == 0 ? along : 0f);
+
+            // Re-bed against the ground under the rock itself. This matters: the
+            // ground falls away from the platform, so a rock standing a couple of
+            // hundred units out sits on ground well below the face it is meant to be
+            // facing, and bedding it to the face measurement leaves it in mid-air.
+            var rockGround = sampleTerrain(px, py);
+            if (!rockGround.HasValue)
+            {
+                return false;
+            }
+
+            var localDrop = surfaceZ - rockGround.Value;
+            scale = Math.Clamp((localDrop + d.WallBedding) / b.Height, d.MinScale, d.MaxScale);
+            var radius = b.Radius * scale;
+            if (radius > d.WallMaxRadius)
+            {
+                result.OversizedSkipped++;
+                return false;
+            }
+
+            // Headroom is what the piece has spare once it has covered the wall.
+            // Overshoot is capped by it, so the base is never lifted clear of the
+            // ground in order to crown the edge.
+            var headroom = b.Height * scale - localDrop;
+            if (headroom <= 0f)
+            {
+                result.TooShortSkipped++;
+                return false;
+            }
+
+            if (!ChannelClear(px, py, radius))
+            {
+                result.ChannelSkipped++;
+                return false;
+            }
+
+            // Solve Z from the piece's own bounds. A vanilla rock's origin sits near
+            // its base, not its centre, so assuming a fixed offset is exactly what
+            // leaves dressing either floating or sunk out of sight.
+            var crown = surfaceZ
+                + (float)rng.NextDouble() * MathF.Min(d.WallTopOvershoot, headroom);
+            PutVanilla(pick, px, py, crown - b.ZMax * scale, Spin(), scale);
+            result.WallRocks++;
+            return true;
+        }
+
+        // One edge segment: faced with rock, toed into grade, then verged.
+        void Treat(float ex, float ey, int dc, int dr, float rot, float surfaceZ, float drop)
+        {
+            // --- embankment ---------------------------------------------------
+            if (drop > d.WallMinDrop)
+            {
+                // Draw only from pieces that can actually reach the top of this wall
+                // at their permitted scale. Without this filter a 180-unit rock gets
+                // asked to face a 288-unit edge, and the only way to put its crown on
+                // the floor plane is to lift its base off the ground. Short pieces are
+                // not wasted - they are exactly what the lower ramp flanks want.
+                var usable = d.Wall
+                    .Where(k => boundsOf(FormKeyHelper.Parse(k)).Height * d.MaxScale
+                        >= drop + d.WallTopOvershoot)
+                    .ToList();
+                if (usable.Count == 0)
+                {
+                    usable = new List<string>
+                    {
+                        d.Wall.MaxBy(k => boundsOf(FormKeyHelper.Parse(k)).Height)!,
+                    };
+                }
+
+                // The slimmest piece that can still reach the top. Kept as a retry for
+                // segments beside the entrance: there a fat rock is rejected for
+                // reaching into the walking channel, and without a second attempt the
+                // most visible wall on the site - the west side of the ramp cutting -
+                // would be the one left bare.
+                var slimmest = usable.MinBy(k => boundsOf(FormKeyHelper.Parse(k)).Radius)!;
+
+                for (var i = 0; i < d.WallPerSegment; i++)
+                {
+                    if (!TryWallRock(usable[rng.Next(usable.Count)], ex, ey, dc, dr, surfaceZ, drop))
+                    {
+                        TryWallRock(slimmest, ex, ey, dc, dr, surfaceZ, drop);
+                    }
+                }
+            }
+
+            // --- toe ----------------------------------------------------------
+            for (var i = 0; i < d.ToePerSegment; i++)
+            {
+                var pick = d.Rocks[rng.Next(d.Rocks.Count)];
+                var b = boundsOf(FormKeyHelper.Parse(pick));
+                var scale = d.MinScale + (float)rng.NextDouble() * (d.MaxScale - d.MinScale);
+                var radius = b.Radius * scale;
+                if (radius > d.MaxRadius)
+                {
+                    result.OversizedSkipped++;
+                    continue;
+                }
+
+                var along = (float)(rng.NextDouble() - 0.5) * tile;
+                var outward = MathF.Max(d.MinOffset, radius - d.EdgeOverlap)
+                    + (float)rng.NextDouble() * d.Spread;
+                var px = ex + dc * outward + (dc == 0 ? along : 0f);
+                var py = ey - dr * outward + (dr == 0 ? along : 0f);
+                if (!ChannelClear(px, py, radius))
+                {
+                    result.ChannelSkipped++;
+                    continue;
+                }
+
+                var ground = sampleTerrain(px, py);
+                if (!ground.HasValue)
                 {
                     continue;
                 }
 
-                var (cx, cy) = Centre(col, row);
-                for (var i = 0; i < f.Dressing.PerEdgeSegment; i++)
-                {
-                    // Rocks hug the retaining face and break its silhouette;
-                    // shrubs and scrub sit slightly further out in the grass.
-                    var pool = i == 0 ? f.Dressing.Rocks
-                        : (rng.NextDouble() < 0.5 ? f.Dressing.Shrubs : f.Dressing.Scrub);
-                    var pick = pool[rng.Next(pool.Count)];
-                    var scale = f.Dressing.MinScale
-                        + (float)rng.NextDouble() * (f.Dressing.MaxScale - f.Dressing.MinScale);
+                PutVanilla(pick, px, py, ground.Value - d.RockSink, Spin(), scale);
+                result.ToeRocks++;
+            }
 
-                    // Stand each piece off by its OWN mesh radius, allowing a small
-                    // deliberate overlap onto the paving edge to break the silhouette.
-                    // Without this a big landscape boulder swallows the whole platform:
-                    // RockTundraLand02Tundra01 alone has a 1767-unit radius.
-                    var radius = radiusOf(FormKeyHelper.Parse(pick)) * scale;
-                    if (radius > f.Dressing.MaxRadius)
+            // --- verge: rough earth, then plants ------------------------------
+            // The wedge is a thin 32-unit skin of rough earth. It reads only where the
+            // native ground it lies on is itself gentle, so it is gated on the local
+            // step across the verge, not on the wall height standing behind it.
+            var nearX = ex + dc * d.MinOffset;
+            var nearY = ey - dr * d.MinOffset;
+            var farX = nearX + dc * d.ShoulderRun;
+            var farY = nearY - dr * d.ShoulderRun;
+            var nearGround = sampleTerrain(nearX, nearY);
+            var farGround = sampleTerrain(farX, farY);
+            if (nearGround.HasValue && farGround.HasValue
+                && nearGround.Value < surfaceZ
+                && MathF.Abs(nearGround.Value - farGround.Value) <= d.VergeMaxLocalStep
+                && ChannelClear(nearX, nearY, d.ShoulderRun))
+            {
+                Put("shoulder", nearX, nearY, nearGround.Value, rot);
+                result.VergeWedges++;
+            }
+
+            for (var i = 0; i < d.VergePerSegment; i++)
+            {
+                var pool = rng.NextDouble() < 0.5 ? d.Shrubs : d.Scrub;
+                var pick = pool[rng.Next(pool.Count)];
+                var b = boundsOf(FormKeyHelper.Parse(pick));
+                var scale = d.MinScale + (float)rng.NextDouble() * (d.MaxScale - d.MinScale);
+
+                var along = (float)(rng.NextDouble() - 0.5) * tile;
+                var outward = d.MinOffset + d.Spread * 0.5f
+                    + (float)rng.NextDouble() * d.Spread;
+                var px = ex + dc * outward + (dc == 0 ? along : 0f);
+                var py = ey - dr * outward + (dr == 0 ? along : 0f);
+                if (!ChannelClear(px, py, b.Radius * scale))
+                {
+                    result.ChannelSkipped++;
+                    continue;
+                }
+
+                var ground = sampleTerrain(px, py);
+                if (!ground.HasValue)
+                {
+                    continue;
+                }
+
+                PutVanilla(pick, px, py, ground.Value, Spin(), scale);
+                result.VergePlants++;
+            }
+        }
+
+        foreach (var seg in faced)
+        {
+            Treat(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop);
+        }
+
+        // ---- ramp flanks ---------------------------------------------------
+        // Without this the ramp is a grey slab hanging in the air beside the terrace.
+        // Each tile is treated on both sides against the exposure measured at that
+        // tile, so the treatment fades from rock at the head to earth at the foot.
+        foreach (var t in rampTiles)
+        {
+            var alongX = t.X + t.Dc * tile / 2f;
+            var alongY = t.Y - t.Dr * tile / 2f;
+            var rampSurfaceZ = t.Z - f.RampRise / 2f;
+
+            foreach (var (name, cdc, cdr) in Directions)
+            {
+                // Only the two sides, never along the ramp's own run.
+                if (cdc * t.Dc + cdr * t.Dr != 0)
+                {
+                    continue;
+                }
+
+                var ex = alongX + cdc * tile / 2f;
+                var ey = alongY - cdr * tile / 2f;
+
+                // The ramp leaves the terrace, so its first tile has paving alongside
+                // it. Treating that side pushes rock and scrub outward onto the
+                // platform, which is how two pieces ended up standing on the terrace.
+                if (InPaving(ex + cdc * tile / 2f, ey - cdr * tile / 2f))
+                {
+                    continue;
+                }
+
+                var flankGround = sampleTerrain(ex, ey);
+                if (!flankGround.HasValue)
+                {
+                    continue;
+                }
+
+                var drop = rampSurfaceZ - flankGround.Value;
+                if (drop <= f.MinExposure)
+                {
+                    continue;
+                }
+
+                Treat(ex, ey, cdc, cdr, OutwardRotation[name], rampSurfaceZ, drop);
+            }
+        }
+
+        // ---- corner stones -------------------------------------------------
+        // A flat top edge reads as a built rectangle most obviously at its corners,
+        // so every convex corner of the outline gets one larger stone set across it.
+        foreach (var (col, row) in paved.OrderBy(c => c.Item2).ThenBy(c => c.Item1))
+        {
+            foreach (var (vdc, vdr) in new[] { (0, -1), (0, 1) })
+            {
+                foreach (var (hdc, hdr) in new[] { (1, 0), (-1, 0) })
+                {
+                    if (paved.Contains((col + vdc, row + vdr)) || paved.Contains((col + hdc, row + hdr)))
+                    {
+                        continue;
+                    }
+
+                    var (cx, cy) = Centre(col, row);
+                    var cornerX = cx + hdc * tile / 2f;
+                    var cornerY = cy - vdr * tile / 2f;
+
+                    var pick = d.CornerStones[rng.Next(d.CornerStones.Count)];
+                    var b = boundsOf(FormKeyHelper.Parse(pick));
+                    if (b.Height <= 1f)
+                    {
+                        continue;
+                    }
+
+                    var cornerGround = sampleTerrain(cornerX, cornerY);
+                    var drop = cornerGround.HasValue ? f.FloorZ - cornerGround.Value : f.RetainHeight;
+                    var scale = Math.Clamp((drop + d.WallBedding) / b.Height, d.MinScale, d.MaxScale);
+                    var radius = b.Radius * scale;
+                    if (radius > d.WallMaxRadius)
                     {
                         result.OversizedSkipped++;
                         continue;
                     }
 
-                    var along = (float)(rng.NextDouble() - 0.5) * tile;
-                    var out_ = tile / 2f
-                        + MathF.Max(f.Dressing.MinOffset, radius - f.Dressing.EdgeOverlap)
-                        + (float)rng.NextDouble() * f.Dressing.Spread;
-
-                    var px = cx + dc * out_ + (dc == 0 ? along : 0f);
-                    var py = cy - dr * out_ + (dr == 0 ? along : 0f);
-
-                    var ground = sampleTerrain(px, py);
-                    if (!ground.HasValue)
+                    var headroom = b.Height * scale - drop;
+                    if (headroom <= 0f)
                     {
+                        result.TooShortSkipped++;
                         continue;
                     }
 
-                    var rot = (float)(rng.NextDouble() * Math.PI * 2.0);
+                    // Set diagonally outward across the corner so it breaks both edges.
+                    var outward = MathF.Max(0f, radius - d.WallEdgeOverlap) * 0.7071f;
+                    var px = cornerX + hdc * outward;
+                    var py = cornerY - vdr * outward;
+                    if (!ChannelClear(px, py, radius))
+                    {
+                        result.ChannelSkipped++;
+                        continue;
+                    }
 
-                    // Sink rocks slightly so they read as bedded into the ground.
-                    var z = ground.Value - (i == 0 ? f.Dressing.RockSink : 0f);
-                    PutVanilla(pick, px, py, z, rot, scale);
+                    var crown = f.FloorZ
+                        + (float)rng.NextDouble() * MathF.Min(d.WallTopOvershoot, headroom);
+                    PutVanilla(pick, px, py, crown - b.ZMax * scale, Spin(), scale);
+                    result.CornerStones++;
                 }
             }
         }
@@ -350,10 +669,43 @@ internal sealed class FoundationResult
     /// <summary>Dressing picks rejected for having an oversized mesh footprint.</summary>
     public int OversizedSkipped { get; set; }
 
+    /// <summary>Picks dropped for reaching into the entrance walking channel.</summary>
+    public int ChannelSkipped { get; set; }
+
+    /// <summary>Picks dropped for being too short to face the edge without floating.</summary>
+    public int TooShortSkipped { get; set; }
+
+    /// <summary>Tall rocks facing an exposed retaining edge.</summary>
+    public int WallRocks { get; set; }
+
+    /// <summary>Low rock piles bedded in at the foot of the embankment.</summary>
+    public int ToeRocks { get; set; }
+
+    /// <summary>Project-owned rough-earth verge wedges.</summary>
+    public int VergeWedges { get; set; }
+
+    /// <summary>Shrubs and scrub in the verge.</summary>
+    public int VergePlants { get; set; }
+
+    /// <summary>Larger stones set across the convex corners of the outline.</summary>
+    public int CornerStones { get; set; }
+
     /// <summary>References named for disabling that were refused, with the reason.</summary>
     public List<string> Refused { get; } = new();
 
     public Dictionary<string, int> Counts { get; } = new();
 
     public int DressingCount { get; set; }
+}
+
+/// <summary>
+/// A base object's mesh envelope, as recorded in its OBND.
+///
+/// <paramref name="Radius"/> is the horizontal half-diagonal, used to keep a piece
+/// from swallowing the platform. <paramref name="ZMin"/> and <paramref name="ZMax"/>
+/// are relative to the mesh origin, which for vanilla rocks sits near the base.
+/// </summary>
+internal readonly record struct PieceBounds(float Radius, float ZMin, float ZMax)
+{
+    public float Height => ZMax - ZMin;
 }

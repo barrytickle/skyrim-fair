@@ -92,13 +92,14 @@
         "minOffset": 192,
         "spread": 384,
         "minScale": 0.7,
-        "maxScale": 1.4,
+        "maxScale": 1.5,
         "rockSink": 24,
         "rocks": [
           "0001BFB0:Skyrim.esm",
           "00024E8F:Skyrim.esm",
           "00021E70:Skyrim.esm",
-          "000674BB:Skyrim.esm"
+          "000674BB:Skyrim.esm",
+          "0003554E:Skyrim.esm"
         ],
         "shrubs": [
           "000AAE79:Skyrim.esm",
@@ -113,8 +114,33 @@
           "0003A2BD:Skyrim.esm",
           "0003A2BE:Skyrim.esm"
         ],
-        "maxRadius": 500,
-        "edgeOverlap": 64
+        "maxRadius": 700,
+        "edgeOverlap": 64,
+        "wall": [
+          "00018199:Skyrim.esm",
+          "0001819A:Skyrim.esm",
+          "00018BA5:Skyrim.esm",
+          "0001A6E2:Skyrim.esm",
+          "0001B0A8:Skyrim.esm",
+          "000332C7:Skyrim.esm"
+        ],
+        "cornerStones": [
+          "0001819A:Skyrim.esm",
+          "000332C7:Skyrim.esm",
+          "0001A6E2:Skyrim.esm"
+        ],
+        "wallMinDrop": 140,
+        "wallPerSegment": 3,
+        "wallTopOvershoot": 48,
+        "wallBedding": 80,
+        "wallEdgeOverlap": 192,
+        "wallMaxRadius": 640,
+        "toePerSegment": 2,
+        "vergePerSegment": 2,
+        "vergeMaxLocalStep": 112,
+        "rampChannelWidth": 480,
+        "rampLandingLength": 512,
+        "shoulderRun": 256
       },
       "retainHeight": 256,
       "clearMargin": 160,

@@ -43,14 +43,21 @@ BLENDER_UNITS_PER_SKYRIM_UNIT = 1.0 / 40.0
 # --- kit dimensions, all in Skyrim units -------------------------------------
 
 FLOOR_THICKNESS = 32
-RETAIN_HEIGHT = 256      # max measured floor exposure is 160u, so this always covers
+# One course. Measured exposure round the approved footprint is 192-288, so the
+# generator stacks two courses on the deeper edges rather than this being a
+# single-piece cover as it was when the floor sat only 160 above grade.
+RETAIN_HEIGHT = 256
 RETAIN_DEPTH = 128
 RAMP_RUN = 512
 # 1:5.3 grade. Was 64 (1:8), but at the fair site the ground falls away almost as
 # fast as a 1:8 ramp descends, so a four-tile run still left its foot floating 128
 # units above the terrain. At 96 the foot lands dead on grade over the same length.
 RAMP_RISE = 96
-RAMP_DEPTH = 256         # buried, so local terrain variation never undercuts it
+# Deep enough that the underside never surfaces. This is a measured figure, not a
+# guess: the ramp head stands 288 units above native ground on its western flank, so
+# at 256 the slab's underside sat 32 units clear of the ground and you could see
+# daylight under the entrance. 384 buries it along the whole run with margin.
+RAMP_DEPTH = 384
 SHOULDER_RUN = 256
 SHOULDER_THICKNESS = 32
 

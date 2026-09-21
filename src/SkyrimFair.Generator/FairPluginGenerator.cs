@@ -111,12 +111,12 @@ internal static class FairPluginGenerator
         if (site.Foundation.Enabled)
         {
             var terrain = new TerrainSampler(vanillaWorldspace);
-            var radii = master is null
-                ? new Dictionary<FormKey, float>()
-                : CollectClearableBases(master);
+            var bounds = master is null
+                ? new Dictionary<FormKey, PieceBounds>()
+                : CollectSceneryBounds(master);
             foundation = FairFoundation.Build(
                 mod, config, terrain.Sample,
-                key => radii.TryGetValue(key, out var r) ? r : 0f,
+                key => bounds.TryGetValue(key, out var b) ? b : default,
                 PlaceAt);
             foreach (var record in foundation.Statics.Values)
             {
@@ -370,20 +370,37 @@ internal static class FairPluginGenerator
     /// quest might reference are deliberately excluded.
     /// </summary>
     private static Dictionary<FormKey, float> CollectClearableBases(ISkyrimModGetter master)
-    {
-        var radii = new Dictionary<FormKey, float>();
+        => CollectSceneryBounds(master).ToDictionary(p => p.Key, p => p.Value.Radius);
 
-        void Add(FormKey key, IObjectBoundsGetter? bounds)
+    /// <summary>
+    /// Scenery bounds, keyed by base FormKey: mesh radius plus the vertical extent.
+    ///
+    /// The vertical extent is what lets a rock be placed to a target top height. A
+    /// rock's origin sits near its base, not its centre - RockL01 runs from -59 to
+    /// +229 - so hiding a 240-unit retaining face means solving for the reference Z
+    /// from the piece's own ZMax, not guessing an offset.
+    /// </summary>
+    private static Dictionary<FormKey, PieceBounds> CollectSceneryBounds(ISkyrimModGetter master)
+    {
+        var bounds = new Dictionary<FormKey, PieceBounds>();
+
+        void Add(FormKey key, IObjectBoundsGetter? b)
         {
-            var hx = bounds is null ? 0f : (bounds.Second.X - bounds.First.X) / 2f;
-            var hy = bounds is null ? 0f : (bounds.Second.Y - bounds.First.Y) / 2f;
-            radii[key] = MathF.Sqrt(hx * hx + hy * hy);
+            if (b is null)
+            {
+                bounds[key] = new PieceBounds(0f, 0f, 0f);
+                return;
+            }
+
+            var hx = (b.Second.X - b.First.X) / 2f;
+            var hy = (b.Second.Y - b.First.Y) / 2f;
+            bounds[key] = new PieceBounds(MathF.Sqrt(hx * hx + hy * hy), b.First.Z, b.Second.Z);
         }
 
         foreach (var record in master.Statics) Add(record.FormKey, record.ObjectBounds);
         foreach (var record in master.Trees) Add(record.FormKey, record.ObjectBounds);
         foreach (var record in master.Florae) Add(record.FormKey, record.ObjectBounds);
-        return radii;
+        return bounds;
     }
 
     private static ICellGetter? FindVanillaCell(IWorldspaceGetter worldspace, int cx, int cy)

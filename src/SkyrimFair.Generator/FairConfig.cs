@@ -385,17 +385,108 @@ internal sealed record DressingConfig
     public float EdgeOverlap { get; init; } = 64f;
 
     /// <summary>
-    /// Edge rocks. Deliberately small and medium piles only - the big
-    /// RockTundraLand landscape slabs are 1400-1770 units across and are not
-    /// dressing, they are terrain features.
+    /// Toe rocks: low piles laid at native ground where the embankment meets grass.
+    /// Deliberately small and medium piles only - the big RockTundraLand landscape
+    /// slabs are 1400-1770 units across and are not dressing, they are terrain
+    /// features. These are too short to face a wall; that is what Wall is for.
     /// </summary>
     public IReadOnlyList<string> Rocks { get; init; } = new[]
     {
-        "0001BFB0:Skyrim.esm", // RockPileM01FieldGrass01Moss, r=404
-        "00024E8F:Skyrim.esm", // RockPileM02FieldGrass01Moss, r=305
-        "00021E70:Skyrim.esm", // RockPileS01FieldGrass01,     r=180
-        "000674BB:Skyrim.esm", // RockPileS02FieldGrass01,     r=177
+        "0001BFB0:Skyrim.esm", // RockPileM01FieldGrass01Moss, r=404 h= 92
+        "00024E8F:Skyrim.esm", // RockPileM02FieldGrass01Moss, r=305 h=102
+        "00021E70:Skyrim.esm", // RockPileS01FieldGrass01,     r=180 h= 59
+        "000674BB:Skyrim.esm", // RockPileS02FieldGrass01,     r=177 h= 78
+        "0003554E:Skyrim.esm", // RockShelf01FieldGrass01,     r=660 h= 54
     };
+
+    /// <summary>
+    /// Embankment rocks, for facing an exposed retaining edge.
+    ///
+    /// Height is the whole point of this pool and the reason the terrace previously
+    /// read as a bare grey box: every piece in Rocks is a 54-102 unit pile, and the
+    /// perimeter it was meant to hide is 192-288 units tall, so the dressing sat
+    /// round the foot of the wall like gravel. These pieces are 180-418 tall and are
+    /// scaled to the measured exposure of the segment they face.
+    ///
+    /// All of them are statics vanilla itself places within 6,000 units of this site,
+    /// so the embankment reads as the same landform family as the surrounding tundra.
+    /// </summary>
+    public IReadOnlyList<string> Wall { get; init; } = new[]
+    {
+        "00018199:Skyrim.esm", // RockL01,                r=270 h=288, 9 nearby in vanilla
+        "0001819A:Skyrim.esm", // RockL02,                r=399 h=263
+        "00018BA5:Skyrim.esm", // RockL03,                r=289 h=180, 4 nearby in vanilla
+        "0001A6E2:Skyrim.esm", // RockL04,                r=178 h=418, tall and narrow
+        "0001B0A8:Skyrim.esm", // RockL05,                r=215 h=276
+        "000332C7:Skyrim.esm", // RockPileL01TundraRocks, r=512 h=372, 2 nearby in vanilla
+    };
+
+    /// <summary>
+    /// Bigger single stones dropped at the outer corners of the outline, where a flat
+    /// top edge reads most obviously as a built rectangle.
+    /// </summary>
+    public IReadOnlyList<string> CornerStones { get; init; } = new[]
+    {
+        "0001819A:Skyrim.esm", // RockL02,                r=399 h=263
+        "000332C7:Skyrim.esm", // RockPileL01TundraRocks, r=512 h=372
+        "0001A6E2:Skyrim.esm", // RockL04,                r=178 h=418
+    };
+
+    /// <summary>Exposure above which a segment gets the tall embankment treatment.</summary>
+    public float WallMinDrop { get; init; } = 140f;
+
+    /// <summary>Embankment rocks per perimeter segment.</summary>
+    public int WallPerSegment { get; init; } = 3;
+
+    /// <summary>
+    /// How far a rock's top is allowed to rise above the floor plane. This is what
+    /// breaks the silhouette: seen from on the terrace, rock crowns interrupt the
+    /// paving edge instead of it ending in a clean line.
+    /// </summary>
+    public float WallTopOvershoot { get; init; } = 48f;
+
+    /// <summary>
+    /// How far a rock's base is driven below the point its top has to reach, so the
+    /// piece is sized to bed into the ground rather than perch on it. Must exceed
+    /// WallTopOvershoot or a rock can end up standing on its own base.
+    /// </summary>
+    public float WallBedding { get; init; } = 80f;
+
+    /// <summary>How far an embankment rock may reach onto the paving.</summary>
+    public float WallEdgeOverlap { get; init; } = 192f;
+
+    /// <summary>Ceiling on an embankment rock's scaled mesh radius.</summary>
+    public float WallMaxRadius { get; init; } = 640f;
+
+    /// <summary>Toe rocks per segment, laid on native ground beyond the embankment.</summary>
+    public int ToePerSegment { get; init; } = 2;
+
+    /// <summary>Shrubs and scrub per segment, out in the verge.</summary>
+    public int VergePerSegment { get; init; } = 2;
+
+    /// <summary>
+    /// Largest local rise or fall of native ground across the verge that still reads
+    /// as a soft earth transition. Beyond this the ground is doing its own thing and a
+    /// verge wedge just floats.
+    /// </summary>
+    public float VergeMaxLocalStep { get; init; } = 112f;
+
+    /// <summary>
+    /// Clear walking width kept down the middle of the entrance ramp. Nothing is
+    /// placed whose mesh reaches into this channel, which is what lets rock hug both
+    /// ramp flanks without the entrance becoming an obstacle course.
+    /// </summary>
+    public float RampChannelWidth { get; init; } = 480f;
+
+    /// <summary>How far past the ramp foot the clear channel continues, toward the road.</summary>
+    public float RampLandingLength { get; init; } = 512f;
+
+    /// <summary>
+    /// Run of the project-owned shoulder wedge, matching SHOULDER_RUN in the kit
+    /// script. The verge rule samples ground at both ends of the wedge, so this has
+    /// to be the real length rather than an approximation.
+    /// </summary>
+    public float ShoulderRun { get; init; } = 256f;
 
     public IReadOnlyList<string> Shrubs { get; init; } = new[]
     {

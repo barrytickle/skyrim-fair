@@ -16,183 +16,263 @@ docs: refresh local audit
 
 ChatGPT should read the latest version of this file from GitHub before making changes that depend on Barry's local Skyrim installation, load order, installed asset packs, animation stack, or generated plugin output.
 
-## Deployed build — raised terrace at +192, ramp landing on grade
+## Deployed build — naturalised terrace at +192
 
-The fairground reads as a deliberate raised terrace, with the entrance ramp descending
-from the north-east corner to the existing vanilla road. The ramp was re-cut this pass:
-at 1:8 its foot hung **128 units in the air**, because the ground north of the site falls
-away almost as fast as a 1:8 ramp descends. At **1:5.3** it lands dead on grade.
+The position, elevation and footprint are the **approved base site** and are unchanged
+by this pass. What changed is the treatment of the edges and the ramp.
 
 | Field | Value |
 | --- | --- |
 | Output | `dist/SkyrimFair.esp` |
-| Size | **55,730 bytes** |
-| sha256 | `32e8f98388e89d4e297c44a3febe927ae0734f2cbaac7eb29808a4fc810783de` |
+| Size | **67,019 bytes** |
+| sha256 | `53d76a11875ebe5d30ca857dc4b54cd0fb8204f24e600b3e8109d454821f9388` |
 | Masters | `Skyrim.esm` only |
-| Records | 1 WRLD, 6 CELL, 5 STAT, 96 REFR |
+| Records | 1 WRLD, 6 CELL, 6 STAT, 247 REFR |
 | Centre | `X -5888, Y -12928` (unchanged) |
-| **Floor Z** | **-5504**, raised **+192** from -5696 |
-| Cells touched | `-3,-4`, `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` |
-| Deployed | byte-identical; `SkyrimFair_Ramp_512.nif` rebuilt and redeployed, other 5 NIFs unchanged |
+| Floor Z | `-5504`, +192 above grade (unchanged) |
+| Cells touched | `-3,-4`, `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` (unchanged) |
+| Deployed | byte-identical; all 6 NIFs redeployed |
 
-Footprint outline and the 22-tile mask are **unchanged**.
+### The ramp-to-floor connection — what was actually wrong
 
-### Why the platform previously looked buried
+The seam itself measured **exact**, and it is worth recording how that was established
+rather than assumed. The paving and the ramp were rebuilt as solids in world space from
+the kit definitions and the placements parsed out of the ESP, then the top surface was
+sampled every 64 units along the ramp centreline:
 
-Two causes, and neither was terrain poking through — re-sampling every 128-unit
-heightmap point under the paving found **zero** points above the floor.
+```
+      Y   carried by                              top Z     step
+ -12224   FloorEdge512, FloorFill1024            -5504.0    +0.0
+ -12160   FloorEdge512, FloorFill1024, Ramp512   -5504.0    +0.0
+ -12096   Ramp512                                -5516.0   -12.0
+ -12032   Ramp512                                -5528.0   -12.0
+    ...                                             ...
+ -10112   Ramp512                                -5888.0   -12.0
+```
 
-1. The floor sat at *exactly* the terrain maximum, so it was flush at its highest point
-   and only 0-120u proud elsewhere. It never read as a platform.
-2. **Grass.** `No Grass In Objects` is installed with `Use-grass-cache = true` and
-   `Load-from-BSA = true`, and the cache in `Still in Skyrim - Grass Cache.bsa` predates
-   the platform. NGIO culls grass under objects at **cache generation** time, so grass
-   still renders where the platform now stands. **Regenerating the grass cache would
-   remove it.** At +192 the paving also clears tundra grass height anyway.
+Continuous, no step and no gap: the paving's north edge and the ramp's high end are both
+at `-5504` at `Y -12160`, and the fall is a constant 12 units per 64 from there to the
+foot. **Collision matches the visual surface exactly, by construction** rather than by
+luck: the ramp's collider is a box rotated by `atan(96/512)` about its own origin, and
+that origin is placed at `(RUN/2, -RISE/2)` — the midpoint of the line from `(0, 0)` to
+`(512, -96)`. A plane through the midpoint at the slope's own gradient is the slope. The
+converted NIF confirms it survived: `bhkBoxShape` 512 x 520.9 x 64, the 520.9 being
+`hypot(512, 96)`, with the rotation stored as 0.983 / 0.184.
 
-### Elevation
+Three things at the connection *were* wrong, and all three are now fixed:
 
-| Lift | Floor | Exposure min / max / mean | Retaining courses |
-| --- | --- | --- | --- |
-| +160 | -5536 | 160 / 256 / 203 | 1 |
-| **+192** | **-5504** | **192 / 288 / 235** | **2** |
-| +208 | -5488 | 208 / 304 / 251 | 2 |
+1. **Daylight under the ramp head.** The ramp slab was 256 deep and its head stands 288
+   above native ground on the western flank, so the underside sat **32 units clear of
+   the ground** and you could see under the entrance. `RAMP_DEPTH` is now **384**, which
+   buries it along the whole run with margin. This is the one real visual fault at the
+   junction and it needed a mesh change, not a placement change.
+2. **Bare flanks.** The ramp was a grey slab hanging in the air beside the terrace, with
+   nothing at its sides. Both flanks are now treated as edge segments (below).
+3. **Bare cutting wall.** The paved spur at footprint cell `(3,0)` sits immediately west
+   of the ramp head, so the first thing you see on the way in was its grey retaining
+   face. It is now faced with rock, via the slim-piece retry described below.
 
-Per edge at +192: N 239 mean / 280 max, S 232 / 280, E 221 / 272, W 246 / 288.
+No tuck or lead-in was added at the seam. The two faces there are coplanar with opposed
+normals and zero separation, which is the ordinary case for butted kit pieces and is
+back-face culled; inventing a new mesh topology to insure against a float error that
+does not exist would have risked bad normals for no gain.
 
-Retaining rises to **24 pieces**, two stacked courses on the deeper edges. Two courses
-are intentional: the height is to be disguised later with rocky embankments, earth,
-shrubs and larger stones rather than reduced.
+### Exposure, measured before designing anything
 
-**Shoulder wedges dropped to zero**, and the shoulder `STAT` is no longer created at all
-(hence 5 STAT records, not 6). That is the `shoulderMaxDrop` rule working as designed — a
-32-unit verge only reads as a soft transition against a small step, and every edge now
-exceeds 192u. Embankment treatment for a wall this tall needs different pieces.
+Every perimeter segment was sampled at its face and 192 and 384 units further out:
 
-### The road, and the ramp that reaches it
-
-The vanilla road is built from **meshes**, not land texture: `RoadStraightLong02`,
-`RoadSCurveR01` and `RoadChunkL/M/S*`, running east-west at Y about -10,050 to -10,750,
-immediately north of the site. `LDirtPath01` exists only about 5,900u away to the WNW and
-is not the relevant approach.
-
-Critically, **the road sits in a dip directly north of the site and climbs eastward**:
-
-| Road point | Z | Grade from floor -5504 |
+| | segments | drop at face |
 | --- | --- | --- |
-| `(-7081, -10064)` | -5992 | 1:3.3 |
-| `(-5960, -10040)` | -5906 | **1:4.0** |
-| `(-4993, -10242)` | -5875 | 1:3.9 |
-| `(-3943, -10360)` | -5748 | **1:7.6** |
-| `(-3034, -10744)` | -5640 | 1:14.2 |
+| North | 4 | 192-280, mean 232 |
+| South | 6 | 192-280, mean 232 |
+| East | 5 | 200-272, mean 221 |
+| West | 5 | 216-288, mean 246 |
+| **All non-ramp** | **20** | **192-288, mean 233** |
 
-A ramp centred on the north edge — where it previously sat — would have needed **1:4**.
-The ramp therefore moved to the **eastern end of the north edge**, where the road has
-climbed and the intervening ground is flatter. A new `rampAlign` config option controls
-this.
+**Not one segment is under 192.** That is the finding that shaped this pass, and it
+contradicts the brief in one respect: there is no perimeter edge with a "smaller height
+difference" to give a soft earth transition to. The whole outline is wall. The old
+`shoulderMaxDrop` rule was gating the verge wedge on floor-to-ground drop at the face,
+which is why it produced zero wedges — it was working correctly against a condition that
+no longer occurs anywhere on the site.
 
-The first cut of that ramp used 1:8, and in game its foot floated clearly above the
-ground. Re-measuring along the ramp centreline (`x -4864`) showed why: the terrain there
-drops about 1:6 going north, so a 1:8 ramp *loses* ground the further it runs. The fix is
-a steeper ramp, not a longer one.
+### Banded edge treatment
 
-| Rise per tile | Grade | Tiles | Run | Foot Z | Ground Z | Gap |
-| --- | --- | --- | --- | --- | --- | --- |
-| 64 | 1:8.0 | 5 | 2,560 | -5824 | -5832 | +8 |
-| **96** | **1:5.3** | **4** | **2,048** | **-5888** | **-5888** | **0** |
-| 128 | 1:4.0 | 2 | 1,024 | -5760 | -5776 | +16 |
+The perimeter treatment is now chosen per segment from its measured exposure.
 
-96 wins on every count: it lands exactly on grade, keeps the same four-tile run, and needs
-no new tile length — only `RAMP_RISE` in the kit script changes, so the ramp mesh is
-re-exported rather than redesigned.
+| Band | Condition | Treatment |
+| --- | --- | --- |
+| Embankment | exposure > 140 | 3 tall rocks, each scaled to the exposure it faces, crown solved onto the floor plane |
+| Toe | always | 2 low rock piles bedded into native grade beyond the embankment |
+| Verge | local ground step <= 112 | the project-owned rough-earth wedge, then 2 shrubs or scrub |
 
-| Field | Value |
+**The palette changed, and that is the main reason the terrace read as a grey box.** The
+old dressing pool was `RockPileM01/M02/S01/S02`, which are **54 to 102 units tall**. They
+were being asked to hide a **192-288 unit** wall, so they sat round its foot like gravel.
+They are kept, but demoted to the toe band, where a low pile is the right piece.
+
+The embankment pool is new, and every piece in it is a static **vanilla itself places
+within 6,000 units of this site**, so the result reads as the same landform family as the
+surrounding tundra:
+
+| FormID | EditorID | Radius | Height | Nearby in vanilla |
+| --- | --- | --- | --- | --- |
+| `00018199` | `RockL01` | 270 | 288 | 9 |
+| `0001819A` | `RockL02` | 399 | 263 | - |
+| `00018BA5` | `RockL03` | 289 | 180 | 4 |
+| `0001A6E2` | `RockL04` | 178 | 418 | - |
+| `0001B0A8` | `RockL05` | 215 | 276 | - |
+| `000332C7` | `RockPileL01TundraRocks` | 512 | 372 | 2 |
+
+Three rules make the embankment sit correctly, and each of them was added because the
+first attempt got it wrong and the verifier caught it:
+
+- **Solve Z from the piece's own bounds.** A vanilla rock's origin sits near its base,
+  not its centre — `RockL01` runs from `-59` to `+229` — so the reference Z is derived
+  from `OBND.ZMax` to put the crown on the floor plane. Assuming a fixed offset is what
+  leaves dressing either floating or sunk out of sight.
+- **Bed against the ground under the rock, not at the face.** The ground falls away from
+  the platform, so a rock standing a couple of hundred units out sits on ground well
+  below the face it is facing. The first build had two rocks hanging 6 and 44 units in
+  the air for exactly this reason. Each rock now re-samples the terrain at its own
+  position and is rescaled to that.
+- **Only draw pieces that can reach the top.** A 180-unit rock asked to face a 288-unit
+  edge can only crown it by lifting its base off the ground, so the draw is filtered to
+  pieces whose height at maximum scale clears the exposure. Short pieces are not wasted:
+  they are what the lower ramp flanks want.
+
+Overshoot above the floor plane is capped at 48 units **and** by the piece's own spare
+height, so crowning the edge can never lift a base clear of grade. Measured over the
+finished build, embankment crowns land **0 to 48 units above the floor plane** — which is
+the silhouette break: seen from on the terrace, rock crowns interrupt the paving edge
+instead of it ending in a drawn line.
+
+### The ramp flanks, and where the earth transition actually belongs
+
+Both flanks of all four ramp tiles are treated as edge segments against the exposure
+measured at that tile. This is where the small height differences live:
+
+| | ramp surface above native ground |
 | --- | --- |
-| Orientation | **due north, rotation 0** (rotation-safe) |
-| Position | 2 segments wide at X -5120 and -4608, edge Y -12160 |
-| Length | **4 chained tiles, 2,048u run** |
-| Grade | **1:5.3** (96u rise per 512u tile) |
-| Tile Z levels | -5504, -5600, -5696, -5792 |
-| Surface | -5504 at the terrace down to a foot at **-5888** |
-| Total fall | **384u** |
-| Native ground at the foot | **-5888** |
-| **Vertical gap at the foot** | **0 units** |
+| At the head | 224-288 |
+| Mid run | 96-176 |
+| Near the foot | 24-64 |
 
-The nearest road piece is `047F9B:Skyrim.esm RoadSCurveR01`, origin `(-4993, -10242, -5875)`
-with a 1,282-unit mesh radius, so the ramp foot at `(-4864, -10112)` sits **183 units from
-its origin, well inside its own footprint**. Its origin Z of -5875 is 13 units above native
-ground, which is what a road mesh laid on the terrain should be. An earlier pass quoted
-"road Z -5747 to -5763" for this junction; those figures belong to the `RoadChunk` pieces
-900-1,000 units further **east**, not to the piece the ramp actually meets.
+So the flanks pick up rock high up and give way to rough earth and grass low down,
+which is the gradient the brief asked for — it just is not on the perimeter.
 
-The map marker sits at the ramp foot, `(-4864, -10112, -5888)`, so fast travel arrives at
-the roadside and the approach is up the ramp.
+Two guards stop this from going wrong:
 
-### References disabled — five, all named explicitly
+- **A clear walking channel**, 480 units wide down the middle of the ramp and continued
+  512 units past the foot toward the road. Nothing is placed whose mesh radius reaches
+  into it. 41 picks were rejected on this rule.
+- **No treatment where the flank's outward side is the terrace itself.** The ramp leaves
+  the platform, so its first tile has paving alongside it; treating that side pushed rock
+  and scrub outward onto the terrace. The first build put two pieces on the platform this
+  way.
 
-| FormID | EditorID | Radius | Why |
-| --- | --- | --- | --- |
-| `00048032:Skyrim.esm` | `RockTundraLand01Tundra01` | 1418 | slab over the paving |
-| `0004801A:Skyrim.esm` | `RockTundraLand02Tundra01` | 1767 | slab over the paving |
-| `00048031:Skyrim.esm` | `RockTundraLand02Tundra01` | 1767 | slab over the paving |
-| `00047F8C:Skyrim.esm` | `RockTundraLand02FieldGrass01` | 1767 | slab over the paving |
-| `00023362:Skyrim.esm` | `DirtCliffs01FieldGrass01` | 899 | earth cliff in the ramp corridor |
+Because a fat rock beside the entrance is always rejected by the channel rule, a
+rejection **retries once with the slimmest piece that can still reach the top**.
+`RockL04` is 418 tall on a 178 radius, so it faces the cutting wall from close in where a
+399-radius `RockL02` cannot. That single retry is why `RockL04` is now the most-used
+embankment piece, with 16 placements.
 
-All five are plain scenery — verified in the written plugin to carry only `DATA`, `NAME`
-and, for the scaled cliff, `XSCL`. No LAND edit, so the ground beneath is untouched.
+### Corner stones
 
-### Deliberately preserved
+Every convex corner of the outline gets one larger stone set diagonally across it, from
+`RockL02` / `RockPileL01TundraRocks` / `RockL04`, sized to the corner's own exposure.
+Eight placed. A flat top edge reads as a built rectangle most obviously at its corners.
 
-- **The road itself** — `047F9B:Skyrim.esm RoadSCurveR01` and every other road piece.
-- **The roadside detail** — both `FenceWoven01` and `HandCart01Wheel`, to keep the
-  entrance feeling inhabited.
-- **`critterSpawnInsects_Many`** and the `LvlAnimalPlainsPrey` spawn — both
-  enable-parented; absent from the plugin entirely.
-- **All vegetation.** Checked against the ramp surface using OBND heights: of the eight
-  references in the ramp corridor, only **one** physically breaks the ramp plane, and that
-  is the handcart, clipping by about 23 units at the extreme foot. Nothing was cleared for
-  tidiness.
+### What is on the site now
 
-### Classifier fix, now committed
+| Role | Count |
+| --- | --- |
+| Paving (`floorFill` 1024 / `floorEdge` 512) | 4 / 6 |
+| Ramp tiles | 8 |
+| Grey retaining courses | 24 |
+| Retaining corners | 2 |
+| **Rough-earth verge wedges** | **24** (previously 0) |
+| Embankment rocks | 63 |
+| Corner stones | 8 |
+| Toe rocks | 43 |
+| Shrubs and scrub | 58 |
+| Vanilla references placed, total | 172 |
+| Rejected as oversized | 10 |
+| Rejected for blocking the entrance channel | 41 |
 
-`tools/footprint_audit.py` is a standalone, re-runnable audit carrying the fix for the bug
-that hid two large statics:
+The shoulder `STAT` is back in use, so there are **6** STAT records rather than 5.
 
-- Bethesda appends texture variants to EditorIDs, and they mislead.
-  `RockTundraLand02FieldGrass01` is a 1767-unit rock slab and `DirtCliffs01FieldGrass01`
-  an 899-unit earth cliff, but a raw substring match filed both under *vegetation* because
-  of "FieldGrass". Variant suffixes are now stripped before any keyword test, rock and
-  earth tokens are matched before vegetation, and **mesh radius outranks keywords** —
-  anything at or above 600 units is a large mass.
-- It also prepends the implicit masters, which MO2's `plugins.txt` omits. Forgetting them
-  had silently dropped the whole vanilla layer from an earlier pass, reporting 30
-  intersecting references instead of 101.
+### Is there still a fairground to build on?
 
-Both slabs now classify correctly as **large rock / earth mass**.
+Yes. Sampling the paved surface on a 32-unit grid against every piece that crowns at or
+above the floor plane, using OBND radius as the reach (the horizontal half-diagonal, so
+deliberately pessimistic):
+
+| | |
+| --- | --- |
+| Paved area | 5.77 million sq units |
+| Clear of rock | **3.71 million sq units, 64.3%** |
+| Largest clear square | **1,216 x 1,216 units** |
+
+The clear area is one contiguous core with a rocky rim, which is the shape wanted. The
+biggest intrusions are `RockL02` at radius 399 leaning on the concave parts of the
+outline; if the interior wants to be cleaner, `wallMaxRadius` down or `wallEdgeOverlap`
+up will pull the rim back without touching anything else.
 
 ### Verification
 
-25 structural checks, all passing, by parsing the written ESP independently of Mutagen:
-single master, author intact, mesh paths under `SkyrimFair\`, 34 references on the floor
-plane, 8 ramp tiles at four Z levels 96u apart all at rotation 0 and on the eastern
-segments, the ramp foot landing at exactly -5888 where native ground is -5888, **exactly five** references disabled and exactly the five named, road, fences,
-handcart, vegetation and critter markers all untouched, marker persistent and at the ramp
-foot, and no LAND / NAVM / NPC / quest / script records.
+All checks pass, by parsing the written ESP independently of Mutagen and rebuilding every
+piece in world space from the kit definitions and Skyrim.esm OBND data:
 
-**All six cell overrides byte-identical to vanilla.** `modlist.txt`, `plugins.txt` and
-`loadorder.txt` unchanged.
+- single master, author intact, no LAND / NAVM / NPC / quest / script records
+- ramp chain untouched: 8 tiles, four Z levels 96 apart, rotation 0, foot at `-5888`
+- **no embankment rock floats above native ground** (0 of 71)
+- **every embankment rock crown reaches the surface it faces** (0 short)
+- no crown overshoots the configured 48
+- **nothing reaches into the entrance walking channel** (0 blockers)
+- nothing centred inside the paving inset by `wallEdgeOverlap`
+- all 24 verge wedges sit exactly on native ground and below the floor plane
+- all dressing scales within 0.70-1.50
+- exactly 5 references disabled, and exactly the five named
+- road pieces, fences, handcart and `critterSpawnInsects_Many` untouched
+
+**All six overridden CELL records are byte-identical to vanilla.** `modlist.txt`,
+`plugins.txt` and `loadorder.txt` were not written by the generator or the deploy.
+
+#### One accepted deviation, now measured properly
+
+The overridden `WRLD` Tamriel record differs from vanilla in exactly two subrecords, and
+nothing else:
+
+| Subrecord | Vanilla | Ours | Why |
+| --- | --- | --- | --- |
+| `RNAM` | 1,349,616 bytes | absent | The region-cell cache, dropped by design. Every real mod that touches Tamriel drops it and the game rebuilds it. |
+| `FULL` | 4 bytes | 7 bytes | Vanilla stores the worldspace name as a localised string ID; this plugin is not flagged localised, so the literal `Skyrim` is written instead. Standard for a non-localised override, and identical text in English, but it would force English for a localised install. |
+
+All 16 other subrecords, including `OFST` at 45,600 bytes, match byte for byte.
+
+### Known and deliberately not fixed
+
+- **The ramp foot's eastern corner runs into a bank.** Across the ramp's 1,024 width the
+  western half lands clean, but native ground rises on the eastern side over the last
+  128 units, covering the ramp by up to 96 there. The terrain slope at that corner is
+  about 29 degrees, which is walkable, so it reads as the ramp emerging from a bank
+  rather than as a wall. Fixing it properly would mean either a LAND edit or moving the
+  ramp, and the placement is approved. Flagged for review rather than changed.
+- **No textures.** Expect grey geometry on the project-owned pieces. The vanilla rock,
+  earth and plant dressing is fully textured, so the contrast will be stark.
+- **No navmesh**, so NPCs cannot use the terrace or the ramp yet.
+- **Grass still grows through the paving** until the No Grass In Objects cache is
+  regenerated. Barry's step; nothing in the plugin can change it.
 
 ### What to test in game
 
-1. **does the foot of the ramp now meet the ground cleanly** — the point of this pass
-2. does 1:5.3 feel walkable, or steep enough to fight the player's step-up
-3. does the ramp collision feel smooth up and down, with no snag at the top or bottom
-4. does the ramp read as joining the road, rather than merely ending near it
-5. does +192 still feel substantial without being ridiculous
-6. do the surviving fences and handcart help the entrance feel integrated
-
-Expect grey untextured geometry, no navmesh, and **grass still growing through the paving
-until the grass cache is regenerated**.
+1. does the terrace now read as a landform rather than a built platform
+2. is the foot of the ramp still clean now the slab is 384 deep, with no gap underneath
+3. does the entrance read as a cutting through rock, and is the way down clearly readable
+4. do the ramp flanks feel integrated, rock at the top giving way to earth at the bottom
+5. do the rock crowns break the top edge without making the terrace feel cluttered
+6. is the clear core big enough to lay out stalls and a stage
 
 ## Footprint blueprint and intersection audit (deployed placement)
 
@@ -407,7 +487,7 @@ Grid: **128 units**, matching Skyrim's architectural grid and the exterior heigh
 | **Floor edge tile** | 512 x 512 | 32u thick | the outer ring, at half the fill size so the outline can step in 512u increments and read as irregular |
 | **Retaining edge** | 512 wide x 128 deep | 256u tall | rough stone face hanging below the floor plane. Max measured exposure is 160u, so one height covers every case and the surplus buries in terrain |
 | **Retaining corner** | 128 x 128 | 256u tall | outer and inner corner variants to turn the stepped outline |
-| **Ramp tile** | 512 x 512 | rises 96u | 1:5.3 grade, chainable. The deployed 192u terrace uses 4 chained tiles over 2,048u, falling 384u to meet the ground |
+| **Ramp tile** | 512 x 512 x 384 deep | rises 96u | 1:5.3 grade, chainable. The deployed 192u terrace uses 4 chained tiles over 2,048u, falling 384u to meet the ground |
 | **Shoulder wedge** | 512 x 256 | tapers 32u to 0u | rough-earth/grass transition strip laid outside the paving to soften the join |
 
 Pivot convention, chosen so the generator needs no offset arithmetic:
@@ -459,7 +539,7 @@ Nothing third-party is copied or referenced. All geometry is original box and we
 | `SkyrimFair_FloorEdge_512` | −256..256 | −256..256 | −32..0 | 8 | (0,0,0) |
 | `SkyrimFair_Retain_512` | −256..256 | −128..0 | −256..0 | 8 | (0,0,0) |
 | `SkyrimFair_RetainCorner_128` | −128..0 | −128..0 | −256..0 | 8 | (0,0,0) |
-| `SkyrimFair_Ramp_512` | −256..256 | 0..512 | −256..0 | 8 | (0,0,0) |
+| `SkyrimFair_Ramp_512` | −256..256 | 0..512 | **−384..0** | 8 | (0,0,0) |
 | `SkyrimFair_Shoulder_512` | −256..256 | 0..256 | −32..0 | 6 | (0,0,0) |
 
 Pivot conventions as specified in Phase 2 and implemented exactly: floor and ramp pivots at the centre of the top face, retaining pieces at the top outer edge, corner at the top outer corner, shoulder at the thick end top face. For retaining, ramp and shoulder pieces **+Y points away from the platform centre**.
@@ -478,7 +558,7 @@ Pivot conventions as specified in Phase 2 and implemented exactly: floor and ram
 Two corrections were needed against the BGS defaults, both worth knowing for future assets:
 
 1. **The default rigidbody is a movable prop** — mass 80, `unyielding` off. For static world geometry that is wrong, so every piece is now set `unyielding = True, mass = 0`.
-2. **A bounding-box collider on the ramp would be a solid 512 x 512 x 256 block** and would stop the player walking up the slope. The ramp instead uses a separate box child collider rotated 10.62 degrees (`atan(96/512)`) to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Confirmed present in the exported FBX.
+2. **A bounding-box collider on the ramp would be a solid 512 x 512 x 384 block** and would stop the player walking up the slope. The ramp instead uses a separate box child collider rotated 10.62 degrees (`atan(96/512)`) to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Confirmed present in the exported FBX.
 
 ### FBX to NIF conversion — DONE, and verified
 
