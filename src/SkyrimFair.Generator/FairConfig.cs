@@ -828,10 +828,19 @@ internal sealed record EntranceCheekConfig
 
     public string Piece { get; init; } = "0000099B:Skyrim.esm"; // Stonewall01
 
+    /// <summary>
+    /// `StonewallEndL01`: the matching tapered end whose open run faces downhill.
+    /// It replaces the full top block so the terrace landing ends in masonry without
+    /// growing another wall segment.
+    /// </summary>
+    public string TopPiece { get; init; } = "0000099E:Skyrim.esm";
+
     /// <summary>Scale of the wall piece. 0.6 makes the 175-tall field wall waist high.</summary>
     public float Scale { get; init; } = 0.6f;
 
     public float PieceLength { get; init; } = 256f;
+
+    public float TopPieceLength { get; init; } = 222f;
 
     public float PieceDepth { get; init; } = 138f;
 

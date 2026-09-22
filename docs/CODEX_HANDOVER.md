@@ -51,11 +51,12 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
   collider built in, same geometry as the vanilla flight so the chain maths is unchanged.
   The vanilla `StonewallTerraceStairs01` is a fallback behind `entrance.kitStair`. See
   "Road and entrance"
-- **the only masonry at the entrance is the original small vanilla `Stonewall01` cheek
-  blocks** at scale 0.6: seven overlapping +30.3-degree blocks per side across the whole
-  stair chain, plus one level block at each top and bottom end. They are sunk 48 units,
+- **the only masonry at the entrance is the original small vanilla Stonewall-family
+  cheek blocks** at scale 0.6: seven overlapping +30.3-degree `Stonewall01` blocks per
+  side across the whole stair chain, one level `Stonewall01` at each lower end, and one
+  compact level `StonewallEndL01` cap at each terrace landing. They are sunk 48 units,
   leaving the west/east crests 8 / 32 above the nosing. An asymmetric closed-rock and
-  grassy-pile bank leans on them
+  grassy-pile bank leans on them; the upper landing itself stays entirely masonry
 - two closed `SkyrimFair_EntranceRetainWing_144` solids restore the terrace face on
   either side of the 217-wide stair opening; the entrance segment must never be left
   structurally open again
@@ -322,9 +323,13 @@ compressed-mesh collision will fail and give it a box.** The standalone slab
 
 **Cheek walls** (`Dressing.EntranceCheeks`): vanilla `Stonewall01` at scale 0.6. Each
 side is one continuous 748.8 run: seven pitched blocks overlap about 30 units, so the
-flight joins cannot gap, and level blocks overlap both ends by 16. They are sunk 48,
-leaving crest centres 8 west / 32 east above the nosing. Rotation is `X +30.3`, `Y 0`,
-`Z 90` at the current north entrance. The unused
+flight joins cannot gap, and a level `Stonewall01` overlaps the bottom by 16. At the
+terrace landing, a matching level `StonewallEndL01` (`00099E`) replaces the former full
+top block. It is 222 rather than 256 units long before scaling, its finished end faces
+uphill, and its continuing edge overlaps the diagonal run by about 26; never add another
+full wall segment there. The blocks are sunk 48, leaving crest centres 8 west / 32 east
+above the nosing. Rotation is `X +30.3`, `Y 0`, `Z 90` at the current north entrance;
+the caps and lower blocks are `[0, 0, 90]`. The unused
 `SkyrimFair_StairCheek_192` comparison mesh remains reproducible in the asset kit but has
 no STAT or placement in the current plugin.
 

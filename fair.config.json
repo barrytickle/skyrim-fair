@@ -231,8 +231,10 @@
         "entranceCheeks": {
           "enabled": true,
           "piece": "0000099B:Skyrim.esm",
+          "topPiece": "0000099E:Skyrim.esm",
           "scale": 0.6,
           "pieceLength": 256,
+          "topPieceLength": 222,
           "pieceDepth": 138,
           "sink": 48,
           "overlap": 24,

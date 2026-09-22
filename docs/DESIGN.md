@@ -332,9 +332,11 @@ The cheek walls beside the approach steps use the original small vanilla dryston
 not a continuous purpose-built slab. Keep their irregular, handmade silhouette, but pitch
 each block to the same overall descent as the stair so they do not stand as vertical
 towers. Treat all flights as one continuous wall run: overlap the diagonal blocks so no
-join gaps remain, sink them until they sit low against the steps, and terminate the run
-with one level block at both top and bottom. They will ultimately be partly embedded into
-the bank. Separately, the structural terrace face must close cleanly around the stair-head
+join gaps remain, sink them until they sit low against the steps, and terminate the lower
+run with one level block. At the top, keep the terrace landing entirely manmade and use a
+compact matching masonry end-cap—currently vanilla `StonewallEndL01`—rather than another
+full wall segment or a natural rock. They will ultimately be partly embedded into the
+bank. Separately, the structural terrace face must close cleanly around the stair-head
 opening without placing geometry or collision across the walking route.
 
 ### Explicit non-goal: the backdrop

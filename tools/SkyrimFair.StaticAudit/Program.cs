@@ -1,14 +1,15 @@
 using Mutagen.Bethesda;
 using Mutagen.Bethesda.Skyrim;
 
-if (args.Length != 1)
+if (args.Length < 1)
 {
-    Console.Error.WriteLine("usage: SkyrimFair.StaticAudit <Skyrim.esm>");
+    Console.Error.WriteLine("usage: SkyrimFair.StaticAudit <Skyrim.esm> [search terms ...]");
     return 1;
 }
 
 using var master = SkyrimMod.CreateFromBinaryOverlay(args[0], SkyrimRelease.SkyrimSE);
-var terms = new[] { "cliff", "rock", "tundra", "shelf" };
+var customTerms = args.Length > 1;
+var terms = customTerms ? args[1..] : new[] { "cliff", "rock", "tundra", "shelf" };
 
 foreach (var record in master.Statics
     .Where(r => terms.Any(term =>
@@ -25,7 +26,7 @@ foreach (var record in master.Statics
     var x = b.Second.X - b.First.X;
     var y = b.Second.Y - b.First.Y;
     var z = b.Second.Z - b.First.Z;
-    if (Math.Max(x, y) < 450 || z < 100)
+    if (!customTerms && (Math.Max(x, y) < 450 || z < 100))
     {
         continue;
     }

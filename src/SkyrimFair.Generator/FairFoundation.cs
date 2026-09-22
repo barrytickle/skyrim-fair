@@ -1068,7 +1068,8 @@ internal static class FairFoundation
         // The original small Stonewall01 blocks retain their chunky, irregular
         // silhouette, but are pitched to the same overall descent as the stair. Treat
         // the three flights as one continuous run: restarting placement per flight left
-        // visible gaps at both joins. Level blocks overlap the run at top and bottom.
+        // visible gaps at both joins. A matching tapered Stonewall end caps the terrace
+        // landing; an ordinary level block remains at the bottom.
         var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
         var stairHalf = f.Entrance.StairHalfWidth * f.Entrance.StairScale;
         var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
@@ -1079,7 +1080,9 @@ internal static class FairFoundation
         {
             var ck = d.EntranceCheeks;
             var cb = boundsOf(FormKeyHelper.Parse(ck.Piece));
+            var topCb = boundsOf(FormKeyHelper.Parse(ck.TopPiece));
             var len = ck.PieceLength * ck.Scale;
+            var topLen = ck.TopPieceLength * ck.Scale;
             cheekDepth = ck.PieceDepth * ck.Scale;
             cheekRiseMax = MathF.Max(ck.RiseLeft, ck.RiseRight) - ck.Sink;
             var alongRot = OutwardRotation[f.RampEdge.ToUpperInvariant()] + MathF.PI / 2f;
@@ -1121,24 +1124,37 @@ internal static class FairFoundation
                         $"crest {nosing + rise - ck.Sink:F0} pitch {slope * 180f / MathF.PI:F1}");
                 }
 
-                // One ordinary upright piece at each landing gives a level termination
-                // rather than ending the diagonal wall abruptly: flat / slope / flat.
-                foreach (var (label, along, nosing) in new[]
-                {
-                    ("top", -len / 2f + ck.EndOverlap, head.Z),
-                    ("bottom", totalRun + len / 2f - ck.EndOverlap, head.Z - totalDrop),
-                })
-                {
-                    var px = head.X + head.Dc * along + (head.Dc == 0 ? lateral : 0f);
-                    var py = head.Y - head.Dr * along + (head.Dr == 0 ? lateral : 0f);
-                    var pz = nosing + rise - ck.Sink - cb.ZMax * ck.Scale;
-                    PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale);
-                    result.CheekWalls++;
-                    result.CheekEndWalls++;
-                    if (trace) Console.Error.WriteLine(
-                        $"cheek {label} side {side} -> ({px:F0},{py:F0},{pz:F0}) " +
-                        $"crest {nosing + rise - ck.Sink:F0} pitch 0.0");
-                }
+                // The upper landing must remain entirely manmade, but another full
+                // Stonewall01 would unnecessarily lengthen the run. Its matching
+                // tapered end overlaps the first diagonal block and reads as a compact
+                // finished pier. Both walls run in the same local direction, so both
+                // use the left-end variant whose continuing edge faces downhill.
+                var topAlong = -topLen / 2f + ck.EndOverlap;
+                var topX = head.X + head.Dc * topAlong + (head.Dc == 0 ? lateral : 0f);
+                var topY = head.Y - head.Dr * topAlong + (head.Dr == 0 ? lateral : 0f);
+                var topZ = head.Z + rise - ck.Sink - topCb.ZMax * ck.Scale;
+                PutVanilla(ck.TopPiece, topX, topY, topZ, alongRot, ck.Scale);
+                result.CheekWalls++;
+                result.CheekEndWalls++;
+                result.CheekTopCaps++;
+                if (trace) Console.Error.WriteLine(
+                    $"cheek top cap side {side} -> ({topX:F0},{topY:F0},{topZ:F0}) " +
+                    $"crest {head.Z + rise - ck.Sink:F0} pitch 0.0");
+
+                // Keep the ordinary level Stonewall01 at the foot of the stairs.
+                var bottomAlong = totalRun + len / 2f - ck.EndOverlap;
+                var bottomNosing = head.Z - totalDrop;
+                var bottomX = head.X + head.Dc * bottomAlong
+                    + (head.Dc == 0 ? lateral : 0f);
+                var bottomY = head.Y - head.Dr * bottomAlong
+                    + (head.Dr == 0 ? lateral : 0f);
+                var bottomZ = bottomNosing + rise - ck.Sink - cb.ZMax * ck.Scale;
+                PutVanilla(ck.Piece, bottomX, bottomY, bottomZ, alongRot, ck.Scale);
+                result.CheekWalls++;
+                result.CheekEndWalls++;
+                if (trace) Console.Error.WriteLine(
+                    $"cheek bottom side {side} -> ({bottomX:F0},{bottomY:F0},{bottomZ:F0}) " +
+                    $"crest {bottomNosing + rise - ck.Sink:F0} pitch 0.0");
             }
         }
 
@@ -1556,6 +1572,8 @@ internal sealed class FoundationResult
     public int CheekWalls { get; set; }
 
     public int CheekEndWalls { get; set; }
+
+    public int CheekTopCaps { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }

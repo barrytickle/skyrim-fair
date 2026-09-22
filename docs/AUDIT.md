@@ -2,13 +2,14 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: low continuous cheek run with level ends
+## Current pass: compact masonry caps at the terrace landing
 
-Barry compared the original small vanilla cheek blocks with the continuous
-project-authored replacement in game. The replacement was structurally tidy but too
-engineered. The chosen direction is the simpler original arrangement: small vanilla
-blocks pitched downhill. Barry's next review approved that direction and requested the
-final shaping pass: lower the walls, close the gaps, and add level pieces at both ends.
+Barry approved the low, overlapping diagonal cheek run and requested a more deliberate
+upper termination: compact masonry end-caps on both sides, with no natural material at
+the terrace landing and no additional full wall segment. Local `Skyrim.esm` inspection
+found the matching `StonewallEndL01`; its tapered end faces the terrace while its open
+run overlaps the first diagonal block downhill. The existing lower `Stonewall01`
+terminations remain unchanged.
 
 The approved site, footprint, elevation, stair dimensions and content scope did not
 change. The closed retaining wings added around the stair head remain, because they fix
@@ -19,7 +20,7 @@ the independently reported missing rear face.
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
 | Size | 86,114 bytes |
-| SHA256 | `b79194281e92a8184c15f948d681c61b8064fe680baf7ec9ae94d7e9a3ae8ac0` |
+| SHA256 | `ab0437f61ec182b6124123d6703f34be126cd53c81f870df4e3be7dadacd7876` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
 | Kit meshes deployed | 13 NIFs under `meshes\SkyrimFair\`; unchanged in this ESP-only pass |
 | Masters | `Skyrim.esm` only |
@@ -30,36 +31,45 @@ the independently reported missing rear face.
 | Forbidden records | 0 LAND, NAVM, NPC_, QUST, PACK, DIAL, INFO, SCEN |
 | Floor material | `road01.dds` worn earth on the paving caps |
 
-## Diagonal original cheek blocks
+## Diagonal original cheek blocks and upper caps
 
-The entrance uses eighteen vanilla `Stonewall01` references (`0000099B:Skyrim.esm`) at
-scale 0.6: seven pitched blocks plus a level top and bottom block on each side.
+The entrance uses eighteen vanilla Stonewall-family references at scale 0.6: seven
+pitched `Stonewall01` blocks plus a level `Stonewall01` at the bottom of each side, and
+a compact `StonewallEndL01` cap at each upper landing.
 
 The only visual change from that original is rotation:
 
 - every block remains aligned along the stair with Z rotation 90 degrees;
 - fourteen diagonal blocks have X rotation **+30.3 degrees**, matching
   `atan2(112 stair rise, 192 stair run)`;
-- four end blocks have zero X/Y pitch, forming a level–slope–level profile;
+- four end references have zero X/Y pitch: two ordinary lower blocks and two tapered
+  upper caps;
 - all blocks were lowered 48 units without changing the diagonal angle. The west crest
   is now 8 above the nosing and the east crest 32 above it;
 - the three flights are treated as one 748.8-unit run. Seven diagonal pieces per side
   are evenly spaced 102.7 apart; their 132.8-unit projected lengths overlap by about
   30.1, including across both former flight joins;
-- each level end block overlaps the diagonal run by 16 units;
+- each lower level block overlaps the diagonal run by 16 units;
+- each upper cap is the matching vanilla `StonewallEndL01` (`0000099E:Skyrim.esm`),
+  222 units long rather than 256 before scaling. At the current transform it reaches
+  only about 107 units onto the terrace side while overlapping the diagonal run by
+  about 26 units; it replaces the former full top block rather than extending it;
+- both upper caps use the same end variant because both wall runs share the same local
+  direction: the finished left end faces uphill and the continuing edge faces downhill;
 - the generator applies the pitch from the entrance direction, so the same logic remains
   correct if the entrance edge changes later.
 
-The written ESP was read independently after generation: exactly 18 references use
-`Stonewall01` at scale 0.6—14 serialize `[+30.3, 0, 90]` degrees and four serialize
+The written ESP was read independently after generation: exactly 16 references use
+`Stonewall01` at scale 0.6—14 serialize `[+30.3, 0, 90]` degrees and two serialize
+`[0, 0, 90]`. Exactly two references use `StonewallEndL01` at scale 0.6 and serialize
 `[0, 0, 90]`.
 
 World placements:
 
-| Side | X | diagonal Y centres | level-end Y centres |
-| --- | --- | --- | --- |
-| W | -6034 | -11582, -11479, -11376, -11274, -11171, -11068, -10966 | -11709, -10838 |
-| E | -5742 | same | -11709, -10838 |
+| Side | X | diagonal Y centres | lower block Y | upper cap Y |
+| --- | --- | --- | --- | --- |
+| W | -6034 | -11582, -11479, -11376, -11274, -11171, -11068, -10966 | -10838 | -11699 |
+| E | -5742 | same | -10838 | -11699 |
 
 The project-authored `SkyrimFair_StairCheek_192` remains in the reproducible asset kit as
 an unused comparison/prototype, but it has no STAT record and no placed reference in the
@@ -90,7 +100,8 @@ face on either side of the entrance while leaving a 224-unit central opening aro
 | Paving bodies / visual caps | 12 / 12 |
 | Kit stair flights | 3 |
 | Tilted vanilla cheek blocks | 14 |
-| Level cheek end blocks | 4 |
+| Level lower cheek blocks | 2 |
+| Tapered upper masonry caps | 2 |
 | Entrance retaining wings | 2 |
 | Entrance bank pieces | 11 |
 | Structural retaining courses | 53 |
@@ -110,10 +121,9 @@ face on either side of the entrance while leaving a 224-unit central opening aro
 | Rejected for blocking the entrance | 74 |
 | Rejected for protruding through the market floor | 45 |
 
-Relative to the prior plugin, two additional pitched blocks per side remove the joins and
-four level termination blocks were added. Lowering the permitted bank crown changes the
-deterministic dressing result to 11 entrance-bank pieces and 142 shrubs. Tamriel WRLD and
-the same four exterior CELL records remain overridden.
+Relative to the prior plugin, two full upper `Stonewall01` references were replaced
+one-for-one with `StonewallEndL01`; reference counts and all deterministic dressing remain
+unchanged. Tamriel WRLD and the same four exterior CELL records remain overridden.
 
 ## Verification performed
 
@@ -127,8 +137,11 @@ python tools\footprint_audit.py --data <stock Data> \
 
 - Release build: zero warnings, zero errors.
 - Generator run twice: identical 86,114-byte output and identical SHA256.
-- The audit reader now exposes all three serialized rotation components. Direct ESP read
-  confirmed 14 pitched and four level cheek references at scale 0.6.
+- The local static-audit utility now accepts explicit search terms. It confirmed vanilla
+  `StonewallEndL01` (`00099E`) is 222 x 138 x 171 and that the active Nordic Stonewalls
+  mod supplies its matching replacement mesh.
+- Direct ESP read confirmed 14 pitched `Stonewall01`, two level lower `Stonewall01`, and
+  exactly two level `StonewallEndL01` upper caps, all at scale 0.6.
 - Full-load-order audit: 40 vanilla references intersect the footprint/margin, with zero
   references standing proud of floor `-5336`.
 - Generated ESP copied to the MO2 mod and compared byte-for-byte by SHA256.
@@ -154,8 +167,8 @@ python tools\footprint_audit.py --data <stock Data> \
    east should remain only modestly higher.
 2. Check the complete diagonal run from both sides. There should be no gaps at individual
    blocks or at the two former flight joins.
-3. Check that the ordinary level block at each top and bottom end reads as a natural
-   termination rather than a post.
+3. Check that each tapered upper cap reads as a compact finished masonry pier, not as
+   another full wall segment, and that no natural rock intrudes onto the terrace top.
 4. Look beneath and behind the tilted blocks for exposed open mesh; the separate rear
    retaining wings should still close the terrace at the stair head.
 5. Walk up, down and brush both edges to confirm the rotated vanilla collision does not
