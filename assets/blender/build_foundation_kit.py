@@ -60,6 +60,22 @@ RAMP_RISE = 120
 # at 256 the slab's underside sat 32 units clear of the ground and you could see
 # daylight under the entrance. 384 buries it along the whole run with margin.
 RAMP_DEPTH = 384
+# Hidden collision under the vanilla staircase. StonewallTerraceStairs01 carries a
+# bhkCompressedMeshShape, and those do not scale reliably with a reference's XSCL in
+# Skyrim: at scale 1.0 the stair was climbable, and it stopped being climbable once it
+# was scaled. Rather than give up a stair that looks right, a smooth box-collider slope
+# is laid under the treads. Box shapes scale predictably.
+#
+# The slope is the MESH's own 112-over-192, which is independent of scale, so one piece
+# placed per flight at the stair's scale always lines up.
+STAIRCOL_RUN = 192
+STAIRCOL_RISE = 112
+STAIRCOL_HALF_X = 80        # inside the 167-wide stair gap, so it never protrudes
+STAIRCOL_SINK = 24          # visible slab sits this far under the tread line
+# Must exceed SINK + RISE (136) or the sloped top dips below the base at the far
+# end and the box turns itself inside out - the orientation guard caught exactly that.
+STAIRCOL_DEPTH = 192
+
 SHOULDER_RUN = 256
 SHOULDER_THICKNESS = 32
 # Deliberate A/B gate.  Keep the project-owned material build in the repository,
@@ -367,6 +383,14 @@ def build_kit():
         "SkyrimFair_Shoulder_512", 256, SHOULDER_RUN, SHOULDER_THICKNESS)
     apply_paving_material(pieces["SkyrimFair_Shoulder_512"], grass, period=512)
 
+    # 7. hidden collision slope for the staircase. The visible slab is sunk under the
+    #    treads and wears the earth material, so if a sliver ever shows between steps it
+    #    reads as packed earth beneath them rather than a floating box.
+    pieces["SkyrimFair_StairCollision"] = sloped_box(
+        "SkyrimFair_StairCollision", -STAIRCOL_HALF_X, STAIRCOL_HALF_X,
+        0, STAIRCOL_RUN, -STAIRCOL_DEPTH, -STAIRCOL_SINK, -STAIRCOL_SINK - STAIRCOL_RISE)
+    apply_paving_material(pieces["SkyrimFair_StairCollision"], earth, period=512)
+
     # --- visual paving caps: the only upward-facing surfaces on the terrace ---
     pieces["SkyrimFair_PaveCap_1024"] = quad(
         "SkyrimFair_PaveCap_1024",
@@ -446,6 +470,27 @@ def apply_collision(obj, collider="self"):
 
     # child box collider, aligned to the ramp slope
     import math
+    if obj.name.startswith("SkyrimFair_StairCollision"):
+        angle = math.atan2(STAIRCOL_RISE, STAIRCOL_RUN)
+        slope_len = math.hypot(STAIRCOL_RUN, STAIRCOL_RISE)
+        thickness = 64
+        child = box(obj.name + "_Collider", -STAIRCOL_HALF_X, STAIRCOL_HALF_X,
+                    -slope_len / 2.0, slope_len / 2.0, -thickness, 0)
+        child.rotation_euler = (-angle, 0.0, 0.0)
+        s2 = BLENDER_UNITS_PER_SKYRIM_UNIT
+        # top face on the TREAD line, which is STAIRCOL_SINK above the visible slab
+        child.location = (0.0, STAIRCOL_RUN / 2.0 * s2, -STAIRCOL_RISE / 2.0 * s2)
+        child.parent = obj
+        child.matrix_parent_inverse = obj.matrix_world.inverted()
+        select_only(child)
+        try:
+            bpy.ops.bgs_skyrim.create_collider_skyrim()
+            result["collider"] = (f"stair collision slope {math.degrees(angle):.1f} deg "
+                                  f"({child.name}, {child.bgs_collider.type})")
+        except Exception as exc:                             # noqa: BLE001
+            result["collider"] = f"child failed: {exc}"
+        return result
+
     angle = math.atan2(RAMP_RISE, RAMP_RUN)
     slope_len = math.hypot(RAMP_RUN, RAMP_RISE)
     thickness = 64
@@ -518,7 +563,9 @@ def main():
 
     collider_mode = {}
     for name in pieces:
-        if name in visual_only:
+        if name == "SkyrimFair_StairCollision":
+            collider_mode[name] = "child"
+        elif name in visual_only:
             # Visual caps get no rigidbody at all. Collision stays on the
             # structural body underneath, at the same plane.
             collider_mode[name] = "visual"

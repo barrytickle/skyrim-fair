@@ -2,120 +2,170 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: layered perimeter prototype
+## Current pass: entrance and foundation correction
 
-Implements Barry's construction-language brief of 2026-09-22. **Deliberately scoped to
-a prototype**: the entrance plus two edges, so the new language can be judged against
-the old treatment on the same site before it is applied all the way round. Footprint,
-size, floor height and the road connection are unchanged, and no stalls, NPCs or
-navmesh were started.
+Implements Barry's correction brief of 2026-09-22, written against two in-game
+screenshots: the entrance read as a fortified gate, and the staircase could not be
+climbed. **Scoped to the entrance and its surrounding bank.** No stalls, NPCs, navmesh,
+stage content or expansion. Footprint, floor height, stair width and road connection
+are unchanged.
 
 | Field | Verified value |
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 84,310 bytes |
-| SHA256 | `27ad659e4a78a8072516aa2eb6d4dd9161cf34e0624fd464be83060f02179d85` |
+| Size | 79,554 bytes |
+| SHA256 | `e948fd103def5925e81332ea55ccb6104480201e348cc1f19d53563b41ced019` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
+| Kit meshes deployed | all 10 NIFs under `meshes\SkyrimFair\`, hashes identical to `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |
 | Centre / floor | `X -5888, Y -13440`, floor `Z -5336` |
 | Cells | `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` |
 | **Vanilla references disabled** | **0** |
 | Forbidden records | 0 LAND, NAVM, NPC_, QUST, PACK, DIAL, INFO, SCEN |
+| Floor material | `road01.dds` worn earth on the paving caps (see note below) |
 
-## The prototype, edge by edge
+## The two faults, and what fixed them
 
-`PerimeterWall.PrototypeEdges` selects which compass edges get the new language.
-Currently `["N", "W"]`. South and east keep the previous rock-and-cliff treatment, so
-the two can be compared directly in game.
+### The stairs could not be climbed
 
-## What the new language does
+The corridor had no physical blocker. The cause is the vanilla stair mesh's own
+collision: `StonewallTerraceStairs01` carries a `bhkCompressedMeshShape`, and that shape
+does not scale reliably with a reference's `XSCL`. At scale 1.0 the flight was climbable;
+at 1.3 it was not.
 
-### Not one continuous wall
+The fix is the one the brief allowed: **a hidden smooth collision ramp under each flight.**
 
-Masonry is laid in **short stretches with gaps**, not per segment. Each straight run of
-the outline is walked, and at each step the generator either lays a stretch of 2-3
-segments or leaves a gap, drawn fresh each time so no rhythm establishes itself.
-Whether a stretch happens at all is a per-edge probability:
+- New kit piece `SkyrimFair_StairCollision` (`assets/blender/build_foundation_kit.py`).
+  A 160-wide slab, 192 long, dropping 112, so it matches one flight at scale 1.0
+  exactly (30.3 degrees). Its collider is a `bhkBoxShape` rotated to the tread line,
+  which is a primitive and does scale correctly. The visible slab is sunk 24 below the
+  tread line and wears the earth material, so if a sliver ever shows between steps it
+  reads as packed earth under them, not a floating box.
+- One placed per flight at the flight's own scale, rotation `rot` (the piece descends
+  in local +Y). Verified in the written plugin, reading the ESP independently of the
+  generator:
 
-| Edge | Masonry bias |
-| --- | --- |
-| North (entrance) | 0.70 |
-| West | 0.50 |
-| South | 0.35 |
-| East | 0.25 |
+| Flight | Top tread (mesh) | Slab top | Slab bottom |
+| --- | --- | --- | --- |
+| 1 | `Y -11648, Z -5336` | `Y -11648, Z -5336` | `Y -11398, Z -5482` |
+| 2 | `Y -11398, Z -5482` | `Y -11398, Z -5482` | `Y -11149, Z -5627` |
+| 3 | `Y -11149, Z -5627` | `Y -11149, Z -5627` | `Y -10899, Z -5773` |
 
-That bias is what makes the fair read as more built on one side than another. The
-player should not be able to trace a rectangle.
+Each slab starts on its flight's top tread and ends on the next flight's top tread. The
+slabs are 160 wide inside the 217-wide stair gap, so nothing protrudes beyond the walls.
+The stairs were not moved, rescaled or narrowed.
 
-### Battered, not vertical
+### The entrance read as a fortification
 
-The slant is **not a rotation**. A drystone retaining wall is battered by stepping each
-course back from the one below, so the face is wider at the foot. Courses of
-`Stonewall01` (`0000099B`), the ordinary 256-wide, 175-tall field wall, step out by
-`CourseBatter` jittered 0.7 to 1.3 per course. Only about half of stretches get a
-second course (`SecondCourseChance` 0.55), which is what makes the number of visual
-tiers vary along the edge instead of being uniform.
+Two things built the gate. The previous pass had added `Stonewall01` flank walls beside
+every flight, two on one side and three on the other, on top of the 666-wide drystone
+wall each flight already brings. And the north-edge masonry bias was highest of all four
+edges, so field wall ran right up to the stairs at the top.
 
-Verified in the written plugin: 29 wall pieces spread across **seven distinct Z bands**
-from -5500 down to -6150, and along the west edge they sit at Y -14571, -14331, -14066,
--13818, -13541, -13327, -13082, -12770, -12548, -12281, -12123 - irregular spacing, not
-a ruled line.
+- **Flank walls removed entirely.** The config and code for them are gone.
+- **No perimeter masonry within 900 of the stair centreline** on the entrance edge
+  (`PerimeterWall.EntranceClear`). The stairs bring their own wall; nothing else is
+  laid beside them.
+- **The stair walls are buried, not decorated.** The wall is part of the vanilla mesh
+  and cannot be removed, so an **entrance bank** is laid against the outer face of each
+  flight's wall (`Dressing.EntranceBank`). Every piece is sized to the wall face it
+  hides, bedded to the *lowest* ground sampled under it so no edge floats, and capped so
+  its crown sits below the wall crest and below the floor plane.
+- **The two sides are different by design.** The west side gets closed boulders
+  (`RockL02`, `RockL04`, `RockL05`, `RockPileL01`), two per flight. The east side gets one
+  grassy hump per flight (`DirtCliffsIsland01FieldGrass01`, the closed, all-round dirt
+  cliff), which reads as the earth bank rather than more masonry.
 
-### Masonry dies into the bank
+Verified positions of the bank, from the written plugin:
 
-Every stretch ends in a **part-buried rock**, sized to 80% of the local drop and sunk 64
-below the crest so it reads as embedded rather than dropped on. Six placed. Masonry
-never stops in mid-air.
+| Side | Flight | Piece | Scale | Position | Crown |
+| --- | --- | --- | --- | --- | --- |
+| W | 1 | RockPileL01TundraRocks | 1.11 | `-6598, -11470` | `-5416` |
+| W | 2 | RockL04 / RockL05 | 0.73 / 1.05 | `-6292, -11196` / `-6488, -11276` | `-5501` / `-5530` |
+| W | 3 | RockL02 x2 | 0.75 / 0.67 | `-6386, -11008` / `-6699, -11103` | `-5678` / `-5703` |
+| E | 1 | DirtCliffsIsland01FieldGrass01 | 1.20 | `-4788, -11535` | `-5470` |
+| E | 2 | DirtCliffsIsland01FieldGrass01 | 1.01 | `-4940, -11329` | `-5532` |
+| E | 3 | DirtCliffsIsland01FieldGrass01 | 0.60 | `-5266, -11025` | `-5666` |
 
-### Varying widths
+Every crown is under the floor plane (-5336) and under its wall's crest; every base is
+at least 40 under local grade.
 
-`OffsetJitter` 96 pushes whole stretches in or out; `AlongJitter` 64 wanders each piece
-sideways within its segment. Combined with the jittered batter, no two stretches line
-up.
+## Open-backed cliff pieces
 
-### The entrance, cut into the bank
+`DirtCliffs01` and `DirtCliffs02` were measured from the extracted vanilla meshes
+(`tools/bsa_extract.py`, then a face-direction histogram): both are one-sided strips,
+with 5 to 7 times more face area on the front than the back. `DirtCliffsIsland01` and
+the `RockPile` family are modelled all round.
 
-Low field walls step down beside each stair flight, `FlankWalls` 2 per side with
-`FlankWallsBias` 1 extra on one side only, so the approach is never mirrored. Short
-walls next to the player rather than cliff faces, which is what the brief asked for.
+- **`DirtCliffs02FieldGrass01` is out of the free-spinning embankment pool.** Spun at
+  random it could present its open back to the player. The entrance bank draws only
+  from closed pieces.
+- **The cliff skins had exposed open ENDS.** The strip is 2430 long at the scale used,
+  and it overhangs the 3 or 4 segment runs it skins by 190 to 450 at each end. At a
+  convex corner that overhang stuck out past the corner with the hollow shell showing
+  from the side face; the east face was doing exactly this at both ends. Now each end is
+  checked: at a re-entrant corner the overhang runs into the neighbouring body and is
+  buried; at a convex corner the piece is slid toward a buried end so the exposed end is
+  tucked 96 inside the corner (`CliffEndInset`); if neither end can be buried the skin
+  is not placed and rocks cover the run. Result: the west skin is kept and slid north
+  287; the east skin is refused (counter `CliffEndSkipped` = 1).
 
-The staircase itself is three flights of `StonewallTerraceStairs01` at scale 1.3:
-a 217-wide flight with a 666 x 224 drystone wall, chained nose to tail so the top tread
-of each sits on the bottom tread of the one above. The top tread is exactly on the
-floor plane and the foot lands dead on grade.
+## A determinism bug, fixed
 
-### The bank below
+The per-edge random stream for the layered masonry was seeded from
+`string.GetHashCode()`. .NET randomises string hashes per process, so **the masonry came
+out differently on every run of the generator** - which is why the drystone course count
+in earlier audits wandered. It is now seeded from a fixed per-edge salt table. Two
+consecutive runs of the generator now produce byte-identical plugins (verified by
+SHA256).
 
-`DirtCliffs02FieldGrass01` and `DirtCliffsIsland01FieldGrass01` are in the embankment
-pool - earth cliffs with grass tops, so the layer below the masonry reads as a grass
-and earth bank rather than more bare rock.
+## The floor material - a conflict to flag
+
+The brief says `WRStoneFloor02` remains the active floor material. **The deployed floor
+is not `WRStoneFloor02`.** The paving caps reference vanilla `road01.dds` worn earth,
+which Barry chose explicitly on 2026-09-22 ("Worn earth/gravel throughout") after
+seeing the stone floor in game. This pass did not touch the floor material either way.
+If Barry wants the stone floor back, it is one setting: `PAVING_MATERIAL_MODE` in
+`assets/blender/build_foundation_kit.py`, then rebuild the kit.
 
 ## What is on the site
 
 | Element | Count |
 | --- | --- |
 | Paving bodies / visual caps | 12 / 12 |
-| Stair flights | 3 |
+| Stair flights / hidden collision slabs | 3 / 3 |
 | Structural retaining courses | 53 |
-| Drystone field-wall pieces | 29 |
-| Part-buried rocks ending a run | 6 |
-| Embankment rocks | 57 |
+| Drystone field-wall pieces | 12 |
+| Part-buried rocks ending a run | 4 |
+| Entrance bank pieces | 8 |
+| Cliff skins placed / refused for an open end | 1 / 1 |
+| Embankment rocks | 71 |
 | Corner stones | 9 |
-| Toe rocks | 66 |
+| Toe rocks | 69 |
 | Rough-earth verge wedges | 23 |
-| Shrubs and scrub | 139 |
-| **Vanilla references placed** | **311** |
-| Rejected as oversized | 44 |
-| Rejected for blocking the entrance | 68 |
-| Rejected for protruding through the market floor | 28 |
+| Shrubs and scrub | 138 |
+| **Vanilla references placed** | **315** |
+| Rejected as oversized | 25 |
+| Rejected for blocking the entrance | 74 |
+| Rejected for protruding through the market floor | 32 |
 
-## The interior stays clean
+The masonry count is low on purpose: nothing within 900 of the stairs, and the prototype
+still covers north and west only. The west edge carries most of what remains.
 
-The paving guard refuses anything whose crown clears the floor plane and whose mesh
-reaches inside the paved footprint eroded by `PavingRimAllowance`. **Nothing stands
-proud of the market floor**, verified against the full load order. The ramp and stair
-surfaces are guarded the same way, with a tighter `RampRimAllowance` of 32.
+## Guards, and how they changed
+
+- **Paving guard unchanged.** The market floor is eroded by `PavingRimAllowance` 144 on
+  outer edges; anything whose crown clears the floor plane and whose mesh reaches inside
+  is refused.
+- **Stair surface guard narrowed to the steps.** It previously protected the whole
+  512-wide tile per flight, which refused the very bank meant to bury the walls. It now
+  protects the 217-wide gap plus `RampRimAllowance` 32, from one inset in front of the
+  origin for one flight run, with the tread slope of the stairs rather than the ramp's.
+  Plain ramp tiles keep the old full-tile rectangle.
+- **Entrance channel unchanged** (800 wide, plus the landing). The bank does not use it
+  as its test, because the stair walls themselves sit inside it; the bank's test is the
+  stair gap.
 
 ## Verification performed
 
@@ -123,15 +173,23 @@ surfaces are guarded the same way, with a tighter `RampRimAllowance` of 32.
 dotnet build SkyrimFair.sln -c Release
 blender.exe --background --python assets\blender\build_foundation_kit.py
 dotnet run --project src/SkyrimFair.Generator -- fair.config.json
-python tools/footprint_audit.py --data <stock Data> --profile <profile> --mods <mods> \
+python tools/footprint_audit.py --data <stock Data> --profile "Still in Skyrim Plus" --mods <mods> \
     --esp dist/SkyrimFair.esp --floor=-5336
 ```
 
 - Release build: zero warnings, zero errors.
-- Nothing stands proud of the market floor.
-- Stair flights meet tread to tread; top tread on the floor plane; foot on grade.
-- Wall pieces spread across seven Z bands with irregular spacing - no ruled line.
-- **All cell overrides byte-identical to vanilla.**
+- Kit build: all 13 pieces wound outward (`inward=0`); `SkyrimFair_StairCollision`
+  collider reported as a Box at 30.3 degrees.
+- Generator run twice: identical SHA256 both times.
+- `footprint_audit.py` against the full load order: **0 vanilla references standing
+  proud of the floor** on the foundation; 40 intersect the footprint, all buried by 200
+  or more.
+- Independent read of the written ESP (no generator code): every vanilla-based
+  placement's crown and footprint disc checked against the eroded market floor and the
+  stair gap. **One hit: the deliberate `SMarketStall01` test stall.** Nothing else on the
+  floor, nothing in the stair gap.
+- Stair flights meet tread to tread; each collision slab spans exactly one flight.
+- **All four cell overrides byte-identical to vanilla.**
 - `modlist.txt`, `plugins.txt` and `loadorder.txt` untouched.
 
 ### Accepted deviation
@@ -141,61 +199,39 @@ region cache, dropped by design; and `FULL`, where vanilla stores a localised st
 and this plugin writes the literal `Skyrim` because it is not flagged localised. All
 other subrecords match byte for byte.
 
-## Candidate dependency: Whiterun Stone Stairs — inspected, not needed
+## Debug aid
 
-`external/Whiterun Stone Stairs 147164 1.2 2026-07-10T16-11Z oPpNfU7Iq.7z`, Nexus
-147164 version 1.2. Listed without extracting into the project.
-
-| Field | Finding |
-| --- | --- |
-| Contents | 66 entries: 26 `.nif`, 3 `.dds`, 2 `.xml` (a FOMOD installer), 3 preview `.jpg` |
-| Plugin | **none** - there is no `.esp` or `.esl` in the archive |
-| New assets | **none** |
-| Install options | `common`, `standard`, plus `WR3DSW`, `FYX_Guard_Towers` and `Water_in_wells` compatibility variants |
-| Readme / licence | **not present in the archive**; permissions are whatever the Nexus page states |
-
-**It is a pure replacer.** Every mesh sits at an existing vanilla path under
-`meshes/architecture/whiterun/` - `wrstairswater01`, `wrcastlestairs01`,
-`wrpondstairs01/02`, `wrstairsplatform01`, `wrmainroadmarket`,
-`wrgreathouseplatform01` and so on. It adds no mesh Skyrim Fair could place that does
-not already exist in the base game.
-
-**Consequences, and they are good ones:**
-
-- **No dependency is required or declared.** Skyrim Fair references vanilla game paths
-  and FormIDs. If Barry installs this, his copy wins at runtime and anything we
-  reference simply looks better. That is the same relationship the project already has
-  with Blended Roads for `road01.dds` and Nordic Stonewalls for `Stonewall01`.
-- **Nothing is redistributed**, so its permissions do not constrain the project. The
-  archive carries no licence text anyway, which is a reason not to depend on it.
-- Worth knowing: it replaces `wrmainroadmarket.nif`, which is the mesh the 256-unit UV
-  scale was originally measured from.
-
-**Does it beat stock for the entrance?** It cannot, because it *is* stock, improved.
-The real question is whether Whiterun **city** stairs suit the fair better than the
-**farm** drystone terrace stairs now in use, and the answer is no: the meshes this mod
-touches are city platform and castle approach pieces built into Whiterun's own terrain,
-not free-standing flights, and the fair's story is a rural rise beside the road rather
-than a city plaza. `StonewallTerraceStairs01` stays.
+`SKYRIMFAIR_TRACE=1` in the environment makes the generator print every entrance-bank
+decision (piece, side, scale, reach, position, crown, ground, or why it was refused) to
+stderr. Nothing else changes.
 
 ## Known and deliberately not done
 
-- **The prototype covers north and west only.** South and east keep the older treatment
-  on purpose, for comparison. Rolling out means adding those names to `PrototypeEdges`.
-- **No timber fencing on the top edge yet.** `WRFenceStr01` (106 tall) and
-  `WRFenceBaseRubble01` (93 tall, a rubble retaining base) are audited and available;
-  they are the intended next step for breaking the paving-edge silhouette.
+- **The perimeter prototype still covers north and west only.** South and east keep the
+  older treatment for comparison. Rolling out means adding those names to
+  `PerimeterWall.PrototypeEdges`.
+- **The east face has no cliff skin now.** Its run is too short to bury both ends of the
+  strip; rocks cover it. If a skin is wanted there, the mesh would need a run of 5
+  segments, or a shorter cliff piece.
+- **No timber fencing on the top edge yet.** `WRFenceStr01` and `WRFenceBaseRubble01`
+  remain the intended next step for breaking the paving-edge silhouette.
 - **No bunting and no pavilion.** Both confirmed absent from vanilla; both need
   authoring.
 - NGIO grass cache not regenerated, so grass still grows through the paving.
 - No navmesh, so NPCs cannot use the terrace or the stairs.
+- An untracked `music/` folder exists in the working tree. It was not added to git: its
+  provenance is unknown and it may be third-party audio.
 
 ## What Barry should test in game
 
-1. Walk the **north and west** edges, then the **south and east** ones. The first two
-   are the new language; the last two are the old. Is the difference worth rolling out?
-2. Does the masonry read as **short runs dying into rock**, or is it still a border?
-3. Does the batter read as a leaning wall holding back earth, or still as a face?
-4. Coming up the stairs, does the route feel **cut into the bank**?
-5. Can you still mentally trace a rectangle around the fair? If yes, where?
-6. Is the market floor still clean and usable?
+1. **Walk up the stairs from the road.** You should reach the terrace without jumping.
+   If you sink slightly into a tread, that is the slab sitting on the tread line under a
+   nosing; say so and it can be lifted a few units.
+2. From the road, does the entrance still read as a gate? What you should see is steps
+   cut into a bank: boulders on the left, a grass hump on the right, a low parapet line
+   where the top flight's wall shows above the paving.
+3. Look back at the terrace from the north-east and south-east. **No hollow cliff back
+   or open end should be visible anywhere.**
+4. Is the market floor still clean?
+5. Does the top of the stairs meet the floor cleanly, with nothing standing on the
+   paving at the head?

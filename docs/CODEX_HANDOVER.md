@@ -37,14 +37,25 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
 - the ramp seam to the paving is geometrically continuous
 - ramp slab depth was increased to remove visible daylight beneath the head
 - perimeter naturalisation uses large vanilla tundra rocks, toe rocks, rough-earth verge wedges and vegetation
-- paving and ramp have a material pipeline; the current deployed test references vanilla
-  `WRStoneFloor02`, while the structural retaining geometry is hidden by rock/cliff dressing
+- paving and ramp have a material pipeline; the deployed floor references vanilla
+  `road01.dds` worn earth (Barry's explicit choice, 2026-09-22, after seeing
+  `WRStoneFloor02` in game). `PAVING_MATERIAL_MODE` in the kit script switches it. Do
+  not revert to the stone floor without Barry asking
 - **foundation construction method is settled** (see below): structural body carries
   collision and has no upward face, a separate zero-thickness cap carries the paving
 - every kit piece now has a material; the retaining faces, corner and verge wedge
   previously had none and rendered as flat lavender default surfaces
 - a paving exclusion guard prevents generated dressing from protruding through the
   usable market floor
+- **the staircase is climbable via hidden collision slabs**, one per flight, because
+  the vanilla stair's `bhkCompressedMeshShape` does not scale with `XSCL`. See "Road
+  and entrance"
+- **the entrance is buried, not framed**: no field walls beside the stairs, no perimeter
+  masonry within 900 of the stair centreline, and an asymmetric earth-and-rock bank laid
+  against each flight's own wall
+- **open-backed cliff strips are never free-spun** and cliff skins are only placed where
+  both ends are buried
+- the generator is deterministic: two runs give byte-identical plugins
 - no LAND edits
 - no NAVM edits
 - no NPCs, quests, packages, music or animation records yet
@@ -149,8 +160,17 @@ Rules, in force for all future perimeter work:
 - **Rocks embedded, never dropped on.** Sunk below the crest, outside the market floor.
 - **Interior stays clean.** Naturalisation belongs on the perimeter; never scatter
   clutter across the usable paving.
-- **Entrance cut into the bank**, framed by low field walls beside the player rather
-  than cliff faces against it.
+- **Entrance cut into the bank.** The stair flights bring their own drystone walls and
+  that is the ONLY masonry at the entrance. No flank walls, no field wall within 900 of
+  the stair centreline: adding either made it read as a gatehouse (Barry, 2026-09-22).
+  What the player sees beside the steps is bank - closed boulders on one side, a grassy
+  hump on the other - laid against the stair walls to bury them.
+- **Open-backed pieces must have the missing side completely buried.** `DirtCliffs01`
+  and `DirtCliffs02` are one-sided strips (measured: 5 to 7 times more face area on the
+  front than the back) with open ends. They may only be placed face-outward with the
+  back inside the structural body, and only where both ends run into something. Never
+  in a pool that spins pieces at random. Prefer closed boulders and
+  `DirtCliffsIsland01` near anything the player walks past.
 - **The existing road is the approach.** Do not build a separate path aimed at the fair.
 - **Vanilla first.** Audit Whiterun and tundra assets before authoring anything.
 
@@ -178,9 +198,10 @@ grass hill with shrubbery and rocks". From the paving outward and down:
    retaining is actually built, and it keeps the face made of small repeated pieces.
    Up to three courses, covering about 525.
 2. **Shrubbery** on and against it.
-3. **Grass and earth bank.** `DirtCliffs02FieldGrass01` and
-   `DirtCliffsIsland01FieldGrass01` are in the embankment pool - earth cliffs with
-   grass tops, which is the "grass hill" layer rather than more bare rock.
+3. **Grass and earth bank.** `DirtCliffsIsland01FieldGrass01` is in the embankment pool
+   - a closed, all-round earth hump with a grass top, which is the "grass hill" layer
+   rather than more bare rock. `DirtCliffs02FieldGrass01` was removed from that pool on
+   2026-09-22: it is an open-backed strip and the pool spins its pieces at random.
 4. **Shrubbery and rock** on the bank.
 
 This replaced relying on the stair piece's own wall for the look. Scaling the stair to
@@ -266,14 +287,35 @@ above, so no landings are needed and it reads as one long staircase. Each flight
 its own 512-wide drystone wall, so the chain also builds the stepped retaining tiers
 either side of the steps.
 
-**Three flights at scale 1.3** carry the current floor of `-5336` down to native ground, landing 8
-units into grade and stopping 885 short of the road. The piece scales well - 17 risers
-of about 7 units - so at 2.0 the walkable stair is 334 wide and each flight brings a
-1024-wide, 344-tall drystone wall, which is the broad staircase with chunky tiers the
-concept shows, which leaves the last stretch to
-the dirt path still to be built. Flights are registered with the ramp-tile list so the
-entrance channel and the paving guard cover the steps and the flank treatment dresses
-their sides. `Entrance.UseStairs = false` falls back to a plain ramp.
+**Three flights at scale 1.3** carry the current floor of `-5336` down to native ground,
+landing 8 units into grade and stopping 885 short of the road, which leaves the last
+stretch to the dirt path still to be built. Scale 2.0 was tried and rejected: each
+flight then brings a 1024 x 344 wall, which reads as fortification. Flights are
+registered with the ramp-tile list so the entrance channel and the paving guard cover
+the steps. `Entrance.UseStairs = false` falls back to a plain ramp.
+
+**The stairs need their own collision.** The vanilla mesh's `bhkCompressedMeshShape`
+does not scale reliably with a reference's `XSCL`: at 1.0 the flight was climbable, at
+1.3 it was not, and there was no other blocker. So the kit has
+`SkyrimFair_StairCollision`: a 160-wide slab, 192 long, dropping 112 (one flight at
+scale 1.0), whose collider is a `bhkBoxShape` rotated to the tread line. Primitives do
+scale. The generator places one per flight at the flight's scale, top on the flight's
+top tread, plain outward rotation (the piece descends in local +Y, the stair faces the
+other way). The visible slab is sunk 24 under the tread line with the earth material so
+it is invisible in normal play. **If a scaled vanilla piece ever needs to be walked on,
+assume its compressed-mesh collision will fail and give it a box.**
+
+**The entrance bank** (`Dressing.EntranceBank`) hides the walls the stair mesh brings.
+Per flight and per side: pieces sized to the wall face from below grade to just under
+the crest, bedded to the lowest ground sampled under them, crown capped below the floor
+plane, leaning into the wall face then into each other, never reaching inside the
+217-wide stair gap plus a 32 margin. One side draws closed boulders, the other draws
+the closed grassy hump, with different counts, so the two sides never match. This is
+the mechanism for "cut into the bank"; do not add masonry to get that effect.
+
+The stair surface guard protects the 217-wide gap for one flight run per tile, not the
+whole 512 tile - the full-tile version refused the bank. Plain ramp tiles keep the
+full-tile rectangle.
 
 **Skyrim Fair now disables no vanilla references at all.** At this floor height the four
 that were disabled sit 200 to 300 units below the paving, so they are invisible and go
@@ -366,6 +408,18 @@ Rules that must not regress:
   redistribution permission
 
 The Creation Kit and Bethesda art tools are against Barry's separate Steam Skyrim install, while the active modlist uses the stock Skyrim copy under MO2. Plugin records must continue to be generated against the stock data via Mutagen.
+
+## Determinism
+
+The generator must produce byte-identical output from the same config. It did not until
+2026-09-22: the per-edge masonry stream was seeded from `string.GetHashCode()`, which
+.NET randomises per process, so the drystone count wandered between runs and audits
+disagreed with each other. Per-edge seeds now come from a fixed salt table
+(`FairFoundation.EdgeSalt`). Never seed from a string hash. Verify with two consecutive
+runs and a SHA256 compare before any audit claims a count.
+
+`SKYRIMFAIR_TRACE=1` in the environment makes the generator print every entrance-bank
+decision to stderr.
 
 ## Local environment
 

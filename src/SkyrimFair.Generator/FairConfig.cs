@@ -305,6 +305,8 @@ internal sealed record FoundationConfig
         ["paveCapFill"] = new() { EditorId = "SkyrimFairPaveCap1024", Model = @"SkyrimFair\SkyrimFair_PaveCap_1024.nif" },
         ["paveCapEdge"] = new() { EditorId = "SkyrimFairPaveCap512", Model = @"SkyrimFair\SkyrimFair_PaveCap_512.nif" },
         ["rampCap"] = new() { EditorId = "SkyrimFairRampCap512", Model = @"SkyrimFair\SkyrimFair_RampCap_512.nif" },
+        // Hidden box-collider slope under the vanilla staircase, one per flight.
+        ["stairCollision"] = new() { EditorId = "SkyrimFairStairCollision", Model = @"SkyrimFair\SkyrimFair_StairCollision.nif" },
     };
 
     public EntranceConfig Entrance { get; init; } = new();
@@ -339,7 +341,7 @@ internal sealed record FoundationConfig
         foreach (var role in new[]
         {
             "floorFill", "floorEdge", "retain", "retainCorner", "ramp", "shoulder",
-            "paveCapFill", "paveCapEdge", "rampCap",
+            "paveCapFill", "paveCapEdge", "rampCap", "stairCollision",
         })
         {
             if (!Pieces.ContainsKey(role))
@@ -418,6 +420,12 @@ internal sealed record DressingConfig
     public float CliffTopSink { get; init; } = 40f;
 
     /// <summary>
+    /// An exposed cliff-skin end is tucked this far inside the corner it would
+    /// otherwise show past. The corner stone and the retaining body then hide it.
+    /// </summary>
+    public float CliffEndInset { get; init; } = 96f;
+
+    /// <summary>
     /// How far beyond the paving edge dressing starts. Vanilla rocks have large
     /// meshes, so placing them close to the edge spills them onto the paved surface.
     /// </summary>
@@ -446,6 +454,8 @@ internal sealed record DressingConfig
     public float EdgeOverlap { get; init; } = 64f;
 
     public PerimeterWallConfig PerimeterWall { get; init; } = new();
+
+    public EntranceBankConfig EntranceBank { get; init; } = new();
 
     /// <summary>
     /// Toe rocks: low piles laid at native ground where the embankment meets grass.
@@ -626,15 +636,6 @@ internal sealed record EntranceConfig
     public float StairRun { get; init; } = 192f;
 
     /// <summary>
-    /// Low field walls set beside each flight, stepping down with it, so the approach
-    /// reads as cut into the bank. Short walls next to the player rather than cliff.
-    /// </summary>
-    public int FlankWalls { get; init; } = 2;
-
-    /// <summary>Extra walls on one side only, so the entrance is never mirrored.</summary>
-    public int FlankWallsBias { get; init; } = 1;
-
-    /// <summary>
     /// Flights in the chain. At scale 2 each drops 224 over a 384 run, so two carry the
     /// floor at -5336 down the same 448 over the same 768 that four did at scale 1.
     /// </summary>
@@ -713,4 +714,81 @@ internal sealed record PerimeterWallConfig
 
     /// <summary>How far below the crest that rock is sunk, so it reads part-buried.</summary>
     public float TerminalRockSink { get; init; } = 64f;
+
+    /// <summary>
+    /// On the entrance edge, no masonry within this distance of the stair centreline.
+    /// The flights bring their own walls; more beside them reads as a gatehouse.
+    /// </summary>
+    public float EntranceClear { get; init; } = 900f;
+}
+
+/// <summary>
+/// Earth and part-buried rock laid against the outer faces of the stair walls, so the
+/// entrance reads as steps cut into a bank rather than a gate between two walls. The
+/// two sides are different on purpose.
+/// </summary>
+internal sealed record EntranceBankConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Which side gets rock; the other gets earth and scrub.</summary>
+    public bool RockOnLeft { get; init; } = true;
+
+    public int RockSide { get; init; } = 2;
+
+    public int EarthSide { get; init; } = 3;
+
+    /// <summary>
+    /// Closed boulders for the rock side. Only pieces modelled all the way round
+    /// belong here: the bank is seen from the steps AND from the approach.
+    /// </summary>
+    public IReadOnlyList<string> RockPool { get; init; } = new[]
+    {
+        "0001819A:Skyrim.esm", // RockL02
+        "0001A6E2:Skyrim.esm", // RockL04
+        "0001B0A8:Skyrim.esm", // RockL05
+        "000332C7:Skyrim.esm", // RockPileL01TundraRocks
+    };
+
+    /// <summary>
+    /// Earth pieces with grass tops for the softer side. DirtCliffsIsland01 is
+    /// modelled all round, unlike the DirtCliffs01/02 strips, which are open-backed
+    /// and must never be free-spun beside a walking route.
+    /// </summary>
+    public IReadOnlyList<string> EarthPool { get; init; } = new[]
+    {
+        "00042A88:Skyrim.esm", // DirtCliffsIsland01FieldGrass01 (closed grassy hump)
+        "00024E7B:Skyrim.esm", // RockPileL02FieldGrass01Moss (broad low grassy pile)
+        "00024E8F:Skyrim.esm", // RockPileM02FieldGrass01Moss (low, grassy)
+        "000332C7:Skyrim.esm", // RockPileL01TundraRocks
+    };
+
+    /// <summary>A piece is drawn only if its height at MaxScale reaches this share of the target.</summary>
+    public float ReachShare { get; init; } = 0.7f;
+
+    /// <summary>No bank piece starts further out than the wall's end plus this.</summary>
+    public float Extent { get; init; } = 320f;
+
+    /// <summary>Clearance kept between a bank piece and the edge of the stair gap.</summary>
+    public float GapMargin { get; init; } = 32f;
+
+    /// <summary>Share of the local drop each piece is sized to.</summary>
+    public float Share { get; init; } = 0.9f;
+
+    /// <summary>Smallest drop a piece is sized against, so the lowest flight still gets a bank.</summary>
+    public float MinDrop { get; init; } = 160f;
+
+    /// <summary>How much of its own radius a piece stands off the wall face. Below 1 it overlaps the wall.</summary>
+    public float Lean { get; init; } = 0.55f;
+
+    /// <summary>Largest scale a bank piece may take; the island cliff is huge at 1.0 already.</summary>
+    public float MaxScale { get; init; } = 1.2f;
+
+    public float AlongJitter { get; init; } = 160f;
+
+    /// <summary>Crown sits this far below the wall crest, so it reads part-buried.</summary>
+    public float Sink { get; init; } = 48f;
+
+    /// <summary>Base sits this far below grade, so the piece reads as bedded in.</summary>
+    public float Bury { get; init; } = 40f;
 }

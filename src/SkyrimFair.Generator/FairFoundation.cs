@@ -23,6 +23,15 @@ internal static class FairFoundation
         ["E"] = 3f * MathF.PI / 2f,
     };
 
+    /// <summary>Fixed per-edge seed offsets, so each edge draws its own reproducible stream.</summary>
+    private static readonly Dictionary<string, int> EdgeSalt = new()
+    {
+        ["N"] = 101,
+        ["S"] = 211,
+        ["E"] = 307,
+        ["W"] = 419,
+    };
+
     private static readonly (string Name, int Dc, int Dr)[] Directions =
     {
         ("N", 0, -1),
@@ -96,12 +105,13 @@ internal static class FairFoundation
             result.PavedRects.Add((px - tile / 2f, py - tile / 2f, px + tile / 2f, py + tile / 2f));
         }
 
-        void Put(string role, float x, float y, float z, float rotZ)
+        void Put(string role, float x, float y, float z, float rotZ, float scale = 1f)
         {
             var baseRecord = StaticFor(role);
             var placed = new PlacedObject(mod)
             {
                 Base = new FormLinkNullable<IPlaceableObjectGetter>(baseRecord.FormKey),
+                Scale = MathF.Abs(scale - 1f) < 1e-4f ? null : scale,
                 Placement = new Placement
                 {
                     Position = new P3Float(x, y, z),
@@ -174,7 +184,7 @@ internal static class FairFoundation
 
         // Every placed ramp tile, kept so the naturalisation pass can face the ramp's
         // flanks and keep its walking channel clear.
-        var rampTiles = new List<(float X, float Y, float Z, int Dc, int Dr)>();
+        var rampTiles = new List<(float X, float Y, float Z, int Dc, int Dr, bool Stair)>();
 
         // Perimeter segments that got a retaining face, with the exposure measured at
         // the face. The embankment pass works from these rather than re-deriving them.
@@ -228,13 +238,29 @@ internal static class FairFoundation
                                 e.StairScale);
                             result.EntrancePieces++;
 
+                            // Hidden smooth collision under this flight. The vanilla
+                            // stair's bhkCompressedMeshShape does not scale reliably
+                            // with XSCL - the flight was climbable at scale 1.0 and not
+                            // once scaled - so a box-collider slope is laid on the tread
+                            // line instead. The mesh's top tread is 64 in front of its
+                            // origin, which is exactly StairInset, so the two offsets
+                            // cancel and the slab's top lands at stairRun * i on the
+                            // floor plane minus i drops. It descends in local +Y, so it
+                            // takes the plain outward rotation, not the stair's turn.
+                            Put("stairCollision",
+                                ex + dc * (stairRun * i),
+                                ey - dr * (stairRun * i),
+                                f.FloorZ - stairDrop * i,
+                                rot,
+                                e.StairScale);
+
                             // Register each flight with the ramp-tile list so the
                             // entrance channel and the paving guard cover the stairs,
                             // and so the flank treatment dresses their sides. Without
                             // this the channel disappears with the ramp and dressing is
                             // free to land on the steps.
                             rampTiles.Add((ex + dc * outward, ey - dr * outward,
-                                           f.FloorZ - stairDrop * i, dc, dr));
+                                           f.FloorZ - stairDrop * i, dc, dr, true));
                         }
 
                         slot0Z = f.FloorZ - stairDrop * e.StairFlights;
@@ -249,7 +275,7 @@ internal static class FairFoundation
                         var oz = slot0Z - f.RampRise * i;
                         Put(PhasedRole("ramp", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         Put(PhasedRole("rampCap", col + dc * i, row + dr * i), ox, oy, oz, rot);
-                        rampTiles.Add((ox, oy, oz, dc, dr));
+                        rampTiles.Add((ox, oy, oz, dc, dr, false));
                     }
 
                     continue;
@@ -411,16 +437,27 @@ internal static class FairFoundation
             // position rather than a single plane.
             foreach (var t in rampTiles)
             {
-                var minX = t.X - tile / 2f + (t.Dc == 0 ? d.RampRimAllowance : 0f);
-                var maxX = t.X + tile / 2f - (t.Dc == 0 ? d.RampRimAllowance : 0f);
-                var lowY = MathF.Min(t.Y, t.Y - t.Dr * tile);
-                var highY = MathF.Max(t.Y, t.Y - t.Dr * tile);
-                var minY = lowY + (t.Dr == 0 ? d.RampRimAllowance : 0f);
-                var maxY = highY - (t.Dr == 0 ? d.RampRimAllowance : 0f);
-                if (maxX <= minX || maxY <= minY)
-                {
-                    continue;
-                }
+                // A ramp tile is a 512-wide walking surface. A stair flight is not: its
+                // walking surface is the 167-wide gap between the two halves of the
+                // wall, starting one inset in front of the origin and running one
+                // flight. Guarding the whole tile for a flight would refuse the very
+                // bank that is meant to bury its walls.
+                var sc = f.Entrance.StairScale;
+                var half = t.Stair
+                    ? 83.5f * sc + d.RampRimAllowance
+                    : tile / 2f - d.RampRimAllowance;
+                var runStart = t.Stair ? f.Entrance.StairInset * sc : 0f;
+                var runLen = t.Stair ? f.Entrance.StairRun * sc : tile;
+                var runRise = t.Stair ? f.Entrance.StairDrop * sc : f.RampRise;
+
+                var ax = t.X + t.Dc * runStart;
+                var ay = t.Y - t.Dr * runStart;
+                var bx = ax + t.Dc * runLen;
+                var by = ay - t.Dr * runLen;
+                var minX = MathF.Min(ax, bx) - (t.Dc == 0 ? half : 0f);
+                var maxX = MathF.Max(ax, bx) + (t.Dc == 0 ? half : 0f);
+                var minY = MathF.Min(ay, by) - (t.Dr == 0 ? half : 0f);
+                var maxY = MathF.Max(ay, by) + (t.Dr == 0 ? half : 0f);
 
                 var gx = MathF.Max(MathF.Max(minX - x, x - maxX), 0f);
                 var gy = MathF.Max(MathF.Max(minY - y, y - maxY), 0f);
@@ -432,10 +469,10 @@ internal static class FairFoundation
                 // How far along the tile's run the piece sits, and so how far the
                 // sloping surface has dropped by the time it gets there.
                 var along = t.Dc != 0
-                    ? (x - t.X) * t.Dc / tile
-                    : (y - t.Y) * -t.Dr / tile;
+                    ? (x - ax) * t.Dc / runLen
+                    : (y - ay) * -t.Dr / runLen;
                 along = Math.Clamp(along, 0f, 1f);
-                if (crownZ > t.Z - f.RampRise * along + d.PavingClearance)
+                if (crownZ > t.Z - runRise * along + d.PavingClearance)
                 {
                     return false;
                 }
@@ -496,8 +533,10 @@ internal static class FairFoundation
                 }
 
                 // A separate stream per edge, so the two sides of the fair never come
-                // out mirrored.
-                var edgeRng = new Random(d.Seed + direction.Name.GetHashCode());
+                // out mirrored. The salt is a fixed table, NOT string.GetHashCode():
+                // .NET randomises string hashes per process, and seeding from one made
+                // the masonry come out differently on every run of the generator.
+                var edgeRng = new Random(d.Seed + EdgeSalt[direction.Name]);
                 var masonryBias = w.MasonryBias.TryGetValue(direction.Name, out var b) ? b : 0.5f;
 
                 var lines = faced
@@ -506,7 +545,16 @@ internal static class FairFoundation
 
                 foreach (var line in lines)
                 {
+                    // The stair flights bring their own walls. More field wall right
+                    // beside them is what made the entrance read as a gate, so on the
+                    // entrance edge the segments nearest the stairs get no masonry.
                     var ordered = line
+                        .Where(s => channel is not { } ch
+                            || !(s.Dc == direction.Dc && s.Dr == direction.Dr
+                                 && direction.Name.Equals(f.RampEdge, StringComparison.OrdinalIgnoreCase))
+                            || (direction.Dc == 0
+                                ? MathF.Abs(s.Ex - (ch.MinX + ch.MaxX) / 2f)
+                                : MathF.Abs(s.Ey - (ch.MinY + ch.MaxY) / 2f)) >= w.EntranceClear)
                         .OrderBy(s => direction.Dc == 0 ? s.Ex : s.Ey)
                         .ToList();
 
@@ -739,6 +787,56 @@ internal static class FairFoundation
                         // the structural slab instead of hanging in the open air.
                         var px = ex - direction.Dc * d.CliffInset;
                         var py = ey + direction.Dr * d.CliffInset;
+
+                        // Third: the shell has open ENDS as well as an open back, and
+                        // the mesh is longer than the runs it covers, so each end
+                        // overhangs. At a re-entrant corner the overhang runs into the
+                        // body of the next tile and is buried. At a convex corner it
+                        // sticks out past the corner into open air, and from the side
+                        // face the player looks straight into the hollow shell - which
+                        // is what the east face was doing. So: work out which ends are
+                        // buried, slide the piece toward a buried end so the exposed
+                        // one is tucked inside the corner, and if neither end can be
+                        // buried, do not place the skin at all. Rocks cover that run.
+                        var runLen = chunk.Count * tile;
+                        var axisX = direction.Dc == 0 ? 1f : 0f;
+                        var axisY = direction.Dc == 0 ? 0f : 1f;
+                        var inX = -direction.Dc * tile / 2f;
+                        var inY = direction.Dr * tile / 2f;
+                        var lo = chunk[0];
+                        var hi = chunk[^1];
+                        var loBuried = InPaving(lo.Ex - axisX * tile + inX, lo.Ey - axisY * tile + inY);
+                        var hiBuried = InPaving(hi.Ex + axisX * tile + inX, hi.Ey + axisY * tile + inY);
+                        var overhang = (length - runLen) / 2f;
+                        var shift = 0f;
+                        if (!loBuried && !hiBuried)
+                        {
+                            if (overhang > -d.CliffEndInset)
+                            {
+                                result.CliffEndSkipped++;
+                                continue;
+                            }
+                        }
+                        else if (!loBuried)
+                        {
+                            shift = overhang + d.CliffEndInset;
+                        }
+                        else if (!hiBuried)
+                        {
+                            shift = -(overhang + d.CliffEndInset);
+                        }
+
+                        // The buried end must still stop inside the neighbouring tile,
+                        // whose body runs one full tile along the axis.
+                        if (shift != 0f && overhang + MathF.Abs(shift) > tile)
+                        {
+                            result.CliffEndSkipped++;
+                            continue;
+                        }
+
+                        px += axisX * shift;
+                        py += axisY * shift;
+
                         // Use the full measured depth as the normal-axis half-extent.
                         // The vanilla mesh origin is not centred in depth
                         // (local Y is -135..330), so this is deliberately conservative
@@ -915,37 +1013,161 @@ internal static class FairFoundation
 
         LayeredPerimeter();
 
-        // ---- entrance flanks ------------------------------------------------
-        // Low stone walls stepping down beside each stair flight, so the route reads
-        // as cut INTO the bank rather than a ramp bolted to the front of a box. Short
-        // field walls next to the player, not cliff faces. The two sides get different
-        // counts on purpose, so the approach is never mirrored.
-        if (f.Entrance.UseStairs && d.PerimeterWall.Enabled && f.Entrance.FlankWalls > 0)
+        // ---- entrance bank ----------------------------------------------------
+        // Each stair flight brings a 666-wide drystone wall with it, and three of them
+        // stacked either side of the steps read as a gatehouse. The wall cannot be
+        // removed from the mesh, so it is BURIED instead: earth and part-sunk rock laid
+        // against the outer face of each flight's wall, so what the player sees beside
+        // the steps is bank, not masonry. The stair width itself is untouched.
+        //
+        // The two sides are deliberately different. One gets rock, the other earth and
+        // scrub, with different counts, so the approach cannot be read as a designed
+        // pair. Which side is which is fixed by config, not chance, so it reproduces.
+        if (f.Entrance.UseStairs && d.EntranceBank.Enabled && rampTiles.Count > 0)
         {
-            var fw = d.PerimeterWall;
-            var fb = boundsOf(FormKeyHelper.Parse(fw.Piece));
-            var fh = fb.Height > 1f ? fb.Height : fw.CourseHeight;
-            var lateralBase = 256f * f.Entrance.StairScale + 128f;
+            var eb = d.EntranceBank;
+            var bankRng = new Random(d.Seed + 7919);
+            var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
+            var wallHalf = 256f * f.Entrance.StairScale;
+            var wallRise = 40f * f.Entrance.StairScale;
+            var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
+            var flightInset = f.Entrance.StairInset * f.Entrance.StairScale;
+
+            // The walking route is the gap between the two halves of each flight's
+            // wall, 167 wide on the shipped mesh. Nothing here may reach into it.
+            var gapHalf = 83.5f * f.Entrance.StairScale + eb.GapMargin;
 
             foreach (var t in rampTiles)
             {
                 for (var side = -1; side <= 1; side += 2)
                 {
-                    var count = f.Entrance.FlankWalls + (side < 0 ? 0 : f.Entrance.FlankWallsBias);
+                    var rocky = (side < 0) == eb.RockOnLeft;
+                    var pool = rocky ? eb.RockPool : eb.EarthPool;
+                    var count = rocky ? eb.RockSide : eb.EarthSide;
+
+                    // The wall crest is a little above the top tread of its flight.
+                    var wallTop = t.Z + wallRise;
+
+                    // Pieces are laid outward from the wall face, each overlapping
+                    // the one before by a share of its own radius, so spacing follows
+                    // the actual sizes drawn rather than a fixed step.
+                    var edge = wallHalf;
+
                     for (var k = 0; k < count; k++)
                     {
-                        var lateral = side * (lateralBase + k * 256f);
-                        var wx = t.X + (t.Dc == 0 ? lateral : 0f);
-                        var wy = t.Y + (t.Dr == 0 ? lateral : 0f);
-                        if (!ClearsMarketFloor(wx, wy, 128f, t.Z))
+                        // Alongside the MIDDLE of the flight. The tile records the
+                        // stair origin, which is one inset behind the top tread, so
+                        // the flight's wall runs from inset to inset + run.
+                        var along = flightInset + flightRun / 2f
+                            + (float)(bankRng.NextDouble() - 0.5) * eb.AlongJitter;
+                        var footX = t.X + t.Dc * along + (t.Dc == 0 ? side * wallHalf : 0f);
+                        var footY = t.Y - t.Dr * along + (t.Dr == 0 ? side * wallHalf : 0f);
+
+                        // Sized to the wall face it hides: from below grade at the
+                        // wall's foot up to just under its crest. Sizing it to the
+                        // drop alone gave knee-high rocks against a chest-high wall.
+                        var bankGround = sampleTerrain(footX, footY);
+                        if (!bankGround.HasValue)
                         {
+                            continue;
+                        }
+
+                        var drop = MathF.Max(wallTop - bankGround.Value, eb.MinDrop);
+                        var target = drop - eb.Sink + eb.Bury;
+
+                        // Draw from the pieces tall enough to do the job at their
+                        // permitted scale; a low pile is not asked to hide a tall wall.
+                        var usable = pool
+                            .Where(kk => boundsOf(FormKeyHelper.Parse(kk)).Height * eb.MaxScale
+                                >= target * eb.ReachShare)
+                            .ToList();
+                        if (usable.Count == 0)
+                        {
+                            usable = new List<string>
+                            {
+                                pool.MaxBy(kk => boundsOf(FormKeyHelper.Parse(kk)).Height)!,
+                            };
+                        }
+
+                        var pick = usable[bankRng.Next(usable.Count)];
+                        var pb = boundsOf(FormKeyHelper.Parse(pick));
+                        if (pb.Height <= 1f)
+                        {
+                            continue;
+                        }
+
+                        var scale = Math.Clamp(target / pb.Height, d.MinScale, eb.MaxScale);
+                        var reach = pb.Radius * scale;
+
+                        // Leaning into whatever is inside it - the wall face first, then
+                        // the previous piece - but never reaching into the steps: a
+                        // piece too fat to lean on the wall is pushed out until its
+                        // inner edge clears the gap.
+                        var offset = MathF.Max(edge + reach * eb.Lean, gapHalf + reach);
+
+                        // The bank is for the wall. Once the next piece would start
+                        // beyond the wall's own extent it is embankment, not bank, and
+                        // the ordinary perimeter treatment already covers that.
+                        if (offset - reach > wallHalf + eb.Extent)
+                        {
+                            if (trace) Console.Error.WriteLine($"bank STOP        side {side} k {k}: inner edge {offset - reach:F0} beyond wall + extent");
+                            break;
+                        }
+
+                        edge = offset + reach * eb.Lean;
+                        var lateral = side * offset;
+                        var px = t.X + t.Dc * along + (t.Dc == 0 ? lateral : 0f);
+                        var py = t.Y - t.Dr * along + (t.Dr == 0 ? lateral : 0f);
+
+                        // The stair walls themselves sit inside the ramp channel, so
+                        // the channel guard cannot be the test here. The test is the
+                        // steps: the piece's inner edge must stay outside the gap.
+                        if (MathF.Abs(lateral) - reach < gapHalf)
+                        {
+                            if (trace) Console.Error.WriteLine($"bank REJECT gap  {pick} side {side} k {k} scale {scale:F2} reach {reach:F0} lateral {lateral:F0}");
+                            result.ChannelSkipped++;
+                            continue;
+                        }
+
+                        // Bedded: base below grade at the piece's own position, and if
+                        // that would lift its crown above the crest, sunk further.
+                        // Nothing here floats and nothing overtops the wall. The crown
+                        // also stays under the floor plane: the top flight's wall stands
+                        // above the paving, and a bank rising with it would be a rock
+                        // standing on the market floor.
+                        // A broad piece spans ground that is not level. Bedding it to
+                        // the lowest sample under it means no edge is left in the air;
+                        // the higher side just sits deeper, which reads as buried.
+                        var pieceGround = bankGround.Value;
+                        foreach (var (sx, sy) in new[]
+                        {
+                            (0f, 0f), (0.6f, 0f), (-0.6f, 0f), (0f, 0.6f), (0f, -0.6f),
+                        })
+                        {
+                            var g = sampleTerrain(px + sx * reach, py + sy * reach);
+                            if (g.HasValue && g.Value < pieceGround)
+                            {
+                                pieceGround = g.Value;
+                            }
+                        }
+                        var pz = pieceGround - eb.Bury - pb.ZMin * scale;
+                        var crownCap = MathF.Min(wallTop - eb.Sink, f.FloorZ - d.PavingClearance);
+                        if (pz + pb.ZMax * scale > crownCap)
+                        {
+                            pz = crownCap - pb.ZMax * scale;
+                        }
+
+                        var crownZ = pz + pb.ZMax * scale;
+                        if (!ClearsMarketFloor(px, py, reach, crownZ))
+                        {
+                            if (trace) Console.Error.WriteLine($"bank REJECT floor {pick} side {side} k {k} scale {scale:F2} reach {reach:F0} at ({px:F0},{py:F0}) crown {crownZ:F0}");
                             result.PavingGuardSkipped++;
                             continue;
                         }
 
-                        PutVanilla(fw.Piece, wx, wy, t.Z - fh * k - fb.ZMax,
-                            OutwardRotation[f.RampEdge.ToUpperInvariant()], 1f);
-                        result.WallCourses++;
+                        if (trace) Console.Error.WriteLine($"bank PLACE       {pick} side {side} k {k} scale {scale:F2} reach {reach:F0} at ({px:F0},{py:F0},{pz:F0}) crown {pz + pb.ZMax * scale:F0} ground {pieceGround:F0}");
+                        PutVanilla(pick, px, py, pz, Spin(), scale);
+                        result.EntranceBankPieces++;
                     }
                 }
             }
@@ -1201,6 +1423,9 @@ internal sealed class FoundationResult
     /// <summary>Part-buried rocks where a masonry run dies into the bank.</summary>
     public int TerminalRocks { get; set; }
 
+    /// <summary>Earth and rock laid against the stair walls to bury them.</summary>
+    public int EntranceBankPieces { get; set; }
+
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }
 
@@ -1209,6 +1434,9 @@ internal sealed class FoundationResult
 
     /// <summary>Structural wall segments whose boulder facing was replaced by cliff skin.</summary>
     public int CliffCoveredSegments { get; set; }
+
+    /// <summary>Cliff skins refused because an open end would have shown past a corner.</summary>
+    public int CliffEndSkipped { get; set; }
 
     /// <summary>Low rock piles bedded in at the foot of the embankment.</summary>
     public int ToeRocks { get; set; }

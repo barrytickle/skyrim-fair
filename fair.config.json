@@ -98,6 +98,10 @@
         "rampCap": {
           "editorId": "SkyrimFairRampCap512",
           "model": "SkyrimFair\\SkyrimFair_RampCap_512.nif"
+        },
+        "stairCollision": {
+          "editorId": "SkyrimFairStairCollision",
+          "model": "SkyrimFair\\SkyrimFair_StairCollision.nif"
         }
       },
       "dressing": {
@@ -142,7 +146,6 @@
           "0001A6E2:Skyrim.esm",
           "0001B0A8:Skyrim.esm",
           "000332C7:Skyrim.esm",
-          "0004D709:Skyrim.esm",
           "00042A88:Skyrim.esm"
         ],
         "cornerStones": [
@@ -183,14 +186,43 @@
           "offsetJitter": 96,
           "alongJitter": 64,
           "masonryBias": {
-            "N": 0.7,
-            "W": 0.5,
+            "N": 0.5,
+            "W": 0.7,
             "S": 0.35,
             "E": 0.25
           },
           "terminalRockShare": 0.8,
-          "terminalRockSink": 64
-        }
+          "terminalRockSink": 64,
+          "entranceClear": 900
+        },
+        "entranceBank": {
+          "enabled": true,
+          "rockOnLeft": true,
+          "rockSide": 2,
+          "earthSide": 3,
+          "rockPool": [
+            "0001819A:Skyrim.esm",
+            "0001A6E2:Skyrim.esm",
+            "0001B0A8:Skyrim.esm",
+            "000332C7:Skyrim.esm"
+          ],
+          "earthPool": [
+            "00042A88:Skyrim.esm",
+            "00024E7B:Skyrim.esm",
+            "00024E8F:Skyrim.esm",
+            "000332C7:Skyrim.esm"
+          ],
+          "minDrop": 160,
+          "lean": 0.55,
+          "alongJitter": 160,
+          "sink": 48,
+          "gapMargin": 32,
+          "bury": 40,
+          "maxScale": 1.2,
+          "reachShare": 0.7,
+          "extent": 320
+        },
+        "cliffEndInset": 96
       },
       "retainHeight": 256,
       "clearMargin": 160,
@@ -208,9 +240,7 @@
         "stairInset": 64,
         "stairRun": 192,
         "stairFlights": 3,
-        "stairScale": 1.3,
-        "flankWalls": 2,
-        "flankWallsBias": 1
+        "stairScale": 1.3
       }
     }
   }
