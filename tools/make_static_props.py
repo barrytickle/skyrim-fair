@@ -9,10 +9,15 @@ SkyrimFairProp<Name> (market pieces use them as @Prop<Name>).
 
 Why: the goods a vanilla market shows (cheese, bread, bottles, weapons, pelts) are loose
 havok items. Placed on a counter they can be knocked off, stolen, or pushed out of the
-collision they spawn in, as the first tower lantern was (2026-09-22). Each copy keeps the
-geometry, textures, add-ons and animation byte for byte and only unhooks the collision:
-every node's collision link is set to none and the BSX havok, ragdoll, complex, dynamic
-and articulated bits are cleared. The rigid body blocks stay in the file unreferenced.
+collision they spawn in, as the first tower lantern was (2026-09-22). Each copy keeps
+every block, link and flag byte for byte and only makes its rigid bodies fixed, the way
+vanilla's unmoving barrels and crates are authored: collision layer STATIC (both filter
+copies), mass and inertia 0, motion system FIXED with fixed quality (the four bytes at
++224 become 05 01 01 00, as in Barrel02.nif and CommonCrate01.nif).
+
+Do not unhook collision links instead. The first version set the node's collision link
+to none and left the rigid body blocks orphaned; loading such a mesh crashed the game
+(2026-09-23, ElvenSword.nif: the -1 link was dereferenced as a pointer).
 
 The outputs are modified Bethesda meshes, so they are generated rather than committed
 (.gitignore) and are shipped only inside the built mod. tools/static_props.json (paths and
@@ -33,9 +38,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SOURCES = os.path.join(HERE, "static_props_sources.json")
 MANIFEST = os.path.join(HERE, "static_props.json")
-AV_OBJECTS = {"BSFadeNode", "NiNode", "BSValueNode", "BSTriShape", "BSMultiBoundNode", "BSLeafAnimNode",
-              "BSOrderedNode", "NiSwitchNode", "BSDynamicTriShape", "BSLODTriShape", "BSSubIndexTriShape"}
-BSX_PHYSICS = 0x2 | 0x4 | 0x8 | 0x40 | 0x80  # havok, ragdoll, complex, dynamic, articulated
 
 
 def blocks(data):
@@ -64,22 +66,21 @@ def blocks(data):
     return out
 
 
-def unhook(data):
-    """Unhook every collision link and clear the BSX physics bits, in place."""
-    unhooked = 0
-    for kind, off, _ in blocks(bytes(data)):
-        if kind in AV_OBJECTS:
-            # NiAVObject (BS 100): name, extra data list, controller, flags, translation,
-            # rotation, scale, then the collision link.
-            extra = struct.unpack_from("<I", data, off + 4)[0]
-            coll = off + 4 + 4 + 4 * extra + 4 + 4 + 12 + 36 + 4
-            if struct.unpack_from("<i", data, coll)[0] != -1:
-                struct.pack_into("<i", data, coll, -1)
-                unhooked += 1
-        elif kind == "BSXFlags":
-            flags = struct.unpack_from("<I", data, off + 4)[0]
-            struct.pack_into("<I", data, off + 4, flags & ~BSX_PHYSICS)
-    return unhooked
+def make_fixed(data):
+    """Make every rigid body fixed in place, in place. Returns how many were changed."""
+    fixed = 0
+    for kind, off, size in blocks(bytes(data)):
+        if not kind.startswith("bhkRigidBody"):
+            continue
+        if size < 232:
+            raise ValueError(f"{kind} of {size} bytes: not the SSE bhkRigidBodyCInfo2010 layout")
+        data[off + 4] = 1                                   # havok filter layer: STATIC
+        data[off + 36] = 1                                  # its copy in the construction info
+        for field in (116, 136, 156, 180):                  # inertia diagonal, mass
+            struct.pack_into("<f", data, off + field, 0.0)
+        data[off + 224:off + 228] = bytes((5, 1, 1, 0))     # motion FIXED, deactivator, solver, quality FIXED
+        fixed += 1
+    return fixed
 
 
 def bounds(path):
@@ -109,7 +110,7 @@ def main():
             missing.append(key)
             continue
         data = bytearray(bsa_extract.extract(index[key]))
-        unhook(data)
+        make_fixed(data)
         out = spec.get("out", f"SkyrimFair/Props/{name}.nif")
         dest = os.path.join(ROOT, "assets", "meshes", *out.split("/"))
         os.makedirs(os.path.dirname(dest), exist_ok=True)

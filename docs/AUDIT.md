@@ -2,6 +2,30 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
+## Hotfix: the crash on entering the fair (2026-09-23)
+
+Barry crashed entering the fair. CrashLogger: `EXCEPTION_ACCESS_VIOLATION` loading
+`meshes\SkyrimFair\Props\ElvenSword.nif`, reading address `0xFFFFFFFF - 0x18`. That is
+the "no collision" link (-1) the props tool had written into the mesh's root node, being
+dereferenced as a pointer, with the rigid-body blocks left orphaned in the file. **130 of
+the 148 props** carry their collision on the root node like the sword. The tower lantern
+survived only because its collision is on a child node.
+
+**Fix**: `tools/make_static_props.py` no longer touches links or BSX flags. It makes each
+rigid body **fixed**, the way vanilla's unmoving barrels and crates are authored. Read
+from `Barrel02.nif` and `CommonCrate01.nif` against `Bread01A.nif` and `ElvenSword.nif`:
+- collision layer STATIC, in both filter copies (+4 and +36)
+- inertia diagonal and mass 0 (+116, +136, +156, +180)
+- motion system FIXED, deactivator, solver and quality FIXED: `05 01 01 00` at +224
+
+Every block, link and flag is otherwise byte-identical to vanilla (the sword differs in
+19 bytes, all inside its `bhkRigidBodyT`). All 148 props checked: every rigid body fixed
+(136 with one body, 12 with two to four). The plugin is unchanged (`60d0a724b1b08410...`,
+the props' bounds are the same). **Meshes redeployed, byte-identical.** Goods now have
+solid, immovable collision.
+
+**Test**: enter the fair again; goods should stay put when bumped.
+
 ## Current pass: festival liveliness and density, worn ground (2026-09-23)
 
 Barry's brief: "THE STRUCTURE IS GOOD, BUT THE FAIR STILL FEELS TOO BARE... MORE LIFE, NOT
@@ -39,7 +63,7 @@ The goods vanilla puts on its market stalls (cheese, bread, bottles, weapons, pe
 loose havok items: they fall, get knocked off and can be stolen, which is what happened to
 the tower lantern. **`tools/make_static_props.py`** (replaces `make_tower_lantern.py`)
 copies each vanilla mesh listed in `tools/static_props_sources.json` out of the BSAs with
-its collision unhooked, into `meshes\SkyrimFair\Props\` (**generated, git-ignored**, a
+its rigid bodies made fixed (see the hotfix above; the first build unhooked them and crashed), into `meshes\SkyrimFair\Props\` (**generated, git-ignored**, a
 modified Bethesda mesh). It measures bounds into `tools/static_props.json` (committed),
 and the generator makes a STAT `SkyrimFairProp<Name>` for each (`@Prop<Name>` in modules).
 **148 props**:
