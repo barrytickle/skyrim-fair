@@ -124,6 +124,9 @@ internal sealed record FairWorldConfig
     /// <summary>The market avenue, Traders' Crossing and trading rows.</summary>
     public MarketConfig Market { get; init; } = new();
 
+    /// <summary>Placeholder stall-keepers, one per stall.</summary>
+    public VendorsConfig Vendors { get; init; } = new();
+
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
 
@@ -1770,6 +1773,9 @@ internal sealed record MarketModule
     public float Depth { get; init; }
 
     public List<MarketPiece> Pieces { get; init; } = new();
+
+    /// <summary><c>[x, y]</c> in the module frame where the stall-keeper stands, facing the front.</summary>
+    public float[] VendorSpot { get; init; } = Array.Empty<float>();
 }
 
 internal sealed record MarketPiece
@@ -1870,4 +1876,42 @@ internal sealed record MarketDressing
     public float Z { get; init; }
 
     public float Yaw { get; init; }
+}
+
+/// <summary>
+/// Placeholder stall-keepers: they stand at their counters so the market can be pictured.
+/// They sell nothing and have no dialogue, faction or quest of their own.
+/// </summary>
+internal sealed record VendorsConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairVendor";
+
+    public string Name { get; init; } = "Fair Trader";
+
+    /// <summary>Placeholder race; the Traits template replaces it with the template's.</summary>
+    public string Race { get; init; } = "00013746:Skyrim.esm";
+
+    public string Class { get; init; } = "0001326B:Skyrim.esm";
+
+    /// <summary>Keeps them where they are placed, with no navmesh needed.</summary>
+    public string Package { get; init; } = "000A6854:Skyrim.esm";
+
+    public short Level { get; init; } = 5;
+
+    public List<VendorLook> Looks { get; init; } = new();
+}
+
+internal sealed record VendorLook
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>A vanilla leveled NPC list whose Traits (face, race, sex, voice) the vendor takes.</summary>
+    public string Template { get; init; } = string.Empty;
+
+    public bool Female { get; init; }
+
+    /// <summary>Vanilla outfits; one vendor record is made per outfit.</summary>
+    public List<string> Outfits { get; init; } = new();
 }

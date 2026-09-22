@@ -189,6 +189,11 @@ try
                 .OrderBy(g => g.Key, StringComparer.Ordinal).Select(g => $"{g.Key} {g.Count()}")));
         }
 
+        if (world.Vendors is { } vendors)
+        {
+            Console.WriteLine($"  vendors: {vendors.Placed} stall-keepers from {vendors.Records} vendor records (sell nothing)");
+        }
+
         Console.WriteLine($"  mountains: {world.Mountains.Count}, persistent + Full LOD");
         foreach (var m in world.Mountains)
         {

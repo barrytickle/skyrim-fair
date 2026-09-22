@@ -218,7 +218,8 @@
             {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 250, "y": -105, "z": 24, "yaw": 10},
             {"name": "CrateSmall02", "piece": "0007A609:Skyrim.esm", "x": 250, "y": -105, "z": 69, "yaw": 28, "optional": true},
             {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": -262, "y": 160, "optional": true}
-          ]
+          ],
+          "vendorSpot": [0, -60]
         },
         {
           "name": "canvas_pair",
@@ -230,7 +231,8 @@
             {"name": "CrateSmallLong01", "piece": "0007A605:Skyrim.esm", "x": -200, "y": -118, "z": 24, "yaw": 90, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -100, "optional": true},
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 200, "y": 112, "yaw": 20, "optional": true}
-          ]
+          ],
+          "vendorSpot": [-105, -40]
         },
         {
           "name": "whiterun_stand",
@@ -242,7 +244,8 @@
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -165, "y": -95},
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 160, "y": -105, "yaw": 35, "optional": true},
             {"name": "CrateSmall03", "piece": "0007A617:Skyrim.esm", "x": 162, "y": 60, "z": 24, "yaw": -12, "optional": true}
-          ]
+          ],
+          "vendorSpot": [0, -65]
         },
         {
           "name": "canvas_wide",
@@ -254,7 +257,8 @@
             {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": -140, "y": 130, "optional": true},
             {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": 245, "y": 95, "z": 24, "yaw": 15, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -245, "y": -110, "optional": true}
-          ]
+          ],
+          "vendorSpot": [-140, -40]
         },
         {
           "name": "cask_bar",
@@ -267,7 +271,8 @@
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 10, "y": -128, "yaw": 40, "optional": true},
             {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 70, "y": 150},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -120, "optional": true}
-          ]
+          ],
+          "vendorSpot": [95, -40]
         },
         {
           "name": "open_trader",
@@ -280,7 +285,8 @@
             {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 125, "y": -70, "z": 40, "yaw": 90, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 140, "y": 70, "optional": true},
             {"name": "FirewoodPileMedium01", "piece": "000185B5:Skyrim.esm", "x": -130, "y": 80, "optional": true}
-          ]
+          ],
+          "vendorSpot": [0, -40]
         },
         {
           "name": "trestle",
@@ -290,7 +296,8 @@
             {"name": "ExteriorWoodenTable01", "piece": "0003DE44:Skyrim.esm", "x": 0, "y": 25},
             {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": -95, "y": -60, "z": 24, "yaw": 12},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 100, "y": -55, "optional": true}
-          ]
+          ],
+          "vendorSpot": [0, -50]
         }
       ],
       "fixed": [
@@ -369,6 +376,19 @@
       "backFill": ["canvas_wide", "grand_double", "canvas_pair", "whiterun_stand"],
       "backFillThemes": ["books", "scrolls", "curios", "candles", "pottery", "toys", "herbs", "rugs", "weaver", "tanner", "carver", "cooper", "bone", "timber"],
       "dressing": []
+    },
+    "vendors": {
+      "enabled": true,
+      "editorIdPrefix": "SkyrimFairVendor",
+      "name": "Fair Trader",
+      "race": "00013746:Skyrim.esm",
+      "class": "0001326B:Skyrim.esm",
+      "package": "000A6854:Skyrim.esm",
+      "level": 5,
+      "looks": [
+        { "name": "Male", "template": "0001A319:Skyrim.esm", "female": false, "outfits": ["0007144A:Skyrim.esm", "0009D4B5:Skyrim.esm", "0009D5E0:Skyrim.esm", "0005FB81:Skyrim.esm"] },
+        { "name": "Female", "template": "0001A31E:Skyrim.esm", "female": true, "outfits": ["0007144A:Skyrim.esm", "0009D4B5:Skyrim.esm", "0009D5E0:Skyrim.esm", "0005FB81:Skyrim.esm"] }
+      ]
     },
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
     "avenueWidth": 800,

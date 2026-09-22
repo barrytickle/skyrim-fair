@@ -116,6 +116,12 @@ Rules for this direction:
     marker (`SkyrimFairStall<Theme><NN>`) for merchants later.
   - Tune the layout in the config, not the code. `SKYRIMFAIR_TRACE=1` explains every
     refusal.
+- **Placeholder stall-keepers** (`FairVendors.cs`, `fairWorld.vendors`): 34 visual-only
+  NPCs, one per stall. They take only their Traits from vanilla commoner leveled lists
+  (vanilla FaceGen, so no dark faces), have their own vanilla town clothes, the Citizen
+  class and a hold-position package, and no merchant, faction, dialogue or script.
+  When real merchants come, keep this template approach, or make faces in the CK and
+  ship their FaceGen.
 - **Medieval Markets** is audited in `docs/AUDIT.md`. JJerem's stall pieces use vanilla
   textures, but their SMIM provenance must be confirmed before bundling. Its ESP
   rearranges the vanilla city markets, so do not make it a dependency.

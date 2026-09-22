@@ -2,7 +2,43 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: east market, west games field (2026-09-22, night)
+## Current pass: placeholder stall-keepers (2026-09-22, night)
+
+Barry: "add NPCs to the stalls, but have them sell nothing for the time being... just to
+help me envision it". **34 stall-keepers, one behind each stall's counter, facing the
+street.** They are purely visual. They have no merchant setup, dialogue, faction, quest,
+script or inventory, and nothing to steal.
+
+| Record | Value |
+| --- | --- |
+| Vendor NPCs | **8 records** `SkyrimFairVendorMale01-04`, `SkyrimFairVendorFemale01-04`, all named "Fair Trader" |
+| Faces | Traits template only, from vanilla `LCharBanditMeleeCommonerM` (`01A319`) / `...F` (`01A31E`), the "commoner" leveled lists (Imperial, Nord, Breton faces with vanilla FaceGen). Each reference rolls its own face, so there are no generated faces and no dark-face bug. Nothing else comes from the template: no bandit gear, factions or AI |
+| Clothes | one record per vanilla outfit: `MerchantClothesOutfit01NoHat`, `FarmClothesRandom`, `FineClothesOutfit01`, `BarkeepClothes01` |
+| Class, AI | `Citizen`; Unaggressive, Cowardly, helps nobody; **Protected** (only the player can kill them) |
+| Package | `DefaultHoldPositionCurrentLoc64` (`0A6854`): stays within 64 of its spot, so **no navmesh is needed** |
+| Placement | 34 ACHR, one per stall, at each stall type's `vendorSpot` (behind the counter), facing the stall's front. They are 200-240 behind each stall's front marker |
+
+Config: `fairWorld.vendors` (looks, outfits, class, package) and each market module's
+`vendorSpot`. Set `vendors.enabled` false to remove them all.
+
+**Verification**:
+- Generator run twice: identical SHA256 `0aa38d0d...` (406,764 bytes). Deployed
+  byte-identical.
+- Read back: 8 NPC records exactly as tabled, 34 placed, 0 filed in the wrong cell, 0
+  merchant containers.
+- **Not verified in game**:
+  - how the faces and outfits look
+  - whether any keeper spawns clipping a counter or stall post
+  - that hold-position keeps them put without a navmesh
+
+**What Barry should test**:
+1. Walk the avenue and the East Lane: is there a keeper at every counter, facing you?
+2. Any odd faces, or anyone stuck inside a stall or wandering off?
+3. Talking to one should give only generic greetings, with no buy or sell option.
+
+## East market, west games field (previous pass)
+
+Still current; the vendor pass above adds NPCs only.
 
 Barry: "could we have just an 'east market' and have the west for the archery and
 anything else?" The market now fills the **east half** as two market streets built
@@ -933,9 +969,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 402,644 bytes (east market) |
-| SHA256 | `b921f86db8c25ba8edec902bc3b755a0e407e8add22b9d956f01f48e3c9a468c` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `613c3418...`, the two-column build) |
+| Size | 406,764 bytes (east market + vendors) |
+| SHA256 | `0aa38d0d93fe554613f3df8375abc10ccc22259e71c146d271561a533a91b78c` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `b921f86d...`, the east-market build) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |
