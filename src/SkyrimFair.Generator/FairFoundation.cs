@@ -459,6 +459,55 @@ internal static class FairFoundation
 
         float Spin() => (float)(rng.NextDouble() * Math.PI * 2.0);
 
+        // ---- battered drystone courses -------------------------------------
+        // The perimeter reads as four layers, from the paving outward and down:
+        // a slanted stone wall, shrubbery on it, a grass and earth bank, then more
+        // shrubbery and rock on that.
+        //
+        // The slant is not a rotation. A drystone retaining wall is battered by
+        // stepping each course back from the one below, so it is wider at the foot,
+        // and that is what this does: courses of an ordinary 256-wide field wall,
+        // each one set CourseBatter further out than the course above it. It also
+        // means the wall is built from small pieces rather than one slab, which is
+        // what made the scaled stair walls read as masonry blocks.
+        void CourseWall(float ex, float ey, int dc, int dr, float rot, float surfaceZ, float drop)
+        {
+            var w = d.PerimeterWall;
+            if (!w.Enabled || w.Piece.Length == 0)
+            {
+                return;
+            }
+
+            var bounds = boundsOf(FormKeyHelper.Parse(w.Piece));
+            var height = bounds.Height > 1f ? bounds.Height : w.CourseHeight;
+            var courses = Math.Clamp(
+                (int)MathF.Ceiling(drop / height), 1, w.MaxCourses);
+
+            for (var c = 0; c < courses; c++)
+            {
+                // Crest of this course, then stepped out so lower courses sit proud.
+                var crown = surfaceZ - height * c;
+                var outward = w.CourseBatter * c;
+
+                // Two pieces cover a 512 segment; a little overlap hides the joint.
+                for (var half = -1; half <= 1; half += 2)
+                {
+                    var along = half * (tile / 4f);
+                    var px = ex + dc * outward + (dc == 0 ? along : 0f);
+                    var py = ey - dr * outward + (dr == 0 ? along : 0f);
+
+                    if (!ChannelClear(px, py, tile / 4f))
+                    {
+                        result.ChannelSkipped++;
+                        continue;
+                    }
+
+                    PutVanilla(w.Piece, px, py, crown - bounds.ZMax, rot, 1f);
+                    result.WallCourses++;
+                }
+            }
+        }
+
         // One embankment rock, scaled to the wall it faces and bedded into the ground
         // beneath itself. Returns false when nothing was placed, so the caller can
         // retry with a slimmer piece.
@@ -773,6 +822,7 @@ internal static class FairFoundation
         for (var i = 0; i < faced.Count; i++)
         {
             var seg = faced[i];
+            CourseWall(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop);
             Treat(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop,
                 !cliffCovered.Contains(i));
         }
@@ -1020,6 +1070,9 @@ internal sealed class FoundationResult
 
     /// <summary>Vanilla entrance pieces, currently the stair-through-a-wall.</summary>
     public int EntrancePieces { get; set; }
+
+    /// <summary>Drystone field-wall courses stepped back to batter the perimeter.</summary>
+    public int WallCourses { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }

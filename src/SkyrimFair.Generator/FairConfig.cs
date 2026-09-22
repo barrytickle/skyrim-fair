@@ -445,6 +445,8 @@ internal sealed record DressingConfig
     /// </summary>
     public float EdgeOverlap { get; init; } = 64f;
 
+    public PerimeterWallConfig PerimeterWall { get; init; } = new();
+
     /// <summary>
     /// Toe rocks: low piles laid at native ground where the embankment meets grass.
     /// Deliberately small and medium piles only - the big RockTundraLand landscape
@@ -640,4 +642,27 @@ internal sealed record EntranceConfig
     /// the edge itself. The mesh's top tread is 64 units in front of its origin.
     /// </summary>
     public float StairInset { get; init; } = 64f;
+}
+
+
+/// <summary>
+/// The stone wall at the top of the perimeter: ordinary drystone field walls, stacked
+/// in courses that step outward as they go down so the face is battered rather than
+/// vertical. Small repeated pieces, not one slab.
+/// </summary>
+internal sealed record PerimeterWallConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>`Stonewall01`, the 256-wide, 175-tall drystone field wall.</summary>
+    public string Piece { get; init; } = "0000099B:Skyrim.esm";
+
+    /// <summary>Fallback height if the piece has no usable bounds.</summary>
+    public float CourseHeight { get; init; } = 175f;
+
+    /// <summary>How far each course steps out from the one above. This is the batter.</summary>
+    public float CourseBatter { get; init; } = 48f;
+
+    /// <summary>Courses deep edges may stack. Three covers about 525 units.</summary>
+    public int MaxCourses { get; init; } = 3;
 }

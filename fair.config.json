@@ -50,7 +50,7 @@
       "rampEdge": "N",
       "rampTiles": 0,
       "rampWidth": 1,
-      "rampRise": 224,
+      "rampRise": 146,
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
@@ -141,7 +141,9 @@
           "00018BA5:Skyrim.esm",
           "0001A6E2:Skyrim.esm",
           "0001B0A8:Skyrim.esm",
-          "000332C7:Skyrim.esm"
+          "000332C7:Skyrim.esm",
+          "0004D709:Skyrim.esm",
+          "00042A88:Skyrim.esm"
         ],
         "cornerStones": [
           "0001819A:Skyrim.esm",
@@ -153,7 +155,7 @@
         "wallTopOvershoot": 96,
         "wallBedding": 80,
         "wallEdgeOverlap": 112,
-        "wallMaxRadius": 760,
+        "wallMaxRadius": 850,
         "toePerSegment": 3,
         "vergePerSegment": 5,
         "vergeMaxLocalStep": 112,
@@ -164,7 +166,14 @@
         "cliffTopSink": 40,
         "pavingRimAllowance": 144,
         "pavingClearance": 8,
-        "rampRimAllowance": 32
+        "rampRimAllowance": 32,
+        "perimeterWall": {
+          "enabled": true,
+          "piece": "0000099B:Skyrim.esm",
+          "courseHeight": 175,
+          "courseBatter": 48,
+          "maxCourses": 3
+        }
       },
       "retainHeight": 256,
       "clearMargin": 160,
@@ -181,8 +190,8 @@
         "stairTopOffset": 130,
         "stairInset": 64,
         "stairRun": 192,
-        "stairFlights": 2,
-        "stairScale": 2.0
+        "stairFlights": 3,
+        "stairScale": 1.3
       }
     }
   }

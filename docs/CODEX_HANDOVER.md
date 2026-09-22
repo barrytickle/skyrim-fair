@@ -127,6 +127,26 @@ levels that step *down* quickly end up below grade. Building levels *up* from th
 current floor is the workable direction. This is a measurement question, not a decision
 for Barry.
 
+## Perimeter treatment, in four layers
+
+Barry's spec, 2026-09-22: "a slightly slanted stone wall, with shrubbery, and then a
+grass hill with shrubbery and rocks". From the paving outward and down:
+
+1. **Battered drystone wall.** Courses of `Stonewall01` (`0000099B`), the ordinary
+   256-wide, 175-tall field wall, each course stepped `CourseBatter` further out than
+   the one above. The slant is the step-back, not a rotation - that is how drystone
+   retaining is actually built, and it keeps the face made of small repeated pieces.
+   Up to three courses, covering about 525.
+2. **Shrubbery** on and against it.
+3. **Grass and earth bank.** `DirtCliffs02FieldGrass01` and
+   `DirtCliffsIsland01FieldGrass01` are in the embankment pool - earth cliffs with
+   grass tops, which is the "grass hill" layer rather than more bare rock.
+4. **Shrubbery and rock** on the bank.
+
+This replaced relying on the stair piece's own wall for the look. Scaling the stair to
+2.0 had scaled that wall to 1024 x 344, which read as masonry slabs rather than farm
+terracing; at 1.3 it is 666 x 224 and the coursed field walls carry the perimeter.
+
 ## Vanilla asset palette for the fair
 
 Researched against `Skyrim.esm` so a later pass does not repeat it. All are referenced
@@ -206,7 +226,7 @@ above, so no landings are needed and it reads as one long staircase. Each flight
 its own 512-wide drystone wall, so the chain also builds the stepped retaining tiers
 either side of the steps.
 
-**Two flights at scale 2.0** carry the current floor of `-5336` down to native ground, landing 8
+**Three flights at scale 1.3** carry the current floor of `-5336` down to native ground, landing 8
 units into grade and stopping 885 short of the road. The piece scales well - 17 risers
 of about 7 units - so at 2.0 the walkable stair is 334 wide and each flight brings a
 1024-wide, 344-tall drystone wall, which is the broad staircase with chunky tiers the
