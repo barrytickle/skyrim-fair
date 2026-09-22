@@ -189,7 +189,7 @@
       "enabled": true,
       "wallMargin": 220,
       "clearance": 15,
-      "keepOutZones": ["Crowd", "Stage", "Entrance"],
+      "keepOutZones": ["Crowd", "Stage"],
       "keepOut": [
         {
           "name": "ArcheryRange",
@@ -294,218 +294,37 @@
         }
       ],
       "fixed": [
-        {"lane": "Avenue", "at": 3810, "side": "left", "module": "grand_double", "theme": "imperial"},
-        {"lane": "Avenue", "at": 3810, "side": "right", "module": "grand_double", "theme": "stormcloak"},
+        {"lane": "Avenue", "at": 3000, "side": "left", "module": "grand_double", "theme": "imperial"},
+        {"lane": "Avenue", "at": 3000, "side": "right", "module": "grand_double", "theme": "stormcloak"},
         {"lane": "Avenue", "at": 5520, "side": "right", "module": "canvas_pair", "theme": "sweetroll"}
       ],
       "lanes": [
         {
           "name": "Avenue",
           "useAvenue": true,
-          "from": 380,
+          "from": 300,
           "to": 5950,
           "halfWidths": [
-            [0, 330], [450, 330], [650, 250], [1000, 260], [1150, 330], [1600, 330], [1750, 240],
-            [2100, 240], [2250, 300], [2480, 300], [2600, 650], [3350, 650], [3470, 240], [4150, 240],
-            [4260, 330], [4560, 330], [4660, 230], [5500, 230], [5700, 380], [6300, 500]
+            [0, 300], [6300, 300]
           ],
-          "meander": [90, 1500],
+          "meander": [0, 1000],
           "mix": [
             {"module": "grand_double", "weight": 2},
             {"module": "canvas_pair", "weight": 3},
             {"module": "whiterun_stand", "weight": 3},
-            {"module": "canvas_wide", "weight": 2},
-            {"module": "cask_bar", "weight": 1},
-            {"module": "open_trader", "weight": 1},
-            {"module": "trestle", "weight": 0.4}
+            {"module": "canvas_wide", "weight": 2}
           ],
           "themes": ["food", "drink", "sweets", "pies", "cheese", "roast", "produce", "bakery", "curios", "leather"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "pocketChance": 0.1,
-          "setBack": 45
-        },
-        {
-          "name": "WestBranch",
-          "points": [
-            [1330, 1000], [800, 1180], [200, 1020], [-950, 1120]
-          ],
-          "halfWidths": [
-            [0, 300], [500, 250], [2600, 250]
-          ],
-          "meander": [60, 900],
-          "mix": [
-            {"module": "canvas_pair", "weight": 2},
-            {"module": "whiterun_stand", "weight": 3},
-            {"module": "open_trader", "weight": 2},
-            {"module": "canvas_wide", "weight": 1},
-            {"module": "trestle", "weight": 0.4}
-          ],
-          "themes": ["mage", "dwemer", "books", "alchemy", "jewellery", "elven", "scrolls", "curios"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "setBack": 40,
-          "pocketChance": 0.1
-        },
-        {
-          "name": "EastBranch",
-          "points": [
-            [2650, 1020], [2900, 960], [3150, 990]
-          ],
-          "halfWidths": [
-            [0, 260], [600, 240]
-          ],
-          "mix": [
-            {"module": "whiterun_stand", "weight": 2},
-            {"module": "open_trader", "weight": 2},
-            {"module": "canvas_pair", "weight": 1},
-            {"module": "trestle", "weight": 0.5}
-          ],
-          "themes": ["smith", "hunter", "armour"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "pocketChance": 0.1
-        },
-        {
-          "name": "WestBackSouth",
-          "points": [
-            [650, -800], [720, 300], [650, 760]
-          ],
-          "halfWidths": [
-            [0, 210], [2000, 210]
-          ],
-          "meander": [50, 800],
-          "mix": [
-            {"module": "whiterun_stand", "weight": 3},
-            {"module": "open_trader", "weight": 3},
-            {"module": "canvas_pair", "weight": 2},
-            {"module": "cask_bar", "weight": 1},
-            {"module": "trestle", "weight": 0.4}
-          ],
-          "themes": ["alchemy", "herbs", "scrolls", "books", "furs", "pottery", "candles", "toys"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "pocketChance": 0.1,
-          "setBack": 40
-        },
-        {
-          "name": "WestBackNorth",
-          "points": [
-            [650, 1400], [720, 2000], [620, 3350]
-          ],
-          "halfWidths": [
-            [0, 210], [2500, 210]
-          ],
-          "meander": [50, 800],
-          "mix": [
-            {"module": "whiterun_stand", "weight": 3},
-            {"module": "open_trader", "weight": 3},
-            {"module": "canvas_pair", "weight": 2},
-            {"module": "cask_bar", "weight": 1},
-            {"module": "trestle", "weight": 0.4}
-          ],
-          "themes": ["herbs", "alchemy", "toys", "candles", "pottery", "furs", "books", "scrolls"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "pocketChance": 0.1,
-          "setBack": 40
-        },
-        {
-          "name": "WestOuterSouth",
-          "points": [
-            [-480, -250], [-600, 760]
-          ],
-          "halfWidths": [
-            [0, 170], [3700, 170]
-          ],
-          "meander": [40, 700],
-          "mix": [
-            {"module": "open_trader", "weight": 3},
-            {"module": "whiterun_stand", "weight": 2},
-            {"module": "canvas_pair", "weight": 1},
-            {"module": "trestle", "weight": 0.4}
-          ],
-          "themes": ["livestock", "hay", "timber", "rugs", "bone", "pottery"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "pocketChance": 0.1,
-          "setBack": 30,
-          "sides": "right"
-        },
-        {
-          "name": "WestOuterNorth",
-          "points": [
-            [-620, 1420], [-540, 2100], [-440, 3300]
-          ],
-          "halfWidths": [
-            [0, 170], [3700, 170]
-          ],
-          "meander": [40, 700],
-          "mix": [
-            {"module": "open_trader", "weight": 3},
-            {"module": "whiterun_stand", "weight": 2},
-            {"module": "canvas_pair", "weight": 1},
-            {"module": "trestle", "weight": 0.4}
-          ],
-          "themes": ["rugs", "bone", "timber", "hay"],
-          "gapMin": 10,
-          "gapMax": 70,
-          "pocketChance": 0.1,
-          "setBack": 30,
-          "sides": "right"
-        },
-        {
-          "name": "WestAlleyLow",
-          "points": [
-            [1640, -250], [1150, -150], [620, -260]
-          ],
-          "halfWidths": [
-            [0, 160], [1500, 160]
-          ],
-          "meander": [40, 700],
-          "mix": [],
-          "themes": ["pies", "cheese", "bakery", "honey"],
           "gapMin": 20,
-          "gapMax": 90,
-          "setBack": 35
-        },
-        {
-          "name": "WestAlleyHigh",
-          "points": [
-            [1830, 2470], [1300, 2590], [640, 2480]
-          ],
-          "halfWidths": [
-            [0, 160], [1500, 160]
-          ],
-          "meander": [40, 700],
-          "mix": [],
-          "themes": ["produce", "ale", "roast", "spices"],
-          "gapMin": 20,
-          "gapMax": 90,
-          "setBack": 35
-        },
-        {
-          "name": "EastAlleyHigh",
-          "points": [
-            [2350, 2900], [2780, 3060]
-          ],
-          "halfWidths": [
-            [0, 160], [1500, 160]
-          ],
-          "mix": [],
-          "themes": ["games", "prizes"],
-          "gapMin": 20,
-          "gapMax": 80
+          "gapMax": 45,
+          "pocketChance": 0,
+          "setBack": 15,
+          "angleJitter": 3
         }
       ],
-      "backFill": ["whiterun_stand", "open_trader"],
-      "backFillThemes": ["storage", "tanner", "cooper", "weaver", "potter", "carver"],
-      "dressing": [
-        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 1380, "y": 690, "yaw": 45},
-        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 1390, "y": 1340, "yaw": 135},
-        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 2620, "y": 700, "yaw": -45},
-        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 2600, "y": 1320, "yaw": -135}
-      ]
+      "backFill": ["canvas_wide", "grand_double", "canvas_pair", "whiterun_stand"],
+      "backFillThemes": ["smith", "armour", "mage", "dwemer", "jewellery", "alchemy", "books", "elven", "hunter", "furs", "scrolls", "curios", "pottery", "candles", "toys", "herbs", "rugs", "weaver", "tanner", "carver"],
+      "dressing": []
     },
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
     "avenueWidth": 800,

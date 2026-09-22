@@ -180,7 +180,7 @@ internal static class FairMarket
                     "move it in fairWorld.market.fixed.");
             }
 
-            Commit(m, x, y, yaw, lane.Config.Name, f.Theme, 900 + i, 1);
+            Commit(m, x, y, yaw, $"{lane.Config.Name} {SideName(side)}", f.Theme, 900 + i, 1);
         }
 
         // ---- every lane, side by side ------------------------------------------------
@@ -263,7 +263,7 @@ internal static class FairMarket
                     }
 
                     var theme = c.Themes.Count == 0 ? "stall" : c.Themes[themeIndex++ % c.Themes.Count];
-                    Commit(m, x, y, yaw, c.Name, theme, seedA, n);
+                    Commit(m, x, y, yaw, $"{c.Name} {SideName(side)}", theme, seedA, n);
                     s += m.Width + (FairHash.Hash3(seedA, n, 70) < c.PocketChance
                         ? c.PocketMin + FairHash.Hash3(seedA, n, 71) * (c.PocketMax - c.PocketMin)
                         : c.GapMin + FairHash.Hash3(seedA, n, 72) * (c.GapMax - c.GapMin));
@@ -411,6 +411,9 @@ internal static class FairMarket
 
         return true;
     }
+
+    /// <summary>Which side of the direction of travel: left is +1.</summary>
+    private static string SideName(float side) => side > 0 ? "left" : "right";
 
     private static string Capitalise(string s) => s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s[1..];
 }

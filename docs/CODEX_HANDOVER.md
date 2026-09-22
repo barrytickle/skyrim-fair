@@ -105,8 +105,10 @@ Rules for this direction:
     That is Barry's call.
 - **The market** (`FairMarket.cs`, `fairWorld.market`), 2026-09-22, night, **pending
   Barry's review**:
-  - Vanilla stall modules line data-driven lanes (the avenue, the West and East Branches,
-    back and outer lanes, and alleys as passages).
+  - Barry replaced the first maze layout with **two double-depth stall columns down
+    both sides of the avenue**: 40 proper stalls (21 west, 19 east), big stall types
+    only, with front rows facing the avenue and back rows back to back. The lane
+    machinery (branches, alleys, infill) remains available in the code.
   - A stall is placed only where it clears every lane, keep-out, the gate-to-stage
     sightline band and every other stall. Each stall gets a themed persistent shell
     marker (`SkyrimFairStall<Theme><NN>`) for merchants later.
