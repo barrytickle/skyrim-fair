@@ -50,7 +50,7 @@
       "rampEdge": "N",
       "rampTiles": 0,
       "rampWidth": 1,
-      "rampRise": 112,
+      "rampRise": 224,
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
@@ -181,7 +181,8 @@
         "stairTopOffset": 130,
         "stairInset": 64,
         "stairRun": 192,
-        "stairFlights": 4
+        "stairFlights": 2,
+        "stairScale": 2.0
       }
     }
   }

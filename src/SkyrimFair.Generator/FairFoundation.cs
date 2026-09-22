@@ -215,15 +215,17 @@ internal static class FairFoundation
                         // Each flight brings its own 512-wide drystone wall, so the
                         // chain also builds the stepped retaining tiers either side of
                         // the steps.
+                        var stairDrop = e.StairDrop * e.StairScale;
+                        var stairRun = e.StairRun * e.StairScale;
                         for (var i = 0; i < e.StairFlights; i++)
                         {
-                            var outward = e.StairRun * i - e.StairInset;
+                            var outward = stairRun * i - e.StairInset * e.StairScale;
                             PutVanilla(e.Stair,
                                 ex + dc * outward,
                                 ey - dr * outward,
-                                f.FloorZ - e.StairTopOffset - e.StairDrop * i,
+                                f.FloorZ - e.StairTopOffset * e.StairScale - stairDrop * i,
                                 rot + MathF.PI,
-                                1f);
+                                e.StairScale);
                             result.EntrancePieces++;
 
                             // Register each flight with the ramp-tile list so the
@@ -232,10 +234,10 @@ internal static class FairFoundation
                             // this the channel disappears with the ramp and dressing is
                             // free to land on the steps.
                             rampTiles.Add((ex + dc * outward, ey - dr * outward,
-                                           f.FloorZ - e.StairDrop * i, dc, dr));
+                                           f.FloorZ - stairDrop * i, dc, dr));
                         }
 
-                        slot0Z = f.FloorZ - e.StairDrop * e.StairFlights;
+                        slot0Z = f.FloorZ - stairDrop * e.StairFlights;
                     }
 
                     // Any ramp tiles configured carry on below the stairs. With a full

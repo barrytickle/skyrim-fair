@@ -206,8 +206,11 @@ above, so no landings are needed and it reads as one long staircase. Each flight
 its own 512-wide drystone wall, so the chain also builds the stepped retaining tiers
 either side of the steps.
 
-**Four flights** carry the current floor of `-5336` down to native ground, landing 8
-units into grade and stopping 885 short of the road, which leaves the last stretch to
+**Two flights at scale 2.0** carry the current floor of `-5336` down to native ground, landing 8
+units into grade and stopping 885 short of the road. The piece scales well - 17 risers
+of about 7 units - so at 2.0 the walkable stair is 334 wide and each flight brings a
+1024-wide, 344-tall drystone wall, which is the broad staircase with chunky tiers the
+concept shows, which leaves the last stretch to
 the dirt path still to be built. Flights are registered with the ramp-tile list so the
 entrance channel and the paving guard cover the steps and the flank treatment dresses
 their sides. `Entrance.UseStairs = false` falls back to a plain ramp.
