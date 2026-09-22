@@ -172,7 +172,24 @@
           "piece": "0000099B:Skyrim.esm",
           "courseHeight": 175,
           "courseBatter": 48,
-          "maxCourses": 3
+          "maxCourses": 3,
+          "prototypeEdges": [
+            "N",
+            "W"
+          ],
+          "minStretch": 2,
+          "maxStretch": 3,
+          "secondCourseChance": 0.55,
+          "offsetJitter": 96,
+          "alongJitter": 64,
+          "masonryBias": {
+            "N": 0.7,
+            "W": 0.5,
+            "S": 0.35,
+            "E": 0.25
+          },
+          "terminalRockShare": 0.8,
+          "terminalRockSink": 64
         }
       },
       "retainHeight": 256,
@@ -191,7 +208,9 @@
         "stairInset": 64,
         "stairRun": 192,
         "stairFlights": 3,
-        "stairScale": 1.3
+        "stairScale": 1.3,
+        "flankWalls": 2,
+        "flankWallsBias": 1
       }
     }
   }

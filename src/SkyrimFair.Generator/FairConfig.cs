@@ -626,6 +626,15 @@ internal sealed record EntranceConfig
     public float StairRun { get; init; } = 192f;
 
     /// <summary>
+    /// Low field walls set beside each flight, stepping down with it, so the approach
+    /// reads as cut into the bank. Short walls next to the player rather than cliff.
+    /// </summary>
+    public int FlankWalls { get; init; } = 2;
+
+    /// <summary>Extra walls on one side only, so the entrance is never mirrored.</summary>
+    public int FlankWallsBias { get; init; } = 1;
+
+    /// <summary>
     /// Flights in the chain. At scale 2 each drops 224 over a 384 run, so two carry the
     /// floor at -5336 down the same 448 over the same 768 that four did at scale 1.
     /// </summary>
@@ -665,4 +674,43 @@ internal sealed record PerimeterWallConfig
 
     /// <summary>Courses deep edges may stack. Three covers about 525 units.</summary>
     public int MaxCourses { get; init; } = 3;
+
+    /// <summary>
+    /// Compass edges this language is prototyped on. Empty means the whole perimeter.
+    /// Kept to one edge first so the new treatment can be compared against the old on
+    /// the same site before it is rolled out.
+    /// </summary>
+    public IReadOnlyList<string> PrototypeEdges { get; init; } = new[] { "N" };
+
+    /// <summary>Shortest and longest run of segments one masonry stretch covers.</summary>
+    public int MinStretch { get; init; } = 2;
+
+    public int MaxStretch { get; init; } = 3;
+
+    /// <summary>
+    /// Chance a stretch gets a second, lower course. Not every stretch does, which is
+    /// what breaks the height into varying numbers of visual tiers.
+    /// </summary>
+    public double SecondCourseChance { get; init; } = 0.55;
+
+    /// <summary>How far a whole stretch may be pushed out, so no two line up.</summary>
+    public float OffsetJitter { get; init; } = 96f;
+
+    /// <summary>Sideways wander within a segment, so the run is not a ruled line.</summary>
+    public float AlongJitter { get; init; } = 64f;
+
+    /// <summary>
+    /// Per-edge chance that any given stretch is masonry rather than left to rock and
+    /// planting. Deliberately uneven: the fair should read as more built on one side.
+    /// </summary>
+    public Dictionary<string, float> MasonryBias { get; init; } = new()
+    {
+        ["N"] = 0.7f, ["W"] = 0.5f, ["S"] = 0.35f, ["E"] = 0.25f,
+    };
+
+    /// <summary>Share of the local drop the rock ending a run is sized to.</summary>
+    public float TerminalRockShare { get; init; } = 0.8f;
+
+    /// <summary>How far below the crest that rock is sunk, so it reads part-buried.</summary>
+    public float TerminalRockSink { get; init; } = 64f;
 }

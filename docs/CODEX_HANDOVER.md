@@ -127,6 +127,46 @@ levels that step *down* quickly end up below grade. Building levels *up* from th
 current floor is the workable direction. This is a measurement question, not a decision
 for Barry.
 
+## Perimeter construction language (Barry's brief, 2026-09-22)
+
+The fair must not read as a rectangular block with paving on top. From inside it is a
+clean flat market floor; from outside the player should see a shaped, terraced hillside.
+The structural platform stays artificial - the player just must not be able to tell.
+
+Rules, in force for all future perimeter work:
+
+- **No continuous wall.** Masonry goes in short runs with gaps, and every run dies into
+  a part-buried rock rather than stopping in mid-air.
+- **Battered, not vertical.** Courses step outward as they descend. The slant is the
+  step-back, never a rotation.
+- **Layers, with widths that vary constantly**: paving, rough verge, low stone
+  retaining where needed, sloped earth and embedded rock, native tundra. No uniform
+  border.
+- **Tiers, not one drop.** Break the height into two or more shorter visual levels.
+  They need not be walkable.
+- **Asymmetry.** Per-edge masonry bias, different run lengths, one side more built than
+  the other. The player must not be able to trace a rectangle.
+- **Rocks embedded, never dropped on.** Sunk below the crest, outside the market floor.
+- **Interior stays clean.** Naturalisation belongs on the perimeter; never scatter
+  clutter across the usable paving.
+- **Entrance cut into the bank**, framed by low field walls beside the player rather
+  than cliff faces against it.
+- **The existing road is the approach.** Do not build a separate path aimed at the fair.
+- **Vanilla first.** Audit Whiterun and tundra assets before authoring anything.
+
+Implemented as a **prototype on the north and west edges only**
+(`PerimeterWall.PrototypeEdges`), so it can be judged against the older treatment on
+south and east before being rolled out. See `docs/AUDIT.md` for the verified state.
+
+## External assets: replacers need no dependency
+
+Whiterun Stone Stairs (Nexus 147164 v1.2) was inspected and **not adopted**: it is a
+pure replacer with no plugin and no new assets, so there is nothing to depend on. This
+is the general rule - where a mod replaces a vanilla mesh or texture at its own path,
+Skyrim Fair keeps referencing the vanilla path and the user's replacer wins at runtime.
+That is already how Blended Roads improves `road01.dds` and Nordic Stonewalls improves
+`Stonewall01`. Never copy a third-party asset into the project to get that effect.
+
 ## Perimeter treatment, in four layers
 
 Barry's spec, 2026-09-22: "a slightly slanted stone wall, with shrubbery, and then a

@@ -62,6 +62,7 @@ try
         Console.WriteLine($"  {foundation.WallRocks,3} x embankment rock facing an exposed edge");
         Console.WriteLine($"  {foundation.EntrancePieces,3} x vanilla stair-through-a-wall entrance");
         Console.WriteLine($"  {foundation.WallCourses,3} x battered drystone field-wall course");
+        Console.WriteLine($"  {foundation.TerminalRocks,3} x part-buried rock ending a masonry run");
         Console.WriteLine($"  {foundation.CornerStones,3} x corner stone breaking the outline");
         Console.WriteLine($"  {foundation.ToeRocks,3} x toe rock bedded into native grade");
         Console.WriteLine($"  {foundation.VergeWedges,3} x rough-earth verge wedge");

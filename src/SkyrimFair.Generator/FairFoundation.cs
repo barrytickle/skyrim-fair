@@ -459,18 +459,24 @@ internal static class FairFoundation
 
         float Spin() => (float)(rng.NextDouble() * Math.PI * 2.0);
 
-        // ---- battered drystone courses -------------------------------------
-        // The perimeter reads as four layers, from the paving outward and down:
-        // a slanted stone wall, shrubbery on it, a grass and earth bank, then more
-        // shrubbery and rock on that.
+        // ---- layered perimeter -------------------------------------------
+        // The brief: from the paved surface outward the eye should read
         //
-        // The slant is not a rotation. A drystone retaining wall is battered by
-        // stepping each course back from the one below, so it is wider at the foot,
-        // and that is what this does: courses of an ordinary 256-wide field wall,
-        // each one set CourseBatter further out than the course above it. It also
-        // means the wall is built from small pieces rather than one slab, which is
-        // what made the scaled stair walls read as masonry blocks.
-        void CourseWall(float ex, float ey, int dc, int dr, float rot, float surfaceZ, float drop)
+        //     paving -> rough verge -> low stone retaining WHERE NEEDED
+        //            -> sloped earth and embedded rock -> native tundra
+        //
+        // with the widths changing constantly and no continuous wall anywhere. So this
+        // does not place masonry per segment. It walks each straight run of the
+        // outline and lays SHORT stretches of wall separated by gaps, and the gaps get
+        // nothing but earth, rock and planting from the ordinary treatment. Every
+        // stretch ends in a large part-buried rock, so masonry always dies into the
+        // bank rather than stopping in mid-air.
+        //
+        // Two levers keep it from reading as a pattern: every length and offset is
+        // jittered per stretch, and each compass edge is seeded differently and given
+        // its own bias, so one side ends up more masonry and another more rock. The
+        // player should not be able to trace a rectangle.
+        void LayeredPerimeter()
         {
             var w = d.PerimeterWall;
             if (!w.Enabled || w.Piece.Length == 0)
@@ -480,30 +486,111 @@ internal static class FairFoundation
 
             var bounds = boundsOf(FormKeyHelper.Parse(w.Piece));
             var height = bounds.Height > 1f ? bounds.Height : w.CourseHeight;
-            var courses = Math.Clamp(
-                (int)MathF.Ceiling(drop / height), 1, w.MaxCourses);
 
-            for (var c = 0; c < courses; c++)
+            foreach (var direction in Directions)
             {
-                // Crest of this course, then stepped out so lower courses sit proud.
-                var crown = surfaceZ - height * c;
-                var outward = w.CourseBatter * c;
-
-                // Two pieces cover a 512 segment; a little overlap hides the joint.
-                for (var half = -1; half <= 1; half += 2)
+                if (w.PrototypeEdges.Count > 0
+                    && !w.PrototypeEdges.Contains(direction.Name, StringComparer.OrdinalIgnoreCase))
                 {
-                    var along = half * (tile / 4f);
-                    var px = ex + dc * outward + (dc == 0 ? along : 0f);
-                    var py = ey - dr * outward + (dr == 0 ? along : 0f);
+                    continue;
+                }
 
-                    if (!ChannelClear(px, py, tile / 4f))
+                // A separate stream per edge, so the two sides of the fair never come
+                // out mirrored.
+                var edgeRng = new Random(d.Seed + direction.Name.GetHashCode());
+                var masonryBias = w.MasonryBias.TryGetValue(direction.Name, out var b) ? b : 0.5f;
+
+                var lines = faced
+                    .Where(s => s.Dc == direction.Dc && s.Dr == direction.Dr)
+                    .GroupBy(s => direction.Dc == 0 ? s.Ey : s.Ex);
+
+                foreach (var line in lines)
+                {
+                    var ordered = line
+                        .OrderBy(s => direction.Dc == 0 ? s.Ex : s.Ey)
+                        .ToList();
+
+                    var i = 0;
+                    while (i < ordered.Count)
                     {
-                        result.ChannelSkipped++;
-                        continue;
-                    }
+                        // Wall for a few segments, then nothing for a few. Lengths are
+                        // drawn fresh each time so no rhythm establishes itself.
+                        var wanted = edgeRng.NextDouble() < masonryBias;
+                        var span = w.MinStretch + edgeRng.Next(w.MaxStretch - w.MinStretch + 1);
+                        span = Math.Min(span, ordered.Count - i);
 
-                    PutVanilla(w.Piece, px, py, crown - bounds.ZMax, rot, 1f);
-                    result.WallCourses++;
+                        if (!wanted)
+                        {
+                            i += span;
+                            continue;
+                        }
+
+                        var stretch = ordered.Skip(i).Take(span).ToList();
+                        var lift = (float)edgeRng.NextDouble() * w.OffsetJitter;
+                        var courses = 1 + (edgeRng.NextDouble() < w.SecondCourseChance ? 1 : 0);
+
+                        foreach (var seg in stretch)
+                        {
+                            for (var c = 0; c < courses; c++)
+                            {
+                                // Each course steps further out as it goes down, so the
+                                // face is battered. The step itself is jittered, which
+                                // is what stops the batter reading as a machined slope.
+                                var batter = w.CourseBatter * (0.7f + (float)edgeRng.NextDouble() * 0.6f);
+                                var outward = lift + batter * c;
+                                var crown = seg.SurfaceZ - height * c;
+
+                                for (var half = -1; half <= 1; half += 2)
+                                {
+                                    var along = half * (tile / 4f)
+                                        + (float)(edgeRng.NextDouble() - 0.5) * w.AlongJitter;
+                                    var px = seg.Ex + seg.Dc * outward + (seg.Dc == 0 ? along : 0f);
+                                    var py = seg.Ey - seg.Dr * outward + (seg.Dr == 0 ? along : 0f);
+                                    if (!ChannelClear(px, py, tile / 4f))
+                                    {
+                                        result.ChannelSkipped++;
+                                        continue;
+                                    }
+
+                                    PutVanilla(w.Piece, px, py, crown - bounds.ZMax, seg.Rot, 1f);
+                                    result.WallCourses++;
+                                }
+                            }
+                        }
+
+                        // Bury a large rock at each end so the masonry runs into the
+                        // bank instead of stopping dead.
+                        foreach (var end in new[] { stretch[0], stretch[^1] })
+                        {
+                            var pick = d.CornerStones[edgeRng.Next(d.CornerStones.Count)];
+                            var rb = boundsOf(FormKeyHelper.Parse(pick));
+                            if (rb.Height <= 1f)
+                            {
+                                continue;
+                            }
+
+                            var scale = Math.Clamp(
+                                (end.Drop * w.TerminalRockShare) / rb.Height, d.MinScale, d.MaxScale);
+                            var reach = rb.Radius * scale;
+                            var out2 = MathF.Max(0f, reach - d.WallEdgeOverlap);
+                            var rx = end.Ex + end.Dc * out2;
+                            var ry = end.Ey - end.Dr * out2;
+                            if (!ChannelClear(rx, ry, reach)
+                                || !ClearsMarketFloor(rx, ry, reach, end.SurfaceZ))
+                            {
+                                result.ChannelSkipped++;
+                                continue;
+                            }
+
+                            // Sunk below the crest so it reads as part-buried in the
+                            // bank rather than dropped on top of it.
+                            var crown = end.SurfaceZ - w.TerminalRockSink;
+                            PutVanilla(pick, rx, ry, crown - rb.ZMax * scale, Spin(), scale);
+                            result.TerminalRocks++;
+                        }
+
+                        i += span;
+                    }
                 }
             }
         }
@@ -822,9 +909,46 @@ internal static class FairFoundation
         for (var i = 0; i < faced.Count; i++)
         {
             var seg = faced[i];
-            CourseWall(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop);
             Treat(seg.Ex, seg.Ey, seg.Dc, seg.Dr, seg.Rot, seg.SurfaceZ, seg.Drop,
                 !cliffCovered.Contains(i));
+        }
+
+        LayeredPerimeter();
+
+        // ---- entrance flanks ------------------------------------------------
+        // Low stone walls stepping down beside each stair flight, so the route reads
+        // as cut INTO the bank rather than a ramp bolted to the front of a box. Short
+        // field walls next to the player, not cliff faces. The two sides get different
+        // counts on purpose, so the approach is never mirrored.
+        if (f.Entrance.UseStairs && d.PerimeterWall.Enabled && f.Entrance.FlankWalls > 0)
+        {
+            var fw = d.PerimeterWall;
+            var fb = boundsOf(FormKeyHelper.Parse(fw.Piece));
+            var fh = fb.Height > 1f ? fb.Height : fw.CourseHeight;
+            var lateralBase = 256f * f.Entrance.StairScale + 128f;
+
+            foreach (var t in rampTiles)
+            {
+                for (var side = -1; side <= 1; side += 2)
+                {
+                    var count = f.Entrance.FlankWalls + (side < 0 ? 0 : f.Entrance.FlankWallsBias);
+                    for (var k = 0; k < count; k++)
+                    {
+                        var lateral = side * (lateralBase + k * 256f);
+                        var wx = t.X + (t.Dc == 0 ? lateral : 0f);
+                        var wy = t.Y + (t.Dr == 0 ? lateral : 0f);
+                        if (!ClearsMarketFloor(wx, wy, 128f, t.Z))
+                        {
+                            result.PavingGuardSkipped++;
+                            continue;
+                        }
+
+                        PutVanilla(fw.Piece, wx, wy, t.Z - fh * k - fb.ZMax,
+                            OutwardRotation[f.RampEdge.ToUpperInvariant()], 1f);
+                        result.WallCourses++;
+                    }
+                }
+            }
         }
 
         // ---- ramp flanks ---------------------------------------------------
@@ -1073,6 +1197,9 @@ internal sealed class FoundationResult
 
     /// <summary>Drystone field-wall courses stepped back to batter the perimeter.</summary>
     public int WallCourses { get; set; }
+
+    /// <summary>Part-buried rocks where a masonry run dies into the bank.</summary>
+    public int TerminalRocks { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }
