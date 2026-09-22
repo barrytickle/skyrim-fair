@@ -2,116 +2,173 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the terrace band, round the whole outline
+## Current pass: the generator reproduces Barry's completed Creation Kit layout
 
-Implements Barry's instruction of 2026-09-22 (afternoon): carry the approved embankment
-prototype he built beside the stairs round the whole site, with an even distance kept
-round every corner, using rotated terrace walls and rocks at the corners as he did. The
-staircase is approved and was not touched.
+Barry finished the perimeter by hand in the Creation Kit and saved it as
+`reference/SkyrimFair.esp` (35,173 bytes, 2026-09-22 17:53). Per his instruction that
+plugin is the **design source of truth**, and a **visual/layout reference only**: it is
+not authoritative as a plugin and never replaces the generator's output. This pass reads
+it, extracts every intentional change, and reproduces the layout from rules so the
+generator's plugin lands on the same design.
 
 | Field | Verified value |
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 93,399 bytes |
-| SHA256 | `c5628dd7f7dc80dda5a1da0e7dff9d2bdb2382e6c6fd1415ffc596286495bce6` |
+| Size | 83,585 bytes |
+| SHA256 | `eed678bc989d072adb1a4f01289101f0f570b21874505c74a685568c65446499` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
-| Kit meshes | unchanged this pass; all 13 deployed NIFs still match `assets/nif/SkyrimFair/` |
+| Kit meshes | unchanged this pass; all 13 deployed NIFs match `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |
-| Cells | `-2,-5`, `-3,-4`, `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` (all byte-identical to vanilla) |
+| Cells | `-3,-4`, `-2,-4`, `-1,-4`, `-3,-3`, `-2,-3`, `-1,-3` (all byte-identical to vanilla) |
 | Centre / floor | `X -5888, Y -13440`, floor `Z -5336` |
+| **Footprint** | **26 cells** (was 33): see below |
 | Vanilla references disabled | 0 |
 | Dirt-cliff pieces placed | 0 |
 | Forbidden records | 0 LAND, NAVM, NPC_, QUST, PACK, DIAL, INFO, SCEN |
 | Floor material | `road01.dds` worn earth on the paving caps |
 
-## The band, as generated
+## What the reference contains, and what was taken from it
 
-The three layers are the ones measured from Barry's Creation Kit prototype (reference
-section below). Each layer is laid along an **offset of the paved outline**, so the band
-is the same width on every edge and turns every corner at the same distance: the paving
-outline is traced as a counter-clockwise polygon, each edge's line is pushed out by the
-layer's plan offset, and neighbouring offset lines meet at the offset corners. That is
-exact for this rectilinear footprint and behaves the same at convex and re-entrant
-corners.
+The reference was built from an earlier generated plugin, so a FormID diff against the
+current one is meaningless; it was read as a complete layout instead, grouped by base
+object, and every hand-placed group was classified.
 
-| Layer | Piece | Scale | Faces | Plan offset (origin) | Z rule |
-| --- | --- | --- | --- | --- | --- |
-| Lower wall | `StonewallTerrace01` | 1.0 | outward | +117 (face at +442) | ground at the face, 6 sunk; crest never above floor -48 |
-| Grass slope | `StonewallTerrace01` | 1.0 | inward (wall buried) | +111 | lower Z + 115; slope top at the retaining face never above floor -48 |
-| Parapet | `Stonewall01` | 0.98 | outward | -15 (straddles the edge) | floor -153, crest floor +18.5 |
+### Footprint: Barry removed the east column and the south tongue
 
-Along each run the pieces are spaced **evenly**: the first and last sit exactly at the
-run's ends and the rest are spread between at or just under piece length, so ends are
-flush at every corner and nothing gaps. Runs continue 64 past a convex corner so their
-ends are swallowed by the knoll; at re-entrant corners the two runs meet at the offset
-vertex and overlap inside each other.
+The reference paves 26 cells. Reconstructed from its floor caps, row by row from the
+north: `..####.`, `.#####.`, `.#####.`, `.#####.`, `.#####.`, `.##....`. Against the
+old 33-cell mask, column 6 (the far east strip) and the south tongue (row 5 columns 3
+to 5, all of row 6) are gone, and the row-0 / column-5 notch is filled. His terrace walls
+wrap this new outline (east rows at `X -4544` from row 0 to row 4, south rows at
+`Y -14290` for columns 3 to 5 and `Y -14836` for columns 1 to 2), so it is deliberate.
+**Adopted**: `footprint` in `fair.config.json` is the 26-cell mask. Because the north
+row is now four tiles wide, the entrance column is pinned with `rampAlign: "offset:1"`
+so the approved staircase stays at `X -5888` ("centre" would have moved it one tile
+east). Three of his floor caps had no body under them (he deleted the 1024 fill they
+replaced); the generator emits bodies and caps for all 26 cells.
 
-**On the entrance edge each run is split** either side of the stairs and each half is
-spaced on its own, so the band finishes exactly at the clearance on both sides: the lower
-wall runs under the stair solid to the flank, the slope and parapet stop 16 outside the
-cheeks' outer face. Both sides measure the same.
+### Perimeter: per-edge layer stacks, not one prototype
 
-### Corners: grass knolls with boulders
+The north band is the prototype measured earlier. The other sides differ, and the
+generator now carries **one layer stack per compass edge** (`terraceBand.edges`):
 
-Every convex corner gets `StonewallTerraceCorner01` on native ground, **turned so its two
-walls face the terrace and its rounded grass shoulder faces out**, walls' corner 40
-outside the paving corner on both axes. That is the orientation Barry used at the
-north-east corner (rotation -90 there; the generator derives the rotation from the two
-edge normals, so every corner gets the matching turn). The walls are buried under the
-grass slopes; what shows is a rounded grass shoulder wrapping the corner 154 beyond the
-lower wall faces, into which both lower walls die. Two closed boulders sit on each
-shoulder (`RockL04`, `RockL05`, `RockL02` at 0.7 to 1.1, bedded to grade and lifted only
-enough to clear the grass). Knolls within 512 of the stair centreline are not placed.
+| Edge | Outward `StonewallTerrace01` | Inward `StonewallTerrace01` | `Stonewall01` parapet (0.98) | Extra |
+| --- | --- | --- | --- | --- |
+| N | origin +117, **on grade** | +111, **115 above** the outward piece: the grass slope | -15, floor -153 | |
+| E | +64, fixed **floor -296** | +64, fixed floor -424: a grass plinth under the wall | +24, floor -149 | |
+| S | +98, fixed floor -296 | +136, fixed floor -424 | +12, floor -149 | |
+| W | +136, fixed floor -296 | +136, fixed floor -424 | +20, floor -149 | lower `Stonewall01` at 0.9 on grade, +397 |
 
-### What was retired
+Offsets are plan distances from the paving edge, positive outward, taken from his
+pieces. On the shallower east, south and west he set the outward wall at one level
+(`Z -5632`, crest at floor -121) and, on east and south, an inward piece 128 below it so
+nothing floats. On the west he used a third, lower field wall on grade instead. His west
+outward walls have no plinth and float 60 to 200 above ground in places; the generator
+gives the west the same plinth as east and south. That is the one place it adds to his
+layout rather than copying it, and it is flagged here.
 
-- The 0.75-scale `Stonewall01` course runs (`perimeterWall.enabled = false`).
-- Embankment wall rocks (`wallPerSegment = 0`) and the old corner stones; the band and
-  its knolls replace both.
-- The entrance bank rocks either side of the stairs (`rockSide = 0`, `earthSide = 0`);
-  the band, the cheeks and the two nearest knolls frame the entrance now, as in the
-  prototype.
-- Toe rocks and scrub moved out to 480 to 960 from the edge, in front of the lower wall
-  instead of inside the band.
+Rows are laid along offsets of the outline with even spacing and flush ends as before,
+**stop 96 short of every convex corner** (his rows end 78 to 167 short and the corner
+is finished by the bastion), and split either side of the stairs. The outward and
+inward rows run under the stair solid to the flank, as his do; the parapet runs to 20
+past the cheeks' outer face.
 
-### Shallow ground
+### Short step faces: one big field wall
 
-The site is shallowest along the east face, where native ground is 234 to 266 below the
-floor. There the lower wall is sunk so its crest stays 48 under the floor and the slope
-piece is lowered so its top meets the retaining face 48 under the floor; the band
-compresses to wall, near-flat grass, parapet. No piece is refused anywhere.
+The three one-tile faces that end at a re-entrant corner (row 0's west face, row 1's
+north face at column 1, row 5's east face) carry no rows in the reference. He walled
+them with one or two `Stonewall01` or `StonewallEndL01` scaled 2.2 to 2.7 so the crest
+reaches the floor. **Adopted** as a rule: a face of one tile touching a re-entrant corner
+gets one `Stonewall01` on grade, 24 out, scaled to `(drop + 8) / 175` (2.2 to 2.5 here).
 
-## The entrance, unchanged and approved
+### Corners: bastions of scaled wall-ends, no knolls
 
-Three `SkyrimFair_Stair_192` flights at scale 1.3 at `(-5888, -11648 / -11398 / -11149)`,
-`Z -5336 / -5482 / -5627`, eight steps each, box collision on the nosing line lifted one
-riser. Beside them the eighteen vanilla Stonewall-family cheek references at 0.6: seven
-`Stonewall01` blocks per side pitched +30.3 degrees with the stairs, a level block at
-each foot and a `StonewallEndL01` cap at each terrace landing, centrelines at
-`X -6022` and `-5754`. Two `SkyrimFair_EntranceRetainWing_144` close the structural face
-either side of the stair head. None of this moved.
+The reference has **no** `StonewallTerraceCorner01` and no corner boulders. Every
+convex corner is closed by `StonewallEndL01` scaled 2.2 to 3.2 so its crest is at floor
+level, forming an L that projects outward along both face lines (north-east,
+south-east, south-west), or a single wall where the other leg would have stood in front
+of a neighbouring face's band (north-west of the stairs: the north-running wall only;
+north-west of row 1: the west-running wall only; south-east of row 5: the south-running
+wall only). **Adopted** as a rule: at each convex corner, two `StonewallEndL01` on grade,
+16 inside their face line, starting 32 inside the corner and running outward `222 x
+scale`, scale `(drop + 8) / 171` clamped 1.5 to 3.3, finished end outward; a leg whose
+middle would lie within 560 of another edge's outward strip is not placed. That
+reproduces his nine corner walls exactly: 9 generated, 9 in the reference.
+
+### Entrance dressing, reproduced piece for piece
+
+Placed relative to the stair head (`entranceDressing`), so the relationships hold if the
+entrance ever moves. All positions equal the reference's to 0.1:
+
+- two `WHfirebrazier01` on the level cheek ends at the foot, with
+  `FXfireWithEmbersHeavy` fire above each;
+- four `Stonewall01` at 0.6 as low wing walls flanking the foot, with a
+  `StonewallEndL01` at 0.6 finishing each pair;
+- two `FarmBannerPost01` mid-flight, 318 either side of the centreline, with two
+  `MarkarthBanner01` on the west post and a `NightingaleBannerAnim02` on the east;
+- three `Stonewall01` (1.06, 1.06, 0.6) under the west cheeks so they do not float.
+
+`MarkarthBanner01` and `NightingaleBannerAnim02` are Barry's picks and are reproduced as
+placed; they are Reach-city and Nightingale banners, so they read as placeholders for
+fair banners that vanilla does not have.
+
+### Ignored as accidental or noise
+
+- Duplicate references at identical transforms (banner posts x4, several walls x2).
+- One `StonewallTerrace01` at `Z 0.0` (`000FCF`), 5,300 units in the air.
+- One `TreePineShrub01Snow`, a snow shrub in the tundra.
+- One `StonewallTerrace02` (the rubble-apron variant) among 68 `Terrace01`.
+- Scale rounding to two decimals and sub-unit position noise.
+- A vanilla `LvlAnimalPlainsPrey` actor (`0DC5B7`) marked deleted in the CK file. The
+  generator never touches vanilla actors; this stays out.
+- Three of the generator's old 0.75-scale course walls he kept; they belong to the
+  retired language.
+
+### Kept from the generator although absent or fewer in the reference
+
+- **Structural retaining bodies** (43) and both **entrance retaining wings**. He deleted
+  48 of 53 retaining bodies and both wings. They are structural: they close the hollow
+  under the floor slab and carry the edge collision. In this layout they are hidden
+  behind his walls except for a strip of at most 25 units under the parapet, so keeping
+  them changes nothing he saw and avoids a see-through gap.
+- **The cheek caps** at their generated position; his sit 87 further out and 27 higher.
+  The staircase is approved as generated.
+- The map marker, the test stall, toe rocks, verge wedges and scrub, which the
+  generator regenerates in equivalent positions.
+
+## How close the result is
+
+Nearest-piece match of the generated plugin against the reference, after removing his
+duplicates:
+
+| Group | Reference | Generated | Matched | Plan distance median / max |
+| --- | --- | --- | --- | --- |
+| `StonewallTerrace01` | 68 | 76 | 68 | 57 / 169 |
+| `Stonewall01` (parapets, cheeks, big walls, wings) | 90 | 75 | 87 | 30 / 155 |
+| `StonewallEndL01` (bastions, caps, foot ends) | 15 | 13 | 12 | 81 / 177 |
+| Stairs, braziers, fire, posts, banners | 12 | 12 | 12 | 0 / 0 |
+
+The extra generated terrace pieces are even spacing on runs where he left gaps; the
+unmatched walls are his short-face wall-ends where the generator uses one `Stonewall01`
+instead, and his three retired courses.
 
 ## What is on the site
 
 | Element | Count |
 | --- | --- |
-| Paving bodies / visual caps | 12 / 12 |
+| Paving bodies / visual caps | 11 / 11 (26 cells) |
 | Kit stair flights | 3 |
 | Cheek blocks, level ends, tapered caps, retaining wings | 18, 4, 2, 2 |
-| Structural retaining courses / corners | 53 / 3 |
-| Band: lower walls | 72 |
-| Band: grass slopes | 70 |
-| Band: parapet pieces | 67 |
-| Band: corner knolls / knoll boulders | 10 / 20 |
-| Toe rocks | 74 |
-| Rough-earth verge wedges | 29 |
-| Shrubs and scrub | 150 |
+| Structural retaining courses / corners | 43 / 1 |
+| Band: outward walls / inward pieces / parapets | 38 / 38 / 38 |
+| Band: west lower field walls | 11 |
+| Band: big walls on short faces / bastion wall-ends | 3 / 9 |
+| Entrance dressing | 18 |
+| Toe rocks / verge wedges / shrubs and scrub | 60 / 25 / 129 |
 | Cliff pieces | 0 |
-| **Vanilla references placed** | **481** |
-| Rejected as oversized | 15 |
-| Rejected for blocking the entrance | 9 |
-| Rejected for protruding through the market floor | 0 |
+| **Vanilla references placed** | **362** |
+| Rejected as oversized / for blocking the entrance / for the market floor | 17 / 10 / 0 |
 
 ## Verification performed
 
@@ -125,96 +182,39 @@ python tools/footprint_audit.py --data <stock Data> --profile "Still in Skyrim P
 - Release build: zero warnings, zero errors.
 - Generator run twice: identical SHA256.
 - `footprint_audit.py` against the full load order: 0 vanilla references proud of the
-  floor on the foundation.
-- Independent read of the written ESP: every vanilla-based placement checked against the
-  eroded market floor and the 208-wide walkable stair width. **One hit: the deliberate
-  `SMarketStall01` test stall.** The approved cheeks and the parapet, which straddle the
-  edge by design, are excluded from that test and noted as such.
-- Band geometry read back from the plugin: lower origins at +117, slopes at +111,
-  parapets at -15 from their edges; slope Z = lower Z + 115 everywhere; runs end flush at
-  offset vertices (checked at the re-entrant corner `(-5120, -14720)`); stair-side runs
-  end symmetrically (lower to the flank, slope and parapet 189 and 171 from the
-  centreline on both sides).
-- Plan-view renders of the whole site and of the north-east and east quadrants were
-  drawn from the plugin and inspected: band continuous on every edge, knolls at all ten
-  convex corners, no piece on the stairs.
+  floor on the foundation (33 intersect, all buried).
+- Independent read of the written ESP against the eroded market floor and the walkable
+  stair width: **one hit, the deliberate `SMarketStall01` test stall.** Cheeks, parapet
+  and the stair-foot dressing (which straddle those lines by design) are excluded and
+  noted.
+- Nearest-piece match against the reference as tabled above; stairs, braziers, fire,
+  banner posts and banners at the reference positions exactly.
 - **All six cell overrides byte-identical to vanilla.** WRLD deviation unchanged (RNAM
   dropped, FULL literal).
+- Plan view drawn from the plugin: bands on every long face of the 26-cell outline,
+  stairs at `X -5888`.
 - `modlist.txt`, `plugins.txt` and `loadorder.txt` untouched.
 
-`SKYRIMFAIR_TRACE=1` prints cheek, bank and band decisions (including any band piece
-refused for shallow ground) to stderr.
-
-## Approved embankment reference, from Barry's Creation Kit layout plugin
-
-`reference/SkyrimFair_CK_LAYOUT_REFERENCE.esp` (40,056 bytes, SHA256
-`6e74233a982809d617a1...`, saved 2026-09-22 15:21) is a hand-edited copy of the
-generated plugin. **It is a visual and layout reference only.** It is not authoritative
-and does not replace the generator-owned `SkyrimFair.esp`. It was read independently and
-diffed against the generated plugin of the time by reference FormID.
-
-### What the diff said
-
-- 21 added, 32 removed, 4 genuinely moved; ~290 other "changes" were the Creation Kit
-  rounding every scale to two decimals on save.
-- **The staircase was unchanged** and is approved.
-- **Cheek caps moved in the CK**: both upper `StonewallEndL01` caps at
-  `Y -11611.1, Z -5379.1`, rotation `95.73` degrees, against the generated
-  `Y -11698.6, Z -5406.6, 90` degrees. Recorded, not adopted.
-- **Removed in the CK**: the east entrance retaining wing, six structural `Retain512`
-  bodies and one `RetainCorner128` at the north-east corner, three perimeter courses and
-  a dozen embankment rocks, cleared for the hand-laid bank.
-- **Added**: one `SkyrimFairPaveCap512` at `(-4865, -11908)` filling the row-0 / col-5
-  notch; two `StonewallTerraceCorner01`; one `StonewallTerrace01` at `Z 0.0` (`000FCF`),
-  a CK accident, ignored.
-
-### The pattern, east of the stairs
-
-World Y increases outward on this edge; paving edge `Y -11648`, floor `Z -5336`, native
-ground about `Z -5777`. `StonewallTerrace01`: a 69-thick wall at local `Y -325..-256`
-with its face on local -Y and crest at 175, then a grass slope falling from 168 at the
-wall back to 96 at local `Y +256`. `StonewallTerraceCorner01`: walls on local -Y and +X
-meeting in a rounded corner at about local `(300, -300)`, grass falling toward local
-`(-X, +Y)`.
-
-| Layer | Base object | Scale | Rotation Z | Origin Z | Origin Y (offset from paving edge) | X positions |
-| --- | --- | --- | --- | --- | --- | --- |
-| Upper wall | `Stonewall01` `0000099B` | 0.98 | 180 (face outward) | -5489.0 (floor -153) | -11662.9 (-15) | -5622.2, -5521.1, -5272.6 |
-| Sloped grass | `StonewallTerrace01` `000009C6` | 1.0 | 0 (face inward, buried) | -5662.0 (ground +115) | -11536.8 (+111) | -5616.3, -5508.1, -5253.8, -5000.1 |
-| Lower wall | `StonewallTerrace01` `000009C6` | 1.0 | 180 (face outward) | -5777.0 (on ground) | -11531.1 (+117) | -5784.1, -5541.2, -5288.4 |
-| Corner knoll | `StonewallTerraceCorner01` `00000A74` | 1.0 | -90 (walls inward) | -5776 (on ground) | origin `(-4673, -11534)` | with `RockL05` 0.7 and `RockL04` 1.13 on the shoulder |
-
-Vertical relationship, foot to crest: ground `-5777` -> lower wall crest `-5602` (175)
--> 36 lip -> grass slope foot `-5566` rising to `-5514` at the retaining face -> upper
-parapet base `-5489` and crest `-5317.5`.
-
-Fit notes carried into the generator: the parapet is **not** sunk (sinking it 32 would
-put its crest under the floor and lose it); the 23 to 31 of retaining face showing under
-the parapet's outer edge is the prototype's own look and is kept. The lower row is
-allowed to run under the stair solid to the flank, as Barry's did.
+`SKYRIMFAIR_TRACE=1` prints cheek, bank and band decisions to stderr.
 
 ## Known and deliberately not done
 
-- **Timber fence** along the top edge and the road (`WRFenceStr01` on `WRFenceBaseStr01`).
-- **Braziers on plinths** at the stair foot; the cobbled spur from the road; bunting,
-  pavilion, signpost text.
-- Shrubs are still planted at grade beyond the lower wall, not on the grass slope.
-- The overrides now touch six cells instead of four because toe rocks and scrub sit
-  further out; all six copies are byte-identical to vanilla.
-- NGIO grass cache not regenerated. No navmesh.
+- No parapet on the three short step faces (he had two on one of them).
+- The rows stop a fixed 96 before corners; his stop 78 to 167.
+- Shrubs are still planted at grade beyond the walls, not on the grass.
+- Timber fence on the top edge, the cobbled spur from the road, bunting, pavilion,
+  signpost text: not started. NGIO grass cache not regenerated. No navmesh.
 - Untracked `music/` folder left out of git; provenance unknown.
 
 ## What Barry should test in game
 
-1. **Walk the whole perimeter at ground level.** Each edge should read as: lower
-   drystone wall, grass bank, knee-high parapet, the same width everywhere, and every
-   corner should turn as a rounded grass shoulder with two boulders on it.
-2. **Compare the generated north-east corner with your own.** Yours had the knoll further
-   out, with the walls' corner about 150 east and 190 south of the paving corner; the
-   generator puts the walls' corner 40 outside the paving corner on both axes so all ten
-   corners match. Say if you want it pushed out.
-3. **The east face** is the shallow side: the band compresses there. Does it still read
-   as terracing, or does it want the lower wall dropped where ground is high?
-4. **Look at the stairs from the road**: the band should meet the cheeks evenly on both
-   sides with no bank rocks between.
-5. Market floor still clean; stairs still climbable.
+1. **The whole perimeter**: each long side should read as your own build did - terrace
+   wall, grass, knee-high parapet - and every corner should be closed by the tall
+   wall-ends.
+2. **The west side** now has the grass plinth under the wall that the east and south
+   have. Say if you would rather it stayed as you left it.
+3. **The stair foot**: braziers lit on the cheek ends, wing walls and banners where you
+   put them.
+4. **The retaining bodies you deleted are back** behind the walls. If any earth face
+   shows where you had cleared it, tell me where.
+5. Market floor clean, stairs climbable, nothing hollow.

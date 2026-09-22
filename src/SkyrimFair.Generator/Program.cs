@@ -71,7 +71,10 @@ try
         Console.WriteLine($"  {foundation.TerraceMiddle,3} x terrace band: grass slope");
         Console.WriteLine($"  {foundation.TerraceParapet,3} x terrace band: parapet");
         Console.WriteLine($"  {foundation.TerraceKnolls,3} x terrace band: corner knoll");
-        Console.WriteLine($"  {foundation.TerraceKnollRocks,3} x terrace band: knoll boulder");
+        Console.WriteLine($"  {foundation.TerraceFieldWall,3} x terrace band: lower field wall");
+        Console.WriteLine($"  {foundation.TerraceShortWalls,3} x terrace band: big wall on a short step face");
+        Console.WriteLine($"  {foundation.TerraceBastionWalls,3} x terrace band: bastion wall-end");
+        Console.WriteLine($"  {foundation.EntranceDressingPieces,3} x entrance dressing (braziers, banners, wing walls)");
         Console.WriteLine($"  {foundation.BandSkipped,3} x terrace band: piece refused, ground too near the floor");
         Console.WriteLine($"  {foundation.CheekEndWalls,3} x level cheek termination at top / bottom");
         Console.WriteLine($"  {foundation.CheekTopCaps,3} x tapered masonry cap at the terrace landing");

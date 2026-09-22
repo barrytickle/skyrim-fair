@@ -1314,25 +1314,27 @@ internal static class FairFoundation
         }
 
         // ---- terrace band -----------------------------------------------------
-        // Barry's approved embankment, measured from his Creation Kit layout beside
-        // the stairs (docs/AUDIT.md, "Approved embankment reference") and carried round
-        // the whole outline. Three layers sharing one plan line:
+        // Barry's completed Creation Kit layout (reference/SkyrimFair.esp, 2026-09-22
+        // evening) is the design source of truth for the perimeter. Read from it:
         //
-        //   lower   StonewallTerrace01 on native ground, wall face outward, 442 out
-        //           from the paving edge: the 175-tall lower wall
-        //   middle  the same piece turned to face the terrace and lifted 115: its wall
-        //           is buried inside the body, only its grass slope shows, rising
-        //           from the lower crest to the retaining face
-        //   upper   Stonewall01 at 0.98 straddling the paving edge, crest a knee above
-        //           the floor: the parapet
+        //   * every long face gets an OUTWARD terrace wall (StonewallTerrace01) and an
+        //     INWARD one behind it whose wall is buried and whose grass shows. On the
+        //     deep north side the outward wall stands on the ground and the inward piece
+        //     sits 115 above it, so its grass climbs from the lower crest to the
+        //     retaining face (the prototype). On the shallower east, south and west the
+        //     outward wall sits at a fixed level, floor - 296, and the inward piece sits
+        //     below it at floor - 424 as a grass plinth so nothing floats;
+        //   * a knee-high Stonewall01 parapet at 0.98 straddles the paving edge;
+        //   * the west face has a third, lower field wall on grade in front of the band;
+        //   * SHORT step faces (one tile, ending at a re-entrant corner) get one big
+        //     Stonewall01 scaled to the full drop instead of the rows;
+        //   * every convex corner is closed by an L of two StonewallEndL01 scaled to
+        //     the full drop - a bastion - and the rows stop short of the corner.
         //
-        // Each layer is laid along an OFFSET of the paved outline, so the band keeps
-        // the same width round every corner, and pieces on each run are spaced evenly
-        // at or just under piece length so nothing gaps. At convex corners the lower
-        // wall dies into a grass knoll - the vanilla terrace corner piece turned so its
-        // walls face the terrace and its rounded grass shoulder faces out, with two
-        // boulders set on it - which is exactly how Barry finished his north-east
-        // corner. At re-entrant corners the two runs simply meet.
+        // Offsets, heights and scales are Barry's numbers per compass edge
+        // (Dressing.TerraceBand.Edges). Each layer is laid along an offset of the paved
+        // outline with pieces spaced evenly and ends flush, so the band keeps one width
+        // on every edge and every corner is finished the same way.
         if (d.TerraceBand.Enabled)
         {
             TerraceBand();
@@ -1342,12 +1344,10 @@ internal static class FairFoundation
         {
             var tb = d.TerraceBand;
             var straight = boundsOf(FormKeyHelper.Parse(tb.Piece));
-            var corner = boundsOf(FormKeyHelper.Parse(tb.CornerPiece));
-            var bandRng = new Random(d.Seed + 4441);
+            var endPiece = boundsOf(FormKeyHelper.Parse(tb.EndPiece));
+            var fieldWall = boundsOf(FormKeyHelper.Parse(tb.ParapetPiece));
 
             // ---- outline polygon, counter-clockwise, collinear edges merged ----
-            // Each unpaved-neighbour side of a paved cell is a directed edge with the
-            // interior on its left; chaining them gives the outline.
             var half = tile / 2f;
             var edges = new Dictionary<(int, int), ((int, int) End, int Tx, int Ty)>();
             foreach (var (col, row) in paved)
@@ -1392,8 +1392,6 @@ internal static class FairFoundation
             }
             while (key != startKey && guard < 4096);
 
-            // The first vertex may sit mid-run if the start edge continued a direction;
-            // drop it when it is collinear with its neighbours.
             if (verts.Count > 2)
             {
                 var a = verts[^1]; var b = verts[0]; var c2 = verts[1];
@@ -1412,22 +1410,40 @@ internal static class FairFoundation
                 return (dx / len, dy / len);
             }
 
-            (float X, float Y) Normal(int i)      // outward: right of travel
+            (float X, float Y) Normal(int i)
             {
                 var t = Tangent(i);
                 return (t.Y, -t.X);
             }
 
-            bool Convex(int i)                    // left turn between edge i-1 and i
+            float EdgeLength(int i)
+            {
+                var a = verts[i]; var b = verts[(i + 1) % n];
+                return MathF.Abs(b.X - a.X) + MathF.Abs(b.Y - a.Y);
+            }
+
+            bool Convex(int i)
             {
                 var a = Tangent((i - 1 + n) % n); var b = Tangent(i);
                 return a.X * b.Y - a.Y * b.X > 0f;
             }
 
-            float RotFacing((float X, float Y) dir)   // piece local -Y ends up pointing along dir
-                => MathF.Atan2(dir.Y, dir.X) + MathF.PI / 2f;
+            string EdgeName(int i)
+            {
+                var nn = Normal(i);
+                return MathF.Abs(nn.Y) > 0.5f ? (nn.Y > 0 ? "N" : "S") : (nn.X > 0 ? "E" : "W");
+            }
 
-            // Where the stairs cut the band, on the entrance edge only.
+            BandEdgeConfig EdgeCfg(int i)
+                => tb.Edges.TryGetValue(EdgeName(i), out var cfg) ? cfg : new BandEdgeConfig();
+
+            // A short face: one tile long and touching a re-entrant corner. Barry walls
+            // these with one big field wall rather than the rows.
+            bool ShortFace(int i)
+                => EdgeLength(i) <= tb.ShortFaceMax && (!Convex(i) || !Convex((i + 1) % n));
+
+            float RotFacing((float X, float Y) dir) => MathF.Atan2(dir.Y, dir.X) + MathF.PI / 2f;
+
             var stairTile = rampTiles.Count > 0 ? rampTiles[0] : default;
             var haveStairs = rampTiles.Count > 0 && f.Entrance.UseStairs;
             var stairNormal = (X: (float)stairTile.Dc, Y: (float)-stairTile.Dr);
@@ -1435,47 +1451,57 @@ internal static class FairFoundation
             var cheekOuter = stairHalf + (cheekDepth > 0f ? d.EntranceCheeks.Gap + cheekDepth : 0f);
 
             // ---- one layer along one offset of the outline ----
-            void LayRow(float originOffset, float faceOffset, bool faceOutward, string piece,
-                float pieceLen, float scale, Func<float, float, float?> zAt, float clearAtStairs,
+            // originOffset: plan offset of the piece origin from the paving edge.
+            // pieceLen: along-edge length. zAt: origin Z from the world position of the
+            // piece's wall face. endInset: how far before each corner the run stops
+            // (negative continues past it). clearAtStairs: clearance kept from the
+            // stair centreline on the entrance edge.
+            void LayRow(Func<int, float> originOffset, Func<int, float> faceOffset, bool faceOutward,
+                string piece, float pieceLen, float scale, Func<int, float, float, float?> zAt,
+                float endInset, float clearAtStairs, Func<int, bool> onEdge,
                 Action<float, float, float, float, float> place)
             {
                 for (var i = 0; i < n; i++)
                 {
-                    var t = Tangent(i);
-                    var nn = Normal(i);
-                    var np = Normal((i - 1 + n) % n);
-                    var nx = Normal((i + 1) % n);
-
-                    // Offset vertices: each is the paving vertex pushed out along both
-                    // of its edges' normals. That is exact for a rectilinear outline
-                    // and works the same at convex and re-entrant corners.
-                    var a = verts[i]; var b = verts[(i + 1) % n];
-                    var ax = a.X + (np.X + nn.X) * originOffset; var ay = a.Y + (np.Y + nn.Y) * originOffset;
-                    var bx = b.X + (nn.X + nx.X) * originOffset; var by = b.Y + (nn.Y + nx.Y) * originOffset;
-
-                    // Runs continue a little past convex corners so their ends are
-                    // swallowed by the knoll; at re-entrant corners the runs just meet.
-                    var s0 = Convex(i) ? -tb.ConvexExtend : 0f;
-                    var s1 = ((bx - ax) * t.X + (by - ay) * t.Y) + (Convex((i + 1) % n) ? tb.ConvexExtend : 0f);
-                    var length = s1 - s0;
-                    if (length < pieceLen * 0.5f)
+                    if (!onEdge(i))
                     {
                         continue;
                     }
 
-                    // On the entrance edge the run is split either side of the stairs,
-                    // and each part is spaced on its own, so both parts finish exactly
-                    // at the clearance and the band meets the steps evenly.
+                    var t = Tangent(i);
+                    var nn = Normal(i);
+                    var np = Normal((i - 1 + n) % n);
+                    var nx = Normal((i + 1) % n);
+                    var off = originOffset(i);
+
+                    var a = verts[i]; var b = verts[(i + 1) % n];
+                    var ax = a.X + (np.X + nn.X) * off; var ay = a.Y + (np.Y + nn.Y) * off;
+                    var bx = b.X + (nn.X + nx.X) * off; var by = b.Y + (nn.Y + nx.Y) * off;
+
+                    // Runs stop endInset short of a convex corner (the bastion finishes
+                    // it) and meet exactly at a re-entrant one.
+                    var s0 = Convex(i) ? endInset + off : 0f;
+                    var s1 = ((bx - ax) * t.X + (by - ay) * t.Y) - (Convex((i + 1) % n) ? endInset + off : 0f);
+                    if (s1 - s0 < pieceLen * 0.5f)
+                    {
+                        continue;
+                    }
+
                     var parts = new List<(float A, float B)>();
                     var onStairEdge = haveStairs
                         && MathF.Abs(nn.X - stairNormal.X) < 0.01f && MathF.Abs(nn.Y - stairNormal.Y) < 0.01f;
                     if (onStairEdge)
                     {
                         var sc = (stairCentre.X - ax) * t.X + (stairCentre.Y - ay) * t.Y;
-                        if (sc - clearAtStairs > s0 + pieceLen * 0.5f) { parts.Add((s0, MathF.Min(s1, sc - clearAtStairs))); }
-                        if (sc + clearAtStairs < s1 - pieceLen * 0.5f) { parts.Add((MathF.Max(s0, sc + clearAtStairs), s1)); }
-                        if (sc - clearAtStairs <= s0 && sc + clearAtStairs >= s1) { parts.Clear(); }
-                        if (!(sc + clearAtStairs > s0 && sc - clearAtStairs < s1)) { parts.Clear(); parts.Add((s0, s1)); }
+                        if (sc + clearAtStairs > s0 && sc - clearAtStairs < s1)
+                        {
+                            if (sc - clearAtStairs > s0 + pieceLen * 0.5f) { parts.Add((s0, sc - clearAtStairs)); }
+                            if (sc + clearAtStairs < s1 - pieceLen * 0.5f) { parts.Add((sc + clearAtStairs, s1)); }
+                        }
+                        else
+                        {
+                            parts.Add((s0, s1));
+                        }
                     }
                     else
                     {
@@ -1490,9 +1516,6 @@ internal static class FairFoundation
                             continue;
                         }
 
-                        // Ends flush with the run: the first and last pieces sit exactly
-                        // at the run's ends and the rest are spread evenly between,
-                        // overlapping a little rather than overshooting a corner.
                         var count = Math.Max(1, (int)MathF.Ceiling(partLen / pieceLen));
                         var spacing = count > 1 ? (partLen - pieceLen) / (count - 1) : 0f;
                         for (var k = 0; k < count; k++)
@@ -1500,14 +1523,12 @@ internal static class FairFoundation
                             var sAlong = count > 1 ? pa + pieceLen / 2f + k * spacing : (pa + pb) / 2f;
                             var px = ax + t.X * sAlong;
                             var py = ay + t.Y * sAlong;
-
-                            // Ground is read where the wall FACE stands, not at the origin.
-                            var fx = px + nn.X * (faceOffset - originOffset);
-                            var fy = py + nn.Y * (faceOffset - originOffset);
-                            var z = zAt(fx, fy);
+                            var fx = px + nn.X * (faceOffset(i) - off);
+                            var fy = py + nn.Y * (faceOffset(i) - off);
+                            var z = zAt(i, fx, fy);
                             if (!z.HasValue)
                             {
-                                if (trace) Console.Error.WriteLine($"band SKIP {piece} at ({px:F0},{py:F0}) face ({fx:F0},{fy:F0}) ground {sampleTerrain(fx, fy):F0}");
+                                if (trace) Console.Error.WriteLine($"band SKIP {piece} at ({px:F0},{py:F0}) ground {sampleTerrain(fx, fy):F0}");
                                 result.BandSkipped++;
                                 continue;
                             }
@@ -1519,46 +1540,86 @@ internal static class FairFoundation
                 }
             }
 
-            var lowerH = straight.Height > 1f ? straight.Height : 175f;
+            var wallH = straight.Height > 1f ? straight.Height : 175f;
+            bool LongFace(int i) => !ShortFace(i);
 
-            // Lower wall: on grade, crest kept below the floor.
-            float? LowerZ(float fx, float fy)
+            // Outward terrace wall: on grade (north) or at a fixed level (elsewhere).
+            float? OuterZ(int i, float fx, float fy)
             {
+                var cfg = EdgeCfg(i);
                 var g = sampleTerrain(fx, fy);
                 if (!g.HasValue) { return null; }
-                var z = g.Value - tb.LowerSink;
-                if (g.Value > f.FloorZ - tb.MinDropForLower) { return null; }
-                return MathF.Min(z, f.FloorZ - tb.CrestClear - lowerH);
+                var z = cfg.OuterOnGround ? g.Value - tb.LowerSink : f.FloorZ - cfg.OuterDrop;
+                return MathF.Min(z, f.FloorZ - tb.CrestClear - wallH);
             }
 
-            // Grass slope: the lower piece turned round and lifted, so its slope foot
-            // lands a hand above the lower crest and its top meets the retaining face.
-            float? MiddleZ(float fx, float fy)
+            // Inward piece: lifted above the outward wall (north) or a plinth below it.
+            float? FillerZ(int i, float fx, float fy)
+            {
+                var cfg = EdgeCfg(i);
+                if (!cfg.Filler) { return null; }
+                if (cfg.FillerLift.HasValue)
+                {
+                    var oz = OuterZ(i, fx, fy);
+                    if (!oz.HasValue) { return null; }
+                    return MathF.Min(oz.Value + cfg.FillerLift.Value, f.FloorZ - tb.CrestClear - tb.MiddleTopAtFace);
+                }
+
+                return f.FloorZ - cfg.FillerDrop;
+            }
+
+            float? ParapetZ(int i, float fx, float fy) => f.FloorZ - EdgeCfg(i).ParapetDrop;
+
+            float? FieldWallZ(int i, float fx, float fy)
             {
                 var g = sampleTerrain(fx, fy);
-                if (!g.HasValue) { return null; }
-                if (g.Value > f.FloorZ - tb.MinDropForMiddle) { return null; }
-                return MathF.Min(g.Value - tb.LowerSink + tb.MiddleLift, f.FloorZ - tb.CrestClear - tb.MiddleTopAtFace);
+                return g.HasValue ? g.Value - tb.LowerSink : null;
             }
 
-            float? ParapetZ(float fx, float fy) => f.FloorZ - tb.ParapetDrop;
-
-            LayRow(tb.LowerOriginOffset, tb.LowerFaceOffset, true, tb.Piece, tb.PieceLength, 1f, LowerZ,
-                stairHalf,
+            LayRow(i => EdgeCfg(i).OuterOffset, i => EdgeCfg(i).OuterOffset + 325f, true, tb.Piece,
+                tb.PieceLength, 1f, OuterZ, tb.CornerStop, stairHalf, LongFace,
                 (x, y, z, rot, sc) => { PutVanilla(tb.Piece, x, y, z, rot, sc); result.TerraceLower++; });
-            LayRow(tb.MiddleOriginOffset, tb.LowerFaceOffset, false, tb.Piece, tb.PieceLength, 1f, MiddleZ,
-                cheekOuter + tb.StairClearance,
+            LayRow(i => EdgeCfg(i).FillerOffset, i => EdgeCfg(i).OuterOffset + 325f, false, tb.Piece,
+                tb.PieceLength, 1f, FillerZ, tb.CornerStop, stairHalf, i => LongFace(i) && EdgeCfg(i).Filler,
                 (x, y, z, rot, sc) => { PutVanilla(tb.Piece, x, y, z, rot, sc); result.TerraceMiddle++; });
-            LayRow(tb.ParapetOriginOffset, tb.ParapetOriginOffset, true, tb.ParapetPiece,
-                tb.ParapetLength * tb.ParapetScale, tb.ParapetScale, ParapetZ,
-                cheekOuter + tb.StairClearance,
+            LayRow(i => EdgeCfg(i).ParapetOffset, i => EdgeCfg(i).ParapetOffset, true, tb.ParapetPiece,
+                tb.ParapetLength * tb.ParapetScale, tb.ParapetScale, ParapetZ, tb.CornerStop,
+                cheekOuter - tb.ParapetStairOverlap, i => LongFace(i) && EdgeCfg(i).Parapet,
                 (x, y, z, rot, sc) => { PutVanilla(tb.ParapetPiece, x, y, z, rot, sc); result.TerraceParapet++; });
+            LayRow(i => EdgeCfg(i).FieldWallOffset, i => EdgeCfg(i).FieldWallOffset, true, tb.ParapetPiece,
+                tb.ParapetLength * tb.FieldWallScale, tb.FieldWallScale, FieldWallZ, tb.CornerStop, stairHalf,
+                i => LongFace(i) && EdgeCfg(i).FieldWall,
+                (x, y, z, rot, sc) => { PutVanilla(tb.ParapetPiece, x, y, z, rot, sc); result.TerraceFieldWall++; });
 
-            // ---- knolls at convex corners ----
-            // The corner piece has its two walls on local -Y and local +X, meeting in a
-            // rounded corner at local (300, -300), and its grass falling away toward
-            // local (-X, +Y). Turned so the walls face the terrace, that grass becomes
-            // a rounded shoulder wrapping the corner, which the straight runs die into.
+            // ---- short step faces: one big field wall scaled to the drop ----
+            for (var i = 0; i < n; i++)
+            {
+                if (!ShortFace(i))
+                {
+                    continue;
+                }
+
+                var nn = Normal(i);
+                var a = verts[i]; var b = verts[(i + 1) % n];
+                var mx = (a.X + b.X) / 2f + nn.X * tb.ShortFaceOffset;
+                var my = (a.Y + b.Y) / 2f + nn.Y * tb.ShortFaceOffset;
+                var g = sampleTerrain(mx, my);
+                if (!g.HasValue)
+                {
+                    continue;
+                }
+
+                var drop = f.FloorZ - g.Value;
+                var scale = Math.Clamp((drop + tb.BigWallOvershoot) / (fieldWall.Height > 1f ? fieldWall.Height : 175f),
+                    tb.BigWallMinScale, tb.BigWallMaxScale);
+                PutVanilla(tb.ParapetPiece, mx, my, g.Value - tb.LowerSink, RotFacing(nn), scale);
+                result.TerraceShortWalls++;
+            }
+
+            // ---- bastions at convex corners ----
+            // Two wall-ends, each along one face line, projecting outward along the other
+            // edge from just inside the corner, scaled so their crest reaches the floor.
+            // The finished end of the piece (local -X) is the free outer end.
             for (var i = 0; i < n; i++)
             {
                 if (!Convex(i))
@@ -1569,65 +1630,92 @@ internal static class FairFoundation
                 var v = verts[i];
                 var np = Normal((i - 1 + n) % n);
                 var nn = Normal(i);
-
-                // Rotation: local +X (leg B's face) points against the incoming edge's
-                // normal, local -Y (leg A's face) against the outgoing edge's normal.
-                var rot = MathF.Atan2(-nn.Y, -nn.X);
-                var cosR = MathF.Cos(rot); var sinR = MathF.Sin(rot);
-                (float X, float Y) World(float lx, float ly)
-                    => (v.X + (np.X + nn.X) * tb.KnollWallInset + cosR * lx - sinR * ly,
-                        v.Y + (np.Y + nn.Y) * tb.KnollWallInset + sinR * lx + cosR * ly);
-
-                // Origin so that the walls' corner lands KnollWallInset outside the
-                // paving corner on both axes.
-                var origin = World(-tb.CornerWallX, tb.CornerWallY);
-                var g = sampleTerrain(origin.X, origin.Y);
-                if (!g.HasValue || g.Value > f.FloorZ - tb.MinDropForLower)
+                var g = sampleTerrain(v.X + (np.X + nn.X) * 64f, v.Y + (np.Y + nn.Y) * 64f);
+                if (!g.HasValue)
                 {
                     continue;
                 }
 
-                if (haveStairs && MathF.Abs(origin.X - stairCentre.X) < cheekOuter + 512f
-                    && MathF.Abs(origin.Y - stairCentre.Y) < 512f)
+                if (haveStairs && MathF.Abs(v.X - stairCentre.X) < cheekOuter + tb.PieceLength
+                    && MathF.Abs(v.Y - stairCentre.Y) < tb.PieceLength)
                 {
                     continue;
                 }
 
-                var kz = MathF.Min(g.Value - tb.LowerSink, f.FloorZ - tb.CrestClear - (corner.Height > 1f ? corner.Height : 175f));
-                PutVanilla(tb.CornerPiece, origin.X, origin.Y, kz, rot, 1f);
-                result.TerraceKnolls++;
+                var drop = f.FloorZ - g.Value;
+                var scale = Math.Clamp((drop + tb.BigWallOvershoot) / (endPiece.Height > 1f ? endPiece.Height : 171f),
+                    tb.BigWallMinScale, tb.BigWallMaxScale);
+                var z = g.Value - tb.LowerSink;
 
-                // Two closed boulders on the shoulder, off-centre, different sizes.
-                // Positions are relative to the walls' corner, on the grass side.
-                var picks = new[] { (lx: -200f, ly: 120f, sc: 1.0f), (lx: -60f, ly: 330f, sc: 0.7f) };
-                foreach (var pk in picks)
+                // (faceNormal, runDir): the wall lies on the face line of the edge whose
+                // normal is faceNormal, inset a little inside it, and runs outward along
+                // runDir from BastionStart inside the corner.
+                foreach (var (fn, run) in new[] { (np, nn), (nn, np) })
                 {
-                    var pick = tb.KnollRocks[bandRng.Next(tb.KnollRocks.Count)];
-                    var rb = boundsOf(FormKeyHelper.Parse(pick));
-                    if (rb.Height <= 1f) { continue; }
-                    var pos = World(pk.lx + (float)(bandRng.NextDouble() - 0.5) * 60f,
-                                    pk.ly + (float)(bandRng.NextDouble() - 0.5) * 60f);
-                    var rg = sampleTerrain(pos.X, pos.Y) ?? g.Value;
-                    var scale = Math.Clamp(pk.sc * (0.9f + (float)bandRng.NextDouble() * 0.2f), 0.6f, 1.15f);
+                    var startX = v.X - fn.X * tb.BastionInset - run.X * tb.BastionStart;
+                    var startY = v.Y - fn.Y * tb.BastionInset - run.Y * tb.BastionStart;
 
-                    // Bedded into grade, but the grass shoulder is up to 168 above
-                    // grade here, so lift until the crown clears it by a margin.
-                    var rz = rg - tb.RockBury - rb.ZMin * scale;
-                    var shoulder = kz + 150f;
-                    if (rz + rb.ZMax * scale < shoulder + tb.RockShow)
+                    // A leg that would stand in front of ANOTHER face's band is left
+                    // out, as Barry left it out: beside a step the L collapses to the
+                    // single wall that projects into open ground. "In front of" means
+                    // the leg's middle lies in the strip BastionLegClear deep outside
+                    // some edge other than the two meeting at this corner.
+                    var midX = startX + run.X * (tb.EndPieceLength * scale / 2f);
+                    var midY = startY + run.Y * (tb.EndPieceLength * scale / 2f);
+                    var crowded = false;
+                    for (var j = 0; j < n && !crowded; j++)
                     {
-                        rz = shoulder + tb.RockShow - rb.ZMax * scale;
+                        if (j == i || j == (i - 1 + n) % n)
+                        {
+                            continue;
+                        }
+
+                        var ea = verts[j]; var eb = verts[(j + 1) % n];
+                        var et = Tangent(j); var en = Normal(j);
+                        var along = (midX - ea.X) * et.X + (midY - ea.Y) * et.Y;
+                        var outward = (midX - ea.X) * en.X + (midY - ea.Y) * en.Y;
+                        var len = EdgeLength(j);
+                        crowded = along >= 0f && along <= len && outward >= 0f && outward <= tb.BastionLegClear;
+                        _ = eb;
                     }
 
-                    if (!ClearsMarketFloor(pos.X, pos.Y, rb.Radius * scale, rz + rb.ZMax * scale))
+                    if (crowded)
                     {
-                        result.PavingGuardSkipped++;
                         continue;
                     }
 
-                    PutVanilla(pick, pos.X, pos.Y, rz, Spin(), scale);
-                    result.TerraceKnollRocks++;
+                    // piece local X spans -94..128 at scale 1; local +X points back
+                    // toward the corner, so the -94 (finished) end is the free end
+                    var dir = (-run.X, -run.Y);
+                    var rot = MathF.Atan2(dir.Item2, dir.Item1);
+                    // origin such that local +128 end sits at the start (corner side)
+                    var ox = startX + run.X * (tb.EndPieceFar * scale);
+                    var oy = startY + run.Y * (tb.EndPieceFar * scale);
+                    PutVanilla(tb.EndPiece, ox, oy, z, rot, scale);
+                    result.TerraceBastionWalls++;
                 }
+            }
+        }
+
+        // ---- entrance dressing -------------------------------------------------
+        // Barry's hand-placed objects around the stairs, reproduced relative to the
+        // stair head (centreline X, top tread Y, floor Z): braziers with fire on the
+        // level cheek ends at the foot, low wing walls flanking the foot, banner posts
+        // and banners mid-flight, and the field walls he set under the west cheeks so
+        // they do not float. Positions are the reference's, so the relationships hold.
+        if (f.Entrance.UseStairs && rampTiles.Count > 0 && d.EntranceDressing.Count > 0)
+        {
+            var head = rampTiles.OrderByDescending(t => t.Z).First();
+            var outwardX = (float)head.Dc; var outwardY = (float)-head.Dr;
+            var rightX = outwardY; var rightY = -outwardX;     // right-hand side looking out
+            var baseRot = MathF.Atan2(outwardY, outwardX) - MathF.PI / 2f;  // 0 for north
+            foreach (var item in d.EntranceDressing)
+            {
+                var px = head.X + rightX * item.Dx + outwardX * item.Dy;
+                var py = head.Y + rightY * item.Dx + outwardY * item.Dy;
+                var pz = f.FloorZ + item.Dz;
+                PutVanilla(item.Base, px, py, pz, baseRot + item.RotDeg * MathF.PI / 180f, item.Scale);
+                result.EntranceDressingPieces++;
             }
         }
 
@@ -1842,10 +1930,16 @@ internal static class FairFoundation
             .First();
 
         var width = Math.Min(f.RampWidth, pick.Count);
-        var start = f.RampAlign.ToLowerInvariant() switch
+        var align = f.RampAlign.ToLowerInvariant();
+        var start = align switch
         {
             "start" => 0,
             "end" => pick.Count - width,
+            // "offset:N" pins the entrance N tiles from the run's start. Needed once the
+            // north row became four tiles wide: "centre" would have moved the approved
+            // staircase one tile east.
+            _ when align.StartsWith("offset:", StringComparison.Ordinal)
+                => Math.Clamp(int.Parse(align[7..]), 0, pick.Count - width),
             _ => Math.Max(0, pick.Count / 2 - width / 2),
         };
         for (var i = start; i < start + width; i++)
@@ -1904,6 +1998,14 @@ internal sealed class FoundationResult
     public int TerraceKnolls { get; set; }
 
     public int TerraceKnollRocks { get; set; }
+
+    public int TerraceFieldWall { get; set; }
+
+    public int TerraceShortWalls { get; set; }
+
+    public int TerraceBastionWalls { get; set; }
+
+    public int EntranceDressingPieces { get; set; }
 
     /// <summary>Band pieces refused because the ground there is too close to the floor.</summary>
     public int BandSkipped { get; set; }

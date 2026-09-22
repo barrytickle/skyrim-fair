@@ -463,6 +463,8 @@ internal sealed record DressingConfig
 
     public TerraceBandConfig TerraceBand { get; init; } = new();
 
+    public IReadOnlyList<EntranceDressingItem> EntranceDressing { get; init; } = new List<EntranceDressingItem>();
+
     /// <summary>
     /// Toe rocks: low piles laid at native ground where the embankment meets grass.
     /// Deliberately small and medium piles only - the big RockTundraLand landscape
@@ -868,9 +870,8 @@ internal sealed record EntranceCheekConfig
 }
 
 /// <summary>
-/// Barry's approved three-layer embankment, measured from his Creation Kit layout
-/// beside the stairs and carried round the outline. Offsets are plan distances from the
-/// paving edge, positive outward.
+/// Barry's completed Creation Kit perimeter, reproduced per compass edge. Offsets are
+/// plan distances from the paving edge, positive outward. Drops are below the floor.
 /// </summary>
 internal sealed record TerraceBandConfig
 {
@@ -881,73 +882,111 @@ internal sealed record TerraceBandConfig
 
     public float PieceLength { get; init; } = 256f;
 
-    /// <summary>StonewallTerraceCorner01: walls on local -Y and +X meeting in a rounded corner.</summary>
-    public string CornerPiece { get; init; } = "00000A74:Skyrim.esm";
-
-    /// <summary>Stonewall01 for the parapet.</summary>
+    /// <summary>Stonewall01: parapet at 0.98, west field wall at 0.9, short-face walls and (scaled) nothing else.</summary>
     public string ParapetPiece { get; init; } = "0000099B:Skyrim.esm";
 
     public float ParapetLength { get; init; } = 256f;
 
     public float ParapetScale { get; init; } = 0.98f;
 
-    /// <summary>Lower wall origin, 117 out: puts its face at LowerFaceOffset.</summary>
-    public float LowerOriginOffset { get; init; } = 117f;
+    public float FieldWallScale { get; init; } = 0.9f;
 
-    public float LowerFaceOffset { get; init; } = 442f;
+    /// <summary>StonewallEndL01, the bastion wall-end: local X -94..128, 171 tall.</summary>
+    public string EndPiece { get; init; } = "0000099E:Skyrim.esm";
 
-    /// <summary>Grass-slope piece origin, 111 out, turned to face the terrace.</summary>
-    public float MiddleOriginOffset { get; init; } = 111f;
+    public float EndPieceLength { get; init; } = 222f;
 
-    /// <summary>Grass-slope piece sits this much above the lower piece.</summary>
-    public float MiddleLift { get; init; } = 115f;
+    /// <summary>Distance from the piece origin to its +X (unfinished) end at scale 1.</summary>
+    public float EndPieceFar { get; init; } = 128f;
 
-    /// <summary>Height of the slope where it meets the retaining face, above the middle origin.</summary>
+    public Dictionary<string, BandEdgeConfig> Edges { get; init; } = new()
+    {
+        ["N"] = new() { OuterOffset = 117f, OuterOnGround = true, Filler = true, FillerOffset = 111f, FillerLift = 115f, ParapetOffset = -15f, ParapetDrop = 153f },
+        ["E"] = new() { OuterOffset = 64f, OuterOnGround = false, OuterDrop = 296f, Filler = true, FillerOffset = 64f, FillerDrop = 424f, ParapetOffset = 24f, ParapetDrop = 149f },
+        ["S"] = new() { OuterOffset = 98f, OuterOnGround = false, OuterDrop = 296f, Filler = true, FillerOffset = 136f, FillerDrop = 424f, ParapetOffset = 12f, ParapetDrop = 149f },
+        ["W"] = new() { OuterOffset = 136f, OuterOnGround = false, OuterDrop = 296f, Filler = true, FillerOffset = 136f, FillerDrop = 424f, ParapetOffset = 20f, ParapetDrop = 149f, FieldWall = true, FieldWallOffset = 397f },
+    };
+
+    /// <summary>Slope top height above the inward piece's origin where it meets the retaining face.</summary>
     public float MiddleTopAtFace { get; init; } = 148f;
 
-    /// <summary>Parapet origin, 15 inside the paving edge.</summary>
-    public float ParapetOriginOffset { get; init; } = -15f;
-
-    /// <summary>Parapet origin below the floor; with Stonewall01 at 0.98 the crest is 18.5 above it.</summary>
-    public float ParapetDrop { get; init; } = 153f;
-
-    /// <summary>Footing buried this far into grade.</summary>
     public float LowerSink { get; init; } = 6f;
 
-    /// <summary>No wall crest closer than this to the floor plane.</summary>
-    public float CrestClear { get; init; } = 60f;
+    /// <summary>No terrace crest closer than this to the floor plane.</summary>
+    public float CrestClear { get; init; } = 48f;
 
-    public float MinDropForLower { get; init; } = 240f;
+    /// <summary>Rows stop this far before a convex corner; the bastion finishes it.</summary>
+    public float CornerStop { get; init; } = 96f;
 
-    public float MinDropForMiddle { get; init; } = 300f;
+    /// <summary>The parapet runs this far past the cheek's outer face toward the steps.</summary>
+    public float ParapetStairOverlap { get; init; } = 20f;
 
-    /// <summary>Runs continue this far past a convex corner, into the knoll.</summary>
-    public float ConvexExtend { get; init; } = 64f;
+    /// <summary>A face this long or shorter, touching a re-entrant corner, gets one big wall.</summary>
+    public float ShortFaceMax { get; init; } = 512f;
 
-    /// <summary>Clearance kept between the middle and parapet runs and the cheek outer face.</summary>
-    public float StairClearance { get; init; } = 16f;
+    public float ShortFaceOffset { get; init; } = 24f;
 
-    /// <summary>Knoll walls' corner sits this far outside the paving corner on both axes.</summary>
-    public float KnollWallInset { get; init; } = 40f;
+    /// <summary>Big walls and bastions are scaled so their crest clears the floor by this.</summary>
+    public float BigWallOvershoot { get; init; } = 8f;
 
-    /// <summary>Local plan position of the corner piece's wall corner.</summary>
-    public float CornerWallX { get; init; } = 300f;
+    public float BigWallMinScale { get; init; } = 1.5f;
 
-    public float CornerWallY { get; init; } = 300f;
+    public float BigWallMaxScale { get; init; } = 3.3f;
 
-    public float RockBury { get; init; } = 24f;
+    /// <summary>Bastion walls sit this far inside their face line.</summary>
+    public float BastionInset { get; init; } = 16f;
 
-    /// <summary>A knoll boulder's crown clears the grass shoulder by at least this.</summary>
-    public float RockShow { get; init; } = 60f;
+    /// <summary>Bastion walls start this far inside the corner along the other edge.</summary>
+    public float BastionStart { get; init; } = 32f;
 
-    /// <summary>
-    /// Boulders for the knolls: narrow closed rocks, the sizes Barry set by hand
-    /// (RockL05 at 0.7, RockL04 at about 1.1). Not the broad rock piles.
-    /// </summary>
-    public IReadOnlyList<string> KnollRocks { get; init; } = new[]
-    {
-        "0001A6E2:Skyrim.esm", // RockL04
-        "0001B0A8:Skyrim.esm", // RockL05
-        "0001819A:Skyrim.esm", // RockL02
-    };
+    /// <summary>A bastion leg whose middle comes closer than this to another paved cell is not placed.</summary>
+    public float BastionLegClear { get; init; } = 560f;
+}
+
+/// <summary>One compass edge's layer stack.</summary>
+internal sealed record BandEdgeConfig
+{
+    public float OuterOffset { get; init; } = 100f;
+
+    /// <summary>True: outward wall on grade. False: at floor minus OuterDrop.</summary>
+    public bool OuterOnGround { get; init; } = false;
+
+    public float OuterDrop { get; init; } = 296f;
+
+    public bool Filler { get; init; } = true;
+
+    public float FillerOffset { get; init; } = 100f;
+
+    /// <summary>When set, the inward piece sits this far above the outward wall (the grass slope).</summary>
+    public float? FillerLift { get; init; }
+
+    /// <summary>Otherwise it sits at floor minus this, a plinth under the outward wall.</summary>
+    public float FillerDrop { get; init; } = 424f;
+
+    public bool Parapet { get; init; } = true;
+
+    public float ParapetOffset { get; init; } = 0f;
+
+    public float ParapetDrop { get; init; } = 149f;
+
+    /// <summary>A third, lower Stonewall01 on grade in front of the band (west face).</summary>
+    public bool FieldWall { get; init; } = false;
+
+    public float FieldWallOffset { get; init; } = 397f;
+}
+
+/// <summary>One hand-placed object relative to the stair head: Dx to the right looking out, Dy outward, Dz from the floor.</summary>
+internal sealed record EntranceDressingItem
+{
+    public string Base { get; init; } = "";
+
+    public float Dx { get; init; }
+
+    public float Dy { get; init; }
+
+    public float Dz { get; init; }
+
+    public float RotDeg { get; init; }
+
+    public float Scale { get; init; } = 1f;
 }

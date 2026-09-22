@@ -192,31 +192,40 @@ Rolled out to **all four edges** on 2026-09-22 (`PerimeterWall.PrototypeEdges` e
 with courses at `PieceScale` 0.75 so they read waist high. See `docs/AUDIT.md` for the
 verified state.
 
-## Approved references (2026-09-22, afternoon)
+## Design source of truth: Barry's Creation Kit layout (2026-09-22, evening)
 
-- **The staircase layout is approved and frozen.** Three `SkyrimFair_Stair_192` flights
-  at scale 1.3 with their cheek blocks and caps as generated. Do not alter it without
-  Barry asking.
-- **`reference/SkyrimFair_CK_LAYOUT_REFERENCE.esp` is Barry's hand-edited Creation Kit
-  layout.** Visual and layout reference only: never authoritative, never deployed, never
-  a replacement for the generator's plugin. Diff it against `dist/SkyrimFair.esp` by
-  FormID; the CK rounds scales to two decimals, so ignore scale deltas under 0.006.
-- **The approved embankment pattern** beside the stairs is documented in `docs/AUDIT.md`
-  ("Approved embankment reference"): lower `StonewallTerrace01` on grade facing out,
-  the same piece turned to face inward and lifted 115 to give a grass slope, and a
-  knee-high `Stonewall01` at 0.98 straddling the paving edge.
-- **It is now generated round the whole outline** (`Dressing.TerraceBand`, 2026-09-22
-  evening, at Barry's request). The generator traces the paved outline as a polygon,
-  offsets it per layer, and spaces pieces evenly along each offset edge with flush ends,
-  so the band keeps one width round every corner. Convex corners get
-  `StonewallTerraceCorner01` turned walls-inward as a grass knoll with two boulders,
-  exactly Barry's north-east treatment. The old 0.75 course runs, embankment wall rocks,
-  corner stones and entrance bank rocks are switched off in config; the code remains.
-  Runs split either side of the stairs and finish at the same clearance both sides. Do
-  not add rocks between the band and the cheeks.
-- **Offsets are the prototype's numbers**: lower origin +117 (face +442), slope +111 and
-  +115 up, parapet -15 and floor -153. Change them only if Barry says the band is the
-  wrong width; keep all three layers on one plan line.
+- **`reference/SkyrimFair.esp` is Barry's completed hand-built layout** and, by his
+  instruction, the design source of truth for the perimeter and the entrance dressing.
+  It is a visual/layout reference only: never authoritative as a plugin, never
+  deployed, never a replacement for the generator's `SkyrimFair.esp`. Where it and a
+  procedural assumption disagree visually, the CK layout wins. It was built from an
+  older generated plugin, so do not diff it by FormID against the current one; read it
+  as a complete layout grouped by base object (`tmp` scripts `refdump.py`,
+  `refmatch.py` in the job folder did this; the method is in `docs/AUDIT.md`).
+- **The footprint is 26 cells**: `..####. / .#####. / .#####. / .#####. / .#####. /
+  .##....`. Barry removed the east column and the south tongue and filled the north-east
+  notch. The staircase is pinned at `X -5888` with `rampAlign: "offset:1"`; "centre"
+  would move it now that the north row is four tiles wide.
+- **The staircase is approved and frozen** as generated (three kit flights, cheek
+  blocks, caps). His CK caps sit 87 further out; not adopted.
+- **The perimeter is per-edge** (`Dressing.TerraceBand.Edges`): north is the two-layer
+  prototype on grade; east, south and west put the outward `StonewallTerrace01` at
+  floor -296 with an inward piece at floor -424 as a plinth, a 0.98 `Stonewall01`
+  parapet on every long face, and a lower 0.9 field wall on grade on the west. Short
+  one-tile faces at re-entrant corners get one `Stonewall01` scaled to the drop.
+  Convex corners get bastions: `StonewallEndL01` scaled to the drop, an L along both
+  face lines, or a single wall where the other leg would stand in front of a
+  neighbouring band. **No corner knolls, no dirt-cliff pieces, no corner boulders.**
+- **Entrance dressing is data** (`Dressing.EntranceDressing`): braziers with fire on the
+  cheek ends at the foot, low wing walls with finished ends, banner posts and banners
+  mid-flight, field walls under the west cheeks. Positions are the reference's,
+  relative to the stair head. Add to the list; do not scatter dressing procedurally.
+- **Kept although he deleted them**: the structural retaining bodies and the entrance
+  retaining wings (hidden behind his walls; they close the hollow under the floor). If
+  Barry reports an earth face showing, hide it with his language, do not delete the
+  structure without asking.
+- Ignore in any future CK file: duplicate references at identical transforms, pieces at
+  `Z 0`, snow-variant plants, scale rounding, and vanilla actors marked deleted.
 
 ## External assets: replacers need no dependency
 

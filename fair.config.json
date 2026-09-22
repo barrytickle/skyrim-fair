@@ -54,13 +54,13 @@
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
-        "..###..",
+        "..####.",
         ".#####.",
-        ".######",
-        ".######",
-        ".######",
         ".#####.",
-        "...##.."
+        ".#####.",
+        ".#####.",
+        ".##....",
+        "......."
       ],
       "pieces": {
         "floorFill": {
@@ -247,34 +247,220 @@
           "enabled": true,
           "piece": "000009C6:Skyrim.esm",
           "pieceLength": 256,
-          "cornerPiece": "00000A74:Skyrim.esm",
           "parapetPiece": "0000099B:Skyrim.esm",
           "parapetLength": 256,
           "parapetScale": 0.98,
-          "lowerOriginOffset": 117,
-          "lowerFaceOffset": 442,
-          "middleOriginOffset": 111,
-          "middleLift": 115,
+          "fieldWallScale": 0.9,
+          "endPiece": "0000099E:Skyrim.esm",
+          "endPieceLength": 222,
+          "endPieceFar": 128,
+          "edges": {
+            "N": {
+              "outerOffset": 117,
+              "outerOnGround": true,
+              "filler": true,
+              "fillerOffset": 111,
+              "fillerLift": 115,
+              "parapet": true,
+              "parapetOffset": -15,
+              "parapetDrop": 153
+            },
+            "E": {
+              "outerOffset": 64,
+              "outerOnGround": false,
+              "outerDrop": 296,
+              "filler": true,
+              "fillerOffset": 64,
+              "fillerDrop": 424,
+              "parapet": true,
+              "parapetOffset": 24,
+              "parapetDrop": 149
+            },
+            "S": {
+              "outerOffset": 98,
+              "outerOnGround": false,
+              "outerDrop": 296,
+              "filler": true,
+              "fillerOffset": 136,
+              "fillerDrop": 424,
+              "parapet": true,
+              "parapetOffset": 12,
+              "parapetDrop": 149
+            },
+            "W": {
+              "outerOffset": 136,
+              "outerOnGround": false,
+              "outerDrop": 296,
+              "filler": true,
+              "fillerOffset": 136,
+              "fillerDrop": 424,
+              "parapet": true,
+              "parapetOffset": 20,
+              "parapetDrop": 149,
+              "fieldWall": true,
+              "fieldWallOffset": 397
+            }
+          },
           "middleTopAtFace": 148,
-          "parapetOriginOffset": -15,
-          "parapetDrop": 153,
           "lowerSink": 6,
           "crestClear": 48,
-          "minDropForLower": 200,
-          "minDropForMiddle": 200,
-          "convexExtend": 64,
-          "stairClearance": 16,
-          "knollWallInset": 40,
-          "cornerWallX": 300,
-          "cornerWallY": 300,
-          "rockBury": 24,
-          "rockShow": 60,
-          "knollRocks": [
-            "0001A6E2:Skyrim.esm",
-            "0001B0A8:Skyrim.esm",
-            "0001819A:Skyrim.esm"
-          ]
-        }
+          "cornerStop": 96,
+          "parapetStairOverlap": 20,
+          "shortFaceMax": 512,
+          "shortFaceOffset": 24,
+          "bigWallOvershoot": 8,
+          "bigWallMinScale": 1.5,
+          "bigWallMaxScale": 3.3,
+          "bastionInset": 16,
+          "bastionStart": 32,
+          "bastionLegClear": 560
+        },
+        "entranceDressing": [
+          {
+            "base": "00093A89:Skyrim.esm",
+            "dx": -138.0,
+            "dy": 851.8,
+            "dz": -448.2,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "00093A89:Skyrim.esm",
+            "dx": 140.1,
+            "dy": 851.8,
+            "dz": -448.2,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "00033DA4:Skyrim.esm",
+            "dx": -144.1,
+            "dy": 849.9,
+            "dz": -356.3,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "00033DA4:Skyrim.esm",
+            "dx": 144.3,
+            "dy": 849.9,
+            "dz": -356.3,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": -414.2,
+            "dy": 860.8,
+            "dz": -500.3,
+            "rotDeg": 180.0,
+            "scale": 0.6
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": -263.8,
+            "dy": 860.8,
+            "dz": -501.0,
+            "rotDeg": 180.0,
+            "scale": 0.6
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": 258.9,
+            "dy": 860.8,
+            "dz": -463.6,
+            "rotDeg": 180.0,
+            "scale": 0.6
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": 408.2,
+            "dy": 860.8,
+            "dz": -463.6,
+            "rotDeg": 180.0,
+            "scale": 0.6
+          },
+          {
+            "base": "0000099E:Skyrim.esm",
+            "dx": -562.5,
+            "dy": 860.3,
+            "dz": -498.9,
+            "rotDeg": 0.0,
+            "scale": 0.6
+          },
+          {
+            "base": "0000099E:Skyrim.esm",
+            "dx": 562.9,
+            "dy": 862.3,
+            "dz": -462.7,
+            "rotDeg": 177.62,
+            "scale": 0.6
+          },
+          {
+            "base": "001083D7:Skyrim.esm",
+            "dx": -319.2,
+            "dy": 269.2,
+            "dz": -308.8,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "001083D7:Skyrim.esm",
+            "dx": 317.4,
+            "dy": 269.2,
+            "dz": -308.8,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "0010EA43:Skyrim.esm",
+            "dx": -368.0,
+            "dy": 303.8,
+            "dz": 41.9,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "0010EA43:Skyrim.esm",
+            "dx": -273.5,
+            "dy": 302.3,
+            "dz": 41.9,
+            "rotDeg": 0.0,
+            "scale": 1.0
+          },
+          {
+            "base": "000B11DF:Skyrim.esm",
+            "dx": 316.6,
+            "dy": 281.6,
+            "dz": 77.2,
+            "rotDeg": 91.67,
+            "scale": 1.0
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": -129.3,
+            "dy": 277.7,
+            "dz": -391.9,
+            "rotDeg": 90.0,
+            "scale": 1.06
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": -130.8,
+            "dy": 81.2,
+            "dz": -391.9,
+            "rotDeg": 90.0,
+            "scale": 1.06
+          },
+          {
+            "base": "0000099B:Skyrim.esm",
+            "dx": -141.4,
+            "dy": 474.8,
+            "dz": -391.9,
+            "rotDeg": 90.0,
+            "scale": 0.6
+          }
+        ]
       },
       "retainHeight": 256,
       "clearMargin": 160,
@@ -283,7 +469,7 @@
       "clearMaxRadius": 2000,
       "clearClutter": false,
       "disableReferences": [],
-      "rampAlign": "centre",
+      "rampAlign": "offset:1",
       "entrance": {
         "useStairs": true,
         "stair": "000009D0:Skyrim.esm",
