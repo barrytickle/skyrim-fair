@@ -65,11 +65,12 @@ SHOULDER_THICKNESS = 32
 # Deliberate A/B gate.  Keep the project-owned material build in the repository,
 # but put the current in-game terrace on vanilla Whiterun stone for comparison.
 PAVING_MATERIAL_MODE = os.environ.get(
-    "SKYRIM_FAIR_PAVING_MATERIAL", "vanilla_whiterun_test")
-if PAVING_MATERIAL_MODE not in {"vanilla_whiterun_test", "project_cobble"}:
-    raise ValueError("SKYRIM_FAIR_PAVING_MATERIAL must be vanilla_whiterun_test or project_cobble")
-PAVING_TEXTURE_PERIOD = 256 if PAVING_MATERIAL_MODE == "vanilla_whiterun_test" else 1024
-PAVING_PHASE_STEP = 0.0 if PAVING_MATERIAL_MODE == "vanilla_whiterun_test" else 0.5
+    "SKYRIM_FAIR_PAVING_MATERIAL", "vanilla_road_dirt")
+_MODES = {"vanilla_road_dirt", "vanilla_whiterun_test", "project_cobble"}
+if PAVING_MATERIAL_MODE not in _MODES:
+    raise ValueError(f"SKYRIM_FAIR_PAVING_MATERIAL must be one of {sorted(_MODES)}")
+PAVING_TEXTURE_PERIOD = 1024 if PAVING_MATERIAL_MODE == "project_cobble" else 256
+PAVING_PHASE_STEP = 0.5 if PAVING_MATERIAL_MODE == "project_cobble" else 0.0
 
 
 def clear_scene():
@@ -95,7 +96,36 @@ def make_object(name, verts, faces):
 
 
 def make_paving_material():
-    """BGS lighting material for the current vanilla/custom comparison target."""
+    """BGS lighting material for the current paving target.
+
+    The default is worn earth, not stone. WRStoneFloor02 is the material Bethesda
+    uses for a stone CITY floor, and at fairground scale that is exactly why the
+    terrace read as a slab of concrete: one city-plaza texture over 8.65 million
+    square units. A fair pitched on prepared ground is earth and gravel, and stone
+    belongs later on the main avenue and stage square where traffic would wear it in.
+
+    road01 measures about 267 units per repeat on the shipped road meshes. This maps
+    it at 256, within four per cent of native and an exact divisor of the 512 tile
+    grid, so the surface stays continuous from tile to tile.
+    """
+    if PAVING_MATERIAL_MODE == "vanilla_road_dirt":
+        material = bpy.data.materials.new("SkyrimFair_RoadDirt01")
+        props = material.bgs_props
+        props.texture_diffuse = r"textures\landscape\roads\road01.dds"
+        props.texture_normal = r"textures\landscape\roads\road01_n.dds"
+        props.texture_height = ""
+        props.clamp_mode = "WRAP_S_WRAP_T"
+        props.parallax_enabled = False
+        props.parallax_occlusion_enabled = False
+        props.model_space_normals = False
+        # Matte. Compacted earth should never catch a highlight the way stone does.
+        props.shininess = 20.0
+        props.specular_enabled = True
+        props.specular_mult = 0.2
+        props.specular_color = (1.0, 1.0, 1.0)
+        props.vertex_colors_enabled = False
+        return material
+
     if PAVING_MATERIAL_MODE == "vanilla_whiterun_test":
         material = bpy.data.materials.new("SkyrimFair_WRStoneFloor02_Test")
         props = material.bgs_props

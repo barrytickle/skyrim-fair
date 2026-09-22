@@ -253,8 +253,12 @@ Rules that must not regress:
 ### Permanent material pipeline
 
 - `assets/blender/build_foundation_kit.py` owns geometry, UVs and BGS material setup
-- default paving comparison mode is `vanilla_whiterun_test`, using vanilla
-  `textures\architecture\whiterun\WRStoneFloor02.dds` and `_n.dds`
+- **default paving mode is `vanilla_road_dirt`**, using vanilla
+  `textures\landscape\roads\road01.dds` and `_n.dds`. Barry chose worn earth over stone
+  on 2026-09-22: WRStoneFloor02 is the material Bethesda uses for a stone CITY floor,
+  and at fairground scale it made the terrace read as a slab of concrete. A fair
+  pitched on prepared ground is earth; stone returns later only for the main avenue
+  and stage square. `vanilla_whiterun_test` and `project_cobble` remain selectable.
 - vanilla `WRStoneFloor02` is mapped at its measured native scale: one UV repeat per
   256 Skyrim units
 - set environment variable `SKYRIM_FAIR_PAVING_MATERIAL=project_cobble` before the
