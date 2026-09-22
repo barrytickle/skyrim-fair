@@ -2,12 +2,14 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: original cheek blocks pitched with the stairs
+## Current pass: original cheek blocks pitched downhill with the stairs
 
 Barry compared the original small vanilla cheek blocks with the continuous
 project-authored replacement in game. The replacement was structurally tidy but too
 engineered. The chosen direction is the simpler original arrangement, with one change:
-each block is rotated to follow the stair's overall descent.
+each block is rotated to follow the stair's overall descent. The first implementation
+used Skyrim's opposite Euler sign and visibly leaned uphill; the corrected sign is now
+verified directly in the written ESP.
 
 The approved site, footprint, elevation, stair dimensions and content scope did not
 change. The closed retaining wings added around the stair head remain, because they fix
@@ -18,7 +20,7 @@ the independently reported missing rear face.
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
 | Size | 85,670 bytes |
-| SHA256 | `868eac186fc77264ae6b5e099e2b1d6c73d2992ccf1972c5185d3b398cb7ef8c` |
+| SHA256 | `2c5fc97600616b4ce05e2be288ce07e7e0b9a160fdbf6bae447ab6241bff365a` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
 | Kit meshes deployed | 13 NIFs under `meshes\SkyrimFair\`; unchanged in this ESP-only pass |
 | Masters | `Skyrim.esm` only |
@@ -38,7 +40,7 @@ same as the original version Barry preferred.
 The only visual change from that original is rotation:
 
 - each block remains aligned along the stair with Z rotation 90 degrees;
-- each block now has X rotation **-30.3 degrees**, matching
+- each block now has X rotation **+30.3 degrees**, matching
   `atan2(112 stair rise, 192 stair run)`;
 - Y rotation is zero at the current north-facing entrance;
 - the centre of each tilted crest is anchored to the same nosing-relative height as the
@@ -47,7 +49,7 @@ The only visual change from that original is rotation:
   correct if the entrance edge changes later.
 
 The written ESP was read independently after generation: exactly 12 references use
-`Stonewall01` at scale 0.6, and every one serializes rotation `[-30.3, 0, 90]` degrees.
+`Stonewall01` at scale 0.6, and every one serializes rotation `[+30.3, 0, 90]` degrees.
 
 World placements:
 
@@ -122,7 +124,7 @@ python tools\footprint_audit.py --data <stock Data> \
 - Release build: zero warnings, zero errors.
 - Generator run twice: identical 85,670-byte output and identical SHA256.
 - The audit reader now exposes all three serialized rotation components. Direct ESP read
-  confirmed 12 cheek references at scale 0.6 and pitch -30.3 degrees.
+  confirmed 12 cheek references at scale 0.6 and pitch +30.3 degrees.
 - Full-load-order audit: 40 vanilla references intersect the footprint/margin, with zero
   references standing proud of floor `-5336`.
 - Generated ESP copied to the MO2 mod and compared byte-for-byte by SHA256.

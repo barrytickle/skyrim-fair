@@ -1103,8 +1103,12 @@ internal static class FairFoundation
                         // upright piece used. Rotation shortens its vertical component
                         // by cos(slope), so compensate rather than sinking the wall.
                         var pz = nosing + rise - cb.ZMax * ck.Scale * MathF.Cos(slope);
-                        var pitchX = t.Dr * slope;
-                        var pitchY = t.Dc * slope;
+                        // Skyrim's placed-reference Euler convention is opposite the
+                        // construction-space sign used for the outward stair vector.
+                        // Positive X makes the current north-facing blocks descend
+                        // toward the road; the previous negative sign leaned uphill.
+                        var pitchX = -t.Dr * slope;
+                        var pitchY = -t.Dc * slope;
                         PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale,
                             rotX: pitchX, rotY: pitchY);
                         result.CheekWalls++;

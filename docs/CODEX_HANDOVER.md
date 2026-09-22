@@ -52,7 +52,7 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
   The vanilla `StonewallTerraceStairs01` is a fallback behind `entrance.kitStair`. See
   "Road and entrance"
 - **the only masonry at the entrance is the original small vanilla `Stonewall01` cheek
-  blocks**, two per side per flight at scale 0.6, now pitched -30.3 degrees to match the
+  blocks**, two per side per flight at scale 0.6, now pitched +30.3 degrees to match the
   stair descent, plus an asymmetric closed-rock and grassy-pile bank leaning on them
 - two closed `SkyrimFair_EntranceRetainWing_144` solids restore the terrace face on
   either side of the 217-wide stair opening; the entrance segment must never be left
@@ -320,7 +320,7 @@ compressed-mesh collision will fail and give it a box.** The standalone slab
 
 **Cheek walls** (`Dressing.EntranceCheeks`): vanilla `Stonewall01`, two per flight per
 side at scale 0.6. They retain the original irregular block silhouette but are rotated
-to the stair's 30.3-degree descent (`X -30.3`, `Y 0`, `Z 90` at the current north
+to the stair's 30.3-degree descent (`X +30.3`, `Y 0`, `Z 90` at the current north
 entrance). Their crest centres remain 56 west / 80 east above the nosing. The unused
 `SkyrimFair_StairCheek_192` comparison mesh remains reproducible in the asset kit but has
 no STAT or placement in the current plugin.
