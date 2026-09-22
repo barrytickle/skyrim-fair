@@ -66,6 +66,20 @@ def blocks(data):
     return out
 
 
+def validate(data, name):
+    """The NIF must end exactly at its footer (root count and root links) after the last
+    block, with every root inside the block list: a truncated or corrupt extraction fails."""
+    parsed = blocks(bytes(data))
+    kind, off, size = parsed[-1]
+    p = off + size
+    nroots = struct.unpack_from("<I", data, p)[0]
+    roots = struct.unpack_from(f"<{nroots}i", data, p + 4)
+    if p + 4 + 4 * nroots != len(data) or not roots or any(r < 0 or r >= len(parsed) for r in roots):
+        raise ValueError(f"{name}: bad NIF footer (roots {roots}, {len(data) - p} trailing bytes)")
+    if parsed[0][0] not in ("BSFadeNode", "NiNode", "BSLeafAnimNode", "BSTreeNode"):
+        raise ValueError(f"{name}: unexpected root block {parsed[0][0]}")
+
+
 def make_fixed(data):
     """Make every rigid body fixed in place, in place. Returns how many were changed."""
     fixed = 0
@@ -110,6 +124,7 @@ def main():
             missing.append(key)
             continue
         data = bytearray(bsa_extract.extract(index[key]))
+        validate(data, name)
         make_fixed(data)
         out = spec.get("out", f"SkyrimFair/Props/{name}.nif")
         dest = os.path.join(ROOT, "assets", "meshes", *out.split("/"))

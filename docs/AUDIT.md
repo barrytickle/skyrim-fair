@@ -2,6 +2,38 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
+## Hotfix 2: the real cause, a BSA extractor bug (2026-09-23)
+
+The same crash came back after the rigid-body change (same file, same instruction). Two
+things settled it:
+- Vanilla has its own `ElvenSwordForDisplay` STAT on the same `ElvenSword.nif`, so a
+  weapon mesh as a static is fine.
+- The crash was reading about 19 bytes from the end of the 69,369-byte file, past the
+  64 KB first LZ4 block.
+
+**Cause**: `tools/bsa_extract.py` decoded each LZ4 block of a frame on its own. SSE
+archives link their blocks (frame flag "block independence" is 0), so matches in the
+second block reach back into the first. Those read zeros, and **every file over 64 KB
+came out corrupt past its first block** while keeping the right length. Five props were
+affected: `ElvenSword`, `DrinkingHorn`, `HideCuirass`, `HuntingBow` and `ImperialBow`.
+The first "hotfix" below was a wrong diagnosis. Its change (fixed rigid bodies instead
+of unhooked links) is still the better way to make props static, so it stays.
+
+**Fix**: the decoder now decodes into one output buffer with the whole frame as history,
+and skips block checksums when the flag says they are there.
+`tools/make_static_props.py` also checks each NIF's footer. That check only caught one of
+the three old files it was tried on, so it is a guard, not the proof.
+
+**Proof**: all 148 source meshes extracted by the fixed tool are **byte-identical to
+Mutagen's own BSA reader** (`Mutagen.Bethesda.Archives`). Exactly the five props over
+64 KB changed. The plugin is unchanged (`60d0a724b1b08410...`). **Meshes redeployed,
+byte-identical.**
+
+Earlier inspection work extracted meshes with the same tool: renders, and surface and
+bound measurements. The measurements the fair relies on came from ESP bounds or from
+meshes under 64 KB. Anything measured from a mesh over 64 KB before today should be
+re-checked if it matters.
+
 ## Hotfix: the crash on entering the fair (2026-09-23)
 
 Barry crashed entering the fair. CrashLogger: `EXCEPTION_ACCESS_VIOLATION` loading

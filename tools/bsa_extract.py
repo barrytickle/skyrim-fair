@@ -28,10 +28,11 @@ import struct
 import sys
 
 
-def lz4_block(src, size):
-    """Minimal LZ4 block decoder. Same routine the save parser uses."""
-    out = bytearray(size)
-    si = di = 0
+def lz4_block(src, out):
+    """Minimal LZ4 block decoder, appending to out. Matches may reach back into earlier
+    blocks of the same frame (SSE archives link their 64 KB blocks), so the history is
+    the whole of out, not just this block."""
+    si = 0
     n = len(src)
     while si < n:
         token = src[si]; si += 1
@@ -42,8 +43,8 @@ def lz4_block(src, size):
                 lit += b
                 if b != 255:
                     break
-        out[di:di + lit] = src[si:si + lit]
-        si += lit; di += lit
+        out += src[si:si + lit]
+        si += lit
         if si >= n:
             break
         offset = src[si] | (src[si + 1] << 8); si += 2
@@ -55,25 +56,29 @@ def lz4_block(src, size):
                 if b != 255:
                     break
         mlen += 4
-        start = di - offset
+        start = len(out) - offset
+        if start < 0:
+            raise ValueError("LZ4 match reaches before the start of the frame")
         for k in range(mlen):
-            out[di] = out[start + k]
-            di += 1
-    return bytes(out[:di])
+            out.append(out[start + k])
 
 
 def lz4_frame(buf):
-    """Decode an LZ4 frame: header, then a chain of blocks, then a zero terminator."""
+    """Decode an LZ4 frame: header, then a chain of blocks, then a zero terminator.
+
+    Before 2026-09-23 each block was decoded on its own, which corrupted the tail of
+    every file over 64 KB (the first block size): its matches into the previous block
+    read zeros. A crash loading such a mesh (ElvenSword.nif) found it."""
     if struct.unpack_from("<I", buf, 0)[0] != 0x184D2204:
         raise ValueError("not an LZ4 frame")
     p = 4
-    flg = buf[p]; bd = buf[p + 1]; p += 2
+    flg = buf[p]; p += 2
     if flg & 0x08:          # content size present
         p += 8
     if flg & 0x01:          # dictionary id present
         p += 4
     p += 1                  # header checksum
-    block_max = {4: 1 << 16, 5: 1 << 18, 6: 1 << 20, 7: 1 << 22}.get((bd >> 4) & 0x07, 1 << 22)
+    block_checksum = bool(flg & 0x10)
     out = bytearray()
     while True:
         size = struct.unpack_from("<I", buf, p)[0]; p += 4
@@ -83,8 +88,10 @@ def lz4_frame(buf):
             n = size & 0x7FFFFFFF
             out += buf[p:p + n]; p += n
         else:
-            out += lz4_block(buf[p:p + size], block_max)
+            lz4_block(buf[p:p + size], out)
             p += size
+        if block_checksum:
+            p += 4
     return bytes(out)
 
 
