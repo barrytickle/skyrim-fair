@@ -179,6 +179,11 @@ internal static class FairWorld
         // ---- the main stage ---------------------------------------------------------
         var stage = config.Stage.Enabled ? FairStage.Build(mod, config, plan.Height, Put) : null;
 
+        // ---- the market ---------------------------------------------------------------
+        var market = config.Market.Enabled
+            ? FairMarket.Build(mod, config, plan.Outside, plan.Height, Put, topCell, PersistentRecordFlag)
+            : null;
+
         // ---- distant mountains ------------------------------------------------------
         var mountains = new List<MountainPlacement>();
         if (config.Mountains.Enabled)
@@ -249,6 +254,7 @@ internal static class FairWorld
                 .ToList(),
             mountains,
             stage,
+            market,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
             plan.RenderPlan(1024f, config.Forest.OuterDistance, trees),
             plan.RenderMountains(mountains, 2048f));
@@ -853,44 +859,13 @@ internal static class FairWorld
         }
 
         private static float SignedDistance((float X, float Y)[] polygon, float x, float y)
-        {
-            var nearest = float.MaxValue;
-            var inside = false;
-            for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
-            {
-                var a = polygon[j];
-                var b = polygon[i];
-                nearest = MathF.Min(nearest, SegmentDistance(a, b, x, y).Distance);
-                if ((b.Y > y) != (a.Y > y) && x < (a.X - b.X) * (y - b.Y) / (a.Y - b.Y) + b.X)
-                {
-                    inside = !inside;
-                }
-            }
-
-            return inside ? -nearest : nearest;
-        }
+            => FairGeometry.SignedDistance(polygon, x, y);
 
         private static float PolylineDistance((float X, float Y)[] line, float x, float y)
-        {
-            var nearest = float.MaxValue;
-            for (var i = 0; i + 1 < line.Length; i++)
-            {
-                nearest = MathF.Min(nearest, SegmentDistance(line[i], line[i + 1], x, y).Distance);
-            }
-
-            return nearest;
-        }
+            => FairGeometry.PolylineDistance(line, x, y);
 
         private static (float Distance, float T) SegmentDistance((float X, float Y) a, (float X, float Y) b, float x, float y)
-        {
-            var abx = b.X - a.X;
-            var aby = b.Y - a.Y;
-            var lengthSquared = abx * abx + aby * aby;
-            var t = lengthSquared == 0f ? 0f : Math.Clamp(((x - a.X) * abx + (y - a.Y) * aby) / lengthSquared, 0f, 1f);
-            var px = a.X + abx * t - x;
-            var py = a.Y + aby * t - y;
-            return (MathF.Sqrt(px * px + py * py), t);
-        }
+            => FairGeometry.SegmentDistance(a, b, x, y);
 
         /// <summary>1 well inside, 0.5 on the edge, 0 well outside, over <paramref name="feather"/>.</summary>
         private static float Fill(float signedDistance, float feather) => Smooth(0.5f - signedDistance / feather);
@@ -960,6 +935,7 @@ internal sealed record FairWorldResult(
     IReadOnlyList<FairWorldTreeCount> Trees,
     IReadOnlyList<MountainPlacement> Mountains,
     StageResult? Stage,
+    MarketResult? Market,
     string Plan,
     string ForestPlan,
     string MountainPlan);

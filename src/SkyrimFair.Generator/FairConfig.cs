@@ -121,6 +121,9 @@ internal sealed record FairWorldConfig
     /// <summary>The main stage, placed from its zone.</summary>
     public StageConfig Stage { get; init; } = new();
 
+    /// <summary>The market avenue, Traders' Crossing and trading rows.</summary>
+    public MarketConfig Market { get; init; } = new();
+
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
 
@@ -1695,4 +1698,176 @@ internal sealed record EntranceDressingItem
     public float RotDeg { get; init; }
 
     public float Scale { get; init; } = 1f;
+}
+
+/// <summary>
+/// The market: stall shells laid along lanes, as a controlled maze. Each lane has a
+/// centreline and a half-width profile that pinches and swells along it, and a gentle
+/// meander, so the street alternates between tight passages and browsing pockets.
+/// Stall modules (a main structure plus display, storage and dressing pieces) line one
+/// or both sides, facing the lane, jittered in set-back, angle and gap, and any module
+/// that would stand in another lane, a keep-out zone or another module is skipped,
+/// which is what opens the junctions and pockets. Each module also gets a named,
+/// themed shell marker so merchants can be layered on later.
+/// </summary>
+internal sealed record MarketConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Stall corners must stay this far inside the palisade line.</summary>
+    public float WallMargin { get; init; } = 220f;
+
+    /// <summary>Clearance kept between neighbouring modules and from lane edges.</summary>
+    public float Clearance { get; init; } = 20f;
+
+    /// <summary>Zones no stall may stand in (the crowd square, the stage, the entrance forecourt).</summary>
+    public List<string> KeepOutZones { get; init; } = new();
+
+    /// <summary>Extra no-stall areas, such as the archery range.</summary>
+    public List<MarketArea> KeepOut { get; init; } = new();
+
+    public List<MarketModule> Modules { get; init; } = new();
+
+    public List<MarketLane> Lanes { get; init; } = new();
+
+    /// <summary>Signature stalls placed first at a lane station, such as the rival faction pair.</summary>
+    public List<MarketFixed> Fixed { get; init; } = new();
+
+    /// <summary>
+    /// Back-to-back infill: after the lanes are lined, each stall tries to take one of
+    /// these modules directly behind it, facing the other way, as real market rows do.
+    /// </summary>
+    public List<string> BackFill { get; init; } = new();
+
+    public List<string> BackFillThemes { get; init; } = new();
+
+    /// <summary>Hand-placed dressing that marks the lane structure, such as banner posts at the crossing.</summary>
+    public List<MarketDressing> Dressing { get; init; } = new();
+
+    /// <summary>Shell markers: one persistent heading marker per stall, named by theme.</summary>
+    public string ShellMarker { get; init; } = "00000034:Skyrim.esm";
+
+    public string ShellMarkerPrefix { get; init; } = "SkyrimFairStall";
+}
+
+internal sealed record MarketArea
+{
+    public string Name { get; init; } = string.Empty;
+
+    public List<float[]> Polygon { get; init; } = new();
+}
+
+/// <summary>
+/// One stall kit. Local frame: +Y is the front (toward the lane), the footprint is
+/// <see cref="Width"/> x <see cref="Depth"/> centred on the origin.
+/// </summary>
+internal sealed record MarketModule
+{
+    public string Name { get; init; } = string.Empty;
+
+    public float Width { get; init; }
+
+    public float Depth { get; init; }
+
+    public List<MarketPiece> Pieces { get; init; } = new();
+}
+
+internal sealed record MarketPiece
+{
+    public string Piece { get; init; } = string.Empty;
+
+    public string Name { get; init; } = string.Empty;
+
+    public float X { get; init; }
+
+    public float Y { get; init; }
+
+    public float Z { get; init; }
+
+    public float Yaw { get; init; }
+
+    /// <summary>Dressing that some copies of the module leave out, so no two look alike.</summary>
+    public bool Optional { get; init; }
+}
+
+internal sealed record MarketLane
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>Use the fair world's avenue as this lane's centreline.</summary>
+    public bool UseAvenue { get; init; }
+
+    public List<float[]> Points { get; init; } = new();
+
+    /// <summary><c>[distance along the lane, half-width]</c> stations, interpolated.</summary>
+    public List<float[]> HalfWidths { get; init; } = new();
+
+    /// <summary><c>[amplitude, period]</c> of the sideways wander of the lane's centre.</summary>
+    public float[] Meander { get; init; } = { 0f, 1000f };
+
+    /// <summary>Stalls from and to this distance along the lane.</summary>
+    public float From { get; init; }
+
+    public float To { get; init; } = float.MaxValue;
+
+    /// <summary><c>both</c>, <c>left</c> or <c>right</c> of the direction of travel.</summary>
+    public string Sides { get; init; } = "both";
+
+    /// <summary>Which modules this lane uses, and how often.</summary>
+    public List<MarketMix> Mix { get; init; } = new();
+
+    /// <summary>Theme slots handed out to this lane's stalls in turn.</summary>
+    public List<string> Themes { get; init; } = new();
+
+    public float GapMin { get; init; } = 30f;
+
+    public float GapMax { get; init; } = 140f;
+
+    /// <summary>Chance of leaving a browsing pocket instead of the next stall.</summary>
+    public float PocketChance { get; init; } = 0.12f;
+
+    public float PocketMin { get; init; } = 280f;
+
+    public float PocketMax { get; init; } = 420f;
+
+    /// <summary>Largest extra set-back behind the lane edge.</summary>
+    public float SetBack { get; init; } = 70f;
+
+    /// <summary>Largest turn away from facing the lane squarely, degrees.</summary>
+    public float AngleJitter { get; init; } = 7f;
+}
+
+internal sealed record MarketFixed
+{
+    public string Lane { get; init; } = string.Empty;
+
+    public float At { get; init; }
+
+    public string Side { get; init; } = "left";
+
+    public string Module { get; init; } = string.Empty;
+
+    public string Theme { get; init; } = string.Empty;
+}
+
+internal sealed record MarketMix
+{
+    public string Module { get; init; } = string.Empty;
+
+    public float Weight { get; init; } = 1f;
+}
+
+internal sealed record MarketDressing
+{
+    public string Piece { get; init; } = string.Empty;
+
+    public string Name { get; init; } = string.Empty;
+
+    public float X { get; init; }
+
+    public float Y { get; init; }
+
+    public float Z { get; init; }
+
+    public float Yaw { get; init; }
 }

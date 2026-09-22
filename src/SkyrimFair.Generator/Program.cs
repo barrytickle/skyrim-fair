@@ -164,6 +164,31 @@ try
             }
         }
 
+        if (world.Market is { } market)
+        {
+            Console.WriteLine(
+                $"  market: {market.Stalls.Count} stalls, {market.Pieces} pieces, " +
+                $"{market.Refused} placements refused for crowding a lane, a keep-out or another stall");
+            foreach (var lane in market.Stalls.GroupBy(x => x.Lane))
+            {
+                Console.WriteLine(
+                    $"    {lane.Key,-16} {lane.Count(),3} stalls: " +
+                    string.Join(", ", lane.GroupBy(x => x.Module).OrderBy(g => g.Key, StringComparer.Ordinal)
+                        .Select(g => $"{g.Count()} {g.Key}")));
+            }
+
+            if (Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 })
+            {
+                foreach (var (reason, count) in market.Reasons)
+                {
+                    Console.WriteLine($"      refused {count,3} x {reason}");
+                }
+            }
+
+            Console.WriteLine("    shells: " + string.Join(", ", market.Stalls.GroupBy(x => x.Theme)
+                .OrderBy(g => g.Key, StringComparer.Ordinal).Select(g => $"{g.Key} {g.Count()}")));
+        }
+
         Console.WriteLine($"  mountains: {world.Mountains.Count}, persistent + Full LOD");
         foreach (var m in world.Mountains)
         {

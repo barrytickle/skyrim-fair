@@ -60,6 +60,15 @@ Before copying any Medieval Markets mesh or texture into this repository:
 
 Where practical, prefer assets authored directly by JJerem or make Medieval Markets an external dependency instead of rebundling third-party assets.
 
+### Audit of the local download (2026-09-22)
+
+See `docs/AUDIT.md` ("Medieval Markets audit"). In short:
+- The stall pieces (`NewMarketStall01`, `MarketStandLong01/02`, `SlantedShelf01`,
+  `ShortFarmTable`, `fenceWovenTall01`, weapon racks) use vanilla textures only.
+- The produce crates and baskets use PraedythXVI's Fruits and Veggies textures.
+- The Nord tent is an unconverted LE mesh with COTN textures.
+- **Nothing is bundled yet.** The open question is which stall pieces derive from SMIM.
+
 Attribution:
 
 > Medieval Markets by JJerem.

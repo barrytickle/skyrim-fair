@@ -185,6 +185,328 @@
       "brazierPiece": "00093A89:Skyrim.esm", "brazierFeet": 33,
       "firePiece": "00033DA4:Skyrim.esm", "fireOffset": [-6, -2, 92]
     },
+    "market": {
+      "enabled": true,
+      "wallMargin": 220,
+      "clearance": 15,
+      "keepOutZones": ["Crowd", "Stage", "Entrance"],
+      "keepOut": [
+        {
+          "name": "ArcheryRange",
+          "polygon": [
+            [3250, -1100], [5400, -700], [5400, 3700], [3250, 3700]
+          ]
+        },
+        {
+          "name": "GateStageSightline",
+          "polygon": [
+            [1918, -1991], [2178, -1991], [2178, 4538], [1918, 4538]
+          ]
+        }
+      ],
+      "modules": [
+        {
+          "name": "grand_double",
+          "width": 560,
+          "depth": 400,
+          "pieces": [
+            {"name": "WRMarketStand01", "piece": "0005B2A7:Skyrim.esm", "x": 0, "y": -20},
+            {"name": "WRMarketDisplayShelf01", "piece": "0005B2AB:Skyrim.esm", "x": -120, "y": 150},
+            {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": 130, "y": 150},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -252, "y": -95},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -258, "y": -30, "optional": true},
+            {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 250, "y": -105, "z": 24, "yaw": 10},
+            {"name": "CrateSmall02", "piece": "0007A609:Skyrim.esm", "x": 250, "y": -105, "z": 69, "yaw": 28, "optional": true},
+            {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": -262, "y": 160, "optional": true}
+          ]
+        },
+        {
+          "name": "canvas_pair",
+          "width": 440,
+          "depth": 300,
+          "pieces": [
+            {"name": "WHMarketStall01", "piece": "000F3C72:Skyrim.esm", "x": -105, "y": 0},
+            {"name": "WHMarketStall02", "piece": "000F3C73:Skyrim.esm", "x": 100, "y": 0},
+            {"name": "CrateSmallLong01", "piece": "0007A605:Skyrim.esm", "x": -200, "y": -118, "z": 24, "yaw": 90, "optional": true},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -100, "optional": true},
+            {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 200, "y": 112, "yaw": 20, "optional": true}
+          ]
+        },
+        {
+          "name": "whiterun_stand",
+          "width": 360,
+          "depth": 340,
+          "pieces": [
+            {"name": "WRMarketStand02", "piece": "0005B2E2:Skyrim.esm", "x": 0, "y": -20},
+            {"name": "WRMarketDisplayShelf02", "piece": "0005B2B2:Skyrim.esm", "x": 0, "y": 138},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -165, "y": -95},
+            {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 160, "y": -105, "yaw": 35, "optional": true},
+            {"name": "CrateSmall03", "piece": "0007A617:Skyrim.esm", "x": 162, "y": 60, "z": 24, "yaw": -12, "optional": true}
+          ]
+        },
+        {
+          "name": "canvas_wide",
+          "width": 520,
+          "depth": 320,
+          "pieces": [
+            {"name": "WHMarketStall01", "piece": "000F3C72:Skyrim.esm", "x": -140, "y": 0},
+            {"name": "WRMarketStand02", "piece": "0005B2E2:Skyrim.esm", "x": 135, "y": -12},
+            {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": -140, "y": 130, "optional": true},
+            {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": 245, "y": 95, "z": 24, "yaw": 15, "optional": true},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -245, "y": -110, "optional": true}
+          ]
+        },
+        {
+          "name": "cask_bar",
+          "width": 460,
+          "depth": 360,
+          "pieces": [
+            {"name": "BreweryCaskLargeClosed01", "piece": "0007F871:Skyrim.esm", "x": -150, "y": -40, "z": 26, "yaw": 90},
+            {"name": "WHMarketStall02", "piece": "000F3C73:Skyrim.esm", "x": 95, "y": -10},
+            {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": -40, "y": -135},
+            {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 10, "y": -128, "yaw": 40, "optional": true},
+            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 70, "y": 150},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -120, "optional": true}
+          ]
+        },
+        {
+          "name": "open_trader",
+          "width": 320,
+          "depth": 250,
+          "pieces": [
+            {"name": "ExteriorWoodenTable01", "piece": "0003DE44:Skyrim.esm", "x": 0, "y": 40},
+            {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": -10, "y": -70},
+            {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": -135, "y": -65, "z": 24, "yaw": 8},
+            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 125, "y": -70, "z": 40, "yaw": 90, "optional": true},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 140, "y": 70, "optional": true},
+            {"name": "FirewoodPileMedium01", "piece": "000185B5:Skyrim.esm", "x": -130, "y": 80, "optional": true}
+          ]
+        },
+        {
+          "name": "trestle",
+          "width": 260,
+          "depth": 200,
+          "pieces": [
+            {"name": "ExteriorWoodenTable01", "piece": "0003DE44:Skyrim.esm", "x": 0, "y": 25},
+            {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": -95, "y": -60, "z": 24, "yaw": 12},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 100, "y": -55, "optional": true}
+          ]
+        }
+      ],
+      "fixed": [
+        {"lane": "Avenue", "at": 3810, "side": "left", "module": "grand_double", "theme": "imperial"},
+        {"lane": "Avenue", "at": 3810, "side": "right", "module": "grand_double", "theme": "stormcloak"},
+        {"lane": "Avenue", "at": 5520, "side": "right", "module": "canvas_pair", "theme": "sweetroll"}
+      ],
+      "lanes": [
+        {
+          "name": "Avenue",
+          "useAvenue": true,
+          "from": 380,
+          "to": 5950,
+          "halfWidths": [
+            [0, 330], [450, 330], [650, 250], [1000, 260], [1150, 330], [1600, 330], [1750, 240],
+            [2100, 240], [2250, 300], [2480, 300], [2600, 650], [3350, 650], [3470, 240], [4150, 240],
+            [4260, 330], [4560, 330], [4660, 230], [5500, 230], [5700, 380], [6300, 500]
+          ],
+          "meander": [90, 1500],
+          "mix": [
+            {"module": "grand_double", "weight": 2},
+            {"module": "canvas_pair", "weight": 3},
+            {"module": "whiterun_stand", "weight": 3},
+            {"module": "canvas_wide", "weight": 2},
+            {"module": "cask_bar", "weight": 1},
+            {"module": "open_trader", "weight": 1},
+            {"module": "trestle", "weight": 0.4}
+          ],
+          "themes": ["food", "drink", "sweets", "pies", "cheese", "roast", "produce", "bakery", "curios", "leather"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "pocketChance": 0.1,
+          "setBack": 45
+        },
+        {
+          "name": "WestBranch",
+          "points": [
+            [1330, 1000], [800, 1180], [200, 1020], [-950, 1120]
+          ],
+          "halfWidths": [
+            [0, 300], [500, 250], [2600, 250]
+          ],
+          "meander": [60, 900],
+          "mix": [
+            {"module": "canvas_pair", "weight": 2},
+            {"module": "whiterun_stand", "weight": 3},
+            {"module": "open_trader", "weight": 2},
+            {"module": "canvas_wide", "weight": 1},
+            {"module": "trestle", "weight": 0.4}
+          ],
+          "themes": ["mage", "dwemer", "books", "alchemy", "jewellery", "elven", "scrolls", "curios"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "setBack": 40,
+          "pocketChance": 0.1
+        },
+        {
+          "name": "EastBranch",
+          "points": [
+            [2650, 1020], [2900, 960], [3150, 990]
+          ],
+          "halfWidths": [
+            [0, 260], [600, 240]
+          ],
+          "mix": [
+            {"module": "whiterun_stand", "weight": 2},
+            {"module": "open_trader", "weight": 2},
+            {"module": "canvas_pair", "weight": 1},
+            {"module": "trestle", "weight": 0.5}
+          ],
+          "themes": ["smith", "hunter", "armour"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "pocketChance": 0.1
+        },
+        {
+          "name": "WestBackSouth",
+          "points": [
+            [650, -800], [720, 300], [650, 760]
+          ],
+          "halfWidths": [
+            [0, 210], [2000, 210]
+          ],
+          "meander": [50, 800],
+          "mix": [
+            {"module": "whiterun_stand", "weight": 3},
+            {"module": "open_trader", "weight": 3},
+            {"module": "canvas_pair", "weight": 2},
+            {"module": "cask_bar", "weight": 1},
+            {"module": "trestle", "weight": 0.4}
+          ],
+          "themes": ["alchemy", "herbs", "scrolls", "books", "furs", "pottery", "candles", "toys"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "pocketChance": 0.1,
+          "setBack": 40
+        },
+        {
+          "name": "WestBackNorth",
+          "points": [
+            [650, 1400], [720, 2000], [620, 3350]
+          ],
+          "halfWidths": [
+            [0, 210], [2500, 210]
+          ],
+          "meander": [50, 800],
+          "mix": [
+            {"module": "whiterun_stand", "weight": 3},
+            {"module": "open_trader", "weight": 3},
+            {"module": "canvas_pair", "weight": 2},
+            {"module": "cask_bar", "weight": 1},
+            {"module": "trestle", "weight": 0.4}
+          ],
+          "themes": ["herbs", "alchemy", "toys", "candles", "pottery", "furs", "books", "scrolls"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "pocketChance": 0.1,
+          "setBack": 40
+        },
+        {
+          "name": "WestOuterSouth",
+          "points": [
+            [-480, -250], [-600, 760]
+          ],
+          "halfWidths": [
+            [0, 170], [3700, 170]
+          ],
+          "meander": [40, 700],
+          "mix": [
+            {"module": "open_trader", "weight": 3},
+            {"module": "whiterun_stand", "weight": 2},
+            {"module": "canvas_pair", "weight": 1},
+            {"module": "trestle", "weight": 0.4}
+          ],
+          "themes": ["livestock", "hay", "timber", "rugs", "bone", "pottery"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "pocketChance": 0.1,
+          "setBack": 30,
+          "sides": "right"
+        },
+        {
+          "name": "WestOuterNorth",
+          "points": [
+            [-620, 1420], [-540, 2100], [-440, 3300]
+          ],
+          "halfWidths": [
+            [0, 170], [3700, 170]
+          ],
+          "meander": [40, 700],
+          "mix": [
+            {"module": "open_trader", "weight": 3},
+            {"module": "whiterun_stand", "weight": 2},
+            {"module": "canvas_pair", "weight": 1},
+            {"module": "trestle", "weight": 0.4}
+          ],
+          "themes": ["rugs", "bone", "timber", "hay"],
+          "gapMin": 10,
+          "gapMax": 70,
+          "pocketChance": 0.1,
+          "setBack": 30,
+          "sides": "right"
+        },
+        {
+          "name": "WestAlleyLow",
+          "points": [
+            [1640, -250], [1150, -150], [620, -260]
+          ],
+          "halfWidths": [
+            [0, 160], [1500, 160]
+          ],
+          "meander": [40, 700],
+          "mix": [],
+          "themes": ["pies", "cheese", "bakery", "honey"],
+          "gapMin": 20,
+          "gapMax": 90,
+          "setBack": 35
+        },
+        {
+          "name": "WestAlleyHigh",
+          "points": [
+            [1830, 2470], [1300, 2590], [640, 2480]
+          ],
+          "halfWidths": [
+            [0, 160], [1500, 160]
+          ],
+          "meander": [40, 700],
+          "mix": [],
+          "themes": ["produce", "ale", "roast", "spices"],
+          "gapMin": 20,
+          "gapMax": 90,
+          "setBack": 35
+        },
+        {
+          "name": "EastAlleyHigh",
+          "points": [
+            [2350, 2900], [2780, 3060]
+          ],
+          "halfWidths": [
+            [0, 160], [1500, 160]
+          ],
+          "mix": [],
+          "themes": ["games", "prizes"],
+          "gapMin": 20,
+          "gapMax": 80
+        }
+      ],
+      "backFill": ["whiterun_stand", "open_trader"],
+      "backFillThemes": ["storage", "tanner", "cooper", "weaver", "potter", "carver"],
+      "dressing": [
+        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 1380, "y": 690, "yaw": 45},
+        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 1390, "y": 1340, "yaw": 135},
+        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 2620, "y": 700, "yaw": -45},
+        {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 2600, "y": 1320, "yaw": -135}
+      ]
+    },
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
     "avenueWidth": 800,
     "zoneMarker": "00000034:Skyrim.esm",

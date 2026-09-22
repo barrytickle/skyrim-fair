@@ -103,6 +103,18 @@ Rules for this direction:
     awning** (the canvas exists only inside whole stall meshes), so a cloth canopy
     would be a small project mesh using vanilla `whmarketstallroof01.dds` by path.
     That is Barry's call.
+- **The market** (`FairMarket.cs`, `fairWorld.market`), 2026-09-22, night, **pending
+  Barry's review**:
+  - Vanilla stall modules line data-driven lanes (the avenue, the West and East Branches,
+    back and outer lanes, and alleys as passages).
+  - A stall is placed only where it clears every lane, keep-out, the gate-to-stage
+    sightline band and every other stall. Each stall gets a themed persistent shell
+    marker (`SkyrimFairStall<Theme><NN>`) for merchants later.
+  - Tune the layout in the config, not the code. `SKYRIMFAIR_TRACE=1` explains every
+    refusal.
+- **Medieval Markets** is audited in `docs/AUDIT.md`. JJerem's stall pieces use vanilla
+  textures, but their SMIM provenance must be confirmed before bundling. Its ESP
+  rearranges the vanilla city markets, so do not make it a dependency.
 - **Rotations are about world axes, Z then Y then X.** Lay logs with a yaw plus at
   most one tilt about the world axis across them. Build braces as crossing pairs, which
   are immune to a tilt's sign.

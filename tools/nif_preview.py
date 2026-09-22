@@ -118,6 +118,9 @@ def triangles(path):
             if size == 0 or nv == 0:
                 continue
             stride = (desc & 15) * 4
+            if stride == 0 or stride * nv + nt * 6 != size:
+                # Some vanilla shapes leave the descriptor's size nibble at 0; the data size is authoritative.
+                stride = (size - nt * 6) // nv
             attrs = desc >> 44
             full = True  # SSE (BS 100) stores positions as floats whatever the flag says
             verts = []

@@ -1,0 +1,422 @@
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Skyrim;
+using Noggog;
+
+namespace SkyrimFair.Generator;
+
+/// <summary>
+/// Lays out the market described by <see cref="MarketConfig"/>: stall shells of vanilla
+/// pieces along lanes that pinch and swell, facing the lane, irregular in set-back,
+/// angle and spacing. A stall is only placed where it keeps clear of every lane, every
+/// keep-out area, the wall and every other stall, so junctions, pockets and the
+/// gate-to-stage sightline open up by themselves. Everything varies from fixed integer
+/// hashes, so the layout regenerates byte-identically.
+/// </summary>
+internal static class FairMarket
+{
+    private const float Deg = MathF.PI / 180f;
+
+    /// <summary>Spacing of the samples that stand for a lane's corridor.</summary>
+    private const float SampleStep = 40f;
+
+    /// <summary>How far to slide along the lane after a stall is refused.</summary>
+    private const float RetryStep = 30f;
+
+    private sealed record Lane(
+        MarketLane Config, int Index, (float X, float Y)[] Points, float[] Arc, float Length, float Phase,
+        List<(float X, float Y, float Tx, float Ty, float Half)> Samples);
+
+    private sealed record Placed(float X, float Y, float Yaw, float HalfW, float HalfD);
+
+    public static MarketResult Build(
+        SkyrimMod mod, FairWorldConfig world, Func<float, float, float> outside, Func<float, float, float> ground,
+        Action<PlacedObject> put, Cell persistentCell, int persistentFlag)
+    {
+        var market = world.Market;
+        var modules = market.Modules.ToDictionary(m => m.Name);
+        var lanes = market.Lanes.Select((l, i) => BuildLane(l, i, world)).ToList();
+        var keepOut = world.Zones
+            .Where(z => market.KeepOutZones.Contains(z.Name))
+            .Select(z => z.Polygon.Select(p => (p[0], p[1])).ToArray())
+            .Concat(market.KeepOut.Select(a => a.Polygon.Select(p => (p[0], p[1])).ToArray()))
+            .ToList();
+
+        var placed = new List<Placed>();
+        var stalls = new List<MarketStall>();
+        var themeCounts = new Dictionary<string, int>();
+        var pieceCount = 0;
+        var refused = 0;
+        var reasons = new SortedDictionary<string, int>(StringComparer.Ordinal);
+        var markerBase = FormKeyHelper.Parse(market.ShellMarker);
+
+        // Null when the stall fits; otherwise what it collides with.
+        string? WhyNot(MarketModule m, float x, float y, float yaw)
+        {
+            var (hw, hd) = (m.Width / 2f, m.Depth / 2f);
+            var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
+            var (fx, fy) = (MathF.Sin(yaw * Deg), MathF.Cos(yaw * Deg));
+            for (var i = 0; i <= 4; i++)
+            {
+                for (var j = 0; j <= 2; j++)
+                {
+                    var u = -hw + i * hw / 2f;
+                    var v = -hd + j * hd;
+                    var px = x + u * rx + v * fx;
+                    var py = y + u * ry + v * fy;
+                    if (outside(px, py) > -market.WallMargin) return $"the wall at ({px:0}, {py:0})";
+                    for (var k = 0; k < keepOut.Count; k++)
+                    {
+                        if (FairGeometry.Inside(keepOut[k], px, py)) return $"keep-out area {k} at ({px:0}, {py:0})";
+                    }
+                    foreach (var lane in lanes)
+                    {
+                        // The corridor is a run of thin slabs cut square across the lane, so a
+                        // pocket's width does not spill back over the pinch beside it.
+                        foreach (var sample in lane.Samples)
+                        {
+                            var dx = px - sample.X;
+                            var dy = py - sample.Y;
+                            var along = dx * sample.Tx + dy * sample.Ty;
+                            var across = MathF.Abs(dx * sample.Ty - dy * sample.Tx);
+                            if (MathF.Abs(along) <= SampleStep * 0.6f && across < sample.Half + market.Clearance)
+                            {
+                                return $"lane {lane.Config.Name} at ({px:0}, {py:0}) sample ({sample.X:0}, {sample.Y:0}) t ({sample.Tx:0.00}, {sample.Ty:0.00}) half {sample.Half:0}";
+                            }
+                        }
+                    }
+                }
+            }
+
+            var candidate = new Placed(x, y, yaw, hw + market.Clearance / 2f, hd + market.Clearance / 2f);
+            return placed.Any(p => Overlap(p, candidate)) ? "another stall" : null;
+        }
+
+        void Commit(MarketModule m, float x, float y, float yaw, string laneName, string theme, int seedA, int seedB)
+        {
+            var mirror = FairHash.Hash3(seedA, seedB, 61) < 0.5f ? -1f : 1f;
+            var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
+            var (fx, fy) = (MathF.Sin(yaw * Deg), MathF.Cos(yaw * Deg));
+            var k = 0;
+            foreach (var piece in m.Pieces)
+            {
+                k++;
+                if (piece.Optional && FairHash.Hash3(seedA * 31 + k, seedB, 62) < 0.35f)
+                {
+                    continue;
+                }
+
+                var u = mirror * piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 5f;
+                var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 5f;
+                var px = x + u * rx + v * fx;
+                var py = y + u * ry + v * fy;
+                var pieceYaw = yaw + mirror * piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 3f;
+                put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece.Piece)),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(px, py, ground(px, py) + piece.Z),
+                        Rotation = new P3Float(0f, 0f, pieceYaw * Deg),
+                    },
+                });
+                pieceCount++;
+            }
+
+            placed.Add(new Placed(x, y, yaw, m.Width / 2f + market.Clearance / 2f, m.Depth / 2f + market.Clearance / 2f));
+
+            // The shell marker stands at the stall's front edge, facing into it.
+            var number = themeCounts[theme] = themeCounts.GetValueOrDefault(theme) + 1;
+            var mx = x + fx * (m.Depth / 2f - 20f);
+            var my = y + fy * (m.Depth / 2f - 20f);
+            var marker = new PlacedObject(mod)
+            {
+                EditorID = $"{market.ShellMarkerPrefix}{Capitalise(theme)}{number:00}",
+                MajorRecordFlagsRaw = persistentFlag,
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(markerBase),
+                Placement = new Placement
+                {
+                    Position = new P3Float(mx, my, ground(mx, my)),
+                    Rotation = new P3Float(0f, 0f, (yaw + 180f) * Deg),
+                },
+            };
+            persistentCell.Persistent.Add(marker);
+            stalls.Add(new MarketStall(laneName, m.Name, theme, marker.EditorID, x, y, yaw, m.Width, m.Depth));
+        }
+
+        // A stall beside a lane at a station, pushed back behind the lane edge, facing it.
+        (float X, float Y, float Yaw) Beside(Lane lane, float s, float side, MarketModule m, float setBack, float turn)
+        {
+            var (cx, cy, tx, ty, _) = Station(lane, s);
+            var (nx, ny) = (-ty * side, tx * side);  // side = +1 left, -1 right
+
+            // Stand behind the lane's widest point across the stall's whole frontage, and
+            // behind its meander there too, so a stall never juts into a pocket beside it.
+            var half = 0f;
+            for (var k = -2; k <= 2; k++)
+            {
+                var (sx, sy, _, _, sh) = Station(lane, s + k * m.Width / 4f);
+                half = MathF.Max(half, sh + ((sx - cx) * nx + (sy - cy) * ny));
+            }
+
+            var off = half + m.Depth / 2f + setBack + 25f;
+            var x = cx + nx * off;
+            var y = cy + ny * off;
+            var yaw = MathF.Atan2(-nx, -ny) / Deg + turn;
+            return (x, y, yaw);
+        }
+
+        // ---- signature stalls first ---------------------------------------------------
+        for (var i = 0; i < market.Fixed.Count; i++)
+        {
+            var f = market.Fixed[i];
+            var lane = lanes.First(l => l.Config.Name == f.Lane);
+            var m = modules[f.Module];
+            var side = f.Side == "left" ? 1f : -1f;
+            var (x, y, yaw) = Beside(lane, f.At, side, m, market.Clearance, 0f);
+            if (WhyNot(m, x, y, yaw) is { } reason)
+            {
+                throw new InvalidOperationException(
+                    $"Signature stall '{f.Theme}' at {f.Lane} {f.At} {f.Side} ({x:0}, {y:0}) collides with {reason}; " +
+                    "move it in fairWorld.market.fixed.");
+            }
+
+            Commit(m, x, y, yaw, lane.Config.Name, f.Theme, 900 + i, 1);
+        }
+
+        // ---- every lane, side by side ------------------------------------------------
+        foreach (var lane in lanes)
+        {
+            var c = lane.Config;
+            if (c.Mix.Count == 0)
+            {
+                continue;  // a passage only: it keeps its corridor clear, but lines up no stalls
+            }
+
+            var mix = c.Mix.Select(x => (Module: modules[x.Module], x.Weight)).ToList();
+            var total = mix.Sum(x => x.Weight);
+            var sides = c.Sides switch
+            {
+                "left" => new[] { 1f },
+                "right" => new[] { -1f },
+                _ => new[] { 1f, -1f },
+            };
+
+            foreach (var side in sides)
+            {
+                var seedA = lane.Index * 2 + (side > 0 ? 0 : 1);
+                var s = MathF.Max(0f, c.From) + FairHash.Hash3(seedA, 0, 66) * c.GapMax;
+                var end = MathF.Min(c.To, lane.Length);
+                var n = 0;
+                var themeIndex = side > 0 ? 0 : c.Themes.Count / 2;
+                while (s < end)
+                {
+                    n++;
+                    var pick = FairHash.Hash3(seedA, n, 67) * total;
+                    var m = mix[^1].Module;
+                    foreach (var (module, weight) in mix)
+                    {
+                        pick -= weight;
+                        if (pick < 0f)
+                        {
+                            m = module;
+                            break;
+                        }
+                    }
+
+                    if (s + m.Width > end)
+                    {
+                        // Near the end of the lane, finish with the smallest stall that fits, or stop.
+                        m = mix.Select(x => x.Module).OrderBy(x => x.Width).First();
+                        if (s + m.Width > end)
+                        {
+                            break;
+                        }
+                    }
+
+                    var setBack = market.Clearance + FairHash.Hash3(seedA, n, 68) * c.SetBack;
+                    var turn = FairHash.Signed(seedA, n, 69) * c.AngleJitter;
+                    var (x, y, yaw) = Beside(lane, s + m.Width / 2f, side, m, setBack, turn);
+                    var why = WhyNot(m, x, y, yaw);
+
+                    // A tight spot takes a smaller stall before it is given up on.
+                    foreach (var smaller in mix.Select(x => x.Module).Where(x => x.Width < m.Width).OrderByDescending(x => x.Width))
+                    {
+                        if (why is null) break;
+                        var (sx, sy, syaw) = Beside(lane, s + smaller.Width / 2f, side, smaller, setBack, turn);
+                        if (WhyNot(smaller, sx, sy, syaw) is null)
+                        {
+                            (m, x, y, yaw, why) = (smaller, sx, sy, syaw, null);
+                        }
+                    }
+
+                    if (why is not null)
+                    {
+                        refused++;
+                        var reason = why.Split(" at ")[0];
+                        if (Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 })
+                        {
+                            Console.Error.WriteLine($"market refuse {c.Name} side {side} s {s:0} {m.Name} at ({x:0}, {y:0}): {why}");
+                        }
+                        reasons[$"{c.Name}: {reason}"] = reasons.GetValueOrDefault($"{c.Name}: {reason}") + 1;
+                        s += RetryStep;
+                        continue;
+                    }
+
+                    var theme = c.Themes.Count == 0 ? "stall" : c.Themes[themeIndex++ % c.Themes.Count];
+                    Commit(m, x, y, yaw, c.Name, theme, seedA, n);
+                    s += m.Width + (FairHash.Hash3(seedA, n, 70) < c.PocketChance
+                        ? c.PocketMin + FairHash.Hash3(seedA, n, 71) * (c.PocketMax - c.PocketMin)
+                        : c.GapMin + FairHash.Hash3(seedA, n, 72) * (c.GapMax - c.GapMin));
+                }
+            }
+        }
+
+        // ---- hand-placed dressing that marks the lane structure ---------------------
+        foreach (var d in market.Dressing)
+        {
+            put(new PlacedObject(mod)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(d.Piece)),
+                Placement = new Placement
+                {
+                    Position = new P3Float(d.X, d.Y, ground(d.X, d.Y) + d.Z),
+                    Rotation = new P3Float(0f, 0f, d.Yaw * Deg),
+                },
+            });
+            pieceCount++;
+        }
+
+        // ---- back-to-back infill ------------------------------------------------------
+        if (market.BackFill.Count > 0)
+        {
+            var fronts = stalls.ToList();
+            var theme = 0;
+            for (var i = 0; i < fronts.Count; i++)
+            {
+                var front = fronts[i];
+                var (fx, fy) = (MathF.Sin(front.Yaw * Deg), MathF.Cos(front.Yaw * Deg));
+                foreach (var name in market.BackFill)
+                {
+                    var m = modules[name];
+                    var back = front.Depth / 2f + m.Depth / 2f + market.Clearance + 40f;
+                    var (x, y) = (front.X - fx * back, front.Y - fy * back);
+                    var yaw = front.Yaw + 180f + FairHash.Signed(i, 3, 74) * 5f;
+                    var whyBack = WhyNot(m, x, y, yaw);
+                    if (whyBack is not null && Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 })
+                    {
+                        Console.Error.WriteLine($"market backfill refuse behind {front.Lane} ({front.X:0}, {front.Y:0}) {name} at ({x:0}, {y:0}): {whyBack}");
+                    }
+
+                    if (whyBack is null)
+                    {
+                        var t = market.BackFillThemes.Count == 0 ? "stall" : market.BackFillThemes[theme++ % market.BackFillThemes.Count];
+                        Commit(m, x, y, yaw, front.Lane + " (behind)", t, 700 + i, 5);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new MarketResult(stalls, pieceCount, refused, reasons);
+    }
+
+    private static Lane BuildLane(MarketLane c, int index, FairWorldConfig world)
+    {
+        var points = (c.UseAvenue ? world.Avenue : c.Points).Select(p => (p[0], p[1])).ToArray();
+        var arc = new float[points.Length];
+        for (var i = 1; i < points.Length; i++)
+        {
+            var dx = points[i].Item1 - points[i - 1].Item1;
+            var dy = points[i].Item2 - points[i - 1].Item2;
+            arc[i] = arc[i - 1] + MathF.Sqrt(dx * dx + dy * dy);
+        }
+
+        var lane = new Lane(c, index, points, arc, arc[^1], FairHash.Hash3(index, 7, 73) * MathF.PI * 2f,
+            new List<(float, float, float, float, float)>());
+        for (var s = 0f; s <= lane.Length; s += SampleStep)
+        {
+            lane.Samples.Add(Station(lane, s));
+        }
+
+        // Round the lane's ends so nothing stands right across its mouth.
+        foreach (var s in new[] { 0f, lane.Length })
+        {
+            var (x, y, tx, ty, half) = Station(lane, s);
+            for (var k = 1; k <= (int)(half / SampleStep); k++)
+            {
+                var d = (s == 0f ? -1f : 1f) * k * SampleStep;
+                lane.Samples.Add((x + tx * d, y + ty * d, tx, ty, MathF.Sqrt(MathF.Max(0f, half * half - d * d))));
+            }
+        }
+
+        return lane;
+    }
+
+    /// <summary>Lane centre (with its meander), direction and half-width at distance <paramref name="s"/>.</summary>
+    private static (float X, float Y, float Tx, float Ty, float Half) Station(Lane lane, float s)
+    {
+        s = Math.Clamp(s, 0f, lane.Length);
+        var i = 1;
+        while (i < lane.Points.Length - 1 && lane.Arc[i] < s) i++;
+        var a = lane.Points[i - 1];
+        var b = lane.Points[i];
+        var segment = lane.Arc[i] - lane.Arc[i - 1];
+        var t = segment <= 0f ? 0f : (s - lane.Arc[i - 1]) / segment;
+        var (tx, ty) = ((b.X - a.X) / segment, (b.Y - a.Y) / segment);
+        var (amp, period) = (lane.Config.Meander[0], MathF.Max(1f, lane.Config.Meander[1]));
+        var wander = amp * MathF.Sin(2f * MathF.PI * s / period + lane.Phase);
+        var x = a.X + (b.X - a.X) * t - ty * wander;
+        var y = a.Y + (b.Y - a.Y) * t + tx * wander;
+        return (x, y, tx, ty, HalfWidth(lane.Config.HalfWidths, s));
+    }
+
+    private static float HalfWidth(List<float[]> stations, float s)
+    {
+        if (stations.Count == 0) return 250f;
+        if (s <= stations[0][0]) return stations[0][1];
+        for (var i = 1; i < stations.Count; i++)
+        {
+            if (s <= stations[i][0])
+            {
+                var (s0, h0, s1, h1) = (stations[i - 1][0], stations[i - 1][1], stations[i][0], stations[i][1]);
+                return h0 + (h1 - h0) * (s - s0) / MathF.Max(1f, s1 - s0);
+            }
+        }
+
+        return stations[^1][1];
+    }
+
+    /// <summary>Separating-axis test for two rotated rectangles.</summary>
+    private static bool Overlap(Placed a, Placed b)
+    {
+        foreach (var yaw in new[] { a.Yaw, b.Yaw })
+        {
+            foreach (var axis in new[] { (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg)), (MathF.Sin(yaw * Deg), MathF.Cos(yaw * Deg)) })
+            {
+                float Extent(Placed p)
+                {
+                    var (rx, ry) = (MathF.Cos(p.Yaw * Deg), -MathF.Sin(p.Yaw * Deg));
+                    var (fx, fy) = (MathF.Sin(p.Yaw * Deg), MathF.Cos(p.Yaw * Deg));
+                    return p.HalfW * MathF.Abs(rx * axis.Item1 + ry * axis.Item2)
+                        + p.HalfD * MathF.Abs(fx * axis.Item1 + fy * axis.Item2);
+                }
+
+                var gap = MathF.Abs((b.X - a.X) * axis.Item1 + (b.Y - a.Y) * axis.Item2);
+                if (gap > Extent(a) + Extent(b))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static string Capitalise(string s) => s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s[1..];
+}
+
+internal sealed record MarketStall(
+    string Lane, string Module, string Theme, string MarkerEditorId, float X, float Y, float Yaw, float Width, float Depth);
+
+internal sealed record MarketResult(
+    IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons);
