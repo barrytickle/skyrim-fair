@@ -1,0 +1,450 @@
+{
+  "_comment": "Vanilla item meshes the fair shows as physics-free static props. tools/make_static_props.py writes each to meshes/SkyrimFair/Props/<Name>.nif (git-ignored) and records bounds in tools/static_props.json. Generated records are SkyrimFairProp<Name>, used in modules as @Prop<Name>.",
+  "props": {
+    "TowerLantern": {
+      "source": "meshes/clutter/common/candlelanternwithcandle01.nif",
+      "out": "SkyrimFair/TowerLantern.nif"
+    },
+    "Bread01A": {
+      "source": "meshes/clutter/food/bread01a.nif"
+    },
+    "Bread01B": {
+      "source": "meshes/clutter/food/bread01b.nif"
+    },
+    "CheeseWheel01A": {
+      "source": "meshes/clutter/food/cheesewheel01a.nif"
+    },
+    "CheeseWheel01B": {
+      "source": "meshes/clutter/food/cheesewheel01b.nif"
+    },
+    "CheeseWheel02A": {
+      "source": "meshes/clutter/food/cheesewheel02a.nif"
+    },
+    "CheeseWedge01": {
+      "source": "meshes/clutter/food/cheesewedge01.nif"
+    },
+    "CheeseWedge02": {
+      "source": "meshes/clutter/food/cheesewedge02.nif"
+    },
+    "Apple01": {
+      "source": "meshes/clutter/food/apple01.nif"
+    },
+    "Apple02": {
+      "source": "meshes/clutter/food/apple02.nif"
+    },
+    "Cabbage": {
+      "source": "meshes/plants/cabbage01.nif"
+    },
+    "Potato": {
+      "source": "meshes/plants/potato01.nif"
+    },
+    "Leek": {
+      "source": "meshes/plants/leek01.nif"
+    },
+    "Carrot": {
+      "source": "meshes/clutter/ingredients/carrot01.nif"
+    },
+    "Tomato": {
+      "source": "meshes/clutter/ingredients/tomato.nif"
+    },
+    "Gourd": {
+      "source": "meshes/plants/gourd01.nif"
+    },
+    "Sweetroll": {
+      "source": "meshes/clutter/ingredients/sweetroll01.nif"
+    },
+    "Pie": {
+      "source": "meshes/clutter/ingredients/pie01.nif"
+    },
+    "HoneyNutTreat": {
+      "source": "meshes/clutter/food/nuttybread01.nif"
+    },
+    "CremeTreat": {
+      "source": "meshes/clutter/food/butterscotchcreams01.nif"
+    },
+    "Venison": {
+      "source": "meshes/clutter/ingredients/venison.nif"
+    },
+    "Beef": {
+      "source": "meshes/clutter/ingredients/beefmeat.nif"
+    },
+    "GoatMeat": {
+      "source": "meshes/clutter/ingredients/goatmeat.nif"
+    },
+    "HorkerMeat": {
+      "source": "meshes/clutter/ingredients/horkermeat.nif"
+    },
+    "SalmonSteak": {
+      "source": "meshes/clutter/food/cookedsalmonsteak01.nif"
+    },
+    "SaltPile": {
+      "source": "meshes/clutter/ingredients/saltpile.nif"
+    },
+    "LeeksGrilled": {
+      "source": "meshes/clutter/food/grilledleeks01.nif"
+    },
+    "PotatoesBaked": {
+      "source": "meshes/clutter/food/grilledpotatoes01.nif"
+    },
+    "Mead": {
+      "source": "meshes/clutter/ingredients/mead01.nif"
+    },
+    "MeadHonningbrew": {
+      "source": "meshes/clutter/potions/meadhonningbrew01.nif"
+    },
+    "MeadBlackBriar": {
+      "source": "meshes/clutter/potions/meadblackbriar.nif"
+    },
+    "WineBottle01": {
+      "source": "meshes/clutter/wine/winebottle01b.nif"
+    },
+    "WineBottle02": {
+      "source": "meshes/clutter/wine/winebottle02b.nif"
+    },
+    "Tankard": {
+      "source": "meshes/clutter/dining set/basictankard01.nif"
+    },
+    "GobletSilver": {
+      "source": "meshes/clutter/silver/silvergoblet02.nif"
+    },
+    "GobletGlazed": {
+      "source": "meshes/clutter/glazedgoblet01.nif"
+    },
+    "DrinkingHorn": {
+      "source": "meshes/clutter/quest/tgdrinkinghorn.nif"
+    },
+    "WoodenBowl": {
+      "source": "meshes/clutter/dining set/basicwoodenbowl01.nif"
+    },
+    "WoodenPlate": {
+      "source": "meshes/clutter/dining set/basicwoodenplate01.nif"
+    },
+    "Plate": {
+      "source": "meshes/clutter/dining set/basicplate01.nif"
+    },
+    "JugLarge": {
+      "source": "meshes/clutter/glazedjuglarge01.nif"
+    },
+    "JugSmall": {
+      "source": "meshes/clutter/glazedjugsmall01.nif"
+    },
+    "GlazedPot01": {
+      "source": "meshes/clutter/glazedpot01.nif"
+    },
+    "GlazedPot02": {
+      "source": "meshes/clutter/glazedpot02.nif"
+    },
+    "GlazedBowl": {
+      "source": "meshes/clutter/glazedbowl01.nif"
+    },
+    "GlazedPlate": {
+      "source": "meshes/clutter/glazedplate01.nif"
+    },
+    "SilverJug": {
+      "source": "meshes/clutter/silver/silverjug01.nif"
+    },
+    "SilverBowl": {
+      "source": "meshes/clutter/silver/silverbowl01.nif"
+    },
+    "IronPot": {
+      "source": "meshes/clutter/kitchen/castironpotmedium01.nif"
+    },
+    "Bucket": {
+      "source": "meshes/clutter/bucket01.nif"
+    },
+    "Basket01": {
+      "source": "meshes/clutter/basket01.nif"
+    },
+    "Basket02": {
+      "source": "meshes/clutter/basket02.nif"
+    },
+    "Basket03": {
+      "source": "meshes/clutter/basket03.nif"
+    },
+    "Basket04": {
+      "source": "meshes/clutter/basket04.nif"
+    },
+    "Basket05": {
+      "source": "meshes/clutter/basket05.nif"
+    },
+    "BasketClosed": {
+      "source": "meshes/clutter/basketclosed01.nif"
+    },
+    "Broom": {
+      "source": "meshes/clutter/common/broom.nif"
+    },
+    "LinenPile": {
+      "source": "meshes/clutter/ruins/ruinslinenwrap01.nif"
+    },
+    "IronSword": {
+      "source": "meshes/weapons/iron/longsword.nif"
+    },
+    "SteelSword": {
+      "source": "meshes/weapons/steel/steelsword.nif"
+    },
+    "IronWarAxe": {
+      "source": "meshes/weapons/iron/waraxe.nif"
+    },
+    "SteelWarAxe": {
+      "source": "meshes/weapons/steel/steelwaraxe.nif"
+    },
+    "IronMace": {
+      "source": "meshes/weapons/iron/ironmace.nif"
+    },
+    "IronDagger": {
+      "source": "meshes/weapons/iron/irondagger.nif"
+    },
+    "SteelDagger": {
+      "source": "meshes/weapons/steel/steeldagger.nif"
+    },
+    "IronBattleAxe": {
+      "source": "meshes/weapons/iron/ironbattleaxe.nif"
+    },
+    "IronShield": {
+      "source": "meshes/armor/iron/shield.nif"
+    },
+    "SteelShield": {
+      "source": "meshes/armor/steel/shield.nif"
+    },
+    "IronHelmet": {
+      "source": "meshes/armor/iron/male/helmetgnd.nif"
+    },
+    "SteelHelmet": {
+      "source": "meshes/armor/steel/helmetlightgo.nif"
+    },
+    "IronCuirass": {
+      "source": "meshes/armor/iron/male/cuirasslightgnd.nif"
+    },
+    "IngotIron": {
+      "source": "meshes/dungeons/mines/ore/ingotiron01.nif"
+    },
+    "IngotSteel": {
+      "source": "meshes/dungeons/mines/ore/ingotsteel.nif"
+    },
+    "SmithHammer": {
+      "source": "meshes/clutter/blacksmith/blacksmithnovicehammer01.nif"
+    },
+    "SmithTongs": {
+      "source": "meshes/clutter/blacksmith/blacksmithnovicetongs01.nif"
+    },
+    "ImperialHelmet": {
+      "source": "meshes/armor/imperial/m/helmetmediumgnd.nif"
+    },
+    "ImperialShield": {
+      "source": "meshes/armor/imperial/imperialshield.nif"
+    },
+    "ImperialBow": {
+      "source": "meshes/weapons/iron/ironbow.nif"
+    },
+    "ImperialWarHorn": {
+      "source": "meshes/clutter/warhorns/imperialwarhorn.nif"
+    },
+    "StormcloakHelmet": {
+      "source": "meshes/armor/stormcloaks/helmetgo.nif"
+    },
+    "StormcloakCuirass": {
+      "source": "meshes/armor/stormcloaks/cuirassgo.nif"
+    },
+    "NordWarHorn": {
+      "source": "meshes/clutter/warhorns/nordwarhorn.nif"
+    },
+    "HuntingBow": {
+      "source": "meshes/weapons/steel/steelbow.nif"
+    },
+    "LongBow": {
+      "source": "meshes/weapons/wooden/woodenbow.nif"
+    },
+    "IronArrow": {
+      "source": "meshes/weapons/iron/ironarrow.nif"
+    },
+    "HideShield": {
+      "source": "meshes/armor/hide/hideshield.nif"
+    },
+    "HideHelmet": {
+      "source": "meshes/armor/hide/m/helmetlightgnd.nif"
+    },
+    "HideCuirass": {
+      "source": "meshes/armor/hide/m/cuirasslightgnd.nif"
+    },
+    "WolfPelt": {
+      "source": "meshes/clutter/wolfpelts/wolfpelt.nif"
+    },
+    "FoxPelt": {
+      "source": "meshes/clutter/wolfpelts/foxpelt.nif"
+    },
+    "DeerPelt": {
+      "source": "meshes/clutter/ingredients/deerpelt.nif"
+    },
+    "BearPelt": {
+      "source": "meshes/clutter/ingredients/bearpelt.nif"
+    },
+    "GoatPelt": {
+      "source": "meshes/clutter/goatskin/goatpelt.nif"
+    },
+    "LeatherStrips": {
+      "source": "meshes/clutter/common/leatherstrips01.nif"
+    },
+    "HangingRabbit": {
+      "source": "meshes/clutter/deadanimals/hangingrabbit01.nif"
+    },
+    "HangingRabbit02": {
+      "source": "meshes/clutter/deadanimals/hangingrabbit02.nif"
+    },
+    "HangingPheasant": {
+      "source": "meshes/clutter/deadanimals/hangingpheasant01.nif"
+    },
+    "HangingSalmon": {
+      "source": "meshes/clutter/deadanimals/deadsalmon01nonail.nif"
+    },
+    "AmuletSilver": {
+      "source": "meshes/armor/amuletsandrings/silveramuletgo.nif"
+    },
+    "AmuletGold": {
+      "source": "meshes/armor/amuletsandrings/goldamuletgo.nif"
+    },
+    "AmuletGems": {
+      "source": "meshes/armor/amuletsandrings/silveramuletgemsgo.nif"
+    },
+    "RingSilver": {
+      "source": "meshes/armor/amuletsandrings/silverringgo.nif"
+    },
+    "RingGold": {
+      "source": "meshes/armor/amuletsandrings/goldringgo.nif"
+    },
+    "Circlet": {
+      "source": "meshes/armor/circlets/circlet1_go.nif"
+    },
+    "IngotGold": {
+      "source": "meshes/dungeons/mines/ore/ingotgold.nif"
+    },
+    "IngotSilver": {
+      "source": "meshes/dungeons/mines/ore/ingotsilver.nif"
+    },
+    "SoulGemLesser": {
+      "source": "meshes/clutter/soulgem/soulgemlesser01.nif"
+    },
+    "SoulGemGrand": {
+      "source": "meshes/clutter/soulgem/soulgemgrand01.nif"
+    },
+    "DweCog": {
+      "source": "meshes/clutter/dwemer/dwecog01.nif"
+    },
+    "DweGyro": {
+      "source": "meshes/clutter/dwemer/dwarvengyro.nif"
+    },
+    "DwePot": {
+      "source": "meshes/clutter/dwemer/dwemerpot01.nif"
+    },
+    "DweUrn": {
+      "source": "meshes/clutter/dwemer/dwemerpot02.nif"
+    },
+    "DweBowl": {
+      "source": "meshes/clutter/dwemer/dwemerbowl02.nif"
+    },
+    "DwePlateLarge": {
+      "source": "meshes/clutter/dwemer/largedwarvenplate.nif"
+    },
+    "DweScrap": {
+      "source": "meshes/clutter/dwemer/dwarvenscraplarge1.nif"
+    },
+    "DweCup": {
+      "source": "meshes/clutter/dwemer/dwecup01.nif"
+    },
+    "DwarvenSword": {
+      "source": "meshes/weapons/dwarven/dwarvensword.nif"
+    },
+    "DwarvenHelmet": {
+      "source": "meshes/armor/dwarven/dwarvenhelmetgo.nif"
+    },
+    "DwarvenShield": {
+      "source": "meshes/armor/dwarven/dwarvenshield.nif"
+    },
+    "ElvenSword": {
+      "source": "meshes/weapons/elven/elvensword.nif"
+    },
+    "ElvenHelmet": {
+      "source": "meshes/armor/elven/m/helmetgnd.nif"
+    },
+    "ElvenShield": {
+      "source": "meshes/armor/elven/elvenshield.nif"
+    },
+    "PotionHealth": {
+      "source": "meshes/clutter/potions/potionhealthlesser.nif"
+    },
+    "PotionMagicka": {
+      "source": "meshes/clutter/potions/potionmagickalesser.nif"
+    },
+    "PotionStamina": {
+      "source": "meshes/clutter/potions/potionstaminalesser.nif"
+    },
+    "PotionHealthGreat": {
+      "source": "meshes/clutter/potions/potionhealthgreat.nif"
+    },
+    "Scroll": {
+      "source": "meshes/clutter/common/scroll01.nif"
+    },
+    "DragonsTongue": {
+      "source": "meshes/plants/dragonstongue01.nif"
+    },
+    "FireSalts": {
+      "source": "meshes/clutter/ingredients/firesaltpile.nif"
+    },
+    "Book01": {
+      "source": "meshes/clutter/books/basicbook01.nif"
+    },
+    "Book03": {
+      "source": "meshes/clutter/books/basicbook03.nif"
+    },
+    "Book05": {
+      "source": "meshes/clutter/books/basicbook05a.nif"
+    },
+    "Book02": {
+      "source": "meshes/clutter/books/book02lowpoly.nif"
+    },
+    "Parchment": {
+      "source": "meshes/clutter/quest/tgparchment01.nif"
+    },
+    "HangingGarlic": {
+      "source": "meshes/plants/hanginggarlicbraid01.nif"
+    },
+    "HangingElvesEar": {
+      "source": "meshes/plants/hangingelvesear01.nif"
+    },
+    "HangingFrostMirriam": {
+      "source": "meshes/plants/hangingfrostmirriam01.nif"
+    },
+    "Lute": {
+      "source": "meshes/clutter/common/lute01.nif"
+    },
+    "Drum": {
+      "source": "meshes/clutter/common/drum01.nif"
+    },
+    "Flute": {
+      "source": "meshes/clutter/common/flute01.nif"
+    },
+    "BarrelFood": {
+      "source": "meshes/clutter/barrel01.nif"
+    },
+    "SackLarge": {
+      "source": "meshes/clutter/containers/miscsacklarge.nif"
+    },
+    "SackLargeFlat": {
+      "source": "meshes/clutter/containers/miscsacklargeflat01.nif"
+    },
+    "SackLargeFlat02": {
+      "source": "meshes/clutter/containers/miscsacklargeflat02.nif"
+    },
+    "Sack02Large": {
+      "source": "meshes/clutter/containers/miscsack02large.nif"
+    },
+    "Sack02LargeFlat": {
+      "source": "meshes/clutter/containers/miscsack02largeflat.nif"
+    },
+    "SackSmall": {
+      "source": "meshes/clutter/containers/miscsacksmall.nif"
+    },
+    "Sack02Small": {
+      "source": "meshes/clutter/containers/miscsack02small.nif"
+    }
+  }
+}

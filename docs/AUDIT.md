@@ -2,7 +2,258 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: tower fixes and working archery (2026-09-22, late)
+## Current pass: festival liveliness and density, worn ground (2026-09-23)
+
+Barry's brief: "THE STRUCTURE IS GOOD, BUT THE FAIR STILL FEELS TOO BARE... MORE LIFE, NOT
+MORE LAND", then "i have a mod called 'Holidays' can we try and use some of the
+decorations", "audit & implement the whiterun and the parallax mod", and "the cobblestone
+for like the center path, and then the dirt parallax textures for the outside areas, but
+make them patchy... make it look like the festival is used and the ground is worn". The
+layout is unchanged: same 33 stalls, same lanes, avenue kept clear.
+
+### Numbers (read from the written ESP)
+
+| | Before | After |
+| --- | --- | --- |
+| Market pieces | 301 | 1,922 (1,056 of them physics-free goods) |
+| Dressing groups | 47 | 68 |
+| Festival line crossings | 0 | 21 (42 poles, 42 rope halves, 75 hanging lanterns) |
+| Visitors | 0 | 34 (plus 59 stall-keepers and 4 archers) |
+| Real lights | 14 | 18 (3 stall lights, 1 range brazier) |
+| Plugin | 423 KB | 561 KB, masters `Skyrim.esm, Holidays.esp` |
+
+### Fixed on the way: sunk stalls and keepers inside tables
+
+`WRMarketStand01` (the `grand_double` stalls: Imperial, Stormcloak and four more) has its
+origin at its tabletop with legs 72 below (bounds minZ -72). Vanilla stands it about 75 up
+(Carlotta's: her ground items sit 71-74 below the stand). We placed it at ground level, so
+its table was at ankle height, its canopy at head height and its keepers stood inside the
+table. It now stands at 75, and its keepers behind the table (y -145). The
+`whiterun_stand` and `canvas_wide` keepers moved behind their `WRMarketStand02` counter
+too (y -105 and -100). This is probably what Barry saw as the Dawi "breaking with the
+vendor table".
+
+### Goods: physics-free static props
+
+The goods vanilla puts on its market stalls (cheese, bread, bottles, weapons, pelts) are
+loose havok items: they fall, get knocked off and can be stolen, which is what happened to
+the tower lantern. **`tools/make_static_props.py`** (replaces `make_tower_lantern.py`)
+copies each vanilla mesh listed in `tools/static_props_sources.json` out of the BSAs with
+its collision unhooked, into `meshes\SkyrimFair\Props\` (**generated, git-ignored**, a
+modified Bethesda mesh). It measures bounds into `tools/static_props.json` (committed),
+and the generator makes a STAT `SkyrimFairProp<Name>` for each (`@Prop<Name>` in modules).
+**148 props**:
+- **Food**: bread, cheese, vegetables, sweetrolls, pies and treats.
+- **Drink**: meads, wines, tankards and a drinking horn.
+- **Tableware**: pottery, silver and baskets.
+- **Arms and armour**: iron, steel, Imperial, Stormcloak, hide, elven and dwemer weapons,
+  armour and shields.
+- **Hunting**: bows, arrows and pelts, plus hanging game and hanging herbs.
+- **Valuables and curios**: jewellery, soul gems, dwemer curios, potions, books and scrolls.
+- **Instruments**: lute, drum and flute.
+- **Sacks** and a food barrel.
+
+11 skinned meshes (books, bows, hanging game) have fallback bounds.
+
+### Stall individuality: five layers from theme kits
+
+Each stall module now has **slots** in its own frame, measured from the shells:
+
+| Slot | What it is |
+| --- | --- |
+| counter strips | Counter tops: Windhelm stalls at 77, `WRMarketStand02` at 76, `WRMarketStand01` table at 77 once raised, the display shelves' tiers, wooden tables at 62. |
+| hang lines | Under the canopies. |
+| side and rear spots | On the ground. |
+| sign spot | Where the identity marker stands. |
+
+A **stall kit** per theme (25 kits covering all 38 themes) fills those slots from a
+library of **111 vignettes** (small scenes such as a cheese board, a sack pile, a barrel
+table or a pelt rack):
+1. **Structure**: the existing shell.
+2. **Front display**: goods laid along every counter strip, cycling the kit's vignettes.
+3. **Side clutter** and 4. **rear storage**: one vignette per ground spot, or none now and
+   then.
+5. **Identity**: a vanilla shop sign hung between two `SignWRPost01` posts, perpendicular
+   to the street as vanilla hangs them (posts about 90 apart, sign at 168), usually with a
+   snowberry wreath.
+
+Hang lines carry herbs, game or coloured lanterns, depending on the kit.
+
+Examples:
+- **Sweetroll**: platters and plates of sweetrolls, a honey sign, coloured lanterns, a
+  stall light, the biggest queue.
+- **Food**: cabbages, potatoes, apples, gourds, garlic hanging, produce spilling onto the
+  ground.
+- **Drink**: meads and tankards, Honningbrew sign, mead barrels, a barrel table with
+  stools.
+- **Roast**: meats and fish, hanging game, a spit roast beside it.
+- **Smith**: swords, axes and helmets, weapons standing in a barrel.
+- **Imperial**: red rug with an Imperial helmet and shield. **Stormcloak**: pelts, a
+  Stormcloak helmet, axes and a war horn.
+- Also jewellery on a cloth, dwemer curios, potions, books and candles.
+
+### Overhead: festival lines (Holidays)
+
+At intervals along every lane, a pole stands each side, 35 inside the corridor edge. That
+is the only room there is, because stalls line both sides, and a 16-wide pole does not
+impede walking. A pennant rope is swagged between the poles:
+- **Poles**: vanilla `WHIntWoodLogVerticalThin01` with a `WHIntWoodLogVerticalThinShort01`
+  cap, 381 tall.
+- **Ropes**: two mirrored halves of the vanilla Solitude festival line
+  (`SRopefestivalLine01`, which starts 53 from its origin, runs 682 and rises 150), in
+  **Holidays' colourways**: Whiterun, Saturalia, Riften and Windhelm, and **one Imperial
+  and one Stormcloak half** meeting over the rival stalls. The low middle is at about
+  330-350, just above the tallest canopy (281).
+- **Lanterns**: Holidays' coloured animated lanterns follow the curve of most crossings.
+
+Runs cover the Avenue, EastLane, EastWallWalk, EastCross and EastEntry: 21 crossings, 4
+refused where a junction or table stood.
+
+### Archery: a county-fair attraction
+
+The keep-out is now just the four lanes, from the backstops to just behind the firing
+line (x -760 to 260, y 860 to 1940), so the range can be dressed round its edges. Added:
+- An **attendant booth**: a table of bows and arrows, a barrel of arrows, a lantern and
+  Solitude's fletcher sign.
+- A **prize booth**: a sweetroll platter, meads, a silver goblet, an amulet, a wolf pelt
+  and a sign stand.
+- **Spectator benches** on both long sides (benches, stools, hay bale, barrel with
+  tankards).
+- A **scoreboard** (sign stand, stool, parchment).
+- **Range storage** (spare target leaning on arrows and crates).
+- A **hay** cluster and a **brazier**.
+- Three **spectators** behind the firing line.
+
+Read back: **0 new references in any line of fire**.
+
+### Hotspots and uneven crowds
+
+Visitors are the stall-keepers' kind of NPC under the name "Fair Visitor": vanilla faces
+from the fair's own face lists, the stay-at-location package. They are placed in loose,
+facing groups round what draws people, and never inside a stall, dressing group or pole:
+
+| Where | Visitors |
+| --- | --- |
+| Sweetroll queue | 4 |
+| Mead / drink stall | 3 |
+| Roast | 3 |
+| Stage approach | 5 |
+| Round braziers | 5 |
+| Archery line | 2 |
+| Traders' Crossing (EastLane x EastCross, 3780, 1000) | 2 |
+| Picnic tables | 4 |
+| Cook fires | 2 |
+| Bakery, pies, jewellery | 1 each |
+| Imperial rivals | 1 |
+
+Group sizes vary by one either way, and not every table or fire gets a group, so the
+density has a rhythm. A few groups got no one where their ground was already full (cheese,
+Stormcloak, dwemer, smith).
+
+### Micro-clusters, wall pockets, picnic
+
+- **Micro-clusters**: 11 placed (barrel with tankards and stools, crate, sack and basket,
+  delivery handcart, woodpile with chopping block, hay with basket and bread, bench with
+  lantern, trader's cart). They fill gaps between stalls with the spiral fitter, which
+  respects lanes, keep-outs and stalls.
+- **Wall pockets**: 7 placed, irregular along the palisade (woodpiles, stacked crates,
+  barrels, a camp).
+- **Picnic**: the seating runs now mix `picnic` with `picnic_busy` (tankards, bread, cheese,
+  a jug and a lantern on the table, a stool and a hay bale dragged in), `picnic_mixed`
+  (round table, stools, a crate) and `picnic_hay` (hay bales round a crate).
+- **The picnic lantern** was vanilla `Lantern`, a havok object that can fall. It's now the
+  static copy.
+
+### Worn ground and the cobbled avenue
+
+Five fair-owned landscape textures (`SkyrimFairGround*`). Each copies a vanilla LTEX, so
+grass, footsteps and friction carry over, and has its own texture set whose **height slot
+names a parallax map**:
+- **Grass** from `LFieldGrass01`: the base, keeps its grass.
+- **Dirt-grass** from `LFieldDirtGrass01`: patchy almost everywhere, more where walked.
+- **Dirt** from `LDirt02`: bare patches following wear, broken by noise at two scales.
+- **Path** from `LDirtPath01`: trodden where traffic is heaviest.
+- **Cobble** from `LSnowCobble01` (stone footsteps), retextured to
+  `Architecture\Whiterun\WRStoneFloor01` with its `_n` and `_p` maps. It runs the length
+  of the avenue, 500 wide, its edge wandering ±110, some stones sunk under dirt, and
+  scuffed bare at the fringe.
+
+**Wear** is a field painted *after* everything is placed. It rises round:
+- stall fronts and floors, stall-keepers and visitors
+- dressing groups (picnics, fires, camps)
+- the archery firing line and target area
+- every market lane's corridor
+- the entrance forecourt and the crowd square
+
+The old flat zone colours, only ever plan markers, are no longer painted. LAND FormIDs are
+unchanged: heights are still built with the cells, and only the texture layers are added
+at the end. At most 6 layers per quadrant.
+
+**The two texture packs are not bundled.** They replace vanilla textures, so they are
+optional, and Barry installs them in MO2:
+- **Whiterun Mossy Wet Stonefloor – Grey 2k** (Nexus 99294) supplies
+  `wrstonefloor01/02` with `_n` and `_p`. Without it the cobbles use vanilla
+  `WRStoneFloor01`.
+- **Terrain Parallax 1.5 – 4K2K** (Nexus 54860) supplies about 50 landscape textures with
+  `_p` maps.
+
+The modlist has Community Shaders with **Terrain Helper** (its DLL looks up terrain
+parallax maps), Terrain Blending and Terrain Variation. The fair's texture sets name their
+`_p` maps explicitly. Whether parallax shows in game is **unverified**.
+
+### Holidays as a master
+
+`Holidays.esp` (Nexus 1533, v2.20 Alpha 1, installed in MO2) is now a **master** of
+SkyrimFair.esp. The fair places its records (rope colourways, lanterns, apple basket, mead
+crate, platter, sign stand) and ships none of its files. In the "Still in Skyrim Plus"
+profile it is enabled and loads at 141, before SkyrimFair.esp at 161. The generator now
+writes against an explicit load order (Skyrim, Update, the DLCs, Holidays) instead of the
+stock game's plugin list, which does not know Holidays.
+
+### Verification
+
+- Generator run twice: identical SHA256 `60d0a724b1b08410...` (560,509 bytes). **Deployed
+  byte-identical**, with `meshes\SkyrimFair\Props\` (147) and `TowerLantern.nif`.
+- Masters read back: `Skyrim.esm, Holidays.esp`.
+- Ground texture sets read back with diffuse, normal and height paths; grass kept on the
+  grass layer.
+- **0** references in the archery lines of fire. **0** low references in the gate-to-stage
+  sightline band (only rope lines and lanterns overhead).
+- Plan drawn from the written ESP (`docs/images/lively_plan.png`: ground colour by texture,
+  blue keepers, red visitors, yellow archers, black poles, pink ropes, orange lights): cobbled
+  avenue, worn market, patchy field, lines across the lanes, visitors at the hotspots.
+- Stall renders from the customer's side (`docs/images/lively_stalls.png`): goods on the counters, the raised
+  `WRMarketStand01` table, sacks and crates spilling in front, the spit roast.
+
+### Known and not done
+
+- **Performance**: 97 actors in the fair (59 keepers, 34 visitors, 4 archers), 18 real
+  lights, and about 1,900 small statics. `fairWorld.crowds.enabled` turns the visitors off.
+- **Not seen in game**: counter heights, small item orientation (tilted leeks, lying
+  swords and bows, the lute), hang heights, and how the cobble texture tiles at terrain
+  scale (it's an architecture texture on landscape).
+- Skinned props (bows, books, hanging game) use fallback bounds and may sit oddly.
+- Holidays is Alpha; if a Holidays update renumbers records, the fair's references break.
+  Pin the version.
+- No navmesh yet; everything was placed with it in mind (poles at corridor edges, nothing
+  in the lines of fire or the sightline).
+
+### Test
+
+1. **Walk the avenue** from the gate to the stage. Is it easy? Do the cobbles read as
+   cobbles, and how big do the stones look on terrain?
+2. **Stalls**: can you tell what each sells from the path? Are the goods on the counters
+   (not floating or sunk)? Check the raised Imperial/Stormcloak tables and the keepers
+   behind them.
+3. **Festival lines**: height, sag and colours; the rival Imperial/Stormcloak crossing.
+4. **Archery**: booth, prize table, benches. Do the archers now shoot? (The stand-marker
+   fix is in this build.)
+5. **Crowds**: does the sweetroll queue read as the most popular thing at the fair?
+6. **Ground**: install the two texture packs in MO2 first, then check the worn patches,
+   the parallax, and whether anything looks too uniform.
+7. **Frame rate** in the market at night.
+
+## Previous pass: tower fixes and working archery (2026-09-22, late)
 
 Barry tested the towers and the range: "The lantern doesn't glow nor does it sit in the
 tower top, can we use fireFX to just make the lanterns glow?", "The flags on the towers

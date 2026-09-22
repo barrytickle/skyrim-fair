@@ -19,6 +19,8 @@ external/
 assets/meshes/Stroti/
 assets/textures/Stroti/
 
-# The towers' lantern is a modified vanilla mesh: generate it, never commit it.
-#   python tools/make_tower_lantern.py --data "<stock Data>"
+# Physics-free copies of vanilla meshes (the towers' lantern and the market's goods) are
+# modified Bethesda meshes: generate them, never commit them.
+#   python tools/make_static_props.py --data "<stock Data>"
 assets/meshes/SkyrimFair/TowerLantern.nif
+assets/meshes/SkyrimFair/Props/

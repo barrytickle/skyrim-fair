@@ -306,9 +306,16 @@ internal static class FairPluginGenerator
 
         var outputPath = Path.Combine(outputDirectory, mod.ModKey.FileName);
 
+        // Masters are sorted against this order. Holidays.esp (Nexus 1533) supplies the
+        // festival rope lines, lanterns and a few festive props the fair places, so it is a
+        // master too; it lives in the MO2 profile, not the stock game's plugin list.
         mod.BeginWrite
             .ToPath(outputPath)
-            .WithDefaultLoadOrder()
+            .WithLoadOrder(
+                ModKey.FromFileName("Skyrim.esm"), ModKey.FromFileName("Update.esm"),
+                ModKey.FromFileName("Dawnguard.esm"), ModKey.FromFileName("HearthFires.esm"),
+                ModKey.FromFileName("Dragonborn.esm"), ModKey.FromFileName("Holidays.esp"))
+            .WithNoDataFolder()
             .Write();
 
         return new FairBuildResult(

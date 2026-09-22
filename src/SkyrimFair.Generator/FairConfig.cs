@@ -136,6 +136,22 @@ internal sealed record FairWorldConfig
     /// <summary>Festival light towers: Barry's scaffold, a large lantern, Whiterun banners.</summary>
     public TowersConfig Towers { get; init; } = new();
 
+    /// <summary>
+    /// Physics-free copies of vanilla item meshes, listed with their bounds in the manifest
+    /// <c>tools/make_static_props.py</c> writes (relative to the config file). Each becomes a
+    /// STAT named <c>SkyrimFairProp&lt;Name&gt;</c>, used in modules as <c>@Prop&lt;Name&gt;</c>.
+    /// </summary>
+    public string PropManifest { get; init; } = string.Empty;
+
+    /// <summary>The worn, patchy festival ground: fair-owned landscape textures and wear.</summary>
+    public GroundConfig Ground { get; init; } = new();
+
+    /// <summary>Overhead festival lines: pennant ropes and lanterns strung between poles.</summary>
+    public List<OverheadRun> Overhead { get; init; } = new();
+
+    /// <summary>Visitors gathered unevenly round the fair's attractions.</summary>
+    public CrowdsConfig Crowds { get; init; } = new();
+
     /// <summary>The archery range: townsfolk practising at targets, Solitude-style.</summary>
     public ArcheryConfig Archery { get; init; } = new();
 
@@ -280,6 +296,9 @@ internal record ProjectStaticConfig
     public float Depth { get; init; }
 
     public float Height { get; init; }
+
+    /// <summary>Lowest point below the origin (props that hang or sit round their origin).</summary>
+    public float MinZ { get; init; }
 
     public float Scale { get; init; } = 1f;
 }
@@ -1768,6 +1787,15 @@ internal sealed record MarketConfig
     /// <summary>Hand-placed dressing that marks the lane structure, such as banner posts at the crossing.</summary>
     public List<MarketDressing> Dressing { get; init; } = new();
 
+    /// <summary>Small reusable scenes (a cheese board, a sack pile, a sign on its post) that kits place.</summary>
+    public List<MarketVignette> Vignettes { get; init; } = new();
+
+    /// <summary>
+    /// What each business shows: per theme, vignettes for the stall's counters, hang line,
+    /// sides, rear and identity marker, placed at the module's <see cref="MarketModule.Slots"/>.
+    /// </summary>
+    public List<StallKit> StallKits { get; init; } = new();
+
     /// <summary>Shell markers: one persistent heading marker per stall, named by theme.</summary>
     public string ShellMarker { get; init; } = "00000034:Skyrim.esm";
 
@@ -1800,6 +1828,27 @@ internal sealed record MarketModule
     /// per counter, so a merged pair of stalls gets two.
     /// </summary>
     public List<float[]> VendorSpots { get; init; } = new();
+
+    /// <summary>Where a stall kit dresses this module, in the module frame.</summary>
+    public ModuleSlots Slots { get; init; } = new();
+}
+
+/// <summary>
+/// Dressing slots of a stall module. Strips are <c>[x0, x1, y, z]</c>: a counter top or
+/// shelf that vignettes are laid along, or the line under a canopy that goods hang from
+/// (<c>z</c> is the hanging point). Spots are <c>[x, y, yaw]</c> on the ground.
+/// </summary>
+internal sealed record ModuleSlots
+{
+    public List<float[]> Counter { get; init; } = new();
+
+    public List<float[]> Hang { get; init; } = new();
+
+    public List<float[]> Side { get; init; } = new();
+
+    public List<float[]> Rear { get; init; } = new();
+
+    public List<float[]> Sign { get; init; } = new();
 }
 
 internal sealed record MarketPiece
@@ -1818,6 +1867,13 @@ internal sealed record MarketPiece
 
     /// <summary>Dressing that some copies of the module leave out, so no two look alike.</summary>
     public bool Optional { get; init; }
+
+    /// <summary>Tilts in degrees, applied as world X and Y rotations after the yaw (as vanilla).</summary>
+    public float RotX { get; init; }
+
+    public float RotY { get; init; }
+
+    public float Scale { get; init; } = 1f;
 }
 
 internal sealed record MarketLane
@@ -2135,4 +2191,189 @@ internal sealed record TowerSpot
 
     /// <summary>Local faces (+X, +Y, -Y, -X) that carry a banner.</summary>
     public List<string> Banners { get; init; } = new();
+}
+
+/// <summary>A small scene of pieces round a point, in the slot's frame (+Y toward the customer).</summary>
+internal sealed record MarketVignette
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>Frontage it takes along a strip.</summary>
+    public float Width { get; init; } = 60f;
+
+    public List<MarketPiece> Pieces { get; init; } = new();
+}
+
+/// <summary>
+/// One kind of business: vignette names per slot kind. Counter strips are filled left to
+/// right from <see cref="Counter"/>, hang strips repeat <see cref="Hang"/> at its spacing,
+/// and each ground spot takes one of its list (or nothing, at <see cref="EmptyChance"/>).
+/// </summary>
+internal sealed record StallKit
+{
+    public List<string> Themes { get; init; } = new();
+
+    public List<string> Counter { get; init; } = new();
+
+    public List<string> Hang { get; init; } = new();
+
+    public float HangSpacing { get; init; } = 45f;
+
+    public List<string> Side { get; init; } = new();
+
+    public List<string> Rear { get; init; } = new();
+
+    public List<string> Sign { get; init; } = new();
+
+    public float EmptyChance { get; init; } = 0.15f;
+
+    /// <summary>A warm light at the stall (a LIGH FormKey), for the busy stalls only.</summary>
+    public string Light { get; init; } = string.Empty;
+
+    public float[] LightAt { get; init; } = { 0f, 40f, 170f };
+}
+
+/// <summary>
+/// The worn ground: each fair texture is a copy of a vanilla landscape texture (so grass,
+/// footsteps and friction carry over) whose texture set also names a parallax height map,
+/// for Terrain Parallax under Community Shaders' Terrain Helper. Wear rises round the
+/// things people walk to, broken by noise into patches.
+/// </summary>
+internal sealed record GroundConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairGround";
+
+    public List<GroundTexture> Textures { get; init; } = new();
+
+    /// <summary>Half-width of the cobbled core of the avenue.</summary>
+    public float CobbleHalfWidth { get; init; } = 250f;
+
+    /// <summary>How far the cobbles' edge wanders in and out.</summary>
+    public float CobbleRagged { get; init; } = 90f;
+
+    /// <summary>Where the cobbles stop short of the avenue's ends.</summary>
+    public float CobbleFrom { get; init; } = 150f;
+
+    public float CobbleTo { get; init; } = float.MaxValue;
+
+    public float NoisePeriod { get; init; } = 520f;
+
+    /// <summary>Wear radius and strength round each kind of source.</summary>
+    public float StallRadius { get; init; } = 200f;
+
+    public float NpcRadius { get; init; } = 150f;
+
+    public float DressingRadius { get; init; } = 220f;
+
+    /// <summary>Wear along every market lane's corridor.</summary>
+    public float LaneWear { get; init; } = 0.6f;
+
+    /// <summary>Zones worn all over (the entrance forecourt, the crowd square).</summary>
+    public List<string> WornZones { get; init; } = new();
+}
+
+internal sealed record GroundTexture
+{
+    /// <summary>grass, dirtGrass, dirt, path or cobble.</summary>
+    public string Role { get; init; } = string.Empty;
+
+    /// <summary>The vanilla LTEX copied.</summary>
+    public string Source { get; init; } = string.Empty;
+
+    /// <summary>Replacement texture paths under <c>textures\</c>; empty keeps the source's.</summary>
+    public string Diffuse { get; init; } = string.Empty;
+
+    public string Normal { get; init; } = string.Empty;
+
+    /// <summary>The parallax height map; empty derives <c>&lt;diffuse&gt;_p.dds</c>.</summary>
+    public string Height { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// A run of festival lines along a lane: at intervals, a pole each side just outside the
+/// corridor and a pennant rope swagged across between them (two mirrored halves of the
+/// Solitude festival line meeting at the low middle), optionally hung with lanterns.
+/// </summary>
+internal sealed record OverheadRun
+{
+    public string Lane { get; init; } = string.Empty;
+
+    public float From { get; init; }
+
+    public float To { get; init; } = float.MaxValue;
+
+    public float Spacing { get; init; } = 700f;
+
+    /// <summary>The rope line STAT; halves are placed mirrored, high end at each pole top.</summary>
+    public string Rope { get; init; } = "000FA22B:Skyrim.esm";
+
+    /// <summary>Alternative ropes cycled along the run (colourways), overriding <see cref="Rope"/>.</summary>
+    public List<string> Ropes { get; init; } = new();
+
+    /// <summary>The pole piece, stacked <see cref="PoleStack"/> high.</summary>
+    public string Pole { get; init; } = string.Empty;
+
+    public float PoleHeight { get; init; } = 254f;
+
+    public int PoleStack { get; init; } = 2;
+
+    /// <summary>A shorter piece stood on top of the stack (optional), and its height.</summary>
+    public string PoleCap { get; init; } = string.Empty;
+
+    public float PoleCapHeight { get; init; }
+
+    /// <summary>
+    /// Where the poles stand relative to the corridor edge plus clearance; negative is
+    /// inside the corridor, which is the only room there is where stalls line both sides.
+    /// </summary>
+    public float PoleMargin { get; init; } = 40f;
+
+    /// <summary>Lanterns hung along the rope (MSTTs cycled), every <see cref="LanternSpacing"/>.</summary>
+    public List<string> Lanterns { get; init; } = new();
+
+    public float LanternSpacing { get; init; } = 110f;
+
+    /// <summary>Fewer crossings where it is <see cref="Chance"/> below 1.</summary>
+    public float Chance { get; init; } = 1f;
+}
+
+/// <summary>Visitor groups: each gathers round a point, facing it, unevenly.</summary>
+internal sealed record CrowdsConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairVisitor";
+
+    public string Name { get; init; } = "Fair Visitor";
+
+    public List<CrowdGroup> Groups { get; init; } = new();
+}
+
+internal sealed record CrowdGroup
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>What they gather round: <c>[x, y]</c>, or a stall theme's front (<see cref="Theme"/>).</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    public string Theme { get; init; } = string.Empty;
+
+    /// <summary>Or round every market dressing group of this module (the picnic sets, the fires).</summary>
+    public string Near { get; init; } = string.Empty;
+
+    /// <summary>Chance each focus gets a group at all, so not every table is taken.</summary>
+    public float Chance { get; init; } = 1f;
+
+    /// <summary>For a theme: how far in front of the stall's counter they stand.</summary>
+    public float FrontOffset { get; init; } = 150f;
+
+    public int Count { get; init; } = 3;
+
+    /// <summary>How far round the point they spread.</summary>
+    public float Radius { get; init; } = 160f;
+
+    /// <summary>Arc they fill, degrees either side of facing the point from the front (360 = all round).</summary>
+    public float Arc { get; init; } = 90f;
 }

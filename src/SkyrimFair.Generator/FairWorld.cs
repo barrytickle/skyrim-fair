@@ -60,6 +60,8 @@ internal static class FairWorld
     /// <summary>Water is switched off in every cell; this is belt and braces for the defaults.</summary>
     private const float NoWaterHeight = -50000f;
 
+    private const float Deg = MathF.PI / 180f;
+
     /// <summary>Soft edge of every painted zone.</summary>
     private const float ZoneFeather = 192f;
 
@@ -120,7 +122,13 @@ internal static class FairWorld
         // FormIDs do not move whenever the wall or forest changes.
         var grid = new ExteriorCellGrid(worldspace);
         var cells = new Dictionary<(int X, int Y), Cell>();
-        var textures = plan.PaintTextures();
+        var groundTextures = config.Ground.Enabled ? AddGroundTextures(mod, config.Ground, master) : null;
+        if (groundTextures is not null)
+        {
+            plan.UseGround(groundTextures);
+        }
+
+        var textures = groundTextures is null ? plan.PaintTextures() : null;
         var maxLayers = 0;
 
         for (var cy = -config.CellRadius; cy <= config.CellRadius; cy++)
@@ -181,6 +189,15 @@ internal static class FairWorld
 
         // ---- project statics, used by market modules as @EditorID -----------------------
         var projectStatics = config.ProjectStatics.ToDictionary(ps => ps.EditorId, ps => AddStatic(mod, ps).FormKey);
+        var props = 0;
+        if (config.PropManifest.Length > 0)
+        {
+            foreach (var (name, prop) in LoadPropManifest(config.PropManifest))
+            {
+                projectStatics[$"Prop{name}"] = AddStatic(mod, prop).FormKey;
+                props++;
+            }
+        }
         FormKey Resolve(string piece) => piece.StartsWith('@')
             ? projectStatics.TryGetValue(piece[1..], out var key)
                 ? key
@@ -257,6 +274,59 @@ internal static class FairWorld
             }, FaceList);
         }
 
+        // ---- visitors -------------------------------------------------------------------
+        CrowdsResult? crowds = null;
+        if (config.Crowds.Enabled)
+        {
+            crowds = FairCrowds.Build(mod, config.Crowds, config.Vendors, market, plan.Height, npc =>
+            {
+                var pos = npc.Placement!.Position;
+                cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
+            }, FaceList);
+        }
+
+        // ---- the worn festival ground ------------------------------------------------------
+        // Painted last, from where everything now stands: the LAND records were allocated
+        // with the cells (their FormIDs stay put) and only their texture layers are added here.
+        if (groundTextures is not null)
+        {
+            var wear = new List<(float X, float Y, float Radius, float Strength)>();
+            foreach (var stall in market?.Stalls ?? Array.Empty<MarketStall>())
+            {
+                var (fx, fy) = (MathF.Sin(stall.Yaw * Deg), MathF.Cos(stall.Yaw * Deg));
+                var front = stall.Depth / 2f + 60f;
+                wear.Add((stall.X + fx * front, stall.Y + fy * front, config.Ground.StallRadius + stall.Width * 0.25f, 0.95f));
+                wear.Add((stall.X, stall.Y, stall.Width * 0.45f, 0.55f));
+                foreach (var (vx, vy) in stall.Vendors)
+                {
+                    wear.Add((vx, vy, config.Ground.NpcRadius, 0.8f));
+                }
+            }
+
+            foreach (var f in market?.Footprints.Where(f => f.Kind is not "stall" and not "pole") ?? Enumerable.Empty<MarketFootprint>())
+            {
+                wear.Add((f.X, f.Y, MathF.Max(f.HalfW, f.HalfD) + config.Ground.DressingRadius * 0.5f, 0.7f));
+            }
+
+            foreach (var (vx, vy) in crowds?.Positions ?? Array.Empty<(float X, float Y)>())
+            {
+                wear.Add((vx, vy, config.Ground.NpcRadius, 0.9f));
+            }
+
+            foreach (var lane in config.Archery.Enabled ? config.Archery.Lanes : new List<ArcheryLane>())
+            {
+                wear.Add((lane.Archer[0], lane.Archer[1], 170f, 1f));
+                wear.Add((lane.Target[0], lane.Target[1], 130f, 0.55f));
+            }
+
+            plan.SetWear(wear, config.Market.Lanes, config.Ground.WornZones);
+            var painted = plan.PaintTextures();
+            foreach (var ((cx, cy), cell) in cells.OrderBy(c => c.Key.Y).ThenBy(c => c.Key.X))
+            {
+                PaintLayers(cell.Landscape!, plan, painted, cx, cy, ref maxLayers);
+            }
+        }
+
         // ---- distant mountains ------------------------------------------------------
         var mountains = new List<MountainPlacement>();
         if (config.Mountains.Enabled)
@@ -331,6 +401,9 @@ internal static class FairWorld
             vendors,
             archery,
             towers,
+            crowds,
+            props,
+            groundTextures?.Count ?? 0,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
             plan.RenderPlan(1024f, config.Forest.OuterDistance, trees),
             plan.RenderMountains(mountains, 2048f));
@@ -350,7 +423,7 @@ internal static class FairWorld
             Model = new Model { File = piece.Model },
             ObjectBounds = new ObjectBounds
             {
-                First = new P3Int16((short)-halfWidth, (short)-halfDepth, 0),
+                First = new P3Int16((short)-halfWidth, (short)-halfDepth, (short)MathF.Floor(piece.MinZ)),
                 Second = new P3Int16(halfWidth, halfDepth, (short)MathF.Ceiling(piece.Height)),
             },
         };
@@ -402,7 +475,7 @@ internal static class FairWorld
     // ------------------------------------------------------------------------
 
     private static Landscape BuildLandscape(
-        SkyrimMod mod, Plan plan, IReadOnlyList<PaintTexture> textures, int cx, int cy, ref int maxLayers)
+        SkyrimMod mod, Plan plan, IReadOnlyList<PaintTexture>? textures, int cx, int cy, ref int maxLayers)
     {
         var originX = cx * CellSize;
         var originY = cy * CellSize;
@@ -455,6 +528,20 @@ internal static class FairWorld
                 HeightMap = heightMap,
             },
         };
+
+        if (textures is not null)
+        {
+            PaintLayers(land, plan, textures, cx, cy, ref maxLayers);
+        }
+
+        return land;
+    }
+
+    /// <summary>Base and alpha texture layers of one LAND, quadrant by quadrant.</summary>
+    private static void PaintLayers(Landscape land, Plan plan, IReadOnlyList<PaintTexture> textures, int cx, int cy, ref int maxLayers)
+    {
+        var originX = cx * CellSize;
+        var originY = cy * CellSize;
 
         // Four quadrants, 17 x 17 vertices each, row 0 at the south edge.
         foreach (var (quadrant, qx, qy) in Quadrants)
@@ -517,8 +604,79 @@ internal static class FairWorld
 
             maxLayers = Math.Max(maxLayers, layerNumber);
         }
+    }
 
-        return land;
+    // ------------------------------------------------------------------------
+    // Ground textures and props
+    // ------------------------------------------------------------------------
+
+    /// <summary>
+    /// The fair's own landscape textures: copies of vanilla LTEX records (grass, footsteps,
+    /// friction carry over) with their own texture sets, whose height slot names a parallax
+    /// map for Terrain Parallax under Community Shaders' Terrain Helper.
+    /// </summary>
+    private static Dictionary<string, FormKey> AddGroundTextures(SkyrimMod mod, GroundConfig ground, ISkyrimModGetter? master)
+    {
+        if (master is null)
+        {
+            throw new InvalidOperationException("fairWorld.ground copies vanilla landscape textures from Skyrim.esm; set Site.SkyrimDataPath.");
+        }
+
+        var result = new Dictionary<string, FormKey>();
+        foreach (var t in ground.Textures)
+        {
+            var key = FormKeyHelper.Parse(t.Source);
+            var ltex = master.LandscapeTextures.FirstOrDefault(l => l.FormKey == key)
+                ?? throw new InvalidOperationException($"Ground texture {t.Role}: {t.Source} is not an LTEX in Skyrim.esm.");
+            var sourceSet = master.TextureSets.First(x => x.FormKey == ltex.TextureSet.FormKey);
+            var set = sourceSet.Duplicate(mod.GetNextFormKey());
+            var name = char.ToUpperInvariant(t.Role[0]) + t.Role[1..];
+            set.EditorID = $"{ground.EditorIdPrefix}{name}Set";
+            if (t.Diffuse.Length > 0) set.Diffuse = t.Diffuse;
+            if (t.Normal.Length > 0) set.NormalOrGloss = t.Normal;
+            var diffuse = set.Diffuse!.GivenPath;
+            set.Height = t.Height.Length > 0
+                ? t.Height
+                : System.Text.RegularExpressions.Regex.Replace(diffuse, @"\.dds$", "_p.dds", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            mod.TextureSets.Add(set);
+
+            var copy = ltex.Duplicate(mod.GetNextFormKey());
+            copy.EditorID = $"{ground.EditorIdPrefix}{name}";
+            copy.TextureSet.SetTo(set.FormKey);
+            mod.LandscapeTextures.Add(copy);
+            result[t.Role] = copy.FormKey;
+        }
+
+        foreach (var role in new[] { "grass", "dirtGrass", "dirt", "path", "cobble" })
+        {
+            if (!result.ContainsKey(role))
+            {
+                throw new InvalidOperationException($"fairWorld.ground.textures has no '{role}' texture.");
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>The props manifest written by tools/make_static_props.py, in name order.</summary>
+    private static IEnumerable<(string Name, ProjectStaticConfig Prop)> LoadPropManifest(string path)
+    {
+        var full = Path.IsPathRooted(path) ? path : Path.Combine(FairPaths.ConfigDirectory, path);
+        using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(full));
+        foreach (var entry in doc.RootElement.GetProperty("props").EnumerateObject().OrderBy(e => e.Name, StringComparer.Ordinal))
+        {
+            var lo = entry.Value.GetProperty("min").EnumerateArray().Select(v => v.GetSingle()).ToArray();
+            var hi = entry.Value.GetProperty("max").EnumerateArray().Select(v => v.GetSingle()).ToArray();
+            yield return (entry.Name, new ProjectStaticConfig
+            {
+                EditorId = $"SkyrimFairProp{entry.Name}",
+                Model = entry.Value.GetProperty("model").GetString()!,
+                Width = MathF.Max(2f, 2f * MathF.Max(MathF.Abs(lo[0]), MathF.Abs(hi[0]))),
+                Depth = MathF.Max(2f, 2f * MathF.Max(MathF.Abs(lo[1]), MathF.Abs(hi[1]))),
+                Height = MathF.Max(2f, hi[2]),
+                MinZ = lo[2],
+            });
+        }
     }
 
     private static readonly (Quadrant Quadrant, int X, int Y)[] Quadrants =
@@ -567,7 +725,142 @@ internal static class FairWorld
             GroundTexture = FormKeyHelper.Parse(config.Textures.Ground);
         }
 
-        public FormKey GroundTexture { get; }
+        public FormKey GroundTexture { get; private set; }
+
+        private Dictionary<string, FormKey>? ground;
+
+        private List<(float X, float Y, float Radius, float Strength)> wear = new();
+
+        private List<((float X, float Y)[] Points, float Half)> wornLanes = new();
+
+        private List<(float X, float Y)[]> wornZones = new();
+
+        // Wear sources bucketed by 512-unit tile, so each vertex only visits its neighbours.
+        private Dictionary<(int, int), List<(float X, float Y, float Radius, float Strength)>> wearTiles = new();
+
+        public void UseGround(Dictionary<string, FormKey> textures)
+        {
+            ground = textures;
+            GroundTexture = textures["grass"];
+        }
+
+        public void SetWear(
+            List<(float X, float Y, float Radius, float Strength)> sources, List<MarketLane> lanes, List<string> zoneNames)
+        {
+            wear = sources;
+            wearTiles = new();
+            foreach (var w in sources)
+            {
+                for (var tx = (int)MathF.Floor((w.X - w.Radius) / 512f); tx <= (int)MathF.Floor((w.X + w.Radius) / 512f); tx++)
+                {
+                    for (var ty = (int)MathF.Floor((w.Y - w.Radius) / 512f); ty <= (int)MathF.Floor((w.Y + w.Radius) / 512f); ty++)
+                    {
+                        if (!wearTiles.TryGetValue((tx, ty), out var list)) wearTiles[(tx, ty)] = list = new();
+                        list.Add(w);
+                    }
+                }
+            }
+
+            wornLanes = lanes
+                .Where(l => l.UseAvenue || l.Points.Count >= 2)
+                .Select(l => ((l.UseAvenue ? avenue : l.Points.Select(p => (p[0], p[1])).ToArray()),
+                    l.HalfWidths.Count == 0 ? 250f : l.HalfWidths.Average(h => h[1])))
+                .ToList();
+            wornZones = zones.Where(z => zoneNames.Contains(z.Zone.Name)).Select(z => z.Polygon).ToList();
+        }
+
+        /// <summary>How trodden the ground is, 0 (untouched) to 1 (bare), before noise.</summary>
+        private float Wear(float x, float y)
+        {
+            var w = 0f;
+            if (wearTiles.TryGetValue(((int)MathF.Floor(x / 512f), (int)MathF.Floor(y / 512f)), out var near))
+            {
+                foreach (var s in near)
+                {
+                    var d = MathF.Sqrt((x - s.X) * (x - s.X) + (y - s.Y) * (y - s.Y));
+                    if (d < s.Radius) w = MathF.Max(w, s.Strength * Smooth(1f - d / s.Radius));
+                }
+            }
+
+            foreach (var (points, half) in wornLanes)
+            {
+                w = MathF.Max(w, config.Ground.LaneWear * Fill(PolylineDistance(points, x, y) - half, 220f));
+            }
+
+            foreach (var polygon in wornZones)
+            {
+                w = MathF.Max(w, 0.85f * Fill(SignedDistance(polygon, x, y), 260f));
+            }
+
+            // The cobbles' fringe is scuffed to bare dirt by the traffic on and off them.
+            var edge = MathF.Abs(PolylineDistance(avenue, x, y) - config.Ground.CobbleHalfWidth);
+            w = MathF.Max(w, 0.8f * Fill(edge - 90f, 140f));
+            return w;
+        }
+
+        /// <summary>Distance along the avenue of the point on it nearest (x, y).</summary>
+        private float AvenueStation(float x, float y)
+        {
+            var (best, bestS, s) = (float.MaxValue, 0f, 0f);
+            for (var i = 1; i < avenue.Length; i++)
+            {
+                var (a, b) = (avenue[i - 1], avenue[i]);
+                var (dx, dy) = (b.X - a.X, b.Y - a.Y);
+                var len = MathF.Sqrt(dx * dx + dy * dy);
+                var t = Math.Clamp(((x - a.X) * dx + (y - a.Y) * dy) / (len * len), 0f, 1f);
+                var (px, py) = (a.X + dx * t, a.Y + dy * t);
+                var d = (x - px) * (x - px) + (y - py) * (y - py);
+                if (d < best) (best, bestS) = (d, s + t * len);
+                s += len;
+            }
+
+            return bestS;
+        }
+
+        private IReadOnlyList<PaintTexture> GroundLayers()
+        {
+            var gc = config.Ground;
+            var p = gc.NoisePeriod;
+            float Inside(float x, float y) => Fill(Outside(x, y) + 40f, 160f);
+            float N1(float x, float y) => ValueNoise(x / p + 3.1f, y / p - 7.7f);
+            float N2(float x, float y) => ValueNoise(x / (p * 0.6f) - 11.3f, y / (p * 0.6f) + 2.9f);
+            float N3(float x, float y) => ValueNoise(x / (p * 0.3f) + 19.9f, y / (p * 0.3f) + 13.1f);
+            var length = 0f;
+            for (var i = 1; i < avenue.Length; i++)
+            {
+                length += MathF.Sqrt((avenue[i].X - avenue[i - 1].X) * (avenue[i].X - avenue[i - 1].X) + (avenue[i].Y - avenue[i - 1].Y) * (avenue[i].Y - avenue[i - 1].Y));
+            }
+
+            return new List<PaintTexture>
+            {
+                new(FormKeyHelper.Parse(config.Textures.Outside), (x, y) => Smooth((Outside(x, y) - 128f) / 512f)),
+                new(FormKeyHelper.Parse(config.Textures.Perimeter),
+                    (x, y) => Fill(MathF.Abs(Outside(x, y)) - config.PerimeterStripWidth / 2f, StripFeather)
+                        * (1f - Fill(GateDistance(x, y) - config.GateWidth / 2f, StripFeather))),
+
+                // Grass giving way: patchy dirt-grass nearly everywhere, more where it is walked.
+                new(ground!["dirtGrass"], (x, y) => Inside(x, y) * Smooth((0.34f + 0.8f * Wear(x, y) + (N1(x, y) - 0.5f) * 1.3f - 0.3f) / 0.35f)),
+
+                // Bare dirt in patches, following the wear but broken by noise at two scales.
+                new(ground["dirt"], (x, y) => Inside(x, y) * Smooth((0.1f + Wear(x, y) * 1.05f + (N2(x, y) - 0.5f) * 1.0f + (N3(x, y) - 0.5f) * 0.4f - 0.5f) / 0.25f)),
+
+                // Trodden earth where the traffic is heaviest.
+                new(ground["path"], (x, y) => Inside(x, y) * Smooth((Wear(x, y) - 0.66f + (N3(x, y) - 0.5f) * 0.5f) / 0.2f)),
+
+                // The cobbled avenue, its edge wandering and the stones giving out at the ends.
+                new(ground["cobble"], (x, y) =>
+                {
+                    var along = AvenueStation(x, y);
+                    if (along < gc.CobbleFrom - 200f || along > MathF.Min(gc.CobbleTo, length) + 200f) return 0f;
+                    var half = gc.CobbleHalfWidth + gc.CobbleRagged * (N3(x, y) * 2f - 1f) + gc.CobbleRagged * 0.6f * (N1(x, y) * 2f - 1f);
+                    var ends = Fill(gc.CobbleFrom - along, 160f) * Fill(along - MathF.Min(gc.CobbleTo, length), 160f);
+
+                    // Here and there the stones are sunk under trodden dirt.
+                    var sunk = 1f - 0.75f * Smooth((N2(x, y) - 0.66f) / 0.1f);
+                    return Fill(PolylineDistance(avenue, x, y) - half, 110f) * ends * sunk;
+                }),
+            };
+        }
 
         public (float MinX, float MinY, float MaxX, float MaxY) Bounds =>
             (perimeter.Min(p => p.X), perimeter.Min(p => p.Y), perimeter.Max(p => p.X), perimeter.Max(p => p.Y));
@@ -596,6 +889,11 @@ internal static class FairWorld
         /// </summary>
         public IReadOnlyList<PaintTexture> PaintTextures()
         {
+            if (ground is not null)
+            {
+                return GroundLayers();
+            }
+
             var ops = new List<(FormKey Texture, Func<float, float, float> Alpha)>
             {
                 (FormKeyHelper.Parse(config.Textures.Outside), (x, y) => Smooth((Outside(x, y) - 128f) / 512f)),
@@ -1015,6 +1313,9 @@ internal sealed record FairWorldResult(
     VendorsResult? Vendors,
     ArcheryResult? Archery,
     TowersResult? Towers,
+    CrowdsResult? Crowds,
+    int Props,
+    int GroundTextures,
     string Plan,
     string ForestPlan,
     string MountainPlan);

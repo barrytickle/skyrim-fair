@@ -4,6 +4,7 @@ using SkyrimFair.Generator;
 const string defaultConfigPath = "fair.config.json";
 
 var configPath = args.Length > 0 ? args[0] : defaultConfigPath;
+FairPaths.ConfigDirectory = Path.GetDirectoryName(Path.GetFullPath(configPath))!;
 
 if (!File.Exists(configPath))
 {
@@ -205,6 +206,26 @@ try
         if (world.Vendors is { } vendors)
         {
             Console.WriteLine($"  vendors: {vendors.Placed} stall-keepers from {vendors.Records} vendor records (sell nothing)");
+        }
+
+        if (world.Props > 0)
+        {
+            Console.WriteLine($"  props: {world.Props} physics-free static props from the manifest");
+        }
+
+        if (world.GroundTextures > 0)
+        {
+            Console.WriteLine($"  ground: {world.GroundTextures} fair landscape textures (parallax slots), worn by use");
+        }
+
+        if (world.Market is { } lively)
+        {
+            Console.WriteLine($"  stall kits: {lively.KitDressed} stalls dressed, {lively.Lights} stall lights; overhead: {lively.Crossings} festival line crossings");
+        }
+
+        if (world.Crowds is { } crowds)
+        {
+            Console.WriteLine($"  visitors: {crowds.Positions.Count} from {crowds.Records} records: {string.Join(", ", crowds.Groups.Select(g => $"{g.Name} {g.Placed}"))}");
         }
 
         if (world.Towers is { } towers)

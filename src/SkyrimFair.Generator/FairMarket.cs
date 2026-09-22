@@ -50,6 +50,7 @@ internal static class FairMarket
         var refused = 0;
         var reasons = new SortedDictionary<string, int>(StringComparer.Ordinal);
         var markerBase = FormKeyHelper.Parse(market.ShellMarker);
+        var lights = 0;
 
         // Null when the stall fits; otherwise what it collides with.
         string? WhyNot(MarketModule m, float x, float y, float yaw, Lane? ignore = null, float? wallMargin = null)
@@ -95,6 +96,136 @@ internal static class FairMarket
             return placed.Any(p => Overlap(p, candidate)) ? "another stall" : null;
         }
 
+        var vignettes = market.Vignettes.ToDictionary(v => v.Name);
+        var kitDressed = 0;
+        var footprints = new List<MarketFootprint>();
+
+        // One piece in a frame at (ox, oy, oz) turned by frameYaw, mirrored across its X.
+        // Tilts are about the piece's own axes, split into the world-axis X and Y rotations
+        // Skyrim applies after Z (as the Dragonsreach banners showed).
+        void PutPiece(MarketPiece piece, float ox, float oy, float oz, float frameYaw, float mirror, float jitter, int seed)
+        {
+            var (rx, ry) = (MathF.Cos(frameYaw * Deg), -MathF.Sin(frameYaw * Deg));
+            var (fx, fy) = (MathF.Sin(frameYaw * Deg), MathF.Cos(frameYaw * Deg));
+            var u = mirror * piece.X + FairHash.Signed(seed, 11, 90) * jitter;
+            var v = piece.Y + FairHash.Signed(seed, 12, 90) * jitter;
+            var px = ox + u * rx + v * fx;
+            var py = oy + u * ry + v * fy;
+            var yaw = (frameYaw + mirror * piece.Yaw + FairHash.Signed(seed, 13, 90) * jitter * 1.5f) * Deg;
+            var (a, t) = (piece.RotX * Deg, mirror * piece.RotY * Deg);
+            put(new PlacedObject(mod)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece.Piece)),
+                Scale = piece.Scale == 1f ? null : piece.Scale,
+                Placement = new Placement
+                {
+                    Position = new P3Float(px, py, oz + piece.Z),
+                    Rotation = new P3Float(a * MathF.Cos(yaw) + t * MathF.Sin(yaw), -a * MathF.Sin(yaw) + t * MathF.Cos(yaw), yaw),
+                },
+            });
+            pieceCount++;
+        }
+
+        // A vignette's pieces round a point in the stall's frame.
+        void PutVignette(string name, float x, float y, float z, float yaw, float mirror, int seed)
+        {
+            if (!vignettes.TryGetValue(name, out var vignette))
+            {
+                throw new InvalidOperationException($"Stall kit names vignette '{name}', which fairWorld.market.vignettes does not define.");
+            }
+
+            var k = 0;
+            foreach (var piece in vignette.Pieces)
+            {
+                k++;
+                if (piece.Optional && FairHash.Hash3(seed, k, 91) < 0.4f)
+                {
+                    continue;
+                }
+
+                PutPiece(piece, x, y, z, yaw, mirror, 2f, seed * 37 + k);
+            }
+        }
+
+        // Dress a committed stall with its theme's kit, slot by slot.
+        void Dress(MarketModule m, float x, float y, float yaw, float mirror, string theme, int seed)
+        {
+            var kit = market.StallKits.FirstOrDefault(k => k.Themes.Contains(theme));
+            if (kit is null)
+            {
+                return;
+            }
+
+            kitDressed++;
+            var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
+            var (fx, fy) = (MathF.Sin(yaw * Deg), MathF.Cos(yaw * Deg));
+            (float X, float Y) At(float u, float v) => (x + mirror * u * rx + v * fx, y + mirror * u * ry + v * fy);
+            var n = 0;
+
+            // Counter strips: vignettes laid left to right, cycling the kit's list.
+            var pick = (int)(FairHash.Hash3(seed, 1, 92) * 97);
+            foreach (var strip in m.Slots.Counter.Where(c => c.Length == 4))
+            {
+                var (x0, x1, sv, sz) = (strip[0], strip[1], strip[2], strip[3]);
+                var cursor = x0;
+                while (kit.Counter.Count > 0)
+                {
+                    var vig = vignettes[kit.Counter[pick++ % kit.Counter.Count]];
+                    if (cursor + vig.Width > x1 + 4f) break;
+                    var (px, py) = At(cursor + vig.Width / 2f, sv);
+                    PutVignette(vig.Name, px, py, ground(px, py) + sz, yaw, mirror, seed * 53 + n++);
+                    cursor += vig.Width + 6f;
+                }
+            }
+
+            // Hang lines: goods every HangSpacing, a little uneven.
+            foreach (var strip in m.Slots.Hang.Where(c => c.Length == 4))
+            {
+                if (kit.Hang.Count == 0) break;
+                var (x0, x1, sv, sz) = (strip[0], strip[1], strip[2], strip[3]);
+                for (var u = x0; u <= x1; u += kit.HangSpacing)
+                {
+                    var uu = u + FairHash.Signed(seed, n, 93) * kit.HangSpacing * 0.2f;
+                    var (px, py) = At(uu, sv);
+                    PutVignette(kit.Hang[(pick++) % kit.Hang.Count], px, py, ground(px, py) + sz, yaw, mirror, seed * 53 + n++);
+                }
+            }
+
+            // Ground spots: one vignette each, or none now and then.
+            void Spots(List<float[]> spots, List<string> choices, int salt)
+            {
+                foreach (var spot in spots.Where(sp => sp.Length >= 2))
+                {
+                    n++;
+                    if (choices.Count == 0 || FairHash.Hash3(seed, n, salt) < kit.EmptyChance) continue;
+                    var (px, py) = At(spot[0], spot[1]);
+                    var name = choices[(int)(FairHash.Hash3(seed, n, salt + 1) * choices.Count) % choices.Count];
+                    PutVignette(name, px, py, ground(px, py), yaw + mirror * (spot.Length > 2 ? spot[2] : 0f), mirror, seed * 53 + n);
+                }
+            }
+
+            Spots(m.Slots.Side, kit.Side, 94);
+            Spots(m.Slots.Rear, kit.Rear, 96);
+            if (kit.Sign.Count > 0 && m.Slots.Sign.Count > 0)
+            {
+                var spot = m.Slots.Sign[(int)(FairHash.Hash3(seed, 3, 98) * m.Slots.Sign.Count) % m.Slots.Sign.Count];
+                var (px, py) = At(spot[0], spot[1]);
+                var name = kit.Sign[(int)(FairHash.Hash3(seed, 4, 98) * kit.Sign.Count) % kit.Sign.Count];
+                PutVignette(name, px, py, ground(px, py), yaw + mirror * (spot.Length > 2 ? spot[2] : 0f), mirror, seed * 53 + 999);
+            }
+
+            if (kit.Light.Length > 0)
+            {
+                var (lx, ly) = At(kit.LightAt[0], kit.LightAt[1]);
+                put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(kit.Light)),
+                    Placement = new Placement { Position = new P3Float(lx, ly, ground(lx, ly) + kit.LightAt[2]), Rotation = new P3Float(0f, 0f, 0f) },
+                });
+                lights++;
+            }
+        }
+
         void Commit(MarketModule m, float x, float y, float yaw, string laneName, string theme, int seedA, int seedB)
         {
             var mirror = FairHash.Hash3(seedA, seedB, 61) < 0.5f ? -1f : 1f;
@@ -117,6 +248,7 @@ internal static class FairMarket
                 put(new PlacedObject(mod)
                 {
                     Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece.Piece)),
+                    Scale = piece.Scale == 1f ? null : piece.Scale,
                     Placement = new Placement
                     {
                         Position = new P3Float(px, py, ground(px, py) + piece.Z),
@@ -125,6 +257,8 @@ internal static class FairMarket
                 });
                 pieceCount++;
             }
+
+            Dress(m, x, y, yaw, mirror, theme, seedA * 131 + seedB);
 
             foreach (var extra in market.ThemeDressing.Where(t => t.Theme == theme).SelectMany(t => t.Pieces))
             {
@@ -143,6 +277,7 @@ internal static class FairMarket
             }
 
             placed.Add(new Placed(x, y, yaw, m.Width / 2f + market.Clearance / 2f, m.Depth / 2f + market.Clearance / 2f));
+            footprints.Add(new MarketFootprint("stall", x, y, yaw, m.Width / 2f, m.Depth / 2f));
 
             // The shell marker stands at the stall's front edge, facing into it.
             var number = themeCounts[theme] = themeCounts.GetValueOrDefault(theme) + 1;
@@ -186,19 +321,23 @@ internal static class FairMarket
                 var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 6f;
                 var px = x + u * rx + v * fx;
                 var py = y + u * ry + v * fy;
+                var pieceYaw = (yaw + piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 4f) * Deg;
+                var (a, t) = (piece.RotX * Deg, piece.RotY * Deg);
                 put(new PlacedObject(mod)
                 {
                     Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece.Piece)),
+                    Scale = piece.Scale == 1f ? null : piece.Scale,
                     Placement = new Placement
                     {
                         Position = new P3Float(px, py, ground(px, py) + piece.Z),
-                        Rotation = new P3Float(0f, 0f, (yaw + piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 4f) * Deg),
+                        Rotation = new P3Float(a * MathF.Cos(pieceYaw) + t * MathF.Sin(pieceYaw), -a * MathF.Sin(pieceYaw) + t * MathF.Cos(pieceYaw), pieceYaw),
                     },
                 });
                 pieceCount++;
             }
 
             placed.Add(new Placed(x, y, yaw, m.Width / 2f + market.Clearance / 2f, m.Depth / 2f + market.Clearance / 2f));
+            footprints.Add(new MarketFootprint(m.Name, x, y, yaw, m.Width / 2f, m.Depth / 2f));
         }
 
         // A stall beside a lane at a station, pushed back behind the lane edge, facing it.
@@ -457,7 +596,145 @@ internal static class FairMarket
             }
         }
 
-        return new MarketResult(stalls, pieceCount, refused, reasons, seats, dressingRuns, dressingRefusals);
+        // ---- overhead festival lines ----------------------------------------------------
+        var crossings = 0;
+        var poles = new List<(float X, float Y)>();
+        var poleModule = new MarketModule { Name = "pole", Width = 40f, Depth = 40f };
+        for (var ri = 0; ri < world.Overhead.Count; ri++)
+        {
+            var run = world.Overhead[ri];
+            var lane = lanes.First(l => l.Config.Name == run.Lane);
+            var ropes = run.Ropes.Count > 0 ? run.Ropes : new List<string> { run.Rope };
+            var k = 0;
+            for (var at = run.From; at <= MathF.Min(run.To, lane.Length); at += run.Spacing)
+            {
+                k++;
+                if (FairHash.Hash3(600 + ri, k, 99) >= run.Chance)
+                {
+                    continue;
+                }
+
+                var (cx, cy, tx, ty, half) = Station(lane, at);
+                var ends = new List<(float X, float Y)>();
+                foreach (var side in new[] { 1f, -1f })
+                {
+                    var (nx, ny) = (-ty * side, tx * side);
+                    (float X, float Y)? found = null;
+                    foreach (var slide in new[] { 0f, 40f, -40f, 80f, -80f, 120f, -120f })
+                    {
+                        var off = half + market.Clearance + run.PoleMargin;
+                        var (px, py) = (cx + nx * off + tx * slide, cy + ny * off + ty * slide);
+                        if (WhyNot(poleModule, px, py, 0f, ignore: lane, wallMargin: 60f) is null && !poles.Any(q => MathF.Abs(q.X - px) < 60f && MathF.Abs(q.Y - py) < 60f))
+                        {
+                            found = (px, py);
+                            break;
+                        }
+                    }
+
+                    if (found is { } f) ends.Add(f);
+                }
+
+                if (ends.Count < 2)
+                {
+                    dressingRefusals[$"overhead {run.Lane} at {at:0}: no room for a pole"] = 1;
+                    continue;
+                }
+
+
+                var pole = run.Pole.Length > 0 ? resolve(run.Pole) : FormKey.Null;
+                var cap = run.PoleCap.Length > 0 ? resolve(run.PoleCap) : FormKey.Null;
+                var top = run.PoleHeight * run.PoleStack + (cap.IsNull ? 0f : run.PoleCapHeight);
+                foreach (var e in ends)
+                {
+                    poles.Add(e);
+                    placed.Add(new Placed(e.X, e.Y, 0f, 25f, 25f));
+                    footprints.Add(new MarketFootprint("pole", e.X, e.Y, 0f, 12f, 12f));
+                    for (var i = 0; i < run.PoleStack && !pole.IsNull; i++)
+                    {
+                        put(new PlacedObject(mod)
+                        {
+                            Base = new FormLinkNullable<IPlaceableObjectGetter>(pole),
+                            Placement = new Placement
+                            {
+                                Position = new P3Float(e.X, e.Y, ground(e.X, e.Y) - 6f + i * run.PoleHeight),
+                                Rotation = new P3Float(0f, 0f, FairHash.Hash3(ri, k * 7 + i, 88) * 6.28f),
+                            },
+                        });
+                        pieceCount++;
+                    }
+
+                    if (!cap.IsNull)
+                    {
+                        put(new PlacedObject(mod)
+                        {
+                            Base = new FormLinkNullable<IPlaceableObjectGetter>(cap),
+                            Placement = new Placement
+                            {
+                                Position = new P3Float(e.X, e.Y, ground(e.X, e.Y) - 6f + run.PoleStack * run.PoleHeight),
+                                Rotation = new P3Float(0f, 0f, FairHash.Hash3(ri, k * 7 + 5, 88) * 6.28f),
+                            },
+                        });
+                        pieceCount++;
+                    }
+                }
+
+                // Two mirrored halves of the festival line meet at the low middle: each half
+                // starts 53 from its origin, runs 682 along its local (+X, -Y) diagonal (heading
+                // 134.7) and rises 150, all times its scale.
+                var (mx, my) = ((ends[0].X + ends[1].X) / 2f, (ends[0].Y + ends[1].Y) / 2f);
+                var topZ = MathF.Max(ground(ends[0].X, ends[0].Y), ground(ends[1].X, ends[1].Y)) + top - 8f;
+                var li = 0;
+                foreach (var e in ends)
+                {
+                    var (dx, dy) = (e.X - mx, e.Y - my);
+                    var d = MathF.Sqrt(dx * dx + dy * dy);
+                    var scale = d / 682f;
+                    var (ux, uy) = (dx / d, dy / d);
+                    var heading = MathF.Atan2(ux, uy) / Deg;
+                    var (ox, oy) = (mx - ux * 53f * scale, my - uy * 53f * scale);
+                    var oz = topZ - 150f * scale;
+                    var rope = resolve(ropes[(k - 1 + (e == ends[0] ? 0 : 1)) % ropes.Count]);
+                    put(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(rope),
+                        Scale = scale,
+                        Placement = new Placement
+                        {
+                            Position = new P3Float(ox, oy, oz),
+                            Rotation = new P3Float(0f, 0f, (heading - 134.7f) * Deg),
+                        },
+                    });
+                    pieceCount++;
+
+                    // Lanterns along the half, following the rope's rise (about quadratic).
+                    for (var along = run.LanternSpacing * 0.5f; along < d - 30f && run.Lanterns.Count > 0; along += run.LanternSpacing)
+                    {
+                        var frac = along / d;
+                        var (lx, ly) = (mx + ux * along, my + uy * along);
+                        put(new PlacedObject(mod)
+                        {
+                            Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(run.Lanterns[(k + li++) % run.Lanterns.Count])),
+                            Placement = new Placement
+                            {
+                                Position = new P3Float(lx, ly, oz + 150f * scale * frac * frac - 4f),
+                                Rotation = new P3Float(0f, 0f, heading * Deg),
+                            },
+                        });
+                        pieceCount++;
+                    }
+                }
+
+                crossings++;
+            }
+        }
+
+        return new MarketResult(stalls, pieceCount, refused, reasons, seats, dressingRuns, dressingRefusals)
+        {
+            KitDressed = kitDressed,
+            Lights = lights,
+            Crossings = crossings,
+            Footprints = footprints,
+        };
     }
 
     private static Lane BuildLane(MarketLane c, int index, FairWorldConfig world)
@@ -564,4 +841,28 @@ internal sealed record MarketStall(
 
 internal sealed record MarketResult(
     IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons, int Seating,
-    IReadOnlyDictionary<string, int> DressingRuns, IReadOnlyDictionary<string, int> DressingRefusals);
+    IReadOnlyDictionary<string, int> DressingRuns, IReadOnlyDictionary<string, int> DressingRefusals)
+{
+    public int KitDressed { get; init; }
+
+    public int Lights { get; init; }
+
+    public int Crossings { get; init; }
+
+    /// <summary>Every stall, dressing group and pole footprint, for the crowds and the ground's wear.</summary>
+    public IReadOnlyList<MarketFootprint> Footprints { get; init; } = Array.Empty<MarketFootprint>();
+}
+
+/// <summary>A placed rectangle: half-extents along the thing's own X (width) and Y (depth).</summary>
+internal sealed record MarketFootprint(string Kind, float X, float Y, float Yaw, float HalfW, float HalfD)
+{
+    private const float Deg = MathF.PI / 180f;
+
+    public bool Contains(float px, float py, float margin)
+    {
+        var (dx, dy) = (px - X, py - Y);
+        var u = dx * MathF.Cos(Yaw * Deg) - dy * MathF.Sin(Yaw * Deg);
+        var v = dx * MathF.Sin(Yaw * Deg) + dy * MathF.Cos(Yaw * Deg);
+        return MathF.Abs(u) <= HalfW + margin && MathF.Abs(v) <= HalfD + margin;
+    }
+}
