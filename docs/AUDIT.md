@@ -2,7 +2,38 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: stall-keeper fixes from Barry's first test (2026-09-22, night)
+## Current pass: aligned rows and eating areas (2026-09-22, night)
+
+From Barry's walk-through:
+- "big gaps in the middle of the east stalls and the centre stalls... benches... eating
+  areas"
+- one stall near the stage "a bit misaligned with the others"
+
+- **Misalignment fixed at the cause.** Back rows were set back to back behind whichever
+  front stall they paired with, so their fronts wandered by the sum of two stall depths
+  (up to about 200). Every visible row is now **lined up on its own street edge**:
+  - Column A's back row is the **west side of the East Lane**, which moved to x 3,780.
+  - Column B's back row faces a new **east-wall walkway** (x 5,100).
+  - Back-to-back infill is switched off.
+
+  Column A's front row still follows the avenue's gentle approved bend.
+- **Eating areas: 9 picnic sets** (new module `picnic`): an `ExteriorWoodenTable01`
+  with four `FarmBench01Static`, sometimes a `Lantern` on the table or a barrel at the
+  end. They are set along lanes by the new `market.seating`, turned to run with the lane:
+  - down the **middle of the East Lane** every 800, as islands with walking room either
+    side
+  - along the **avenue's open west edge** every 900, facing the food stalls
+
+  Sets that would crowd a passage, a stall or a keep-out are skipped. The archery
+  keep-out now starts at x 1,350.
+- **Counts**: **33 stalls** (Avenue 9, East Lane 7 + 9, wall walk 8), 200 pieces,
+  **59 stall-keepers**.
+- Generator run twice: identical SHA256 `24dbe3a2...` (412,046 bytes). **Deployed
+  byte-identical** (including the stall-keeper fixes the previous deploy missed).
+- Market meshes: 0 outside the compound (nearest 519 from the wall); 0 in the crowd
+  square, the stage zone, the archery field and the sightline band.
+
+## Stall-keeper fixes (previous pass; now deployed)
 
 Barry's test: the keepers showed up and "the faces look okay", but paired stalls had one
 empty counter, and "they all look ready to wanna punch me".
@@ -989,9 +1020,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 408,300 bytes (east market + 58 vendors) |
-| SHA256 | `f661bcc4c3b2b141a7ecc53bd358d1fe693dbe2276f156e664f9cf98f97de189` |
-| Deployed | **pending**: the file was locked by the running game; the deployed copy is still the previous build (`0aa38d0d...`) |
+| Size | 412,046 bytes (aligned rows, picnic sets, 59 vendors) |
+| SHA256 | `24dbe3a2d2ca756bce5dc5b515616286a5536bd27ce096786671dc9b8f79b21e` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |
