@@ -9,7 +9,7 @@ watchtowers... two near the main gate and two near the stage... large whiterun b
 hanging from it", then "adding a light to the towers... the flame podium you used on the
 stage, or just make a large lantern... where the guards normally stand".
 
-**The tower** (`meshesarry_scaffold\scaffold.nif`, BS 100, 2,552 triangles, box
+**The tower** (`meshes\barry_scaffold\scaffold.nif`, BS 100, 2,552 triangles, box
 collision; `scaffold_d.dds` 2048 DXT1, `scaffold_n.dds` a 4x4 flat normal map). Measured
 from the mesh: 124 x 129 x 320, deck floor at 215, deck edge boards topping out at 234,
 deck edge at +/-59, roof underside 306 over the centre, **ladder on the local -X face**.
@@ -47,8 +47,8 @@ Stage towers about 245 from the stage skirt and 90 between a banner's swing and 
 nearest stage post.
 
 **Verification**: generator run twice, identical SHA256 `2e01805cfdde37fe...` (422,558
-bytes). **Deployed byte-identical**, with `meshesarry_scaffold\` and
-`texturesarry_scaffold\` copied into the MO2 mod folder.
+bytes). **Deployed byte-identical**, with `meshes\barry_scaffold\` and
+`textures\barry_scaffold\` copied into the MO2 mod folder.
 
 **Test**:
 - Do the lanterns stand on the deck floor (not floating or sunk) and glow at night?
