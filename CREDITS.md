@@ -152,6 +152,36 @@ Attribution:
 > "Palisade" by adam127, licensed under CC BY 4.0. "Viking Palisade gate" by Sereib,
 > licensed under CC BY 4.0. Converted and modified for Skyrim.
 
+## Stroti's Outdoor Toilet (modder's resource)
+
+The fair's outhouses are **bundled** in the built mod as `meshes\Stroti\Outdoor Toilet\`
+(`OutdoorToilet.nif`, `ToiletDoor.nif`) and `textures\Stroti\` (six custom DDS files).
+
+| Role | Who | Source |
+| --- | --- | --- |
+| Original model (Oblivion) | Stroti | http://oblivion.nexusmods.com/mods/37634 |
+| Skyrim conversion | Tamira | https://www.nexusmods.com/skyrimspecialedition/mods/4086 |
+| SE / AE format conversion (stream 83 NiTriShape to stream 100 BSTriShape) | Astra, for Skyrim Fair | `external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip` |
+
+Permissions, from the original readme: *"This is a modder's resource. You may use the
+meshes and textures for your own mods as long as you give credit and you do not charge
+money for it. Do not upload to other sites."* So:
+- Skyrim Fair must stay free, and this credit must ship with it.
+- The files are **not committed to this repository**, so git never uploads them anywhere
+  on their own; `.gitignore` excludes `assets/meshes/Stroti/` and
+  `assets/textures/Stroti/`. To restore them, unzip the `meshes/` and `textures/` folders
+  of Astra's zip into `assets/`. The original readme and Astra's conversion notes sit
+  next to the meshes.
+- The resource also uses six vanilla textures (Whiterun floorboards, Solitude roof slate,
+  a torn page), which Skyrim supplies and which are not redistributed.
+
+The fair places both as plain statics: the outhouse cannot be sat in and the door does
+not open.
+
+Attribution:
+
+> Outdoor Toilet by Stroti, converted for Skyrim by Tamira, SE conversion by Astra.
+
 ## Bethesda Game Studios
 
 The Elder Scrolls V: Skyrim Special Edition and its original game assets are property of Bethesda Game Studios / Bethesda Softworks.
@@ -170,4 +200,4 @@ As assets are selected for the shipped mod, record them here.
 | Perimeter palisade / gates | `J3_RW_WallStraight*.nif`, `J3_RW_WallJunction.nif`, `J3_RW_GateNoFrame.nif`, `J3_RW_GateWay.nif`, `RiverwoodPost*.dds`, `RiverwoodWoodPlanks*.dds` (see audit) | Riverwood Has Charm and Walls | J3w3ls | Asset reuse requires author permission; modder's resource promised | Blocked pending permission; visual reference only |
 | Fair worldspace palisade wall | `meshes\barry_palisades\palisade.nif`, `textures\barry_palisades\palisade\*.dds` | Palisade (Sketchfab) | adam127 | CC BY 4.0: redistribution and modification allowed with attribution | Bundled |
 | Fair worldspace main gate | `meshes\barry_palisades\viking_palisade_gate_closed.nif` (placed), `viking_palisade_gate.nif` (open variant, not placed), `textures\barry_palisades\viking_palisade_gate\*.dds` | Viking Palisade gate (Sketchfab) | Sereib | CC BY 4.0: redistribution and modification allowed with attribution | Bundled |
-
+| Fair worldspace outhouses | `meshes\Stroti\Outdoor Toilet\OutdoorToilet.nif`, `ToiletDoor.nif`, `textures\Stroti\*.dds` | Stroti's Outdoor Toilet Resource | Stroti; Tamira (Skyrim); Astra (SE conversion) | Modder's resource: credit, free, not re-uploaded | Bundled in the built mod; kept out of git |

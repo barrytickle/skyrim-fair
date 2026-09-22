@@ -127,6 +127,12 @@ internal sealed record FairWorldConfig
     /// <summary>Placeholder stall-keepers, one per stall.</summary>
     public VendorsConfig Vendors { get; init; } = new();
 
+    /// <summary>
+    /// Bundled third-party or project meshes given STAT records, so market modules can use
+    /// them by writing <c>@EditorID</c> as a piece.
+    /// </summary>
+    public List<ProjectStaticConfig> ProjectStatics { get; init; } = new();
+
     /// <summary>The archery range: townsfolk practising at targets, Solitude-style.</summary>
     public ArcheryConfig Archery { get; init; } = new();
 

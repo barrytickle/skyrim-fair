@@ -2,7 +2,52 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: props to bring the market to life (2026-09-22, night)
+## Current pass: no Dawi stall-keepers, and outhouses by the walls (2026-09-22, late)
+
+Barry: "i believe i have a dawi mod installed which has the dawi race. Could we make those
+excempt from being vendors... their height breaks with the vendor table", and Astra's SE
+conversion of Stroti's outdoor toilet for the outhouse groups asked for earlier.
+
+**Dawi.** The vendors and archers take their faces from the vanilla commoner lists
+`LCharBanditMeleeCommonerM` / `F` (`01A319` / `01A31E`). `Dawi_NPC_Encounters.esp`
+overrides the male list and adds a seventh entry of its own (`04FF70:Dawi_NPC_Encounters.esp`),
+so some male stall-keepers came out Dawi. The generator now copies each vanilla list
+**from Skyrim.esm** into a leveled list of the fair's own, which no other mod edits:
+- `SkyrimFairFacesLCharBanditMeleeCommonerM` (`000D49`): 6 entries, `EncBandit01`-`06Melee1HImperialM`, all Skyrim.esm.
+- `SkyrimFairFacesLCharBanditMeleeCommonerF` (`000D4E`): 6 entries, the female counterparts, all Skyrim.esm.
+- All 8 vendor records and both archer records template these lists (checked by reading
+  the ESP). Other mods' face changes to those vanilla lists no longer reach the fair.
+
+**Outhouses.** Two new project statics (`fairWorld.projectStatics`, used by modules as
+`@EditorID`): `SkyrimFairOuthouse` (`000BF8`) and `SkyrimFairOuthouseDoor` (`000BF9`),
+with the door placed shut in its frame. The module `outhouse_row` is three outhouses
+side by side, and two `dressing` groups place it:
+
+| Group | Outhouses at | Doors face |
+| --- | --- | --- |
+| West wall, north of the archery range | (-683, 2970), (-686, 2844), (-686, 2739) | east, into the field |
+| East wall, north-east corner | (5332, 3662), (5299, 3767), (5252, 3874) | west-south-west, into the market |
+
+To make room, the archery keep-out is narrowed to y 800-2,000 (the lanes run y 950-1,850),
+and the east group is placed north of the East Wall Walk's end with a 900 search radius.
+
+**Assets**: bundled in the deployed mod, but kept out of git because the resource's
+permissions say "Do not upload to other sites" (see `CREDITS.md`).
+
+**Verification**:
+- Generator run twice: identical SHA256 `e0624b78d352730b...` (420,733 bytes). **Deployed
+  byte-identical**, with `meshes\Stroti\` and `textures\Stroti\` copied into the MO2 mod
+  folder.
+- Market still 33 stalls, 59 stall-keepers, 4 archery lanes. The outhouses sit well
+  north of the lines of fire (y 950-1,850).
+
+**Test**:
+- Stall-keepers: no Dawi behind any counter (walk the whole market, since faces are
+  picked per spawn).
+- The outhouses stand level against both walls, doors shut in their frames, and the
+  textures load (no purple).
+
+## Previous pass: props to bring the market to life (2026-09-22, night)
 
 Barry: "audit some more props... the east side and the center looks a bit bare". The
 audit of vanilla civilian props (Skyrim.esm, ranked by how often vanilla places them) led

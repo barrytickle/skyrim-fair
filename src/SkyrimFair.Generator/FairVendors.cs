@@ -21,7 +21,7 @@ internal static class FairVendors
 
     public static VendorsResult Build(
         SkyrimMod mod, VendorsConfig config, IReadOnlyList<MarketStall> stalls,
-        Func<float, float, float> ground, Action<PlacedNpc> put)
+        Func<float, float, float> ground, Action<PlacedNpc> put, Func<string, FormKey> faceList)
     {
         // One vendor record per look (template x outfit), shared by many references.
         var looks = new List<Npc>();
@@ -34,7 +34,7 @@ internal static class FairVendors
                     EditorID = $"{config.EditorIdPrefix}{look.Name}{looks.Count(n => n.EditorID!.StartsWith($"{config.EditorIdPrefix}{look.Name}")) + 1:00}",
                     Name = config.Name,
                     Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(config.Race)),
-                    Template = new FormLinkNullable<INpcSpawnGetter>(FormKeyHelper.Parse(look.Template)),
+                    Template = new FormLinkNullable<INpcSpawnGetter>(faceList(look.Template)),
                     Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(config.Class)),
                     DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(outfit)),
                     Configuration = new NpcConfiguration

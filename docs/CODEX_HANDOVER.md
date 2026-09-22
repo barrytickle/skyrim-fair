@@ -551,6 +551,9 @@ Project-owned mesh work is code-first and reproducible.
 - ramp collision uses the verified rotated child box approach
 - shoulder wedge intentionally has no collision
 - do not save the authoritative ESP from Creation Kit
+- third-party meshes the generator places get a `fairWorld.projectStatics` entry (EditorID, model path, bounds) and are used in market modules as `@EditorID`
+- Stroti's outhouse meshes and textures (Astra's SE conversion) are git-ignored because their permissions forbid re-uploading; restore them from `external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip` before deploying (see `CREDITS.md`)
+- vendors and archers template the fair's own `SkyrimFairFaces*` leveled lists, copied from Skyrim.esm at generation, so mods that edit vanilla commoner lists (Dawi NPC Encounters) cannot change the fair's faces
 
 ### Permanent foundation construction method
 

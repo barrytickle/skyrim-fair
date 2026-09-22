@@ -30,7 +30,7 @@ internal static class FairMarket
 
     public static MarketResult Build(
         SkyrimMod mod, FairWorldConfig world, Func<float, float, float> outside, Func<float, float, float> ground,
-        Action<PlacedObject> put, Cell persistentCell, int persistentFlag)
+        Action<PlacedObject> put, Cell persistentCell, int persistentFlag, Func<string, FormKey> resolve)
     {
         var market = world.Market;
         var modules = market.Modules.ToDictionary(m => m.Name);
@@ -114,7 +114,7 @@ internal static class FairMarket
                 var pieceYaw = yaw + mirror * piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 3f;
                 put(new PlacedObject(mod)
                 {
-                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece.Piece)),
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece.Piece)),
                     Placement = new Placement
                     {
                         Position = new P3Float(px, py, ground(px, py) + piece.Z),
@@ -130,7 +130,7 @@ internal static class FairMarket
                 var py = y + mirror * extra.X * ry + extra.Y * fy;
                 put(new PlacedObject(mod)
                 {
-                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(extra.Piece)),
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(extra.Piece)),
                     Placement = new Placement
                     {
                         Position = new P3Float(px, py, ground(px, py) + extra.Z),
@@ -186,7 +186,7 @@ internal static class FairMarket
                 var py = y + u * ry + v * fy;
                 put(new PlacedObject(mod)
                 {
-                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece.Piece)),
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece.Piece)),
                     Placement = new Placement
                     {
                         Position = new P3Float(px, py, ground(px, py) + piece.Z),
@@ -407,7 +407,7 @@ internal static class FairMarket
 
             put(new PlacedObject(mod)
             {
-                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(d.Piece)),
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(d.Piece)),
                 Placement = new Placement
                 {
                     Position = new P3Float(d.X, d.Y, ground(d.X, d.Y) + d.Z),

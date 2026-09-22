@@ -194,7 +194,7 @@
         {
           "name": "ArcheryRange",
           "polygon": [
-            [-1100, -900], [700, -900], [700, 3900], [-1100, 3900]
+            [-1100, 800], [700, 800], [700, 2000], [-1100, 2000]
           ]
         },
         {
@@ -416,6 +416,20 @@
             {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 0, "y": 0},
             {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 0, "y": 3, "z": 395}
           ]
+        },
+        {
+          "name": "outhouse_row",
+          "width": 350,
+          "depth": 130,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": -115, "y": 39, "yaw": 180},
+            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "x": -96.9, "y": 57.8, "yaw": 180},
+            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": 0, "y": 39, "yaw": 180},
+            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "x": 18.1, "y": 57.8, "yaw": 180},
+            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": 115, "y": 39, "yaw": 180},
+            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "x": 133.1, "y": 57.8, "yaw": 180}
+          ]
         }
       ],
       "fixed": [
@@ -528,7 +542,9 @@
         {"module": "haystack", "x": 1520, "y": -1330, "yaw": 20, "searchRadius": 600},
         {"module": "crates", "x": 1720, "y": -1220, "yaw": 100, "searchRadius": 600},
         {"module": "haystack", "x": 2650, "y": -1250, "yaw": -30, "searchRadius": 600},
-        {"module": "cart", "x": 2800, "y": -1450, "yaw": -70, "searchRadius": 600}
+        {"module": "cart", "x": 2800, "y": -1450, "yaw": -70, "searchRadius": 600},
+        {"module": "outhouse_row", "x": -720, "y": 2850, "yaw": 90, "searchRadius": 600},
+        {"module": "outhouse_row", "x": 5150, "y": 3780, "yaw": 250, "searchRadius": 900}
       ],
       "seating": [
         {"lane": "EastLane", "module": "picnic", "offset": 0, "from": 300, "to": 4300, "spacing": 800},
@@ -637,6 +653,10 @@
         }
       ]
     },
+    "projectStatics": [
+      {"editorId": "SkyrimFairOuthouse", "model": "Stroti\\Outdoor Toilet\\OutdoorToilet.nif", "width": 100, "depth": 126, "height": 195},
+      {"editorId": "SkyrimFairOuthouseDoor", "model": "Stroti\\Outdoor Toilet\\ToiletDoor.nif", "width": 72, "depth": 9, "height": 141}
+    ],
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
     "avenueWidth": 800,
     "zoneMarker": "00000034:Skyrim.esm",

@@ -12,3 +12,9 @@ external/
 
 # Blender backup saves
 *.blend1
+
+# Stroti's Outdoor Toilet (SE conversion by Astra): the resource's permissions forbid
+# uploading it elsewhere, so it is bundled into the built mod but never committed.
+# Restore with: unzip external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip (see CREDITS.md)
+assets/meshes/Stroti/
+assets/textures/Stroti/

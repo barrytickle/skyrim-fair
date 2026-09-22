@@ -179,9 +179,43 @@ internal static class FairWorld
         // ---- the main stage ---------------------------------------------------------
         var stage = config.Stage.Enabled ? FairStage.Build(mod, config, plan.Height, Put) : null;
 
+        // ---- project statics, used by market modules as @EditorID -----------------------
+        var projectStatics = config.ProjectStatics.ToDictionary(ps => ps.EditorId, ps => AddStatic(mod, ps).FormKey);
+        FormKey Resolve(string piece) => piece.StartsWith('@')
+            ? projectStatics.TryGetValue(piece[1..], out var key)
+                ? key
+                : throw new InvalidOperationException($"Market piece {piece} is not a configured project static.")
+            : FormKeyHelper.Parse(piece);
+
+        // ---- the fair's own face lists -------------------------------------------------
+        // Vendors and archers take their looks from vanilla commoner leveled lists. Other
+        // mods edit those lists (Dawi NPC Encounters adds its race to the male one), so the
+        // fair copies each list's Skyrim.esm entries into a record of its own, which no
+        // other mod touches.
+        var faceLists = new Dictionary<string, FormKey>();
+        FormKey FaceList(string template)
+        {
+            if (faceLists.TryGetValue(template, out var own))
+            {
+                return own;
+            }
+
+            var key = FormKeyHelper.Parse(template);
+            var vanilla = master?.LeveledNpcs.FirstOrDefault(l => l.FormKey == key);
+            if (vanilla is null)
+            {
+                return faceLists[template] = key;
+            }
+
+            var copy = vanilla.Duplicate(mod.GetNextFormKey());
+            copy.EditorID = $"SkyrimFairFaces{vanilla.EditorID}";
+            mod.LeveledNpcs.Add(copy);
+            return faceLists[template] = copy.FormKey;
+        }
+
         // ---- the market ---------------------------------------------------------------
         var market = config.Market.Enabled
-            ? FairMarket.Build(mod, config, plan.Outside, plan.Height, Put, topCell, PersistentRecordFlag)
+            ? FairMarket.Build(mod, config, plan.Outside, plan.Height, Put, topCell, PersistentRecordFlag, Resolve)
             : null;
 
         // ---- stall-keepers ------------------------------------------------------------
@@ -192,7 +226,7 @@ internal static class FairWorld
             {
                 var pos = npc.Placement!.Position;
                 cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
-            });
+            }, FaceList);
         }
 
         // ---- archery range ------------------------------------------------------------
@@ -203,7 +237,7 @@ internal static class FairWorld
             {
                 var pos = npc.Placement!.Position;
                 cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
-            });
+            }, FaceList);
         }
 
         // ---- distant mountains ------------------------------------------------------

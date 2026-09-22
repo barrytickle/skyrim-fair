@@ -19,7 +19,7 @@ internal static class FairArchery
 
     public static ArcheryResult Build(
         SkyrimMod mod, ArcheryConfig config, Func<float, float, float> ground,
-        Action<PlacedObject> putObject, Action<PlacedNpc> putNpc)
+        Action<PlacedObject> putObject, Action<PlacedNpc> putNpc, Func<string, FormKey> faceList)
     {
         var archers = new List<Npc>();
         foreach (var look in config.Looks)
@@ -29,7 +29,7 @@ internal static class FairArchery
                 EditorID = $"{config.EditorIdPrefix}{look.Name}",
                 Name = config.Name,
                 Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(config.Race)),
-                Template = new FormLinkNullable<INpcSpawnGetter>(FormKeyHelper.Parse(look.Template)),
+                Template = new FormLinkNullable<INpcSpawnGetter>(faceList(look.Template)),
                 Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(config.Class)),
                 DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(config.Outfit)),
                 Configuration = new NpcConfiguration
