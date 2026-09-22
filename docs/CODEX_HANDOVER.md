@@ -195,6 +195,20 @@ Do not enlarge the platform simply because more space might be useful. First pro
 
 ## Road and entrance
 
+**The entrance is a vanilla stair, not a ramp** (built 2026-09-22, to match Barry's
+second concept reference). `StonewallTerraceStairs01`, `000009D0:Skyrim.esm`, is a
+512-wide drystone wall with a 167-wide staircase cut through it; its treads climb 112
+units over a 192 run, about 30 degrees. Measured off the shipped mesh, not the LOD.
+
+Its 192 run does not fit the 512 tile grid, so the first ramp slot becomes a flat
+**landing** one stair-drop below the floor, the stair bridges up from it to the terrace,
+and the ramp chain carries on from the landing. That keeps everything on grid and the
+walk continuous. Placed at `floorZ - StairTopOffset` the top tread lands on the floor
+plane and the wall crest stands 40 above it, giving a low parapet either side of the way
+in. `Entrance.UseStairs = false` falls back to a plain ramp.
+
+
+
 The existing road is part of the site's visual integration.
 
 - never disable or alter the road reference just to simplify the ramp

@@ -196,12 +196,50 @@ internal static class FairFoundation
 
                 if (rampSegments.Contains((col, row, name)))
                 {
-                    // Chain of ramp tiles stepping down and outward from the paving.
-                    for (var i = 0; i < f.RampTiles; i++)
+                    var e = f.Entrance;
+                    var slot0Z = f.FloorZ;
+                    var firstRamp = 0;
+
+                    if (e.UseStairs)
+                    {
+                        // The entrance is a vanilla drystone wall with a staircase cut
+                        // through it, measured from the shipped mesh: the wall is 512
+                        // wide, the stair gap 167, and the treads climb 112 units over a
+                        // 192 run at about 30 degrees.
+                        //
+                        // The stair's run does not fit the 512 tile grid, so the first
+                        // slot becomes a flat LANDING one stair-drop below the floor and
+                        // the stair bridges up from it to the terrace. The ramp chain
+                        // then carries on from the landing, which keeps everything on
+                        // grid and keeps the walk continuous.
+                        var landX = ex + dc * tile / 2f;
+                        var landY = ey - dr * tile / 2f;
+                        slot0Z = f.FloorZ - e.StairDrop;
+                        Put("floorEdge", landX, landY, slot0Z, 0f);
+                        Put(PhasedRole("paveCapEdge", col, row), landX, landY, slot0Z, 0f);
+                        result.PavedRects.Add((landX - tile / 2f, landY - tile / 2f,
+                                               landX + tile / 2f, landY + tile / 2f));
+
+                        // Placed so the TOP of the treads sits on the floor plane. The
+                        // wall then stands StairCrest above it, which is the low parapet
+                        // either side of the way in.
+                        PutVanilla(e.Stair,
+                            ex - dc * e.StairInset,
+                            ey + dr * e.StairInset,
+                            f.FloorZ - e.StairTopOffset,
+                            rot + MathF.PI,      // its stair climbs toward local +Y
+                            1f);
+                        result.EntrancePieces++;
+                        firstRamp = 1;
+                    }
+
+                    // Chain of ramp tiles stepping down and outward from the paving, or
+                    // from the landing when the stair takes the first slot.
+                    for (var i = firstRamp; i < f.RampTiles; i++)
                     {
                         var ox = ex + dc * tile * i;
                         var oy = ey - dr * tile * i;
-                        var oz = f.FloorZ - f.RampRise * i;
+                        var oz = slot0Z - f.RampRise * (i - firstRamp);
                         Put(PhasedRole("ramp", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         Put(PhasedRole("rampCap", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         rampTiles.Add((ox, oy, oz, dc, dr));
@@ -926,8 +964,13 @@ internal static class FairFoundation
         }
 
         // Outermost line first, so the ramp leaves the outline rather than a notch.
+        //
+        // "Outermost" is distance along the OUTWARD direction, which is what the sign
+        // here encodes: going outward means row decreasing on a north edge, row
+        // increasing on a south edge, and likewise for columns east and west. Getting
+        // that backwards put a one-tile-wide entrance on the far side of the terrace.
         var pick = usable
-            .OrderBy(r => dr != 0 ? Across(r[0], dc) * dr : Across(r[0], dc) * -dc)
+            .OrderByDescending(r => Across(r[0], dc) * (dc != 0 ? dc : dr))
             .ThenByDescending(r => r.Count)
             .First();
 
@@ -967,6 +1010,9 @@ internal sealed class FoundationResult
 
     /// <summary>Picks refused for protruding through the usable market floor.</summary>
     public int PavingGuardSkipped { get; set; }
+
+    /// <summary>Vanilla entrance pieces, currently the stair-through-a-wall.</summary>
+    public int EntrancePieces { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }

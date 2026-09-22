@@ -307,6 +307,8 @@ internal sealed record FoundationConfig
         ["rampCap"] = new() { EditorId = "SkyrimFairRampCap512", Model = @"SkyrimFair\SkyrimFair_RampCap_512.nif" },
     };
 
+    public EntranceConfig Entrance { get; init; } = new();
+
     public DressingConfig Dressing { get; init; } = new();
 
     public void Validate()
@@ -589,4 +591,34 @@ internal sealed record DressingConfig
         "0003A2BD:Skyrim.esm", // TundraScrub02
         "0003A2BE:Skyrim.esm", // TundraScrub03
     };
+}
+
+
+/// <summary>
+/// The way in. A vanilla drystone wall with a staircase cut through it, rather than a
+/// bare ramp: measured off the shipped mesh, the wall is 512 wide, the stair gap is 167,
+/// and the treads climb 112 units over a 192 run at about 30 degrees.
+/// </summary>
+internal sealed record EntranceConfig
+{
+    /// <summary>False falls back to a plain ramp all the way up.</summary>
+    public bool UseStairs { get; init; } = true;
+
+    /// <summary>`StonewallTerraceStairs01`, the farm terrace stair.</summary>
+    public string Stair { get; init; } = "000009D0:Skyrim.esm";
+
+    /// <summary>Height the treads climb, so the landing sits exactly at their foot.</summary>
+    public float StairDrop { get; init; } = 112f;
+
+    /// <summary>
+    /// Local Z of the top tread. Placing the piece this far below the floor plane puts
+    /// the top step on the floor and leaves the wall crest standing 40 above it.
+    /// </summary>
+    public float StairTopOffset { get; init; } = 130f;
+
+    /// <summary>
+    /// How far inside the paved edge the piece's origin sits, so the top tread lands on
+    /// the edge itself. The mesh's top tread is 64 units in front of its origin.
+    /// </summary>
+    public float StairInset { get; init; } = 64f;
 }
