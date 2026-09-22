@@ -607,8 +607,18 @@ internal sealed record EntranceConfig
     /// <summary>`StonewallTerraceStairs01`, the farm terrace stair.</summary>
     public string Stair { get; init; } = "000009D0:Skyrim.esm";
 
-    /// <summary>Height the treads climb, so the landing sits exactly at their foot.</summary>
+    /// <summary>Height one flight climbs. Also the step between chained flights.</summary>
     public float StairDrop { get; init; } = 112f;
+
+    /// <summary>Run of one flight, so chained flights meet tread to tread.</summary>
+    public float StairRun { get; init; } = 192f;
+
+    /// <summary>
+    /// Flights in the chain. Four is what reaches native ground from a floor at
+    /// -5336, landing 8 units into grade and stopping 885 short of the road, which
+    /// leaves the last stretch to the dirt path.
+    /// </summary>
+    public int StairFlights { get; init; } = 4;
 
     /// <summary>
     /// Local Z of the top tread. Placing the piece this far below the floor plane puts

@@ -30,7 +30,7 @@ The current site, footprint, height and entrance are approved unless Barry expli
 Read `docs/AUDIT.md` for exact current values and hashes. At handover time the important state is:
 
 - centre `X -5888, Y -13440` (pushed back 512 from the road on 2026-09-22)
-- floor `Z -5592`
+- floor `Z -5336` (raised 2026-09-22 to make the terrace tall, per concept reference)
 - the platform was deliberately raised by +192 from the earlier test
 - irregular 22-tile paving footprint
 - broad ramp connects toward the existing road
@@ -195,17 +195,26 @@ Do not enlarge the platform simply because more space might be useful. First pro
 
 ## Road and entrance
 
-**The entrance is a vanilla stair, not a ramp** (built 2026-09-22, to match Barry's
+**The entrance is a CHAIN of vanilla stair flights, not a ramp** (built 2026-09-22, to match Barry's
 second concept reference). `StonewallTerraceStairs01`, `000009D0:Skyrim.esm`, is a
 512-wide drystone wall with a 167-wide staircase cut through it; its treads climb 112
 units over a 192 run, about 30 degrees. Measured off the shipped mesh, not the LOD.
 
-Its 192 run does not fit the 512 tile grid, so the first ramp slot becomes a flat
-**landing** one stair-drop below the floor, the stair bridges up from it to the terrace,
-and the ramp chain carries on from the landing. That keeps everything on grid and the
-walk continuous. Placed at `floorZ - StairTopOffset` the top tread lands on the floor
-plane and the wall crest stands 40 above it, giving a low parapet either side of the way
-in. `Entrance.UseStairs = false` falls back to a plain ramp.
+Flights chain nose to tail: each is stepped one `StairRun` further out and one
+`StairDrop` lower, which puts the top tread of each on the bottom tread of the one
+above, so no landings are needed and it reads as one long staircase. Each flight brings
+its own 512-wide drystone wall, so the chain also builds the stepped retaining tiers
+either side of the steps.
+
+**Four flights** carry the current floor of `-5336` down to native ground, landing 8
+units into grade and stopping 885 short of the road, which leaves the last stretch to
+the dirt path still to be built. Flights are registered with the ramp-tile list so the
+entrance channel and the paving guard cover the steps and the flank treatment dresses
+their sides. `Entrance.UseStairs = false` falls back to a plain ramp.
+
+**Skyrim Fair now disables no vanilla references at all.** At this floor height the four
+that were disabled sit 200 to 300 units below the paving, so they are invisible and go
+back to vanilla untouched.
 
 
 

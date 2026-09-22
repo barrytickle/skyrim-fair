@@ -39,18 +39,18 @@
       "locationRefType": "0010F63C:Skyrim.esm",
       "position": {
         "x": -5888,
-        "y": -10112,
-        "z": -5928
+        "y": -10880,
+        "z": -5776
       }
     },
     "foundation": {
       "enabled": true,
       "tileSize": 512,
-      "floorZ": -5592,
+      "floorZ": -5336,
       "rampEdge": "N",
-      "rampTiles": 3,
+      "rampTiles": 0,
       "rampWidth": 1,
-      "rampRise": 120,
+      "rampRise": 112,
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
@@ -153,9 +153,9 @@
         "wallTopOvershoot": 96,
         "wallBedding": 80,
         "wallEdgeOverlap": 112,
-        "wallMaxRadius": 640,
-        "toePerSegment": 2,
-        "vergePerSegment": 2,
+        "wallMaxRadius": 760,
+        "toePerSegment": 3,
+        "vergePerSegment": 5,
         "vergeMaxLocalStep": 112,
         "rampChannelWidth": 800,
         "rampLandingLength": 512,
@@ -172,19 +172,16 @@
       "clearSearchRadius": 2048,
       "clearMaxRadius": 2000,
       "clearClutter": false,
-      "disableReferences": [
-        "0004801A:Skyrim.esm",
-        "00048031:Skyrim.esm",
-        "00047F8C:Skyrim.esm",
-        "00048026:Skyrim.esm"
-      ],
+      "disableReferences": [],
       "rampAlign": "centre",
       "entrance": {
         "useStairs": true,
         "stair": "000009D0:Skyrim.esm",
         "stairDrop": 112,
         "stairTopOffset": 130,
-        "stairInset": 64
+        "stairInset": 64,
+        "stairRun": 192,
+        "stairFlights": 4
       }
     }
   }

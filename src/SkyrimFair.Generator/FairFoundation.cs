@@ -202,44 +202,49 @@ internal static class FairFoundation
 
                     if (e.UseStairs)
                     {
-                        // The entrance is a vanilla drystone wall with a staircase cut
-                        // through it, measured from the shipped mesh: the wall is 512
-                        // wide, the stair gap 167, and the treads climb 112 units over a
-                        // 192 run at about 30 degrees.
+                        // A chain of vanilla stair flights, nose to tail, which reads as
+                        // one long staircase climbing the terrace rather than a ramp.
                         //
-                        // The stair's run does not fit the 512 tile grid, so the first
-                        // slot becomes a flat LANDING one stair-drop below the floor and
-                        // the stair bridges up from it to the terrace. The ramp chain
-                        // then carries on from the landing, which keeps everything on
-                        // grid and keeps the walk continuous.
-                        var landX = ex + dc * tile / 2f;
-                        var landY = ey - dr * tile / 2f;
-                        slot0Z = f.FloorZ - e.StairDrop;
-                        Put("floorEdge", landX, landY, slot0Z, 0f);
-                        Put(PhasedRole("paveCapEdge", col, row), landX, landY, slot0Z, 0f);
-                        result.PavedRects.Add((landX - tile / 2f, landY - tile / 2f,
-                                               landX + tile / 2f, landY + tile / 2f));
+                        // Measured off the shipped mesh: the treads run from local
+                        // Y -256 at Z 18 up to Y -64 at Z 130, so one flight is 112 of
+                        // rise over 192 of run, about 30 degrees. Turning the piece to
+                        // face outward and stepping each flight one run further out and
+                        // one drop lower puts the top tread of each on the bottom tread
+                        // of the one above, with no landing needed.
+                        //
+                        // Each flight brings its own 512-wide drystone wall, so the
+                        // chain also builds the stepped retaining tiers either side of
+                        // the steps.
+                        for (var i = 0; i < e.StairFlights; i++)
+                        {
+                            var outward = e.StairRun * i - e.StairInset;
+                            PutVanilla(e.Stair,
+                                ex + dc * outward,
+                                ey - dr * outward,
+                                f.FloorZ - e.StairTopOffset - e.StairDrop * i,
+                                rot + MathF.PI,
+                                1f);
+                            result.EntrancePieces++;
 
-                        // Placed so the TOP of the treads sits on the floor plane. The
-                        // wall then stands StairCrest above it, which is the low parapet
-                        // either side of the way in.
-                        PutVanilla(e.Stair,
-                            ex - dc * e.StairInset,
-                            ey + dr * e.StairInset,
-                            f.FloorZ - e.StairTopOffset,
-                            rot + MathF.PI,      // its stair climbs toward local +Y
-                            1f);
-                        result.EntrancePieces++;
-                        firstRamp = 1;
+                            // Register each flight with the ramp-tile list so the
+                            // entrance channel and the paving guard cover the stairs,
+                            // and so the flank treatment dresses their sides. Without
+                            // this the channel disappears with the ramp and dressing is
+                            // free to land on the steps.
+                            rampTiles.Add((ex + dc * outward, ey - dr * outward,
+                                           f.FloorZ - e.StairDrop * i, dc, dr));
+                        }
+
+                        slot0Z = f.FloorZ - e.StairDrop * e.StairFlights;
                     }
 
-                    // Chain of ramp tiles stepping down and outward from the paving, or
-                    // from the landing when the stair takes the first slot.
+                    // Any ramp tiles configured carry on below the stairs. With a full
+                    // stair chain reaching grade this is usually zero.
                     for (var i = firstRamp; i < f.RampTiles; i++)
                     {
                         var ox = ex + dc * tile * i;
                         var oy = ey - dr * tile * i;
-                        var oz = slot0Z - f.RampRise * (i - firstRamp);
+                        var oz = slot0Z - f.RampRise * i;
                         Put(PhasedRole("ramp", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         Put(PhasedRole("rampCap", col + dc * i, row + dr * i), ox, oy, oz, rot);
                         rampTiles.Add((ox, oy, oz, dc, dr));
