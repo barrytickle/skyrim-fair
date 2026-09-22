@@ -122,8 +122,22 @@ try
                 : $"  WARNING: Skyrim.esm not read; climate {world.ClimateFormKey} referenced as is");
         Console.WriteLine(
             $"  planned compound {maxX - minX:0} x {maxY - minY:0} units, " +
-            $"X {minX:0}..{maxX:0}, Y {minY:0}..{maxY:0}; {world.PostCount} temporary perimeter posts; " +
+            $"X {minX:0}..{maxX:0}, Y {minY:0}..{maxY:0}; " +
             $"at most {world.MaxAlphaLayers} texture layers in a quadrant");
+        var wall = world.Wall;
+        Console.WriteLine(
+            $"  palisade: {wall.PanelCount} panels of STAT {wall.PanelStatic}, " +
+            $"{wall.PanelWidth:0} wide x {wall.PanelHeight:0} tall each");
+        Console.WriteLine(
+            $"  main gate: STAT {wall.GateStatic} placed as {wall.GateReference}, " +
+            $"{wall.GateHeight:0} tall, facing {wall.GateHeading:0.0} degrees");
+        Console.WriteLine($"  forest: {world.Trees.Sum(t => t.Count)} trees");
+        foreach (var tree in world.Trees)
+        {
+            Console.WriteLine(
+                $"    {tree.Count,4} x {tree.Name,-20} scale {tree.MinScale:0.00}-{tree.MaxScale:0.00}, " +
+                $"{tree.MinDistance:0}-{tree.MaxDistance:0} beyond the wall");
+        }
         foreach (var marker in world.Markers)
         {
             Console.WriteLine($"  {marker.EditorId,-36} {marker.FormKey}  ({marker.X:0}, {marker.Y:0}) facing {marker.Heading:0}");
@@ -134,6 +148,8 @@ try
         Console.WriteLine($"    out:  cow Tamriel {site.CellGridX} {site.CellGridY}     (lands at the Tamriel fair site)");
         Console.WriteLine("  Plan (north up, 512 units per character):");
         Console.Write(world.Plan);
+        Console.WriteLine("  Forest (north up, 1024 units per character, ^ = trees, G = gate):");
+        Console.Write(world.ForestPlan);
     }
 
     Console.WriteLine();

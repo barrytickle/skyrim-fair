@@ -73,11 +73,16 @@ lighting template and sky weather. Set `"enabled": false` to leave it out of the
 ## Fair worldspace (prototype)
 
 `SkyrimFairWorld` is an isolated outdoor worldspace that will eventually hold the whole
-fair inside a palisade compound. For now it is an empty canvas: 121 cells of generated
-ground, flat inside the planned perimeter and rising into low hills beyond it, under a
-tundra sky. The plan is painted into the ground (avenue, entrance, crowd square and
-stage, market side, activity side) and temporary posts mark the wall line. The Tamriel
-terrace is unaffected.
+fair. It has 121 cells of generated ground, flat inside the compound and rising into low
+hills beyond it, under a tundra sky. The plan is painted into the ground (avenue,
+entrance, crowd square and stage, market side, activity side). A custom wooden palisade
+encloses it, with a closed Viking gate at the south end of the avenue, and a loose
+forest of vanilla pines stands outside the wall. There are no stalls or NPCs yet. The
+Tamriel terrace is unaffected.
+
+The palisade and gate meshes are bundled from `assets/meshes/barry_palisades/` and
+`assets/textures/barry_palisades/`. They are CC BY 4.0 models by adam127 and Sereib;
+see `CREDITS.md`.
 
 ```text
 cow SkyrimFairWorld 0 0                     go in, to the middle of the compound
@@ -86,7 +91,8 @@ cow Tamriel -2 -4                           come out, at the Tamriel fair site
 ```
 
 The `fairWorld` block in `fair.config.json` holds the perimeter, gate, avenue and zone
-geometry, the ground textures and the terrain shape. `docs/AUDIT.md` has the details.
+geometry, the ground textures, the terrain shape, and the palisade, gate and forest
+settings. `docs/AUDIT.md` has the details.
 
 ## Prototype config
 

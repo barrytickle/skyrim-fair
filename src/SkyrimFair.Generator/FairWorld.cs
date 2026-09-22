@@ -109,27 +109,12 @@ internal static class FairWorld
 
         worldspace.TopCell = topCell;
 
-        // ---- temporary scale posts along the planned wall line --------------------
-        var posts = new Dictionary<(int X, int Y), List<PlacedObject>>();
-        var postBase = FormKeyHelper.Parse(config.PerimeterPost);
-        var postCount = 0;
-        foreach (var (x, y, heading) in plan.PostPositions(config.PostSpacing))
-        {
-            var key = ((int)MathF.Floor(x / CellSize), (int)MathF.Floor(y / CellSize));
-            if (!posts.TryGetValue(key, out var list))
-            {
-                list = new List<PlacedObject>();
-                posts[key] = list;
-            }
-
-            list.Add(Place(mod, postBase, x, y, plan.Height(x, y), heading));
-            postCount++;
-        }
-
         // ---- exterior cells, each with its own landscape --------------------------
+        // Cells and LAND are allocated before anything placed in them, so their
+        // FormIDs do not move whenever the wall or forest changes.
         var grid = new ExteriorCellGrid(worldspace);
+        var cells = new Dictionary<(int X, int Y), Cell>();
         var textures = plan.PaintTextures();
-        var cellCount = 0;
         var maxLayers = 0;
 
         for (var cy = -config.CellRadius; cy <= config.CellRadius; cy++)
@@ -144,18 +129,56 @@ internal static class FairWorld
                 };
 
                 cell.Landscape = BuildLandscape(mod, plan, textures, cx, cy, ref maxLayers);
-
-                if (posts.TryGetValue((cx, cy), out var cellPosts))
-                {
-                    foreach (var post in cellPosts)
-                    {
-                        cell.Temporary.Add(post);
-                    }
-                }
-
                 grid.Add(cell, cx, cy);
-                cellCount++;
+                cells[(cx, cy)] = cell;
             }
+        }
+
+        void Put(PlacedObject placed)
+        {
+            var pos = placed.Placement!.Position;
+            var key = ((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize));
+            if (!cells.TryGetValue(key, out var cell))
+            {
+                throw new InvalidOperationException(
+                    $"FairWorld reference at {pos.X:0}, {pos.Y:0} falls outside the generated cells; raise CellRadius.");
+            }
+
+            cell.Temporary.Add(placed);
+        }
+
+        // ---- the palisade and its gate ---------------------------------------------
+        var panelStatic = AddStatic(mod, config.Palisade);
+        var gateStatic = AddStatic(mod, config.GatePiece);
+
+        var gatePiece = config.GatePiece;
+        var facing = config.Zones.First(z => z.Name == config.GateFacesZone).Marker;
+        var gateHeading = MathF.Atan2(facing[0] - config.Gate[0], facing[1] - config.Gate[1]) * 180f / MathF.PI
+            + gatePiece.YawOffsetDegrees;
+        var gate = Place(
+            mod, gateStatic.FormKey, config.Gate[0], config.Gate[1],
+            plan.Height(config.Gate[0], config.Gate[1]) - gatePiece.Sink, gateHeading);
+        gate.EditorID = $"{config.EditorId}MainGate";
+        gate.Scale = gatePiece.Scale;
+        Put(gate);
+
+        var panels = plan.WallPanels(config.Palisade, gatePiece.Width * gatePiece.Scale / 2f).ToList();
+        foreach (var panel in panels)
+        {
+            var placed = Place(mod, panelStatic.FormKey, panel.X, panel.Y, panel.Z, panel.Heading);
+            placed.Scale = panel.Scale;
+            Put(placed);
+        }
+
+        // ---- forest backdrop ---------------------------------------------------------
+        var trees = config.Forest.Enabled ? plan.ForestTrees(config.Forest, gateHeading).ToList() : new List<TreePlacement>();
+        foreach (var tree in trees)
+        {
+            var placed = Place(mod, tree.Base, tree.X, tree.Y, tree.Z, tree.Heading);
+            placed.Placement!.Rotation = new P3Float(
+                tree.LeanX * MathF.PI / 180f, tree.LeanY * MathF.PI / 180f, tree.Heading * MathF.PI / 180f);
+            placed.Scale = tree.Scale;
+            Put(placed);
         }
 
         mod.Worldspaces.Add(worldspace);
@@ -165,13 +188,46 @@ internal static class FairWorld
             config.EditorId,
             climateKey,
             weatherCount,
-            cellCount,
+            cells.Count,
             config.CellRadius,
-            postCount,
             maxLayers,
             markers,
             plan.Bounds,
-            plan.RenderPlan(512f));
+            new FairWorldWall(
+                panelStatic.FormKey, gateStatic.FormKey, gate.FormKey, panels.Count,
+                config.Palisade.Width * config.Palisade.Scale, config.Palisade.Height * config.Palisade.Scale,
+                gatePiece.Height * gatePiece.Scale, gateHeading),
+            trees
+                .GroupBy(t => t.Name)
+                .OrderBy(g => g.Key, StringComparer.Ordinal)
+                .Select(g => new FairWorldTreeCount(
+                    g.Key, g.Count(), g.Min(t => t.Scale), g.Max(t => t.Scale),
+                    g.Min(t => t.Distance), g.Max(t => t.Distance)))
+                .ToList(),
+            plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
+            plan.RenderPlan(1024f, config.Forest.OuterDistance, trees));
+    }
+
+    /// <summary>
+    /// A STAT for a project mesh, with object bounds taken from its measured size so the
+    /// engine culls it correctly.
+    /// </summary>
+    private static Static AddStatic(SkyrimMod mod, ProjectStaticConfig piece)
+    {
+        var halfWidth = (short)MathF.Ceiling(piece.Width / 2f);
+        var halfDepth = (short)MathF.Ceiling(piece.Depth / 2f);
+        var record = new Static(mod)
+        {
+            EditorID = piece.EditorId,
+            Model = new Model { File = piece.Model },
+            ObjectBounds = new ObjectBounds
+            {
+                First = new P3Int16((short)-halfWidth, (short)-halfDepth, 0),
+                Second = new P3Int16(halfWidth, halfDepth, (short)MathF.Ceiling(piece.Height)),
+            },
+        };
+        mod.Statics.Add(record);
+        return record;
     }
 
     // ------------------------------------------------------------------------
@@ -451,76 +507,201 @@ internal static class FairWorld
         }
 
         /// <summary>
-        /// Posts at every perimeter vertex and at even spacing along each edge, except
-        /// across the gate, which gets one post either side of its opening instead.
+        /// Palisade panels, edge by edge round the outline. Each edge's run carries a
+        /// little past both vertices so corners close, is split either side of the gate
+        /// with its ends tucked into the gate posts, and is filled with the fewest panels
+        /// that still overlap by <see cref="PalisadeConfig.Overlap"/>, spread evenly so no
+        /// short filler panel is needed. Every panel then wanders slightly in yaw, line,
+        /// scale and sink, and some are turned round, all from a fixed integer hash.
         /// </summary>
-        public IEnumerable<(float X, float Y, float Heading)> PostPositions(float spacing)
+        public IEnumerable<WallPanel> WallPanels(PalisadeConfig wall, float gateHalfWidth)
         {
-            var gate = config.Gate;
-            var gateHalf = config.GateWidth / 2f;
+            var width = wall.Width * wall.Scale;
+            var pitch = width * (1f - wall.Overlap);
 
             for (var i = 0; i < perimeter.Length; i++)
             {
                 var a = perimeter[i];
                 var b = perimeter[(i + 1) % perimeter.Length];
                 var length = MathF.Sqrt((b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y));
-                var heading = MathF.Atan2(b.X - a.X, b.Y - a.Y) * 180f / MathF.PI;
-                var steps = Math.Max(1, (int)MathF.Round(length / spacing));
-                var gateOnEdge = false;
-                var gateT = 0f;
+                var (ux, uy) = ((b.X - a.X) / length, (b.Y - a.Y) / length);
+                var edgeHeading = MathF.Atan2(ux, uy) * 180f / MathF.PI;
 
-                if (gate is { Length: 2 })
+                var runs = new List<(float From, float To)>();
+                var (gateDistance, gateT) = SegmentDistance(a, b, config.Gate[0], config.Gate[1]);
+                if (gateDistance < 1f)
                 {
-                    var (d, t) = SegmentDistance(a, b, gate[0], gate[1]);
-                    gateOnEdge = d < gateHalf;
-                    gateT = t;
+                    var at = gateT * length;
+                    runs.Add((-wall.CornerExtension, at - gateHalfWidth + wall.GateTuck));
+                    runs.Add((at + gateHalfWidth - wall.GateTuck, length + wall.CornerExtension));
+                }
+                else
+                {
+                    runs.Add((-wall.CornerExtension, length + wall.CornerExtension));
                 }
 
-                for (var s = 0; s < steps; s++)
+                for (var r = 0; r < runs.Count; r++)
                 {
-                    var t = s / (float)steps;
-                    if (gateOnEdge && MathF.Abs(t - gateT) * length < gateHalf)
+                    var (from, to) = runs[r];
+                    var span = to - from;
+                    var count = span <= width ? 1 : (int)MathF.Ceiling((span - width) / pitch) + 1;
+                    var run = i * 16 + r;
+                    for (var k = 0; k < count; k++)
                     {
-                        continue;
-                    }
+                        var along = count == 1 ? (from + to) / 2f : from + width / 2f + k * (span - width) / (count - 1);
+                        var offset = (Hash3(run, k, 1) * 2f - 1f) * wall.OffsetJitter;
+                        var x = a.X + ux * along + uy * offset;
+                        var y = a.Y + uy * along - ux * offset;
+                        var flip = Hash3(run, k, 5) < wall.FlipChance ? 180f : 0f;
 
-                    yield return (a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t, heading);
-                }
-
-                if (gateOnEdge)
-                {
-                    foreach (var side in new[] { -1f, 1f })
-                    {
-                        var t = gateT + side * gateHalf / length;
-                        yield return (a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t, heading);
+                        // The panel spans local X, so it turns a quarter from the edge heading.
+                        yield return new WallPanel(
+                            x, y,
+                            Height(x, y) - Hash3(run, k, 4) * wall.SinkMax,
+                            edgeHeading - 90f + flip + (Hash3(run, k, 2) * 2f - 1f) * wall.YawJitterDegrees,
+                            wall.Scale * (1f + (Hash3(run, k, 3) * 2f - 1f) * wall.ScaleJitter));
                     }
                 }
             }
         }
 
-        /// <summary>Plan view, north up, one character per <paramref name="cell"/> units.</summary>
-        public string RenderPlan(float cell)
+        /// <summary>
+        /// Scenery conifers in the band outside the wall: a jittered grid of candidates,
+        /// each kept by chance against a density that rises from sparse by the wall to
+        /// dense a little way out and thins toward the outer edge, multiplied by a
+        /// clustering field whose low values are clearings. Nothing stands near the gate
+        /// or in the open approach in front of it.
+        /// </summary>
+        public IEnumerable<TreePlacement> ForestTrees(ForestConfig forest, float gateHeading)
+        {
+            var species = forest.Trees
+                .Select(t => (Tree: t, Key: FormKeyHelper.Parse(t.FormKey)))
+                .ToList();
+            var nearest = forest.Trees.Min(t => t.MinDistance);
+            var (minX, minY, maxX, maxY) = Bounds;
+            var reach = forest.OuterDistance;
+
+            // The approach runs out of the gate, away from what it faces.
+            var outward = (gateHeading + 180f) * MathF.PI / 180f;
+            var (ox, oy) = (MathF.Sin(outward), MathF.Cos(outward));
+            var coneCos = MathF.Cos(forest.GateApproachDegrees * MathF.PI / 180f);
+
+            var gx0 = (int)MathF.Floor((minX - reach) / forest.GridSpacing);
+            var gx1 = (int)MathF.Ceiling((maxX + reach) / forest.GridSpacing);
+            var gy0 = (int)MathF.Floor((minY - reach) / forest.GridSpacing);
+            var gy1 = (int)MathF.Ceiling((maxY + reach) / forest.GridSpacing);
+
+            for (var gy = gy0; gy <= gy1; gy++)
+            {
+                for (var gx = gx0; gx <= gx1; gx++)
+                {
+                    var x = (gx + 0.5f + (Hash3(gx, gy, 11) * 2f - 1f) * forest.Jitter) * forest.GridSpacing;
+                    var y = (gy + 0.5f + (Hash3(gx, gy, 12) * 2f - 1f) * forest.Jitter) * forest.GridSpacing;
+                    var distance = Outside(x, y);
+                    if (distance < nearest || distance > forest.OuterDistance)
+                    {
+                        continue;
+                    }
+
+                    var gdx = x - config.Gate[0];
+                    var gdy = y - config.Gate[1];
+                    var fromGate = MathF.Sqrt(gdx * gdx + gdy * gdy);
+                    if (fromGate < forest.GateClearRadius || (gdx * ox + gdy * oy) / fromGate > coneCos)
+                    {
+                        continue;
+                    }
+
+                    var cluster = ValueNoise(x / forest.ClusterPeriod + 41.7f, y / forest.ClusterPeriod - 23.9f) * 0.7f
+                        + ValueNoise(x / (forest.ClusterPeriod * 0.45f) - 8.2f, y / (forest.ClusterPeriod * 0.45f) + 3.3f) * 0.3f;
+                    if (cluster < forest.ClearingThreshold)
+                    {
+                        continue;
+                    }
+
+                    var rampIn = Smooth((distance - nearest) / MathF.Max(1f, forest.DenseFrom - nearest));
+                    var fadeOut = 1f - 0.75f * Smooth((distance - forest.DenseTo) / MathF.Max(1f, forest.OuterDistance - forest.DenseTo));
+                    var clump = Smooth((cluster - forest.ClearingThreshold) / 0.22f);
+                    var chance = forest.PeakDensity * (0.25f + 0.75f * rampIn) * fadeOut * clump;
+                    if (Hash3(gx, gy, 13) >= chance)
+                    {
+                        continue;
+                    }
+
+                    var allowed = species
+                        .Where(s => distance >= s.Tree.MinDistance && distance <= s.Tree.MaxDistance)
+                        .ToList();
+                    if (allowed.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var pick = Hash3(gx, gy, 14) * allowed.Sum(s => s.Tree.Weight);
+                    var chosen = allowed[^1];
+                    foreach (var s in allowed)
+                    {
+                        pick -= s.Tree.Weight;
+                        if (pick < 0f)
+                        {
+                            chosen = s;
+                            break;
+                        }
+                    }
+
+                    var tree = chosen.Tree;
+                    yield return new TreePlacement(
+                        chosen.Key, tree.Name, x, y,
+                        Height(x, y) - forest.Sink,
+                        Hash3(gx, gy, 15) * 360f,
+                        (Hash3(gx, gy, 16) * 2f - 1f) * forest.LeanDegrees,
+                        (Hash3(gx, gy, 17) * 2f - 1f) * forest.LeanDegrees,
+                        tree.MinScale + Hash3(gx, gy, 18) * (tree.MaxScale - tree.MinScale),
+                        distance);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Plan view, north up, one character per <paramref name="cell"/> units, padded by
+        /// <paramref name="margin"/>. <c>^</c> marks a character holding at least one tree.
+        /// </summary>
+        public string RenderPlan(float cell, float margin, IReadOnlyList<TreePlacement> trees)
         {
             var (minX, minY, maxX, maxY) = Bounds;
+            minX -= margin + cell;
+            minY -= margin + cell;
+            maxX += margin + cell;
+            maxY += margin + cell;
+            var columns = (int)MathF.Floor((maxX - minX) / cell) + 1;
+            var rows = (int)MathF.Floor((maxY - minY) / cell) + 1;
+            var wooded = trees
+                .Select(t => ((int)MathF.Floor((t.X - minX) / cell), (int)MathF.Floor((maxY - t.Y) / cell)))
+                .ToHashSet();
+
             var sb = new StringBuilder();
-            for (var y = maxY + cell; y >= minY - cell; y -= cell)
+            for (var row = 0; row < rows; row++)
             {
                 sb.Append("    ");
-                for (var x = minX - cell; x <= maxX + cell; x += cell)
+                for (var col = 0; col < columns; col++)
                 {
-                    sb.Append(Glyph(x, y));
+                    var glyph = Glyph(minX + (col + 0.5f) * cell, maxY - (row + 0.5f) * cell);
+                    sb.Append(glyph == ' ' && wooded.Contains((col, row)) ? '^' : glyph);
                 }
 
                 sb.AppendLine();
             }
 
-            return sb.ToString();
+            return sb.ToString().TrimEnd() + Environment.NewLine;
         }
 
         private char Glyph(float x, float y)
         {
             var outside = Outside(x, y);
-            if (MathF.Abs(outside) <= config.PerimeterStripWidth && GateDistance(x, y) > config.GateWidth / 2f)
+            if (GateDistance(x, y) <= config.GateWidth / 2f)
+            {
+                return 'G';
+            }
+
+            if (MathF.Abs(outside) <= config.PerimeterStripWidth)
             {
                 return '#';
             }
@@ -604,6 +785,10 @@ internal static class FairWorld
 
         private static float Lerp(float a, float b, float t) => a + (b - a) * t;
 
+        /// <summary>Hash of three integers in 0..1: a position and a salt naming what it decides.</summary>
+        private static float Hash3(int a, int b, int salt)
+            => Hash(unchecked(a * 73856093 ^ salt * 83492791), unchecked(b * 19349663 + salt));
+
         private static float Hash(int x, int y)
         {
             unchecked
@@ -619,6 +804,25 @@ internal static class FairWorld
 
 internal sealed record FairWorldMarker(string EditorId, FormKey FormKey, float X, float Y, float Heading);
 
+internal sealed record WallPanel(float X, float Y, float Z, float Heading, float Scale);
+
+internal sealed record TreePlacement(
+    FormKey Base, string Name, float X, float Y, float Z,
+    float Heading, float LeanX, float LeanY, float Scale, float Distance);
+
+internal sealed record FairWorldWall(
+    FormKey PanelStatic,
+    FormKey GateStatic,
+    FormKey GateReference,
+    int PanelCount,
+    float PanelWidth,
+    float PanelHeight,
+    float GateHeight,
+    float GateHeading);
+
+internal sealed record FairWorldTreeCount(
+    string Name, int Count, float MinScale, float MaxScale, float MinDistance, float MaxDistance);
+
 internal sealed record FairWorldResult(
     FormKey WorldspaceFormKey,
     string EditorId,
@@ -626,8 +830,10 @@ internal sealed record FairWorldResult(
     int WeatherCount,
     int CellCount,
     int CellRadius,
-    int PostCount,
     int MaxAlphaLayers,
     IReadOnlyList<FairWorldMarker> Markers,
     (float MinX, float MinY, float MaxX, float MaxY) CompoundBounds,
-    string Plan);
+    FairWorldWall Wall,
+    IReadOnlyList<FairWorldTreeCount> Trees,
+    string Plan,
+    string ForestPlan);

@@ -2,7 +2,232 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: isolated festival worldspace prototype (2026-09-22, night)
+## Current pass: palisade compound, main gate and forest backdrop (2026-09-22, night)
+
+Barry approved the isolated `SkyrimFairWorld` prototype in game. This pass replaces the
+temporary banner-pole markers with his custom palisade, adds the Viking gate at the main
+entrance, and rings the compound with vanilla conifers. **The approved layout is
+unchanged**: the perimeter polygon, gate point, avenue, zones, terrain and ground
+painting are the same config values as before. Read back from the written plugin, all
+121 LAND records, every cell header, the WRLD header, the persistent cell and the five
+zone markers are identical to the approved build. The Tamriel terrace, staircase,
+embankment and sandbox are untouched: all 543 records outside the fair world's cells are
+identical.
+
+Not built, by instruction: the teleport / "Enter The Wanderer's Fair" interaction, the
+Tamriel gate, stalls, NPCs, navmesh, stage systems, music, archery, clutter.
+
+### Custom assets, bundled
+
+Barry's Skyrim-ready conversions, both **CC BY 4.0** (attribution recorded in
+`CREDITS.md`). The deployable files live in the repo at `assets/meshes/barry_palisades/`
+and `assets/textures/barry_palisades/`, byte-identical to the `Data/` folder of Barry's
+package `assets/Skyrim_Palisade_Assets/`. They are deployed to the MO2 mod at the same
+relative paths:
+
+| File | SHA256 | Deployed |
+| --- | --- | --- |
+| `meshes\barry_palisades\palisade.nif` (24,655 bytes) | `d1d92fc9...43b2` | identical |
+| `meshes\barry_palisades\viking_palisade_gate.nif` (468,624 bytes) | `7f5bfd7f...8349` | identical |
+| `textures\barry_palisades\palisade\material_00_{d,n}.dds` | | identical |
+| `textures\barry_palisades\viking_palisade_gate\material_00..23_{d,n}.dds` (48 files) | | identical |
+
+The NIFs reference their textures as `textures\barry_palisades\...`, which resolve to
+those files (checked in the NIF strings). Measured, per the package's validation and
+build scripts: the palisade is **138.97 wide (local X) x 11.29 deep x 140 tall**, and the
+gate is **181.44 x 43.52 x 175.45**. Both have origins at bottom centre, fixed zero-mass
+box collision on the Static layer, and no LOD meshes.
+
+### New STAT records
+
+| EditorID | FormID | MODL | OBND |
+| --- | --- | --- | --- |
+| `SkyrimFairPalisade` | `000B0F` | `barry_palisades\palisade.nif` | -70,-6,0 .. 70,6,140 |
+| `SkyrimFairPalisadeGate` | `000B10` | `barry_palisades\viking_palisade_gate.nif` | -91,-22,0 .. 91,22,176 |
+
+Bounds come from the measured sizes (the terrace kit STATs carry none).
+
+### Palisade: placement strategy
+
+- **106 panels** at scale **2.5**, so each is 347 wide and **350 tall** (about 5 m). The
+  crest wanders between **316 and 364** because each panel's scale varies by up to 4% and
+  it sinks by up to 20. That is well above a standing player's eye (about 120), so the
+  empty ground beyond is never visible over the wall.
+- Laid **edge by edge along the approved 17-point outline**, each panel turned to its
+  edge. Each edge's run carries **48 past both vertices**, so neighbouring edges cross at
+  every bend. Each run is filled with the fewest panels that still **overlap by 6%** (21
+  units), spaced evenly so there is never a short filler piece.
+- **Handmade, not plotted**: from a fixed integer hash (never a string hash), each panel
+  wanders up to 1.2 degrees in yaw and 5 units off the line, varies up to ±4% in scale
+  and sinks 0-20. About half are turned round so the same face does not repeat along the
+  wall.
+- **Blended into the gate**: the south edge's run is split at the gate, and the panel
+  either side **tucks 31 and 36 units into the gate** (the config asks for 32).
+- The wall stands on the painted perimeter strip, so the stony strip reads as its
+  trodden footing.
+
+### Main gate
+
+- `SkyrimFairWorldMainGate` (`000B11`), a static `SkyrimFairPalisadeGate`, closed, with no
+  script or animation. It stands at the approved gate point **(2048, -2777)**, where the
+  avenue starts, at scale **2.5**: 454 wide and **439 tall**, so it rises about 90 above
+  the wall.
+- **It faces the Stage marker** (heading 0, due north). The view out of the forecourt
+  therefore runs straight up the avenue to the stage at (2048, 6548). The avenue's own
+  gentle bend stays as approved.
+- The model's front and back were not identifiable from the data. If the gate turns out
+  to be facing the wrong way, `fairWorld.gatePiece.yawOffsetDegrees: 180` turns it round.
+- The teleport and activation come in a later pass.
+
+### Forest backdrop: placement strategy
+
+**487 vanilla trees**, all Skyrim.esm TREE records, scenery only:
+
+| Tree | FormID | Count | Scale | Distance beyond the wall |
+| --- | --- | --- | --- | --- |
+| `TreePineForest01` (2,498 tall at 1.0) | `01306D` | 71 | 0.80-1.20 | 574-4,608 |
+| `TreePineForest02` (2,501) | `018A02` | 132 | 0.80-1.25 | 482-5,188 |
+| `TreePineForest04` (2,085 above origin) | `04FBB0` | 121 | 0.80-1.25 | 556-4,826 |
+| `TreePineForest05` (1,465) | `051126` | 151 | 0.86-1.35 | 424-5,191 |
+| `TreePineForest03` (860, understory, within 1,800 only) | `04B016` | 12 | 0.94-1.48 | 382-1,762 |
+
+These are the Falkreath and Rift pine-forest conifers, and in Tamriel they are placed at
+0.35-1.67. Snow and dead variants are excluded.
+
+- **Candidates** come from a 440-unit jittered grid over the band from 320 to 5,200
+  beyond the wall. Each is kept by chance against a density that starts **sparse by the
+  wall**, peaks from 700 to 2,600 out and thins toward 5,200, so the view has layers of
+  trunks and canopy.
+- **Clumps and clearings**: that density is multiplied by a low-frequency clustering
+  field with a 1,700-unit period, and where the field is low there are no trees. The
+  result is irregular stands with gaps of sky between them, not a ring. Because the
+  ground rises beyond the flat margin, trees further out stand higher, which stacks the
+  canopy.
+- **Variation per tree**: species by weight, scale within its range, any yaw, and a lean
+  of up to 1.5 degrees. Trunks are sunk 24.
+- **Gate kept open**: no tree within 1,800 of the gate, and none in a 28-degree cone
+  straight out of it, so a future approach from outside stays clear. From inside, the
+  gate sightline runs north to the stage and past it into the northern stands.
+- Canopies do not overhang the wall. Each species has a minimum distance (320 to 520)
+  set to about its canopy radius.
+
+Plan read back from the written plugin, 512 units per character, north up (`#` wall,
+`G` gate, `^` a cell holding trees):
+
+```text
+                   ^
+                 ^^      ^^
+                ^  ^ ^ ^  ^ ^^^ ^
+                  ^^  ^^^^ ^   ^^
+          ^        ^^^^^^ ^^^  ^^^^
+           ^       ^^^^^ ^^^^   ^ ^
+             ^ ^^  ^   ^^ ^^^^ ^^^ ^
+             ^^^^^^^        ^^^ ^ ^^^
+            ^^ ^^^ ^         ^^^^ ^  ^^
+         ^^^^^^^            ^^^  ^^^^ ^
+        ^ ^   ^     #########^ ^ ^^  ^
+         ^ ^^^^^  ###       ## ^^^^^^
+        ^ ^^^    ##          ## ^^^^^^
+           ^^^^^##            ##^^^ ^^ ^ ^
+       ^        #              # ^^^ ^
+        ^ ^   ^##              ##^^  ^ ^
+      ^^^ ^ ^^^ #               #^ ^^^ ^^^
+        ^^     ^#              ##^^ ^ ^   ^
+        ^   ^ ^ #              # ^   ^ ^^^
+       ^    ^ ^^#              # ^^^^^   ^
+        ^    ^^ #              #^^ ^ ^^ ^
+       ^ ^ ^^^^##              # ^^^   ^^
+       ^  ^^^ ^#               # ^^^^^^
+       ^^^^^ ^ #               ##^  ^^
+             ^  #              # ^^^^^    ^
+        ^^^^ ^^^#              #^ ^^^^
+      ^  ^^^^ ^^##             #^^^^  ^
+         ^^^^^ ^ ##          ### ^^^^
+           ^^ ^   ###      ###  ^^^^^
+        ^^  ^^^^^ ^ ###G#### ^^^ ^^^ ^^
+         ^^^^   ^^ ^^       ^ ^ ^ ^
+         ^ ^^  ^ ^^^^      ^^  ^^^^^^
+           ^    ^^^^      ^^^  ^ ^  ^^
+           ^^   ^ ^^^         ^^ ^^^^ ^
+           ^^     ^^ ^       ^^    ^^
+            ^      ^^         ^^
+            ^   ^^ ^        ^^^
+                  ^         ^ ^^
+                              ^
+```
+
+**Loading.** The world has no LOD, so a tree only draws while its cell is loaded. **197**
+of the 487 are in cells -1..1, which are loaded from anywhere in the compound at the
+default `uGridsToLoad` of 5. The rest (cells ±2) load as the player nears that side, and
+may pop in at the far side of the compound. The wall hides their bases, so what pops is
+canopy. The lasting fix is tree LOD for this worldspace (DynDOLOD/xLODGen, which can use
+vanilla pine billboards). There are no real distant mountains in this world; the
+"mountains" in the gaps are the generated hills beyond the flat margin.
+
+### Records changed
+
+| Type | Change |
+| --- | --- |
+| STAT | +2 (`SkyrimFairPalisade`, `SkyrimFairPalisadeGate`) |
+| REFR | -33 `FarmBannerPost01` scale posts; +106 palisade panels, +1 gate, +487 trees. SkyrimFairWorld now holds 599 references: 5 zone markers + 594 in its cells |
+| CELL, LAND, WRLD, CLMT | content unchanged |
+
+**One-time FormID shift.** The 121 exterior CELL and LAND records are now allocated
+straight after the zone markers and before anything placed in them. They moved down by
+33 FormIDs, the slots the posts had used, and their content is identical. From now on,
+changing the wall or forest never moves them. Nothing references them. The WRLD
+(`000A16`), climate (`000A15`), persistent cell (`000A17`) and zone markers
+(`000A18`-`000A1C`) keep their IDs.
+
+### Verification of this pass
+
+- Release build: zero warnings, zero errors. Generator run twice: identical SHA256
+  `da78301a...`.
+- The previous approved build (`8b7eb313...`, the deployed copy) and the new one were
+  read side by side with Mutagen:
+  - **543 of 543** records outside the fair world's cells are identical (Tamriel,
+    sandbox, kit STATs, climate, WRLD headers).
+  - All 121 LAND records are identical, as are the cell headers apart from FormID, the
+    persistent cell and the markers.
+- **Wall closure**:
+  - 3,863 points every 8 units along the outline all lie inside a wall or gate
+    footprint (worst -6.8, i.e. inside).
+  - **20,160 sightline rays** from seven interior points (centre, gate, stage, both
+    sides, two corners) all cross a wall or gate centreline.
+  - A first build had one ray slip between two centrelines at a shallow bend. Panel
+    thickness blocked it, but the corner carry-over went from 24 to 48 so it no longer
+    depends on thickness.
+- **Usable space kept**: no wall or gate footprint enters a zone. The nearest is the
+  gate's inner face meeting the entrance forecourt's paint, by design. 0 references
+  filed in the wrong cell. 0 banner posts left.
+- **Trees**:
+  - the nearest is 382 outside the wall line, and the nearest to the gate is 1,862
+  - 0 in the approach cone, and the closest pair is 174 apart
+  - every tree is a TREE record in Skyrim.esm
+- **Deployment**: the ESP is byte-identical in the mod folder, and so are all 52 asset
+  files (2 NIF, 50 DDS).
+- **Not verified in game**: how it looks, the gate's facing, collision against the wall,
+  and performance with 487 full trees.
+
+### What Barry should test in game (this pass)
+
+1. `cow SkyrimFairWorld 0 0`, then turn round slowly. Check for a continuous wall with no
+   gaps at the bends, trees above it on every side, and occasional sky between stands.
+2. `player.moveto SkyrimFairWorldEntranceMarker` and look at the gate close up. Is it
+   the right way round (if not, it's one config value)? Do the panels either side run
+   into its posts cleanly? Then turn north: the view should run up the avenue to the
+   stage.
+3. **Height and scale**: does a 5 m wall with a 6 m gate feel right beside your
+   character? Scale is one number each (`palisade.scale`, `gatePiece.scale`).
+4. Walk into the wall and the gate: both should stop you.
+5. Walk to each side of the compound and watch the far trees. Say if their popping in
+   is distracting.
+6. Frame rate with the forest in view.
+7. `cow Tamriel -2 -4`: the terrace should be exactly as before.
+
+## The isolated worldspace (previous pass; approved by Barry in game)
+
+Everything in this section still holds, except that the temporary posts are gone (replaced by the palisade above) and the cell and LAND FormIDs moved once (see "Records changed" above).
 
 Barry changed direction: the full Wanderer's Fair will eventually live in its own
 isolated outdoor worldspace, a large irregular palisade compound reached through a gate
@@ -13,7 +238,7 @@ approved staircase and embankment, and the sandbox cell are untouched: all 541 r
 of the previous plugin are present and field-for-field identical in the new one (checked
 by reading both files, below).
 
-Not built, by instruction: the Tamriel gate, the palisade itself, stalls, NPCs, archery,
+Not built at that pass, by instruction: the Tamriel gate, the palisade itself, stalls, NPCs, archery,
 stage systems, quests, navmesh, music, clutter.
 
 ### The worldspace
@@ -119,10 +344,8 @@ flagged Full LOD, or generated LOD.
 
 ### Temporary scale markers
 
-- **33 `FarmBannerPost01`** (`1083D7`, 422 tall, about the height a palisade might be)
-  on the perimeter line: one at each vertex and at even spacing up to 1,024 apart,
-  turned along the wall. None stands across the gate; one post stands at each side of
-  the opening. They are there to show the scale. The final wall replaces them.
+- The 33 temporary `FarmBannerPost01` scale posts that stood on the perimeter line
+  were **removed in the palisade pass**. The wall now stands on that line.
 - **Five persistent `XMarkerHeading`** (`000034`, invisible in game) with EditorIDs,
   for `player.moveto` and for the Creation Kit:
 
@@ -142,7 +365,7 @@ flagged Full LOD, or generated LOD.
 | CLMT | 1 (`SkyrimFairWorldClimate`) |
 | CELL | 122 (121 exterior + the persistent cell) |
 | LAND | 121 |
-| REFR | 38 (33 posts + 5 markers) |
+| REFR | 38 at that pass (33 posts + 5 markers); the posts are gone now, see the palisade pass |
 
 Built last in the generator, so it only appends FormIDs: every Tamriel and sandbox
 record keeps its previous ID. The exterior block / sub-block grouping was moved into a
@@ -186,7 +409,7 @@ it (identical records, below).
 - Weather is climate-driven (no regions), so `fw <weather id>` is how to force one when
   testing.
 
-### What Barry should test in game (this pass)
+### What Barry was asked to test (done: approved)
 
 1. `cow SkyrimFairWorld 0 0`: does it load, with sky, sun and weather, and are you
    standing on grass in the middle of the avenue? If it hangs or drops you into a void,
@@ -236,11 +459,12 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 366,226 bytes (88,124 before the worldspace; the difference is the 121 LAND records) |
-| SHA256 | `8b7eb313ec3a798e98576a3328abe1e3e8cbbee988f12ac455946cb3071855c2` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `2eaeeeba...`, the previous audited build) |
+| Size | 408,356 bytes (366,226 before the palisade pass; 88,124 before the worldspace) |
+| SHA256 | `da78301a587473b376cc12d61298c7b509d427fdd71df4469b14e1ab1c338330` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `8b7eb313...`, the approved worldspace build) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
-| Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; see the current pass above |
+| Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the current pass above |
+| Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |
 | Kit meshes | unchanged this pass; all 13 deployed NIFs match `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |
 | Tamriel cells | `-3,-4`, `-2,-4`, `-1,-4`, `-3,-3`, `-2,-3`, `-1,-3` (all byte-identical to vanilla) |

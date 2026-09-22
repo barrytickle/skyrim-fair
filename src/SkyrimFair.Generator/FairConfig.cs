@@ -92,18 +92,28 @@ internal sealed record FairWorldConfig
     /// <summary>Width of the painted strip marking the perimeter line.</summary>
     public float PerimeterStripWidth { get; init; } = 256f;
 
-    /// <summary>Temporary scale posts along the perimeter, one per vertex and every <see cref="PostSpacing"/>.</summary>
-    public string PerimeterPost { get; init; } = "001083D7:Skyrim.esm";
-
-    public float PostSpacing { get; init; } = 1024f;
-
     /// <summary>
-    /// <c>[x, y]</c> on the perimeter where the main gate will stand. No post is placed
-    /// across its opening; one stands either side instead.
+    /// <c>[x, y]</c> on the perimeter where the main gate stands, centred on the avenue.
     /// </summary>
     public float[] Gate { get; init; } = Array.Empty<float>();
 
+    /// <summary>Width of the break in the painted perimeter strip at the gate.</summary>
     public float GateWidth { get; init; } = 640f;
+
+    /// <summary>
+    /// Zone whose marker the gate faces, so the view through it runs up the avenue to
+    /// the stage.
+    /// </summary>
+    public string GateFacesZone { get; init; } = "Stage";
+
+    /// <summary>The palisade wall laid along the perimeter.</summary>
+    public PalisadeConfig Palisade { get; init; } = new();
+
+    /// <summary>The closed main gate.</summary>
+    public GatePieceConfig GatePiece { get; init; } = new();
+
+    /// <summary>The ring of vanilla conifers outside the wall.</summary>
+    public ForestConfig Forest { get; init; } = new();
 
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
@@ -147,6 +157,26 @@ internal sealed record FairWorldConfig
             throw new InvalidOperationException("FairWorld.Avenue needs at least two [x, y] points.");
         }
 
+        if (Palisade.Width <= 0f || GatePiece.Width <= 0f || Palisade.Scale <= 0f || GatePiece.Scale <= 0f)
+        {
+            throw new InvalidOperationException("FairWorld palisade and gate need a positive width and scale.");
+        }
+
+        if (Gate is not { Length: 2 })
+        {
+            throw new InvalidOperationException("FairWorld.Gate needs an [x, y] point on the perimeter.");
+        }
+
+        if (!Zones.Any(z => z.Name == GateFacesZone))
+        {
+            throw new InvalidOperationException($"FairWorld.GateFacesZone '{GateFacesZone}' is not a zone.");
+        }
+
+        if (Forest.Enabled && (Forest.Trees.Count == 0 || Forest.Trees.Any(t => t.Weight <= 0f)))
+        {
+            throw new InvalidOperationException("FairWorld.Forest needs at least one tree, each with a positive weight.");
+        }
+
         foreach (var zone in Zones)
         {
             if (string.IsNullOrWhiteSpace(zone.Name) || zone.Name.Any(char.IsWhiteSpace))
@@ -175,6 +205,133 @@ internal sealed record FairWorldConfig
                 "FairWorld.Perimeter reaches too close to the edge of the generated land; raise CellRadius.");
         }
     }
+}
+
+/// <summary>
+/// A project static: one NIF under <c>meshes\</c>, measured once so the generator can
+/// lay it by its real size. Width runs along local X, depth along local Y, and the
+/// origin is at the bottom centre.
+/// </summary>
+internal record ProjectStaticConfig
+{
+    public string EditorId { get; init; } = string.Empty;
+
+    /// <summary>Path under <c>meshes\</c>, as the STAT's MODL stores it.</summary>
+    public string Model { get; init; } = string.Empty;
+
+    public float Width { get; init; }
+
+    public float Depth { get; init; }
+
+    public float Height { get; init; }
+
+    public float Scale { get; init; } = 1f;
+}
+
+/// <summary>
+/// The perimeter wall: repeated palisade panels laid edge by edge along the planned
+/// outline, turned to each edge, overlapped so nothing shows through, and jittered a
+/// little so the line looks built by hand rather than plotted.
+/// </summary>
+internal sealed record PalisadeConfig : ProjectStaticConfig
+{
+    /// <summary>Fraction of a panel's width each panel overlaps the next.</summary>
+    public float Overlap { get; init; } = 0.06f;
+
+    /// <summary>How far each edge's run carries past the vertex, closing the corner.</summary>
+    public float CornerExtension { get; init; } = 48f;
+
+    /// <summary>How far the panels either side of the gate tuck into its posts.</summary>
+    public float GateTuck { get; init; } = 32f;
+
+    public float YawJitterDegrees { get; init; } = 1.2f;
+
+    /// <summary>Largest sideways wander off the outline.</summary>
+    public float OffsetJitter { get; init; } = 5f;
+
+    /// <summary>Largest fractional change of scale per panel, so the crest line varies.</summary>
+    public float ScaleJitter { get; init; } = 0.04f;
+
+    /// <summary>Largest sink into the ground per panel.</summary>
+    public float SinkMax { get; init; } = 20f;
+
+    /// <summary>Chance a panel is turned round, so the same face does not repeat along the wall.</summary>
+    public float FlipChance { get; init; } = 0.5f;
+}
+
+internal sealed record GatePieceConfig : ProjectStaticConfig
+{
+    /// <summary>Added to the facing: 180 turns the gate round if its front is on the other side.</summary>
+    public float YawOffsetDegrees { get; init; }
+
+    public float Sink { get; init; } = 4f;
+}
+
+/// <summary>
+/// Scenery conifers outside the wall. Candidates come from a jittered grid over the
+/// band beyond the perimeter and are kept by a density that falls with distance and is
+/// broken up by a low-frequency clustering field, so the trees stand in clumps with
+/// clearings between them rather than in a ring.
+/// </summary>
+internal sealed record ForestConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    public List<ForestTree> Trees { get; init; } = new();
+
+    /// <summary>Candidate spacing; each candidate wanders up to <see cref="Jitter"/> of it.</summary>
+    public float GridSpacing { get; init; } = 440f;
+
+    public float Jitter { get; init; } = 0.35f;
+
+    /// <summary>Distance beyond the wall where the forest is densest.</summary>
+    public float DenseFrom { get; init; } = 700f;
+
+    public float DenseTo { get; init; } = 2600f;
+
+    /// <summary>Beyond this distance no tree is placed.</summary>
+    public float OuterDistance { get; init; } = 5200f;
+
+    /// <summary>Chance a candidate is kept in the densest band, before clustering.</summary>
+    public float PeakDensity { get; init; } = 0.8f;
+
+    /// <summary>Size of the clumps and clearings.</summary>
+    public float ClusterPeriod { get; init; } = 1700f;
+
+    /// <summary>Clustering values below this are clearings: sky between the clumps.</summary>
+    public float ClearingThreshold { get; init; } = 0.34f;
+
+    /// <summary>No tree within this distance of the gate.</summary>
+    public float GateClearRadius { get; init; } = 1800f;
+
+    /// <summary>Half-angle of the open approach kept in front of the gate, outward.</summary>
+    public float GateApproachDegrees { get; init; } = 28f;
+
+    /// <summary>Largest lean off vertical, degrees.</summary>
+    public float LeanDegrees { get; init; } = 1.5f;
+
+    /// <summary>How far each trunk is sunk below the ground at its position.</summary>
+    public float Sink { get; init; } = 24f;
+}
+
+internal sealed record ForestTree
+{
+    public string FormKey { get; init; } = string.Empty;
+
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>Relative frequency.</summary>
+    public float Weight { get; init; } = 1f;
+
+    public float MinScale { get; init; } = 0.8f;
+
+    public float MaxScale { get; init; } = 1.2f;
+
+    /// <summary>Nearest the wall this tree may stand, so its canopy does not hang over.</summary>
+    public float MinDistance { get; init; } = 450f;
+
+    /// <summary>Furthest from the wall this tree may stand.</summary>
+    public float MaxDistance { get; init; } = float.MaxValue;
 }
 
 /// <summary>

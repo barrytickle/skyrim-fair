@@ -56,14 +56,38 @@ Rules for this direction:
   render. Inside a 3 x 3 block every cell of the compound is loaded from anywhere in it.
   Growing past that needs Full LOD walls or generated LOD. Decide that on purpose; do
   not drift into it.
-- The 33 `FarmBannerPost01` on the perimeter are **temporary scale posts**. The final
-  palisade is custom, handmade and irregular, and replaces them. Riverwood Has Charm
-  and Walls is visual reference only (see `docs/RIVERWOOD_WALLS_AUDIT.md`).
+- **Barry approved the worldspace prototype in game (2026-09-22).** Its layout, terrain,
+  avenue and zoning are now fixed. Do not redesign them.
+- **The boundary is Barry's custom palisade** (2026-09-22, night, **pending his visual
+  review**; once he accepts it, this becomes the permanent boundary):
+  - `SkyrimFairPalisade` panels are laid along the approved outline by
+    `Plan.WallPanels` in `FairWorld.cs`, from the `fairWorld.palisade` config: scale
+    2.5, 6% overlap, runs carried 48 past every vertex, and small hashed jitter.
+  - The closed `SkyrimFairPalisadeGate` stands at the gate point facing the Stage
+    marker. If its front is on the wrong side, `gatePiece.yawOffsetDegrees` flips it.
+  - The temporary banner posts are gone. The verification method that proves the wall
+    closes (outline coverage plus interior sightline rays) is in `docs/AUDIT.md`.
+    Rerun it after any wall change.
+- **The assets are bundled, CC BY 4.0** (attribution in `CREDITS.md`, which must
+  ship with any release):
+  - `assets/meshes/barry_palisades/` and `assets/textures/barry_palisades/` are the
+    deployable copies. Deploy them to the mod folder at the same relative paths.
+  - Barry's source package `assets/Skyrim_Palisade_Assets/` holds the Blender, FBX and
+    rebuild scripts. It is Barry's and is not committed by the agent.
+  - Riverwood Has Charm and Walls remains visual reference only (see
+    `docs/RIVERWOOD_WALLS_AUDIT.md`).
+- **The forest backdrop is generated scenery** (`Plan.ForestTrees`, `fairWorld.forest`):
+  about 490 vanilla `TreePineForest01-05` in clumps and clearings from 320 to 5,200
+  beyond the wall, with none near the gate or in front of it. Only trees in cells
+  -1..1 are always loaded, so far trees can pop in. Tree LOD for this worldspace is the
+  eventual fix.
+- **FormID stability**: exterior CELL and LAND are allocated before anything placed in
+  them, so wall, gate and forest changes never renumber them. Anything new that is
+  placed goes after them.
 - Known gaps: no LOD, no navmesh, no OFST / MHDT data (the CK would write these; not yet
   proven to matter), no NGIO grass cache for the new world. See `docs/AUDIT.md`.
-- **Gate:** the canvas exists. The next step waits for Barry to test `cow` in game and
-  review the layout. Do not start festival content or the Tamriel gate without that
-  review.
+- **Gate:** palisade, gate and forest are deployed for Barry's visual review. Do not
+  start the teleport interaction, festival content or the Tamriel gate without it.
 
 ## Current approved foundation state
 

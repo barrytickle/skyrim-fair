@@ -115,6 +115,34 @@ Attribution:
 
 > Riverwood Has Charm and Walls by J3w3ls.
 
+## Palisade and Viking Palisade gate (Sketchfab, CC BY 4.0)
+
+These two models form the wall and main gate of the isolated fair worldspace, and they
+**are bundled** with Skyrim Fair as `meshes\barry_palisades\` and
+`textures\barry_palisades\`. Both are licensed CC BY 4.0, which allows redistribution
+and modification with attribution.
+
+| Model | Author | Source | Licence |
+| --- | --- | --- | --- |
+| Palisade | adam127 (https://sketchfab.com/adam127) | https://sketchfab.com/3d-models/palisade-c88f57eb0d734484b010c3f170e48d4a | CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) |
+| Viking Palisade gate | Sereib (https://sketchfab.com/Sereib) | https://sketchfab.com/3d-models/viking-palisade-gate-9c87007db87c41c9b161dae827ced741 | CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) |
+
+### Changes made
+
+Barry converted both for Skyrim SE / AE with Blender 3.6.23, the BGS exporter and
+AssetWatcher (the package is `assets/Skyrim_Palisade_Assets/`, with its own README and
+CREDITS). The palisade was uniformly enlarged to 3.5 m and turned to span its X axis; the
+gate keeps its original size. Both were re-origined to bottom centre, given simplified
+fixed box collision, re-materialised as opaque double-sided matte wood, and their
+textures re-encoded as DDS. The palisade's normal map has its green channel inverted, and
+the gate, which shipped diffuse maps only, was given neutral normal maps. In the plugin,
+the palisade is placed at about 2.5x scale and the gate at 2.5x.
+
+Attribution:
+
+> "Palisade" by adam127, licensed under CC BY 4.0. "Viking Palisade gate" by Sereib,
+> licensed under CC BY 4.0. Converted and modified for Skyrim.
+
 ## Bethesda Game Studios
 
 The Elder Scrolls V: Skyrim Special Edition and its original game assets are property of Bethesda Game Studios / Bethesda Softworks.
@@ -131,4 +159,6 @@ As assets are selected for the shipped mod, record them here.
 | Market stalls / tents | TBD | Medieval Markets | TBD per asset | Pending downloaded-file audit | TBD |
 | Entrance stairs / wall borders | TBD | Whiterun Stone Stairs | Chiselsky | Asset reuse requires author permission; patch reuse allowed | Prefer external dependency / optional replacer |
 | Perimeter palisade / gates | `J3_RW_WallStraight*.nif`, `J3_RW_WallJunction.nif`, `J3_RW_GateNoFrame.nif`, `J3_RW_GateWay.nif`, `RiverwoodPost*.dds`, `RiverwoodWoodPlanks*.dds` (see audit) | Riverwood Has Charm and Walls | J3w3ls | Asset reuse requires author permission; modder's resource promised | Blocked pending permission; visual reference only |
+| Fair worldspace palisade wall | `meshes\barry_palisades\palisade.nif`, `textures\barry_palisades\palisade\*.dds` | Palisade (Sketchfab) | adam127 | CC BY 4.0: redistribution and modification allowed with attribution | Bundled |
+| Fair worldspace main gate | `meshes\barry_palisades\viking_palisade_gate.nif`, `textures\barry_palisades\viking_palisade_gate\*.dds` | Viking Palisade gate (Sketchfab) | Sereib | CC BY 4.0: redistribution and modification allowed with attribution | Bundled |
 
