@@ -559,6 +559,14 @@ internal sealed record DressingConfig
     public float RampLandingLength { get; init; } = 512f;
 
     /// <summary>
+    /// Band at the ramp's own edge where dressing may still stand proud of its
+    /// surface. Much tighter than PavingRimAllowance: a rock centred exactly on the
+    /// ramp edge reaches half its width onto the walking surface, and at the head of
+    /// the ramp that is a snag right where the player steps on.
+    /// </summary>
+    public float RampRimAllowance { get; init; } = 32f;
+
+    /// <summary>
     /// Run of the project-owned shoulder wedge, matching SHOULDER_RUN in the kit
     /// script. The verge rule samples ground at both ends of the wedge, so this has
     /// to be the real length rather than an approximation.

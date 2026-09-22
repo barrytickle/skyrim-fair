@@ -347,17 +347,50 @@ internal static class FairFoundation
 
         bool ClearsMarketFloor(float x, float y, float reach, float crownZ)
         {
-            // Anything that stays below the walking surface cannot intrude on it.
-            if (crownZ <= f.FloorZ + d.PavingClearance)
+            if (crownZ > f.FloorZ + d.PavingClearance)
             {
-                return true;
+                foreach (var r in marketFloor)
+                {
+                    var gx = MathF.Max(MathF.Max(r.MinX - x, x - r.MaxX), 0f);
+                    var gy = MathF.Max(MathF.Max(r.MinY - y, y - r.MaxY), 0f);
+                    if (MathF.Sqrt(gx * gx + gy * gy) < reach)
+                    {
+                        return false;
+                    }
+                }
             }
 
-            foreach (var r in marketFloor)
+            // The ramp is a walking surface too, and it was not protected: seven pieces
+            // ended up standing on it, one of them 100 units proud. Its surface falls
+            // along the run, so the test is against the height at the piece's own
+            // position rather than a single plane.
+            foreach (var t in rampTiles)
             {
-                var gx = MathF.Max(MathF.Max(r.MinX - x, x - r.MaxX), 0f);
-                var gy = MathF.Max(MathF.Max(r.MinY - y, y - r.MaxY), 0f);
-                if (MathF.Sqrt(gx * gx + gy * gy) < reach)
+                var minX = t.X - tile / 2f + (t.Dc == 0 ? d.RampRimAllowance : 0f);
+                var maxX = t.X + tile / 2f - (t.Dc == 0 ? d.RampRimAllowance : 0f);
+                var lowY = MathF.Min(t.Y, t.Y - t.Dr * tile);
+                var highY = MathF.Max(t.Y, t.Y - t.Dr * tile);
+                var minY = lowY + (t.Dr == 0 ? d.RampRimAllowance : 0f);
+                var maxY = highY - (t.Dr == 0 ? d.RampRimAllowance : 0f);
+                if (maxX <= minX || maxY <= minY)
+                {
+                    continue;
+                }
+
+                var gx = MathF.Max(MathF.Max(minX - x, x - maxX), 0f);
+                var gy = MathF.Max(MathF.Max(minY - y, y - maxY), 0f);
+                if (MathF.Sqrt(gx * gx + gy * gy) >= reach)
+                {
+                    continue;
+                }
+
+                // How far along the tile's run the piece sits, and so how far the
+                // sloping surface has dropped by the time it gets there.
+                var along = t.Dc != 0
+                    ? (x - t.X) * t.Dc / tile
+                    : (y - t.Y) * -t.Dr / tile;
+                along = Math.Clamp(along, 0f, 1f);
+                if (crownZ > t.Z - f.RampRise * along + d.PavingClearance)
                 {
                     return false;
                 }

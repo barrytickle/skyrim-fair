@@ -157,13 +157,14 @@
         "toePerSegment": 2,
         "vergePerSegment": 2,
         "vergeMaxLocalStep": 112,
-        "rampChannelWidth": 480,
+        "rampChannelWidth": 800,
         "rampLandingLength": 512,
         "shoulderRun": 256,
         "cliffInset": 48,
         "cliffTopSink": 40,
         "pavingRimAllowance": 144,
-        "pavingClearance": 8
+        "pavingClearance": 8,
+        "rampRimAllowance": 32
       },
       "retainHeight": 256,
       "clearMargin": 160,
