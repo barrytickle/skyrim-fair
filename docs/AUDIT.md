@@ -2,7 +2,27 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: review fixes and one trade per stall (2026-09-23)
+## Current pass: archery touch-ups (2026-09-23)
+
+Barry: "you just nailed it", archers working, and two small things at the archery booth:
+- **Fletcher sign hanging off one post**: every vanilla shop sign is modelled across its
+  local Y, but the boards sit at different offsets from their origins:
+  - centred: Riften Fishery, Honningbrew, Drunken Huntsman
+  - from 0 to 98: general goods, alchemy, blacksmith, pawn (0 to 128 for the Riverwood
+    trader)
+  - about -90 to -15: the Solitude signs, including the fletcher
+  - -98 to 0: Bee and Barb
+
+  Hung at the posts' midpoint, the offset boards stuck out past one post. Every sign (15
+  stall-sign vignettes and the booth's) is now shifted by its measured extent so it
+  centres between the posts.
+- **Floating arrows**: the arrow bundle is 59 long along -Y and is stood upright in its
+  barrel, but its foot was on the rim. 10 arrow pieces (the booth, range storage, the
+  fletcher's arrow barrel) now stand 36 lower, inside the 80-high barrels.
+
+Generator run twice: identical SHA256 `c521ee9204d4bb75...`. **Deployed byte-identical.**
+
+## Previous pass: review fixes and one trade per stall (2026-09-23)
 
 Barry's in-game review (18 screenshots): props covering stall fronts, several stalls looking
 like the same vendor (the drum and bowls), keepers too far to talk to (the long double

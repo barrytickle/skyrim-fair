@@ -649,14 +649,14 @@
             {"piece": "@PropIronArrow", "x": 62, "y": 10, "z": 63, "yaw": 90},
             {"piece": "@PropIronArrow", "x": 65, "y": 10, "z": 63, "yaw": 90},
             {"piece": "0010C0E3:Skyrim.esm", "x": -130, "y": -40},
-            {"piece": "@PropIronArrow", "x": -130, "y": -40, "z": 90, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": -126, "y": -36, "z": 92, "yaw": 40, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": -134, "y": -44, "z": 88, "yaw": 80, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": -130, "y": -40, "z": 54, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": -126, "y": -36, "z": 56, "yaw": 40, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": -134, "y": -44, "z": 52, "yaw": 80, "rotX": 90},
             {"piece": "0007A617:Skyrim.esm", "x": 130, "y": -50, "z": 24, "yaw": 10},
             {"piece": "@PropTowerLantern", "x": 90, "y": 30, "z": 62, "yaw": 20},
             {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 60},
             {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 150, "yaw": 180},
-            {"piece": "000F0A22:Skyrim.esm", "x": 150, "y": 105, "z": 168},
+            {"piece": "000F0A22:Skyrim.esm", "x": 150, "y": 157.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 159, "y": 150, "z": 120, "yaw": 90}
           ]
         },
@@ -705,8 +705,8 @@
             {"piece": "00066AF6:Skyrim.esm", "x": 90, "y": 20, "yaw": 60, "rotY": 12},
             {"piece": "0007A60D:Skyrim.esm", "x": -80, "y": 10, "z": 24, "yaw": 90},
             {"piece": "0005B198:Skyrim.esm", "x": 10, "y": -70, "optional": true},
-            {"piece": "@PropIronArrow", "x": 0, "y": 0, "z": 82, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": 4, "y": 3, "z": 84, "yaw": 60, "rotX": 90}
+            {"piece": "@PropIronArrow", "x": 0, "y": 0, "z": 46, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 4, "y": 3, "z": 48, "yaw": 60, "rotX": 90}
           ]
         },
         {
@@ -1695,7 +1695,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0010704F:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "0010704F:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1705,7 +1705,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0009624D:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "0009624D:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1715,7 +1715,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0009625B:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "0009625B:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1725,7 +1725,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0009624C:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "0009624C:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1735,7 +1735,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "00096267:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "00096267:Skyrim.esm", "x": 0, "y": 0.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1745,7 +1745,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000BFB0A:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000BFB0A:Skyrim.esm", "x": 0, "y": 0.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1755,7 +1755,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000F0A22:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000F0A22:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1765,7 +1765,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000F0A1A:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000F0A1A:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1775,7 +1775,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 52.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1785,7 +1785,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000F0A1C:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000F0A1C:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1795,7 +1795,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA62E:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000EA62E:Skyrim.esm", "x": 0, "y": 0.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1805,7 +1805,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA62B:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000EA62B:Skyrim.esm", "x": 0, "y": 49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1815,7 +1815,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA629:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000EA629:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1825,7 +1825,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA623:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "000EA623:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -1835,7 +1835,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "00038229:Skyrim.esm", "x": 0, "y": 0, "z": 168},
+            {"piece": "00038229:Skyrim.esm", "x": 0, "y": -64.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
         },
@@ -2162,11 +2162,11 @@
           "width": 70,
           "pieces": [
             {"piece": "@PropBarrelFood", "x": 0, "y": 0},
-            {"piece": "@PropIronArrow", "x": -6, "y": 0, "z": 82, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": 4, "y": 4, "z": 82, "yaw": 40, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": 0, "y": -6, "z": 82, "yaw": 80, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": 6, "y": -2, "z": 82, "yaw": 120, "rotX": 90},
-            {"piece": "@PropIronArrow", "x": -4, "y": 6, "z": 82, "yaw": 160, "rotX": 90}
+            {"piece": "@PropIronArrow", "x": -6, "y": 0, "z": 46, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 4, "y": 4, "z": 46, "yaw": 40, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 0, "y": -6, "z": 46, "yaw": 80, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 6, "y": -2, "z": 46, "yaw": 120, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": -4, "y": 6, "z": 46, "yaw": 160, "rotX": 90}
           ]
         },
         {
