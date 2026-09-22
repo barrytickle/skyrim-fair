@@ -50,7 +50,7 @@ internal static class FairMarket
         var markerBase = FormKeyHelper.Parse(market.ShellMarker);
 
         // Null when the stall fits; otherwise what it collides with.
-        string? WhyNot(MarketModule m, float x, float y, float yaw)
+        string? WhyNot(MarketModule m, float x, float y, float yaw, Lane? ignore = null)
         {
             var (hw, hd) = (m.Width / 2f, m.Depth / 2f);
             var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
@@ -70,6 +70,8 @@ internal static class FairMarket
                     }
                     foreach (var lane in lanes)
                     {
+                        if (ReferenceEquals(lane, ignore)) continue;
+
                         // The corridor is a run of thin slabs cut square across the lane, so a
                         // pocket's width does not spill back over the pinch beside it.
                         foreach (var sample in lane.Samples)
@@ -146,6 +148,39 @@ internal static class FairMarket
                 .ToList();
 
             stalls.Add(new MarketStall(laneName, m.Name, theme, marker.EditorID, x, y, yaw, m.Width, m.Depth, vendors));
+        }
+
+        // Dressing (seating): the module's pieces and footprint, but no stall or shell marker.
+        void CommitDressing(MarketModule m, float x, float y, float yaw, int seedA, int seedB)
+        {
+            var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
+            var (fx, fy) = (MathF.Sin(yaw * Deg), MathF.Cos(yaw * Deg));
+            var k = 0;
+            foreach (var piece in m.Pieces)
+            {
+                k++;
+                if (piece.Optional && FairHash.Hash3(seedA * 31 + k, seedB, 62) < 0.4f)
+                {
+                    continue;
+                }
+
+                var u = piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 6f;
+                var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 6f;
+                var px = x + u * rx + v * fx;
+                var py = y + u * ry + v * fy;
+                put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece.Piece)),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(px, py, ground(px, py) + piece.Z),
+                        Rotation = new P3Float(0f, 0f, (yaw + piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 4f) * Deg),
+                    },
+                });
+                pieceCount++;
+            }
+
+            placed.Add(new Placed(x, y, yaw, m.Width / 2f + market.Clearance / 2f, m.Depth / 2f + market.Clearance / 2f));
         }
 
         // A stall beside a lane at a station, pushed back behind the lane edge, facing it.
@@ -276,6 +311,30 @@ internal static class FairMarket
             }
         }
 
+        // ---- seating: picnic sets along lanes ---------------------------------------
+        var seats = 0;
+        for (var i = 0; i < market.Seating.Count; i++)
+        {
+            var seating = market.Seating[i];
+            var lane = lanes.First(l => l.Config.Name == seating.Lane);
+            var m = modules[seating.Module];
+            var k = 0;
+            for (var s = seating.From; s <= MathF.Min(seating.To, lane.Length); s += seating.Spacing)
+            {
+                k++;
+                var (cx, cy, tx, ty, _) = Station(lane, s);
+                var x = cx - ty * seating.Offset;
+                var y = cy + tx * seating.Offset;
+                // The module's long side (its local X) runs along the lane.
+                var yaw = MathF.Atan2(tx, ty) / Deg - 90f + FairHash.Signed(500 + i, k, 75) * seating.AngleJitter;
+                if (WhyNot(m, x, y, yaw, ignore: lane) is null)
+                {
+                    CommitDressing(m, x, y, yaw, 500 + i, k);
+                    seats++;
+                }
+            }
+        }
+
         // ---- hand-placed dressing that marks the lane structure ---------------------
         foreach (var d in market.Dressing)
         {
@@ -329,7 +388,7 @@ internal static class FairMarket
             }
         }
 
-        return new MarketResult(stalls, pieceCount, refused, reasons);
+        return new MarketResult(stalls, pieceCount, refused, reasons, seats);
     }
 
     private static Lane BuildLane(MarketLane c, int index, FairWorldConfig world)
@@ -435,4 +494,4 @@ internal sealed record MarketStall(
     IReadOnlyList<(float X, float Y)> Vendors);
 
 internal sealed record MarketResult(
-    IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons);
+    IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons, int Seating);

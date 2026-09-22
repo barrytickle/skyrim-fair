@@ -1744,6 +1744,12 @@ internal sealed record MarketConfig
 
     public List<string> BackFillThemes { get; init; } = new();
 
+    /// <summary>
+    /// Seating: modules (picnic tables and benches) set out at intervals along a lane,
+    /// either down its middle or offset to one side, turned to run along it.
+    /// </summary>
+    public List<MarketSeating> Seating { get; init; } = new();
+
     /// <summary>Hand-placed dressing that marks the lane structure, such as banner posts at the crossing.</summary>
     public List<MarketDressing> Dressing { get; init; } = new();
 
@@ -1920,4 +1926,22 @@ internal sealed record VendorLook
 
     /// <summary>Vanilla outfits; one vendor record is made per outfit.</summary>
     public List<string> Outfits { get; init; } = new();
+}
+
+internal sealed record MarketSeating
+{
+    public string Lane { get; init; } = string.Empty;
+
+    public string Module { get; init; } = string.Empty;
+
+    /// <summary>Sideways from the lane centre, positive to the left of travel; 0 is down the middle.</summary>
+    public float Offset { get; init; }
+
+    public float From { get; init; }
+
+    public float To { get; init; } = float.MaxValue;
+
+    public float Spacing { get; init; } = 900f;
+
+    public float AngleJitter { get; init; } = 6f;
 }

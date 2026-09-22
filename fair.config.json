@@ -194,7 +194,7 @@
         {
           "name": "ArcheryRange",
           "polygon": [
-            [-1100, -900], [1500, -900], [1500, 3900], [-1100, 3900]
+            [-1100, -900], [1350, -900], [1350, 3900], [-1100, 3900]
           ]
         },
         {
@@ -312,6 +312,21 @@
           "vendorSpots": [
             [0, -50]
           ]
+        },
+        {
+          "name": "picnic",
+          "width": 260,
+          "depth": 280,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "ExteriorWoodenTable01", "piece": "0003DE44:Skyrim.esm", "x": 0, "y": 0},
+            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": -55, "y": 95},
+            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 58, "y": 97},
+            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": -57, "y": -95},
+            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 55, "y": -97},
+            {"name": "Lantern", "piece": "0009151C:Skyrim.esm", "x": 25, "y": 8, "z": 70, "optional": true},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 155, "y": 0, "optional": true}
+          ]
         }
       ],
       "fixed": [
@@ -346,20 +361,43 @@
         {
           "name": "EastLane",
           "points": [
-            [3700, -800], [3700, 3700]
+            [3780, -800], [3780, 3700]
           ],
           "halfWidths": [
             [0, 300], [4600, 300]
           ],
           "meander": [0, 1000],
-          "sides": "right",
+          "sides": "both",
           "mix": [
             {"module": "grand_double", "weight": 2},
             {"module": "canvas_pair", "weight": 3},
             {"module": "whiterun_stand", "weight": 3},
             {"module": "canvas_wide", "weight": 2}
           ],
-          "themes": ["smith", "armour", "hunter", "leather", "furs", "jewellery", "dwemer", "elven", "mage", "alchemy"],
+          "themes": ["smith", "armour", "hunter", "leather", "furs", "jewellery", "dwemer", "elven", "mage", "alchemy", "books", "scrolls", "curios", "herbs"],
+          "gapMin": 20,
+          "gapMax": 45,
+          "pocketChance": 0,
+          "setBack": 15,
+          "angleJitter": 3
+        },
+        {
+          "name": "EastWallWalk",
+          "points": [
+            [5100, -500], [5100, 3600]
+          ],
+          "halfWidths": [
+            [0, 150], [4200, 150]
+          ],
+          "meander": [0, 1000],
+          "sides": "left",
+          "mix": [
+            {"module": "grand_double", "weight": 2},
+            {"module": "canvas_pair", "weight": 3},
+            {"module": "whiterun_stand", "weight": 3},
+            {"module": "canvas_wide", "weight": 2}
+          ],
+          "themes": ["tanner", "cooper", "weaver", "potter", "carver", "rugs", "timber", "bone", "candles", "toys"],
           "gapMin": 20,
           "gapMax": 45,
           "pocketChance": 0,
@@ -369,7 +407,7 @@
         {
           "name": "EastEntry",
           "points": [
-            [2250, -1650], [3050, -1300], [3700, -850]
+            [2250, -1650], [3050, -1300], [3780, -850]
           ],
           "halfWidths": [
             [0, 200], [1700, 200]
@@ -379,7 +417,7 @@
         {
           "name": "EastCross",
           "points": [
-            [2300, 1000], [3700, 1000]
+            [2300, 1000], [3780, 1000]
           ],
           "halfWidths": [
             [0, 210], [1500, 210]
@@ -387,9 +425,13 @@
           "mix": []
         }
       ],
-      "backFill": ["canvas_wide", "grand_double", "canvas_pair", "whiterun_stand"],
+      "backFill": [],
       "backFillThemes": ["books", "scrolls", "curios", "candles", "pottery", "toys", "herbs", "rugs", "weaver", "tanner", "carver", "cooper", "bone", "timber"],
-      "dressing": []
+      "dressing": [],
+      "seating": [
+        {"lane": "EastLane", "module": "picnic", "offset": 0, "from": 300, "to": 4300, "spacing": 800},
+        {"lane": "Avenue", "module": "picnic", "offset": 480, "from": 1200, "to": 5600, "spacing": 900}
+      ]
     },
     "vendors": {
       "enabled": true,

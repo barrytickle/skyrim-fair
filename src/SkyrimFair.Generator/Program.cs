@@ -168,7 +168,8 @@ try
         {
             Console.WriteLine(
                 $"  market: {market.Stalls.Count} stalls, {market.Pieces} pieces, " +
-                $"{market.Refused} placements refused for crowding a lane, a keep-out or another stall");
+                $"{market.Refused} placements refused for crowding a lane, a keep-out or another stall; " +
+                $"{market.Seating} picnic sets");
             foreach (var lane in market.Stalls.GroupBy(x => x.Lane))
             {
                 Console.WriteLine(
