@@ -122,6 +122,9 @@ Rules for this direction:
   class and a hold-position package, and no merchant, faction, dialogue or script.
   When real merchants come, keep this template approach, or make faces in the CK and
   ship their FaceGen.
+- **MCM Helper is planned** (`docs/MCM.md`). Generate every switchable feature under one
+  enable-parent marker, and every runtime value as a `GLOB`, with stable names, so a
+  menu can drive them later. The layout itself stays generation-time.
 - **Medieval Markets** is audited in `docs/AUDIT.md`. JJerem's stall pieces use vanilla
   textures, but their SMIM provenance must be confirmed before bundling. Its ESP
   rearranges the vanilla city markets, so do not make it a dependency.
