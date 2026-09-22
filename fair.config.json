@@ -304,7 +304,7 @@
           "middleTopAtFace": 148,
           "lowerSink": 6,
           "crestClear": 48,
-          "cornerStop": 96,
+          "cornerStop": 0,
           "parapetStairOverlap": 20,
           "shortFaceMax": 512,
           "shortFaceOffset": 24,
@@ -313,7 +313,9 @@
           "bigWallMaxScale": 3.3,
           "bastionInset": 16,
           "bastionStart": 32,
-          "bastionLegClear": 560
+          "bastionLegClear": 560,
+          "bastions": false,
+          "shortFaceWalls": false
         },
         "entranceDressing": [
           {

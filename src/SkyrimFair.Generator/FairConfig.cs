@@ -921,6 +921,12 @@ internal sealed record TerraceBandConfig
     /// <summary>The parapet runs this far past the cheek's outer face toward the steps.</summary>
     public float ParapetStairOverlap { get; init; } = 20f;
 
+    /// <summary>Scaled-up wall-ends at convex corners. Off: the rows run through to the corner.</summary>
+    public bool Bastions { get; init; } = false;
+
+    /// <summary>One scaled-up field wall on each short step face. Off: the rows run there too.</summary>
+    public bool ShortFaceWalls { get; init; } = false;
+
     /// <summary>A face this long or shorter, touching a re-entrant corner, gets one big wall.</summary>
     public float ShortFaceMax { get; init; } = 512f;
 

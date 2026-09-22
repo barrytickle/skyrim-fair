@@ -4,6 +4,15 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the generator reproduces Barry's completed Creation Kit layout
 
+**Late amendment (2026-09-22 evening):** after seeing the result in game Barry asked for
+the big scaled walls to go entirely. At two to three times size the flat cut end of a
+wall piece reads as a huge smooth slab, whichever way it is turned. The corner bastions
+and the single walls on the short step faces are switched off (`bastions`,
+`shortFaceWalls`), and the terrace rows now run through to every corner and along the
+short faces too (`cornerStop` 0). No scaled-up Stonewall piece remains in the plugin;
+the parapets (0.98), the west field wall (0.9), the cheeks (0.6) and Barry's two 1.06
+cheek underpinnings are the only Stonewall01 left. Everything else below still holds.
+
 Barry finished the perimeter by hand in the Creation Kit and saved it as
 `reference/SkyrimFair.esp` (35,173 bytes, 2026-09-22 17:53). Per his instruction that
 plugin is the **design source of truth**, and a **visual/layout reference only**: it is
@@ -15,8 +24,8 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 83,585 bytes |
-| SHA256 | `eed678bc989d072adb1a4f01289101f0f570b21874505c74a685568c65446499` |
+| Size | 84,473 bytes |
+| SHA256 | `b1404fae2f8cb07c8816031e7d43f3875d871f768c5b50727eb0ce34dc1d448c` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
 | Kit meshes | unchanged this pass; all 13 deployed NIFs match `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |
@@ -161,13 +170,13 @@ instead, and his three retired courses.
 | Kit stair flights | 3 |
 | Cheek blocks, level ends, tapered caps, retaining wings | 18, 4, 2, 2 |
 | Structural retaining courses / corners | 43 / 1 |
-| Band: outward walls / inward pieces / parapets | 38 / 38 / 38 |
-| Band: west lower field walls | 11 |
-| Band: big walls on short faces / bastion wall-ends | 3 / 9 |
+| Band: outward walls / inward pieces / parapets | 44 / 44 / 49 |
+| Band: west lower field walls | 12 |
+| Band: big walls on short faces / bastion wall-ends | 0 / 0 (switched off, see amendment) |
 | Entrance dressing | 18 |
 | Toe rocks / verge wedges / shrubs and scrub | 60 / 25 / 129 |
 | Cliff pieces | 0 |
-| **Vanilla references placed** | **362** |
+| **Vanilla references placed** | **374** |
 | Rejected as oversized / for blocking the entrance / for the market floor | 17 / 10 / 0 |
 
 ## Verification performed
@@ -180,9 +189,11 @@ python tools/footprint_audit.py --data <stock Data> --profile "Still in Skyrim P
 ```
 
 - Release build: zero warnings, zero errors.
-- Generator run twice: identical SHA256.
+- Generator run twice: identical SHA256 (re-verified after the amendment).
 - `footprint_audit.py` against the full load order: 0 vanilla references proud of the
-  floor on the foundation (33 intersect, all buried).
+  floor on the foundation.
+- No Stonewall-family reference above scale 1.1 remains in the plugin (checked by
+  reading the ESP).
 - Independent read of the written ESP against the eroded market floor and the walkable
   stair width: **one hit, the deliberate `SMarketStall01` test stall.** Cheeks, parapet
   and the stair-foot dressing (which straddle those lines by design) are excluded and
@@ -199,8 +210,10 @@ python tools/footprint_audit.py --data <stock Data> --profile "Still in Skyrim P
 
 ## Known and deliberately not done
 
-- No parapet on the three short step faces (he had two on one of them).
-- The rows stop a fixed 96 before corners; his stop 78 to 167.
+- Corners are now simply where two rows meet, with the outward walls at their per-edge
+  offsets, so a north/east corner has a 53-unit step between the two wall faces. No
+  corner piece of any kind is placed; if a corner needs closing, it wants a new idea
+  rather than a scaled wall.
 - Shrubs are still planted at grade beyond the walls, not on the grass.
 - Timber fence on the top edge, the cobbled spur from the road, bunting, pavilion,
   signpost text: not started. NGIO grass cache not regenerated. No navmesh.
@@ -208,9 +221,9 @@ python tools/footprint_audit.py --data <stock Data> --profile "Still in Skyrim P
 
 ## What Barry should test in game
 
-1. **The whole perimeter**: each long side should read as your own build did - terrace
-   wall, grass, knee-high parapet - and every corner should be closed by the tall
-   wall-ends.
+1. **The whole perimeter**: each side should read as your own build did - terrace wall,
+   grass, knee-high parapet. The big slabs are gone; look at the corners, where the two
+   rows now just meet, and say whether they need closing with something else.
 2. **The west side** now has the grass plinth under the wall that the east and south
    have. Say if you would rather it stayed as you left it.
 3. **The stair foot**: braziers lit on the cheek ends, wing walls and banners where you

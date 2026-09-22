@@ -1541,7 +1541,8 @@ internal static class FairFoundation
             }
 
             var wallH = straight.Height > 1f ? straight.Height : 175f;
-            bool LongFace(int i) => !ShortFace(i);
+            // With the big short-face walls switched off, every face gets the rows.
+            bool LongFace(int i) => !tb.ShortFaceWalls || !ShortFace(i);
 
             // Outward terrace wall: on grade (north) or at a fixed level (elsewhere).
             float? OuterZ(int i, float fx, float fy)
@@ -1592,9 +1593,11 @@ internal static class FairFoundation
                 (x, y, z, rot, sc) => { PutVanilla(tb.ParapetPiece, x, y, z, rot, sc); result.TerraceFieldWall++; });
 
             // ---- short step faces: one big field wall scaled to the drop ----
+            // Barry switched these off after seeing them in game (2026-09-22, late):
+            // at 2-3x scale the piece's flat cut end reads as a huge smooth slab.
             for (var i = 0; i < n; i++)
             {
-                if (!ShortFace(i))
+                if (!tb.ShortFaceWalls || !ShortFace(i))
                 {
                     continue;
                 }
@@ -1622,7 +1625,7 @@ internal static class FairFoundation
             // The finished end of the piece (local -X) is the free outer end.
             for (var i = 0; i < n; i++)
             {
-                if (!Convex(i))
+                if (!tb.Bastions || !Convex(i))
                 {
                     continue;
                 }

@@ -213,9 +213,11 @@ verified state.
   floor -296 with an inward piece at floor -424 as a plinth, a 0.98 `Stonewall01`
   parapet on every long face, and a lower 0.9 field wall on grade on the west. Short
   one-tile faces at re-entrant corners get one `Stonewall01` scaled to the drop.
-  Convex corners get bastions: `StonewallEndL01` scaled to the drop, an L along both
-  face lines, or a single wall where the other leg would stand in front of a
-  neighbouring band. **No corner knolls, no dirt-cliff pieces, no corner boulders.**
+  The bastion and short-face-wall code exists but is **switched off** (`bastions`,
+  `shortFaceWalls` false): Barry saw the scaled-up wall-ends in game and rejected them,
+  because at 2-3x the piece's flat cut end reads as a smooth slab. **Never scale a
+  Stonewall-family piece above about 1.1.** Corners are where two rows meet; nothing
+  else is placed there. **No corner knolls, no dirt-cliff pieces, no corner boulders.**
 - **Entrance dressing is data** (`Dressing.EntranceDressing`): braziers with fire on the
   cheek ends at the foot, low wing walls with finished ends, banner posts and banners
   mid-flight, field walls under the west cheeks. Positions are the reference's,
