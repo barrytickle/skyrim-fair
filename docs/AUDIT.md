@@ -2,7 +2,62 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: no Dawi stall-keepers, and outhouses by the walls (2026-09-22, late)
+## Current pass: festival light towers at the gate and the stage (2026-09-22, late)
+
+Barry: "a new asset... barry_scaffold... festival watchtowers more than guard
+watchtowers... two near the main gate and two near the stage... large whiterun banners
+hanging from it", then "adding a light to the towers... the flame podium you used on the
+stage, or just make a large lantern... where the guards normally stand".
+
+**The tower** (`meshesarry_scaffold\scaffold.nif`, BS 100, 2,552 triangles, box
+collision; `scaffold_d.dds` 2048 DXT1, `scaffold_n.dds` a 4x4 flat normal map). Measured
+from the mesh: 124 x 129 x 320, deck floor at 215, deck edge boards topping out at 234,
+deck edge at +/-59, roof underside 306 over the centre, **ladder on the local -X face**.
+Placed at **scale 2**: 640 tall, deck floor 430, edge boards 468, so it looks over the
+palisade (350) and the gate (440).
+
+**The light: a large lantern, not a brazier.** At scale 2 there is 182 of headroom
+between the deck floor and the wooden roof, and a brazier's flames would lick the roof.
+Instead each deck has vanilla `CandleLanternwithCandle01` (`02D847`, the common iron
+lantern with a lit candle, placed 1,393 times in vanilla) at **3.5x, about 150 tall**,
+standing in the middle of the deck where the guard would, 35 below the roof. Inside it is
+**`WRFireLightNS`** (`0BBAE5`), Whiterun's warm street fire light: radius 768, flickering,
+no shadows. That makes 4 more real lights, 14 in the fair.
+
+**The banners**: vanilla `CityBannerWhiterun01InsideTall` (`0DEE54`), Dragonsreach's
+long Whiterun banner (340 long, measured from its skin data), at 1.25x, about 425 long.
+Each hangs from the top of the deck's edge boards, 8 outside the edge, and turned so the
+cloth sways away from the tower. There are none on the ladder face or on faces toward the
+wall.
+
+| Tower | At | Yaw | Ladder faces | Banners face |
+| --- | --- | --- | --- | --- |
+| 01 gate west | (1500, -1790) | 0 | west | east (gate), north (fair) |
+| 02 gate east | (2600, -1800) | 180 | east | west (gate), north (fair) |
+| 03 stage west | (798, 5250) | 0 | west | east (stage), north, south (crowd) |
+| 04 stage east | (3298, 5250) | 180 | east | west (stage), north, south (crowd) |
+
+`fairWorld.towers` in the config, built by `FairTowers.cs`. Each tower's footprint plus
+60 is a market keep-out; no market placement changed (33 stalls, 301 pieces, same
+refusals).
+
+**Clearances** (read from the written ESP): gate towers 40-65 inside the palisade and
+out of the gate-to-stage sightline band; tower 02 about 110 from the gate signpost.
+Stage towers about 245 from the stage skirt and 90 between a banner's swing and the
+nearest stage post.
+
+**Verification**: generator run twice, identical SHA256 `2e01805cfdde37fe...` (422,558
+bytes). **Deployed byte-identical**, with `meshesarry_scaffold\` and
+`texturesarry_scaffold\` copied into the MO2 mod folder.
+
+**Test**:
+- Do the lanterns stand on the deck floor (not floating or sunk) and glow at night?
+- Do the banners hang clear of the tower (no clipping through the edge boards or legs)
+  and sway?
+- Does the scale look right next to the gate and the stage? The scale, lantern size and
+  banner size are one number each in the config.
+
+## Previous pass: no Dawi stall-keepers, and outhouses by the walls (2026-09-22, late)
 
 Barry: "i believe i have a dawi mod installed which has the dawi race. Could we make those
 excempt from being vendors... their height breaks with the vendor table", and Astra's SE

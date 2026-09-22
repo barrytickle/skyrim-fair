@@ -207,6 +207,11 @@ try
             Console.WriteLine($"  vendors: {vendors.Placed} stall-keepers from {vendors.Records} vendor records (sell nothing)");
         }
 
+        if (world.Towers is { } towers)
+        {
+            Console.WriteLine($"  light towers: {towers.Towers} (lantern, fire light, {towers.Banners} Whiterun banners)");
+        }
+
         if (world.Archery is { } archery)
         {
             Console.WriteLine($"  archery: {archery.Lanes} lanes (target, backstop, townsfolk archer) from {archery.Records} archer records");

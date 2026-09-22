@@ -553,6 +553,7 @@ Project-owned mesh work is code-first and reproducible.
 - do not save the authoritative ESP from Creation Kit
 - third-party meshes the generator places get a `fairWorld.projectStatics` entry (EditorID, model path, bounds) and are used in market modules as `@EditorID`
 - Stroti's outhouse meshes and textures (Astra's SE conversion) are git-ignored because their permissions forbid re-uploading; restore them from `external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip` before deploying (see `CREDITS.md`)
+- the festival light towers (`fairWorld.towers`, `FairTowers.cs`) are Barry's `barry_scaffold\scaffold.nif` at scale 2 with a 3.5x vanilla candle lantern, a `WRFireLightNS` light and `CityBannerWhiterun01InsideTall` banners; the ladder is the mesh's local -X face, and each footprint is a market keep-out
 - vendors and archers template the fair's own `SkyrimFairFaces*` leveled lists, copied from Skyrim.esm at generation, so mods that edit vanilla commoner lists (Dawi NPC Encounters) cannot change the fair's faces
 
 ### Permanent foundation construction method

@@ -133,6 +133,9 @@ internal sealed record FairWorldConfig
     /// </summary>
     public List<ProjectStaticConfig> ProjectStatics { get; init; } = new();
 
+    /// <summary>Festival light towers: Barry's scaffold, a large lantern, Whiterun banners.</summary>
+    public TowersConfig Towers { get; init; } = new();
+
     /// <summary>The archery range: townsfolk practising at targets, Solitude-style.</summary>
     public ArcheryConfig Archery { get; init; } = new();
 
@@ -2036,4 +2039,68 @@ internal sealed record MarketThemeDressing
     public string Theme { get; init; } = string.Empty;
 
     public List<MarketPiece> Pieces { get; init; } = new();
+}
+
+/// <summary>
+/// Festival light towers: Barry's scaffold watchtower with no guard, a large lantern on
+/// the deck where the guard would stand, and tall Whiterun banners from the deck's edge.
+/// The market treats each tower as a keep-out.
+/// </summary>
+internal sealed record TowersConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairLightTower";
+
+    public ProjectStaticConfig Tower { get; init; } = new();
+
+    /// <summary>Top of the deck's edge boards above the tower's origin, unscaled; banners hang from here.</summary>
+    public float DeckZ { get; init; } = 234f;
+
+    /// <summary>The deck floor inside the edge boards, unscaled; the lantern stands here.</summary>
+    public float FloorZ { get; init; } = 215f;
+
+    /// <summary>Half the deck's width, unscaled; banners hang just outside it.</summary>
+    public float DeckHalf { get; init; } = 59f;
+
+    public float Sink { get; init; } = 4f;
+
+    /// <summary>CityBannerWhiterun01InsideTall, Dragonsreach's long banner.</summary>
+    public string Banner { get; init; } = "000DEE54:Skyrim.esm";
+
+    public float BannerScale { get; init; } = 1.25f;
+
+    /// <summary>How far outside the deck edge each banner hangs.</summary>
+    public float BannerOut { get; init; } = 8f;
+
+    /// <summary>Banner origin (its top) relative to the deck top.</summary>
+    public float BannerZ { get; init; }
+
+    /// <summary>CandleLanternwithCandle01, scaled up into a large lantern.</summary>
+    public string Lantern { get; init; } = "0002D847:Skyrim.esm";
+
+    public float LanternScale { get; init; } = 3f;
+
+    /// <summary>WRFireLightNS: Whiterun's warm street fire light, radius 768, no shadows.</summary>
+    public string Light { get; init; } = "000BBAE5:Skyrim.esm";
+
+    /// <summary>Light height above the deck floor, inside the lantern.</summary>
+    public float LightZ { get; init; } = 60f;
+
+    public float KeepOutMargin { get; init; } = 60f;
+
+    public List<TowerSpot> Towers { get; init; } = new();
+}
+
+internal sealed record TowerSpot
+{
+    public float X { get; init; }
+
+    public float Y { get; init; }
+
+    /// <summary>Yaw in degrees; the ladder is on the tower's local -X face.</summary>
+    public float Yaw { get; init; }
+
+    /// <summary>Local faces (+X, +Y, -Y, -X) that carry a banner.</summary>
+    public List<string> Banners { get; init; } = new();
 }

@@ -657,6 +657,70 @@
       {"editorId": "SkyrimFairOuthouse", "model": "Stroti\\Outdoor Toilet\\OutdoorToilet.nif", "width": 100, "depth": 126, "height": 195},
       {"editorId": "SkyrimFairOuthouseDoor", "model": "Stroti\\Outdoor Toilet\\ToiletDoor.nif", "width": 72, "depth": 9, "height": 141}
     ],
+    "towers": {
+      "enabled": true,
+      "editorIdPrefix": "SkyrimFairLightTower",
+      "tower": {
+        "editorId": "SkyrimFairLightTower",
+        "model": "barry_scaffold\\scaffold.nif",
+        "width": 124,
+        "depth": 129,
+        "height": 320,
+        "scale": 2.0
+      },
+      "deckZ": 234,
+      "floorZ": 215,
+      "deckHalf": 59,
+      "banner": "000DEE54:Skyrim.esm",
+      "bannerScale": 1.25,
+      "bannerOut": 8,
+      "bannerZ": 0,
+      "lantern": "0002D847:Skyrim.esm",
+      "lanternScale": 3.5,
+      "light": "000BBAE5:Skyrim.esm",
+      "lightZ": 90,
+      "keepOutMargin": 60,
+      "towers": [
+        {
+          "x": 1500,
+          "y": -1790,
+          "yaw": 0,
+          "banners": [
+            "+X",
+            "+Y"
+          ]
+        },
+        {
+          "x": 2600,
+          "y": -1800,
+          "yaw": 180,
+          "banners": [
+            "+X",
+            "-Y"
+          ]
+        },
+        {
+          "x": 798,
+          "y": 5250,
+          "yaw": 0,
+          "banners": [
+            "+X",
+            "+Y",
+            "-Y"
+          ]
+        },
+        {
+          "x": 3298,
+          "y": 5250,
+          "yaw": 180,
+          "banners": [
+            "+X",
+            "+Y",
+            "-Y"
+          ]
+        }
+      ]
+    },
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
     "avenueWidth": 800,
     "zoneMarker": "00000034:Skyrim.esm",

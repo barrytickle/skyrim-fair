@@ -30,7 +30,8 @@ internal static class FairMarket
 
     public static MarketResult Build(
         SkyrimMod mod, FairWorldConfig world, Func<float, float, float> outside, Func<float, float, float> ground,
-        Action<PlacedObject> put, Cell persistentCell, int persistentFlag, Func<string, FormKey> resolve)
+        Action<PlacedObject> put, Cell persistentCell, int persistentFlag, Func<string, FormKey> resolve,
+        IReadOnlyList<(float X, float Y)[]> extraKeepOut)
     {
         var market = world.Market;
         var modules = market.Modules.ToDictionary(m => m.Name);
@@ -39,6 +40,7 @@ internal static class FairMarket
             .Where(z => market.KeepOutZones.Contains(z.Name))
             .Select(z => z.Polygon.Select(p => (p[0], p[1])).ToArray())
             .Concat(market.KeepOut.Select(a => a.Polygon.Select(p => (p[0], p[1])).ToArray()))
+            .Concat(extraKeepOut)
             .ToList();
 
         var placed = new List<Placed>();

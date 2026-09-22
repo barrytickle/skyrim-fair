@@ -132,6 +132,11 @@ def triangles(path):
                     hx, hy, hz = struct.unpack_from("<3H", raw, 0)
                     verts.append((half(hx), half(hy), half(hz)))
             faces = [struct.unpack("<3H", q.read(6)) for _ in range(nt)]
+            if kind == "BSDynamicTriShape":
+                # Cloth banners keep their positions after the triangles, as Vector4s.
+                q.g("I")  # particle data size (BS 100)
+                dynamic = q.g("I") // 16
+                verts = [struct.unpack("<4f", q.read(16))[:3] for _ in range(dynamic)]
             shapes[i] = (verts, faces, flags)
     # walk from the root
     def walk(i, xf):

@@ -213,9 +213,17 @@ internal static class FairWorld
             return faceLists[template] = copy.FormKey;
         }
 
+        // ---- festival light towers ------------------------------------------------------
+        TowersResult? towers = null;
+        if (config.Towers.Enabled && config.Towers.Towers.Count > 0)
+        {
+            towers = FairTowers.Build(mod, config.Towers, AddStatic(mod, config.Towers.Tower), plan.Height, Put);
+        }
+
         // ---- the market ---------------------------------------------------------------
         var market = config.Market.Enabled
-            ? FairMarket.Build(mod, config, plan.Outside, plan.Height, Put, topCell, PersistentRecordFlag, Resolve)
+            ? FairMarket.Build(mod, config, plan.Outside, plan.Height, Put, topCell, PersistentRecordFlag, Resolve,
+                towers?.Footprints ?? Array.Empty<(float X, float Y)[]>())
             : null;
 
         // ---- stall-keepers ------------------------------------------------------------
@@ -313,6 +321,7 @@ internal static class FairWorld
             market,
             vendors,
             archery,
+            towers,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
             plan.RenderPlan(1024f, config.Forest.OuterDistance, trees),
             plan.RenderMountains(mountains, 2048f));
@@ -996,6 +1005,7 @@ internal sealed record FairWorldResult(
     MarketResult? Market,
     VendorsResult? Vendors,
     ArcheryResult? Archery,
+    TowersResult? Towers,
     string Plan,
     string ForestPlan,
     string MountainPlan);
