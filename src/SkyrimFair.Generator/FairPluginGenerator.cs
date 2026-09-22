@@ -9,11 +9,6 @@ internal static class FairPluginGenerator
 {
     private const int CellSize = 4096;
 
-    /// <summary>Exterior cells are grouped 32x32 per block and 8x8 per sub-block.</summary>
-    private const int ExteriorBlockSize = 32;
-
-    private const int ExteriorSubBlockSize = 8;
-
     /// <summary>
     /// The Persistent record flag. Every one of the 347 vanilla map markers in Tamriel
     /// carries it, and without it the engine will not resolve the reference as a
@@ -122,6 +117,37 @@ internal static class FairPluginGenerator
             {
                 mod.Statics.Add(record);
             }
+        }
+
+        // ---- sandbox: a private interior cell for looking at pieces ------
+        // Shares the foundation's STAT records when they exist so the plugin carries
+        // one definition of each kit piece, not one per place it is used.
+        SandboxResult? sandbox = null;
+        if (config.Sandbox.Enabled)
+        {
+            var kitStatics = foundation?.Statics ?? new Dictionary<string, Static>();
+            sandbox = FairSandbox.Build(mod, config, role =>
+            {
+                if (kitStatics.TryGetValue(role, out var existing))
+                {
+                    return existing;
+                }
+
+                if (!site.Foundation.Pieces.TryGetValue(role, out var piece))
+                {
+                    throw new InvalidOperationException(
+                        $"The sandbox floor needs foundation piece '{role}', which is not configured.");
+                }
+
+                var record = new Static(mod)
+                {
+                    EditorID = piece.EditorId,
+                    Model = new Model { File = piece.Model },
+                };
+                kitStatics[role] = record;
+                mod.Statics.Add(record);
+                return record;
+            });
         }
 
         // Clear vanilla clutter standing inside the paving, or rocks and shrubs poke
@@ -254,8 +280,7 @@ internal static class FairPluginGenerator
         }
 
         // Nest each touched cell under its exterior block / sub-block.
-        var blocks = new Dictionary<(int X, int Y), WorldspaceBlock>();
-        var subBlocks = new Dictionary<(int X, int Y), WorldspaceSubBlock>();
+        var grid = new ExteriorCellGrid(worldspace);
 
         foreach (var ((cx, cy), placedObjects) in byCell.OrderBy(p => p.Key.Y).ThenBy(p => p.Key.X))
         {
@@ -267,37 +292,17 @@ internal static class FairPluginGenerator
                 cell.Temporary.Add(placed);
             }
 
-            var blockKey = (FloorDivide(cx, ExteriorBlockSize), FloorDivide(cy, ExteriorBlockSize));
-            var subKey = (FloorDivide(cx, ExteriorSubBlockSize), FloorDivide(cy, ExteriorSubBlockSize));
-
-            if (!blocks.TryGetValue(blockKey, out var block))
-            {
-                block = new WorldspaceBlock
-                {
-                    BlockNumberX = (short)blockKey.Item1,
-                    BlockNumberY = (short)blockKey.Item2,
-                    GroupType = GroupTypeEnum.ExteriorCellBlock,
-                };
-                blocks[blockKey] = block;
-                worldspace.SubCells.Add(block);
-            }
-
-            if (!subBlocks.TryGetValue(subKey, out var subBlock))
-            {
-                subBlock = new WorldspaceSubBlock
-                {
-                    BlockNumberX = (short)subKey.Item1,
-                    BlockNumberY = (short)subKey.Item2,
-                    GroupType = GroupTypeEnum.ExteriorCellSubBlock,
-                };
-                subBlocks[subKey] = subBlock;
-                block.Items.Add(subBlock);
-            }
-
-            subBlock.Items.Add(cell);
+            grid.Add(cell, cx, cy);
         }
 
         mod.Worldspaces.Add(worldspace);
+
+        // ---- the isolated festival worldspace: a parallel prototype ------
+        // Built last so it only ever appends FormIDs: every Tamriel and sandbox record
+        // keeps the ID it had before this worldspace existed.
+        FairWorldResult? fairWorld = config.FairWorld.Enabled
+            ? FairWorld.Build(mod, config.FairWorld, master)
+            : null;
 
         var outputPath = Path.Combine(outputDirectory, mod.ModKey.FileName);
 
@@ -313,7 +318,9 @@ internal static class FairPluginGenerator
             mapMarker.FormKey,
             master is not null,
             byCell.Keys.OrderBy(k => k.Y).ThenBy(k => k.X).ToList(),
-            foundation);
+            foundation,
+            sandbox,
+            fairWorld);
     }
 
     private static IEnumerable<(int X, int Y)> EnumerateCellsAround(
@@ -572,10 +579,6 @@ internal static class FairPluginGenerator
 
         return placed;
     }
-
-    /// <summary>Floor division, so negative cell coordinates land in the correct block.</summary>
-    private static int FloorDivide(int value, int divisor)
-        => (int)Math.Floor(value / (double)divisor);
 }
 
 internal sealed record FairBuildResult(
@@ -585,4 +588,6 @@ internal sealed record FairBuildResult(
     FormKey MapMarkerFormKey,
     bool CopiedMasterRecords,
     IReadOnlyList<(int X, int Y)> CellsTouched,
-    FoundationResult? Foundation);
+    FoundationResult? Foundation,
+    SandboxResult? Sandbox,
+    FairWorldResult? FairWorld);

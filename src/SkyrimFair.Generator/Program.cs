@@ -97,6 +97,45 @@ try
     Console.WriteLine();
     Console.WriteLine($"Cells touched: {string.Join(", ", result.CellsTouched.Select(c => $"{c.X},{c.Y}"))}");
 
+    if (result.Sandbox is { } sandbox)
+    {
+        Console.WriteLine();
+        Console.WriteLine(
+            $"Sandbox cell '{sandbox.EditorId}' created as {sandbox.CellFormKey}: " +
+            $"{sandbox.Tiles}x{sandbox.Tiles} kit tiles, {sandbox.SideLength:0} units a side, " +
+            $"{sandbox.FloorPiecesPlaced} floor pieces.");
+        Console.WriteLine("  Console commands:");
+        Console.WriteLine($"    in:   coc {sandbox.EditorId}");
+        Console.WriteLine($"    out:  cow Tamriel {site.CellGridX} {site.CellGridY}     (lands at the fair site)");
+    }
+
+    if (result.FairWorld is { } world)
+    {
+        var (minX, minY, maxX, maxY) = world.CompoundBounds;
+        Console.WriteLine();
+        Console.WriteLine(
+            $"Isolated worldspace '{world.EditorId}' created as {world.WorldspaceFormKey}: " +
+            $"{world.CellCount} cells ({-world.CellRadius}..{world.CellRadius} on both axes), each with LAND.");
+        Console.WriteLine(
+            world.WeatherCount > 0
+                ? $"  climate {world.ClimateFormKey} with {world.WeatherCount} tundra weathers"
+                : $"  WARNING: Skyrim.esm not read; climate {world.ClimateFormKey} referenced as is");
+        Console.WriteLine(
+            $"  planned compound {maxX - minX:0} x {maxY - minY:0} units, " +
+            $"X {minX:0}..{maxX:0}, Y {minY:0}..{maxY:0}; {world.PostCount} temporary perimeter posts; " +
+            $"at most {world.MaxAlphaLayers} texture layers in a quadrant");
+        foreach (var marker in world.Markers)
+        {
+            Console.WriteLine($"  {marker.EditorId,-36} {marker.FormKey}  ({marker.X:0}, {marker.Y:0}) facing {marker.Heading:0}");
+        }
+
+        Console.WriteLine("  Console commands:");
+        Console.WriteLine($"    in:   cow {world.EditorId} 0 0");
+        Console.WriteLine($"    out:  cow Tamriel {site.CellGridX} {site.CellGridY}     (lands at the Tamriel fair site)");
+        Console.WriteLine("  Plan (north up, 512 units per character):");
+        Console.Write(world.Plan);
+    }
+
     Console.WriteLine();
     if (result.CopiedMasterRecords)
     {

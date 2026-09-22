@@ -87,6 +87,34 @@ Attribution:
 
 > Whiterun Stone Stairs by Chiselsky.
 
+## Riverwood Has Charm and Walls
+
+**Mod:** Riverwood Has Charm and Walls  
+**Nexus Mods:** https://www.nexusmods.com/skyrimspecialedition/mods/146520  
+**Created by:** J3w3ls  
+**Current referenced version:** 1.4.1
+
+Riverwood Has Walls adds a wooden palisade, gates, watchtowers and covered bridges around Riverwood. Its wall and gate meshes are being evaluated for Skyrim Fair's perimeter. The full file-level audit is in [docs/RIVERWOOD_WALLS_AUDIT.md](docs/RIVERWOOD_WALLS_AUDIT.md).
+
+The Nexus permissions state that you must get permission from J3w3ls before using any of the assets in this file, before modifying them, and that they may not be uploaded elsewhere, converted to other games, used in sold mods, or earn Donation Points. The author's notes add that the assets "will be included in a modder's resource eventually, free to use there".
+
+### Important provenance note
+
+J3w3ls credits riton67000 (Farmhouse Parallax II, WoodPost02 textures), LucidAPs (High Poly Project smelter rocks), Vermunds (Bells of Skyrim bell) and others. The wall and gate meshes themselves reference only J3w3ls's own `RiverwoodPost` and `RiverwoodWoodPlanks` textures plus vanilla texture paths, but the bell in the bell tower is Vermunds's and would need a separate check.
+
+### Skyrim Fair usage
+
+Treat Riverwood Has Charm and Walls as a visual reference only until one of the following happens:
+
+1. J3w3ls grants explicit written permission for the specific files listed in the audit, or
+2. J3w3ls publishes the promised modder's resource, whose own permissions then apply.
+
+Do not copy, downscale, rename, or redistribute its meshes or textures before then. If permission is granted, record the exact files, the permission text and date, and the required attribution here before bundling anything.
+
+Attribution:
+
+> Riverwood Has Charm and Walls by J3w3ls.
+
 ## Bethesda Game Studios
 
 The Elder Scrolls V: Skyrim Special Edition and its original game assets are property of Bethesda Game Studios / Bethesda Softworks.
@@ -102,4 +130,5 @@ As assets are selected for the shipped mod, record them here.
 | Stage dancing | TBD | Professional Dancer | contentcat and davidgilbertking / underlying animation creators | Pending exact integration audit | Prefer dependency |
 | Market stalls / tents | TBD | Medieval Markets | TBD per asset | Pending downloaded-file audit | TBD |
 | Entrance stairs / wall borders | TBD | Whiterun Stone Stairs | Chiselsky | Asset reuse requires author permission; patch reuse allowed | Prefer external dependency / optional replacer |
+| Perimeter palisade / gates | `J3_RW_WallStraight*.nif`, `J3_RW_WallJunction.nif`, `J3_RW_GateNoFrame.nif`, `J3_RW_GateWay.nif`, `RiverwoodPost*.dds`, `RiverwoodWoodPlanks*.dds` (see audit) | Riverwood Has Charm and Walls | J3w3ls | Asset reuse requires author permission; modder's resource promised | Blocked pending permission; visual reference only |
 

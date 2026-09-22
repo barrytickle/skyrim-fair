@@ -12,6 +12,10 @@ internal sealed record FairConfig
 
     public PrototypeSite Site { get; init; } = new();
 
+    public SandboxConfig Sandbox { get; init; } = new();
+
+    public FairWorldConfig FairWorld { get; init; } = new();
+
     public void Validate()
     {
         if (string.IsNullOrWhiteSpace(PluginName))
@@ -31,6 +35,248 @@ internal sealed record FairConfig
         }
 
         Site.Validate();
+        Sandbox.Validate();
+        FairWorld.Validate();
+    }
+}
+
+/// <summary>
+/// The isolated festival worldspace: a parallel prototype to the Tamriel terrace, not
+/// a replacement for it. A flat grass canvas with sky, weather and exterior lighting,
+/// its own generated landscape, and the broad plan (perimeter line, entrance, avenue,
+/// crowd square, stage, market side, activity side) painted into the ground so it can
+/// be walked in game. Reached with <c>cow &lt;EditorId&gt; 0 0</c>.
+///
+/// Every coordinate is in world units in the new worldspace. Points are <c>[x, y]</c>.
+/// </summary>
+internal sealed record FairWorldConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Typed after <c>cow</c>. Must be unique across the load order.</summary>
+    public string EditorId { get; init; } = "SkyrimFairWorld";
+
+    /// <summary>Shown on the loading screen and in the HUD on arrival.</summary>
+    public string Name { get; init; } = "The Wanderer's Fair";
+
+    /// <summary>
+    /// Parent worldspace, used for its map only (the pause-menu map and fast travel out
+    /// behave as they do in a city). Nothing else is inherited. Tamriel.
+    /// </summary>
+    public string ParentWorldspace { get; init; } = "0000003C:Skyrim.esm";
+
+    /// <summary>CLMT copied for sun, moons, sky model and day timings. SkyrimClimate.</summary>
+    public string BaseClimate { get; init; } = "00000812:Skyrim.esm";
+
+    /// <summary>REGN whose weather list becomes the new climate's. WeatherTundraNoPrecip.</summary>
+    public string WeatherRegion { get; init; } = "001046C9:Skyrim.esm";
+
+    public string ClimateEditorId { get; init; } = "SkyrimFairWorldClimate";
+
+    /// <summary>Landscape is generated for cells -CellRadius..+CellRadius on both axes.</summary>
+    public int CellRadius { get; init; } = 5;
+
+    /// <summary>Height of the flat festival ground.</summary>
+    public float FloorZ { get; init; } = 0f;
+
+    public FairWorldTerrain Terrain { get; init; } = new();
+
+    public FairWorldTextures Textures { get; init; } = new();
+
+    /// <summary>
+    /// Planned palisade line, one closed irregular polygon. Only painted and staked for
+    /// now: the final wall is not built in this pass.
+    /// </summary>
+    public List<float[]> Perimeter { get; init; } = new();
+
+    /// <summary>Width of the painted strip marking the perimeter line.</summary>
+    public float PerimeterStripWidth { get; init; } = 256f;
+
+    /// <summary>Temporary scale posts along the perimeter, one per vertex and every <see cref="PostSpacing"/>.</summary>
+    public string PerimeterPost { get; init; } = "001083D7:Skyrim.esm";
+
+    public float PostSpacing { get; init; } = 1024f;
+
+    /// <summary>
+    /// <c>[x, y]</c> on the perimeter where the main gate will stand. No post is placed
+    /// across its opening; one stands either side instead.
+    /// </summary>
+    public float[] Gate { get; init; } = Array.Empty<float>();
+
+    public float GateWidth { get; init; } = 640f;
+
+    /// <summary>Centreline of the central avenue, entrance first.</summary>
+    public List<float[]> Avenue { get; init; } = new();
+
+    public float AvenueWidth { get; init; } = 800f;
+
+    /// <summary>Painted zones, drawn in list order (later zones paint over earlier ones).</summary>
+    public List<FairWorldZone> Zones { get; init; } = new();
+
+    /// <summary>
+    /// Named persistent heading markers, one per zone, so each can be reached with
+    /// <c>player.moveto &lt;EditorId&gt;</c>. XMarkerHeading: invisible in game.
+    /// </summary>
+    public string ZoneMarker { get; init; } = "00000034:Skyrim.esm";
+
+    public void Validate()
+    {
+        if (!Enabled)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(EditorId) || EditorId.Any(char.IsWhiteSpace))
+        {
+            throw new InvalidOperationException(
+                "FairWorld.EditorId must be a single word: it is typed into the console after 'cow'.");
+        }
+
+        if (CellRadius < 2 || CellRadius > 16)
+        {
+            throw new InvalidOperationException("FairWorld.CellRadius must be between 2 and 16.");
+        }
+
+        if (Perimeter.Count < 3 || Perimeter.Any(p => p.Length != 2))
+        {
+            throw new InvalidOperationException("FairWorld.Perimeter needs at least three [x, y] points.");
+        }
+
+        if (Avenue.Count < 2 || Avenue.Any(p => p.Length != 2))
+        {
+            throw new InvalidOperationException("FairWorld.Avenue needs at least two [x, y] points.");
+        }
+
+        foreach (var zone in Zones)
+        {
+            if (string.IsNullOrWhiteSpace(zone.Name) || zone.Name.Any(char.IsWhiteSpace))
+            {
+                throw new InvalidOperationException("Every FairWorld zone needs a single-word Name.");
+            }
+
+            if (zone.Polygon.Count < 3 || zone.Polygon.Any(p => p.Length != 2))
+            {
+                throw new InvalidOperationException($"FairWorld zone '{zone.Name}' needs at least three [x, y] points.");
+            }
+
+            if (zone.Marker is not { Length: 3 })
+            {
+                throw new InvalidOperationException($"FairWorld zone '{zone.Name}' needs a Marker [x, y, headingDegrees].");
+            }
+        }
+
+        // Land must run at least two whole cells past the planned wall, or the player can
+        // see the edge of the generated ground from inside the compound.
+        var min = (-CellRadius + 2) * 4096f;
+        var max = (CellRadius - 1) * 4096f;
+        if (Perimeter.Any(p => p.Any(v => v < min || v > max)))
+        {
+            throw new InvalidOperationException(
+                "FairWorld.Perimeter reaches too close to the edge of the generated land; raise CellRadius.");
+        }
+    }
+}
+
+/// <summary>
+/// The ground: exactly flat inside the perimeter and for <see cref="FlatMargin"/>
+/// beyond it, so the palisade will stand on level ground wherever it is finally drawn,
+/// then rising gently into low hills that close the view where the wall is not yet.
+/// </summary>
+internal sealed record FairWorldTerrain
+{
+    public float FlatMargin { get; init; } = 1024f;
+
+    /// <summary>Distance over which the ground climbs from the floor to its full rise.</summary>
+    public float RiseDistance { get; init; } = 8192f;
+
+    public float RiseHeight { get; init; } = 1536f;
+
+    /// <summary>Undulation added outside the flat area, scaled by how far up the rise it is.</summary>
+    public float NoiseAmplitude { get; init; } = 160f;
+
+    public float NoisePeriod { get; init; } = 2048f;
+}
+
+/// <summary>Vanilla LTEX records painted into the landscape. Referenced, never copied.</summary>
+internal sealed record FairWorldTextures
+{
+    /// <summary>Inside the compound. LFieldGrass01, the Whiterun tundra field with grass.</summary>
+    public string Ground { get; init; } = "00013428:Skyrim.esm";
+
+    /// <summary>Beyond the perimeter. LTundra01, rougher tundra with grass.</summary>
+    public string Outside { get; init; } = "00024E30:Skyrim.esm";
+
+    /// <summary>The perimeter strip. LTundraRocks01NoRocks.</summary>
+    public string Perimeter { get; init; } = "0006DE8B:Skyrim.esm";
+
+    /// <summary>The avenue. LDirtPath01, bare path with no grass.</summary>
+    public string Avenue { get; init; } = "000B424C:Skyrim.esm";
+}
+
+internal sealed record FairWorldZone
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>LTEX painted over the zone.</summary>
+    public string Texture { get; init; } = string.Empty;
+
+    public List<float[]> Polygon { get; init; } = new();
+
+    /// <summary><c>[x, y, headingDegrees]</c> for the zone's named marker.</summary>
+    public float[] Marker { get; init; } = Array.Empty<float>();
+}
+
+/// <summary>
+/// A private interior cell, paved with the project's own floor kit and open to the
+/// sky, for looking at pieces in isolation. It is reached with the console:
+/// <c>coc &lt;EditorId&gt;</c> to go in, <c>cow Tamriel &lt;x&gt; &lt;y&gt;</c> to come back
+/// out at the fair site. It is not part of the fair and has no doors into the world.
+/// </summary>
+internal sealed record SandboxConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>The name typed after <c>coc</c>. Must be unique across the load order.</summary>
+    public string EditorId { get; init; } = "SkyrimFairSandbox";
+
+    /// <summary>Shown on the loading screen and in the HUD when entering.</summary>
+    public string Name { get; init; } = "Skyrim Fair Sandbox";
+
+    /// <summary>Floor tiles per side. Each tile is the 1024-unit fill from the foundation kit.</summary>
+    public int Tiles { get; init; } = 5;
+
+    /// <summary>Top surface of the paving. Everything in the sandbox stands on this.</summary>
+    public float FloorZ { get; init; } = 0f;
+
+    /// <summary>LGTM the cell inherits all its lighting from. DefaultLightingTemplate.</summary>
+    public string LightingTemplate { get; init; } = "000300E2:Skyrim.esm";
+
+    /// <summary>REGN whose weather list drives the visible sky. WeatherTundraNoPrecip.</summary>
+    public string WeatherRegion { get; init; } = "001046C9:Skyrim.esm";
+
+    /// <summary>IMGS applied in the cell. DefaultImageSpaceExterior.</summary>
+    public string ImageSpace { get; init; } = "00000161:Skyrim.esm";
+
+    /// <summary>STAT placed at the centre so <c>coc</c> has somewhere to put the player. COCMarkerHeading.</summary>
+    public string CocMarker { get; init; } = "00000032:Skyrim.esm";
+
+    public void Validate()
+    {
+        if (!Enabled)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(EditorId) || EditorId.Any(char.IsWhiteSpace))
+        {
+            throw new InvalidOperationException(
+                "Sandbox.EditorId must be a single word: it is typed into the console after 'coc'.");
+        }
+
+        if (Tiles < 1 || Tiles > 16)
+        {
+            throw new InvalidOperationException("Sandbox.Tiles must be between 1 and 16.");
+        }
     }
 }
 

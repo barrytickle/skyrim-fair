@@ -53,6 +53,41 @@ Milestone unlocked: C# -> Mutagen -> Skyrim plugin.
 
 The generated ESP is deliberately empty for now. The test is whether Skyrim accepts the generated plugin. Once that is confirmed, the next commit will place one unmistakable vanilla object in a known exterior cell.
 
+## Sandbox cell
+
+The plugin also carries a private interior cell, `SkyrimFairSandbox`, paved with a
+5 x 5 square of the foundation kit's 1024 tiles (5,120 units, about 73 m, a side) and
+open to a tundra sky. It has no doors and touches nothing in the world; it exists so
+pieces can be looked at in isolation before they go anywhere near the site.
+
+Console commands (open the console with `~`):
+
+```text
+coc SkyrimFairSandbox        go in
+cow Tamriel -2 -4            come out, at the fair site
+```
+
+The `sandbox` block in `fair.config.json` controls its name, size, floor height,
+lighting template and sky weather. Set `"enabled": false` to leave it out of the plugin.
+
+## Fair worldspace (prototype)
+
+`SkyrimFairWorld` is an isolated outdoor worldspace that will eventually hold the whole
+fair inside a palisade compound. For now it is an empty canvas: 121 cells of generated
+ground, flat inside the planned perimeter and rising into low hills beyond it, under a
+tundra sky. The plan is painted into the ground (avenue, entrance, crowd square and
+stage, market side, activity side) and temporary posts mark the wall line. The Tamriel
+terrace is unaffected.
+
+```text
+cow SkyrimFairWorld 0 0                     go in, to the middle of the compound
+player.moveto SkyrimFairWorldEntranceMarker the gate (also Market, Activity, Crowd, Stage)
+cow Tamriel -2 -4                           come out, at the Tamriel fair site
+```
+
+The `fairWorld` block in `fair.config.json` holds the perimeter, gate, avenue and zone
+geometry, the ground textures and the terrain shape. `docs/AUDIT.md` has the details.
+
 ## Prototype config
 
 ```json
