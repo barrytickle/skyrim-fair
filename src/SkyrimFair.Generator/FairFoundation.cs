@@ -229,6 +229,25 @@ internal static class FairFoundation
                         var stairRun = e.StairRun * e.StairScale;
                         for (var i = 0; i < e.StairFlights; i++)
                         {
+                            if (e.KitStair)
+                            {
+                                // The project-authored flight: steps only, no wall, box
+                                // collider on the nosing line built in. Its origin IS the
+                                // top tread, it descends in local +Y, so it takes the
+                                // plain outward rotation and no inset. Nothing else is
+                                // needed for it to be climbable.
+                                Put("stair",
+                                    ex + dc * (stairRun * i),
+                                    ey - dr * (stairRun * i),
+                                    f.FloorZ - stairDrop * i,
+                                    rot,
+                                    e.StairScale);
+                                result.EntrancePieces++;
+                                rampTiles.Add((ex + dc * (stairRun * i), ey - dr * (stairRun * i),
+                                               f.FloorZ - stairDrop * i, dc, dr, true));
+                                continue;
+                            }
+
                             var outward = stairRun * i - e.StairInset * e.StairScale;
                             PutVanilla(e.Stair,
                                 ex + dc * outward,
@@ -416,6 +435,11 @@ internal static class FairFoundation
             }
         }
 
+        // Where a flight's walking surface starts relative to the tile it was
+        // registered at. The vanilla mesh's top tread is one inset in front of its
+        // origin; the kit flight's origin is its top tread.
+        var stairInset = f.Entrance.KitStair ? 0f : f.Entrance.StairInset * f.Entrance.StairScale;
+
         bool ClearsMarketFloor(float x, float y, float reach, float crownZ)
         {
             if (crownZ > f.FloorZ + d.PavingClearance)
@@ -444,9 +468,9 @@ internal static class FairFoundation
                 // bank that is meant to bury its walls.
                 var sc = f.Entrance.StairScale;
                 var half = t.Stair
-                    ? 83.5f * sc + d.RampRimAllowance
+                    ? f.Entrance.StairHalfWidth * sc + d.RampRimAllowance
                     : tile / 2f - d.RampRimAllowance;
-                var runStart = t.Stair ? f.Entrance.StairInset * sc : 0f;
+                var runStart = t.Stair ? stairInset : 0f;
                 var runLen = t.Stair ? f.Entrance.StairRun * sc : tile;
                 var runRise = t.Stair ? f.Entrance.StairDrop * sc : f.RampRise;
 
@@ -522,7 +546,9 @@ internal static class FairFoundation
             }
 
             var bounds = boundsOf(FormKeyHelper.Parse(w.Piece));
-            var height = bounds.Height > 1f ? bounds.Height : w.CourseHeight;
+            var height = (bounds.Height > 1f ? bounds.Height : w.CourseHeight) * w.PieceScale;
+            var pieceLen = w.PieceLength * w.PieceScale;
+            var perSegment = Math.Max(1, (int)MathF.Ceiling(tile / pieceLen));
 
             foreach (var direction in Directions)
             {
@@ -588,19 +614,19 @@ internal static class FairFoundation
                                 var outward = lift + batter * c;
                                 var crown = seg.SurfaceZ - height * c;
 
-                                for (var half = -1; half <= 1; half += 2)
+                                for (var k = 0; k < perSegment; k++)
                                 {
-                                    var along = half * (tile / 4f)
+                                    var along = (k + 0.5f) * tile / perSegment - tile / 2f
                                         + (float)(edgeRng.NextDouble() - 0.5) * w.AlongJitter;
                                     var px = seg.Ex + seg.Dc * outward + (seg.Dc == 0 ? along : 0f);
                                     var py = seg.Ey - seg.Dr * outward + (seg.Dr == 0 ? along : 0f);
-                                    if (!ChannelClear(px, py, tile / 4f))
+                                    if (!ChannelClear(px, py, pieceLen / 2f))
                                     {
                                         result.ChannelSkipped++;
                                         continue;
                                     }
 
-                                    PutVanilla(w.Piece, px, py, crown - bounds.ZMax, seg.Rot, 1f);
+                                    PutVanilla(w.Piece, px, py, crown - bounds.ZMax * w.PieceScale, seg.Rot, w.PieceScale);
                                     result.WallCourses++;
                                 }
                             }
@@ -1023,19 +1049,70 @@ internal static class FairFoundation
         // The two sides are deliberately different. One gets rock, the other earth and
         // scrub, with different counts, so the approach cannot be read as a designed
         // pair. Which side is which is fixed by config, not chance, so it reproduces.
+        // ---- cheek walls ------------------------------------------------------
+        // Small drystone walls stepping down beside the steps, one line each side,
+        // waist high - the concept's stair cheeks. Stonewall01 scaled down, laid along
+        // the flight, each piece's crest set a little above the nosing line where it
+        // stands. The two sides get different crest heights so the pair never reads
+        // as designed symmetry. These, and only these, are the masonry at the
+        // entrance.
+        var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
+        var stairHalf = f.Entrance.StairHalfWidth * f.Entrance.StairScale;
+        var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
+        var flightDrop = f.Entrance.StairDrop * f.Entrance.StairScale;
+        var cheekDepth = 0f;
+        var cheekRiseMax = 0f;
+        if (f.Entrance.UseStairs && d.EntranceCheeks.Enabled && rampTiles.Count > 0)
+        {
+            var ck = d.EntranceCheeks;
+            var cb = boundsOf(FormKeyHelper.Parse(ck.Piece));
+            var len = ck.PieceLength * ck.Scale;
+            cheekDepth = ck.PieceDepth * ck.Scale;
+            cheekRiseMax = MathF.Max(ck.RiseLeft, ck.RiseRight);
+            var alongRot = OutwardRotation[f.RampEdge.ToUpperInvariant()] + MathF.PI / 2f;
+
+            foreach (var t in rampTiles.Where(t => t.Stair))
+            {
+                var n = Math.Max(1, (int)MathF.Ceiling(flightRun / len));
+                for (var side = -1; side <= 1; side += 2)
+                {
+                    var rise = side < 0 ? ck.RiseLeft : ck.RiseRight;
+                    var lateral = side * (stairHalf + ck.Gap + cheekDepth / 2f);
+                    for (var j = 0; j < n; j++)
+                    {
+                        // First piece flush with the stair head so nothing pokes onto the
+                        // paving; later pieces overlap toward the foot rather than overhang.
+                        var along = stairInset + MathF.Min((j + 0.5f) * len, flightRun - len / 2f);
+                        var nosing = t.Z - flightDrop * ((along - stairInset) / flightRun);
+                        var px = t.X + t.Dc * along + (t.Dc == 0 ? lateral : 0f);
+                        var py = t.Y - t.Dr * along + (t.Dr == 0 ? lateral : 0f);
+                        var pz = nosing + rise - cb.ZMax * ck.Scale;
+                        PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale);
+                        result.CheekWalls++;
+                        if (trace) Console.Error.WriteLine($"cheek side {side} flight at ({t.X:F0},{t.Y:F0}) j {j} -> ({px:F0},{py:F0},{pz:F0}) crest {nosing + rise:F0}");
+                    }
+                }
+            }
+        }
+
         if (f.Entrance.UseStairs && d.EntranceBank.Enabled && rampTiles.Count > 0)
         {
             var eb = d.EntranceBank;
             var bankRng = new Random(d.Seed + 7919);
-            var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
-            var wallHalf = 256f * f.Entrance.StairScale;
-            var wallRise = 40f * f.Entrance.StairScale;
-            var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
-            var flightInset = f.Entrance.StairInset * f.Entrance.StairScale;
 
-            // The walking route is the gap between the two halves of each flight's
-            // wall, 167 wide on the shipped mesh. Nothing here may reach into it.
-            var gapHalf = 83.5f * f.Entrance.StairScale + eb.GapMargin;
+            // What the bank leans on: the outer face of the cheek wall if there is
+            // one, else the vanilla flight's own 666-wide wall. And how high it may
+            // rise: a little under that wall's crest at mid-flight.
+            var wallHalf = cheekDepth > 0f
+                ? stairHalf + d.EntranceCheeks.Gap + cheekDepth
+                : 256f * f.Entrance.StairScale;
+            var wallRise = cheekDepth > 0f
+                ? cheekRiseMax - flightDrop / 2f
+                : 40f * f.Entrance.StairScale;
+            var flightInset = stairInset;
+
+            // The walking route is the stair gap. Nothing here may reach into it.
+            var gapHalf = stairHalf + eb.GapMargin;
 
             foreach (var t in rampTiles)
             {
@@ -1425,6 +1502,9 @@ internal sealed class FoundationResult
 
     /// <summary>Earth and rock laid against the stair walls to bury them.</summary>
     public int EntranceBankPieces { get; set; }
+
+    /// <summary>Low drystone pieces stepping down beside the steps.</summary>
+    public int CheekWalls { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }

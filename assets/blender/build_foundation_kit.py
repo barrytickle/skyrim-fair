@@ -76,6 +76,17 @@ STAIRCOL_SINK = 24          # visible slab sits this far under the tread line
 # end and the box turns itself inside out - the orientation guard caught exactly that.
 STAIRCOL_DEPTH = 192
 
+# Project-authored staircase, replacing the vanilla StonewallTerraceStairs01 flight
+# whose 666-wide drystone wall read as a gatehouse. Same 112 rise over 192 run and
+# same 167 width as the vanilla flight at scale 1.0, so every placement the generator
+# already does for the chain, and the box collider, carry over unchanged. Eight steps
+# of 14 rise - a real step, not the vanilla piece's 7-unit ripples.
+STAIR_RUN = 192
+STAIR_RISE = 112
+STAIR_HALF_X = 84
+STAIR_STEPS = 8
+STAIR_DEPTH = 192           # solid below the treads, buried in the bank
+
 SHOULDER_RUN = 256
 SHOULDER_THICKNESS = 32
 # Deliberate A/B gate.  Keep the project-owned material build in the repository,
@@ -299,6 +310,64 @@ def wedge(name, half_x, run, thickness):
     return make_object(name, verts, faces)
 
 
+def stair(name, half_x, run, rise, steps, depth):
+    """Stepped solid: treads descend in +Y, top tread at the origin, closed all round.
+
+    Non-convex, so it is built as a profile swept across X and then handed to
+    Blender's normal recalculation, which is reliable for a closed manifold. The
+    orientation assertion in main() knows to treat it separately.
+    """
+    t = run / steps
+    r = rise / steps
+    profile = []
+    for i in range(steps):
+        profile.append((i * t, -i * r))
+        profile.append(((i + 1) * t, -i * r))
+    profile.append((run, -depth))
+    profile.append((0.0, -depth))
+    n = len(profile)
+    verts = [(-half_x, y, z) for y, z in profile] + [(half_x, y, z) for y, z in profile]
+    faces = [tuple(range(n)), tuple(reversed(range(n, 2 * n)))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((i, j, n + j, n + i))
+    obj = make_object(name, verts, faces)
+    select_only(obj)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.mesh.quads_convert_to_tris(quad_method="BEAUTY", ngon_method="BEAUTY")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return obj
+
+
+def apply_split_material(obj, top, sides, period):
+    """Treads take one material, risers and flanks another. World-scale UVs as usual."""
+    obj.data.materials.append(top)
+    obj.data.materials.append(sides)
+    uv_layer = obj.data.uv_layers.new(name="UVMap")
+    inv = 1.0 / BLENDER_UNITS_PER_SKYRIM_UNIT
+    coords = [v.co * inv for v in obj.data.vertices]
+    min_x = min(v.x for v in coords)
+    min_y = min(v.y for v in coords)
+    min_z = min(v.z for v in coords)
+    for polygon in obj.data.polygons:
+        normal = polygon.normal
+        polygon.material_index = 0 if normal.z > 0.5 else 1
+        for loop_index in polygon.loop_indices:
+            vertex = coords[obj.data.loops[loop_index].vertex_index]
+            if abs(normal.z) >= max(abs(normal.x), abs(normal.y)):
+                u = (vertex.x - min_x) / period
+                v = (vertex.y - min_y) / period
+            elif abs(normal.x) >= abs(normal.y):
+                u = (vertex.y - min_y) / period
+                v = (vertex.z - min_z) / period
+            else:
+                u = (vertex.x - min_x) / period
+                v = (vertex.z - min_z) / period
+            uv_layer.data[loop_index].uv = (u, v)
+
+
 def quad(name, corners):
     """Single upward-facing polygon: a visual surface with no thickness.
 
@@ -328,6 +397,7 @@ def build_kit():
     """
     pieces = {}
     visual_only = set()
+    nonconvex = set()
     paving = make_paving_material()
     earth = make_landscape_material(
         "SkyrimFair_DirtCliffs01_Structural",
@@ -339,6 +409,20 @@ def build_kit():
         r"textures\landscape\fieldgrass02.dds",
         r"textures\landscape\fieldgrass02_n.dds",
         shininess=20.0, spec_mult=0.1)
+
+    # Stone for the staircase: Whiterun flagstones on the treads, farmhouse drystone
+    # on the risers and flanks so it ties into the Stonewall01 cheek walls beside it.
+    # Both vanilla paths; replacers win at runtime as everywhere else.
+    steps_top = make_landscape_material(
+        "SkyrimFair_WRStoneFloor02_Steps",
+        r"textures\architecture\whiterun\WRStoneFloor02.dds",
+        r"textures\architecture\whiterun\WRStoneFloor02_n.dds",
+        shininess=40.0, spec_mult=0.3)
+    steps_side = make_landscape_material(
+        "SkyrimFair_StoneWall01_Steps",
+        r"textures\architecture\farmhouse\StoneWall01.dds",
+        r"textures\architecture\farmhouse\StoneWall01_n.dds",
+        shininess=30.0, spec_mult=0.2)
 
     # Phase variants only exist to stop a small texture period stamping visibly.
     # The vanilla Whiterun floor tiles at 256 units, which divides the 512 grid
@@ -391,6 +475,15 @@ def build_kit():
         0, STAIRCOL_RUN, -STAIRCOL_DEPTH, -STAIRCOL_SINK, -STAIRCOL_SINK - STAIRCOL_RISE)
     apply_paving_material(pieces["SkyrimFair_StairCollision"], earth, period=512)
 
+    # 5. Staircase flight: the walking surface IS this piece (visible treads), and the
+    #    collision is a box on the nosing line, exactly as the hidden slab did it for
+    #    the vanilla flight. No drystone wall comes with it; the cheek walls beside the
+    #    steps are separate vanilla pieces the generator lays.
+    pieces["SkyrimFair_Stair_192"] = stair(
+        "SkyrimFair_Stair_192", STAIR_HALF_X, STAIR_RUN, STAIR_RISE, STAIR_STEPS, STAIR_DEPTH)
+    apply_split_material(pieces["SkyrimFair_Stair_192"], steps_top, steps_side, period=256)
+    nonconvex.add("SkyrimFair_Stair_192")
+
     # --- visual paving caps: the only upward-facing surfaces on the terrace ---
     pieces["SkyrimFair_PaveCap_1024"] = quad(
         "SkyrimFair_PaveCap_1024",
@@ -413,7 +506,7 @@ def build_kit():
         apply_paving_material(pieces[name], paving, u_phase, v_phase)
         visual_only.add(name)
 
-    return pieces, visual_only
+    return pieces, visual_only, nonconvex
 
 
 def select_only(obj):
@@ -470,7 +563,7 @@ def apply_collision(obj, collider="self"):
 
     # child box collider, aligned to the ramp slope
     import math
-    if obj.name.startswith("SkyrimFair_StairCollision"):
+    if obj.name.startswith("SkyrimFair_StairCollision") or obj.name.startswith("SkyrimFair_Stair_"):
         angle = math.atan2(STAIRCOL_RISE, STAIRCOL_RUN)
         slope_len = math.hypot(STAIRCOL_RUN, STAIRCOL_RISE)
         thickness = 64
@@ -535,7 +628,7 @@ def main():
     scene.unit_settings.length_unit = "INCHES"
     scene.unit_settings.scale_length = 1
 
-    pieces, visual_only = build_kit()
+    pieces, visual_only, nonconvex = build_kit()
     print(f"\nbuilt {len(pieces)} pieces")
 
     # Guard the bug that made the whole kit render inside-out. Every piece here is
@@ -553,6 +646,16 @@ def main():
         upward = sum(1 for poly in mesh.polygons if poly.normal.z > 0.3)
         if name in visual_only:
             print(f"  {name:34s} faces={len(mesh.polygons):2d} upward={upward} (visual cap)")
+        elif name in nonconvex:
+            # The centroid test is meaningless for a stepped solid: a riser faces
+            # away from the steps below it, toward the centroid. Blender recalculated
+            # these outward on a closed manifold; check that the treads face up and
+            # nothing faces straight down except the underside.
+            treads = sum(1 for poly in mesh.polygons if poly.normal.z > 0.9)
+            print(f"  {name:34s} faces={len(mesh.polygons):2d} tread-tris={treads} (non-convex, recalculated)")
+            if treads < 2 * STAIR_STEPS:
+                raise AssertionError(f"{name}: expected {2 * STAIR_STEPS} upward tread triangles, found {treads}")
+            continue
         else:
             print(f"  {name:34s} faces={len(mesh.polygons):2d} inward={inward} upward={upward}")
         if name in visual_only:
@@ -563,7 +666,7 @@ def main():
 
     collider_mode = {}
     for name in pieces:
-        if name == "SkyrimFair_StairCollision":
+        if name == "SkyrimFair_StairCollision" or name == "SkyrimFair_Stair_192":
             collider_mode[name] = "child"
         elif name in visual_only:
             # Visual caps get no rigidbody at all. Collision stays on the

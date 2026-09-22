@@ -102,14 +102,18 @@
         "stairCollision": {
           "editorId": "SkyrimFairStairCollision",
           "model": "SkyrimFair\\SkyrimFair_StairCollision.nif"
+        },
+        "stair": {
+          "editorId": "SkyrimFairStair192",
+          "model": "SkyrimFair\\SkyrimFair_Stair_192.nif"
         }
       },
       "dressing": {
         "seed": 20260921,
         "perEdgeSegment": 2,
         "cliffFace": "00097065:Skyrim.esm",
-        "cliffMinRunSegments": 3,
-        "cliffMaxRunSegments": 4,
+        "cliffMinRunSegments": 99,
+        "cliffMaxRunSegments": 99,
         "cliffMeshLength": 1944,
         "cliffMeshDepth": 465,
         "minOffset": 192,
@@ -145,8 +149,7 @@
           "00018BA5:Skyrim.esm",
           "0001A6E2:Skyrim.esm",
           "0001B0A8:Skyrim.esm",
-          "000332C7:Skyrim.esm",
-          "00042A88:Skyrim.esm"
+          "000332C7:Skyrim.esm"
         ],
         "cornerStones": [
           "0001819A:Skyrim.esm",
@@ -176,10 +179,7 @@
           "courseHeight": 175,
           "courseBatter": 48,
           "maxCourses": 3,
-          "prototypeEdges": [
-            "N",
-            "W"
-          ],
+          "prototypeEdges": [],
           "minStretch": 2,
           "maxStretch": 3,
           "secondCourseChance": 0.55,
@@ -187,18 +187,20 @@
           "alongJitter": 64,
           "masonryBias": {
             "N": 0.5,
-            "W": 0.7,
-            "S": 0.35,
-            "E": 0.25
+            "W": 0.6,
+            "S": 0.45,
+            "E": 0.35
           },
           "terminalRockShare": 0.8,
           "terminalRockSink": 64,
-          "entranceClear": 900
+          "entranceClear": 900,
+          "pieceScale": 0.75,
+          "pieceLength": 256
         },
         "entranceBank": {
           "enabled": true,
           "rockOnLeft": true,
-          "rockSide": 2,
+          "rockSide": 3,
           "earthSide": 3,
           "rockPool": [
             "0001819A:Skyrim.esm",
@@ -207,7 +209,6 @@
             "000332C7:Skyrim.esm"
           ],
           "earthPool": [
-            "00042A88:Skyrim.esm",
             "00024E7B:Skyrim.esm",
             "00024E8F:Skyrim.esm",
             "000332C7:Skyrim.esm"
@@ -218,11 +219,21 @@
           "sink": 48,
           "gapMargin": 32,
           "bury": 40,
-          "maxScale": 1.2,
+          "maxScale": 1.4,
           "reachShare": 0.7,
-          "extent": 320
+          "extent": 600
         },
-        "cliffEndInset": 96
+        "cliffEndInset": 96,
+        "entranceCheeks": {
+          "enabled": true,
+          "piece": "0000099B:Skyrim.esm",
+          "scale": 0.6,
+          "pieceLength": 256,
+          "pieceDepth": 138,
+          "gap": -4,
+          "riseLeft": 56,
+          "riseRight": 80
+        }
       },
       "retainHeight": 256,
       "clearMargin": 160,
@@ -240,7 +251,9 @@
         "stairInset": 64,
         "stairRun": 192,
         "stairFlights": 3,
-        "stairScale": 1.3
+        "stairScale": 1.3,
+        "kitStair": true,
+        "stairHalfWidth": 83.5
       }
     }
   }

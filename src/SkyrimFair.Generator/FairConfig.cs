@@ -307,6 +307,8 @@ internal sealed record FoundationConfig
         ["rampCap"] = new() { EditorId = "SkyrimFairRampCap512", Model = @"SkyrimFair\SkyrimFair_RampCap_512.nif" },
         // Hidden box-collider slope under the vanilla staircase, one per flight.
         ["stairCollision"] = new() { EditorId = "SkyrimFairStairCollision", Model = @"SkyrimFair\SkyrimFair_StairCollision.nif" },
+        // Project-authored flight of steps with its own box collider; no wall.
+        ["stair"] = new() { EditorId = "SkyrimFairStair192", Model = @"SkyrimFair\SkyrimFair_Stair_192.nif" },
     };
 
     public EntranceConfig Entrance { get; init; } = new();
@@ -341,7 +343,7 @@ internal sealed record FoundationConfig
         foreach (var role in new[]
         {
             "floorFill", "floorEdge", "retain", "retainCorner", "ramp", "shoulder",
-            "paveCapFill", "paveCapEdge", "rampCap", "stairCollision",
+            "paveCapFill", "paveCapEdge", "rampCap", "stairCollision", "stair",
         })
         {
             if (!Pieces.ContainsKey(role))
@@ -456,6 +458,8 @@ internal sealed record DressingConfig
     public PerimeterWallConfig PerimeterWall { get; init; } = new();
 
     public EntranceBankConfig EntranceBank { get; init; } = new();
+
+    public EntranceCheekConfig EntranceCheeks { get; init; } = new();
 
     /// <summary>
     /// Toe rocks: low piles laid at native ground where the embankment meets grass.
@@ -616,6 +620,15 @@ internal sealed record EntranceConfig
     /// <summary>False falls back to a plain ramp all the way up.</summary>
     public bool UseStairs { get; init; } = true;
 
+    /// <summary>
+    /// Use the project-authored flight (steps only, collider built in) instead of
+    /// the vanilla StonewallTerraceStairs01, whose 666-wide wall read as a gate.
+    /// </summary>
+    public bool KitStair { get; init; } = true;
+
+    /// <summary>Half the walking width of one flight at scale 1: 167 on both the vanilla and the kit flight.</summary>
+    public float StairHalfWidth { get; init; } = 83.5f;
+
     /// <summary>`StonewallTerraceStairs01`, the farm terrace stair.</summary>
     public string Stair { get; init; } = "000009D0:Skyrim.esm";
 
@@ -720,6 +733,12 @@ internal sealed record PerimeterWallConfig
     /// The flights bring their own walls; more beside them reads as a gatehouse.
     /// </summary>
     public float EntranceClear { get; init; } = 900f;
+
+    /// <summary>Scale applied to every course piece. Below 1 gives the lower walls of the concept.</summary>
+    public float PieceScale { get; init; } = 1f;
+
+    /// <summary>The piece's length along the wall at scale 1; Stonewall01 is 256.</summary>
+    public float PieceLength { get; init; } = 256f;
 }
 
 /// <summary>
@@ -791,4 +810,30 @@ internal sealed record EntranceBankConfig
 
     /// <summary>Base sits this far below grade, so the piece reads as bedded in.</summary>
     public float Bury { get; init; } = 40f;
+}
+
+/// <summary>
+/// Low drystone walls stepping down either side of the steps: the stair cheeks in the
+/// concept. This is the only masonry laid at the entrance.
+/// </summary>
+internal sealed record EntranceCheekConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    public string Piece { get; init; } = "0000099B:Skyrim.esm"; // Stonewall01
+
+    /// <summary>Scale of the wall piece. 0.6 makes the 175-tall field wall waist high.</summary>
+    public float Scale { get; init; } = 0.6f;
+
+    public float PieceLength { get; init; } = 256f;
+
+    public float PieceDepth { get; init; } = 138f;
+
+    /// <summary>Clearance between the stair flank and the wall's inner face.</summary>
+    public float Gap { get; init; } = 8f;
+
+    /// <summary>Crest height above the nosing line, per side; different on purpose.</summary>
+    public float RiseLeft { get; init; } = 56f;
+
+    public float RiseRight { get; init; } = 80f;
 }

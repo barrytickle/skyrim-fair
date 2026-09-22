@@ -47,14 +47,16 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
   previously had none and rendered as flat lavender default surfaces
 - a paving exclusion guard prevents generated dressing from protruding through the
   usable market floor
-- **the staircase is climbable via hidden collision slabs**, one per flight, because
-  the vanilla stair's `bhkCompressedMeshShape` does not scale with `XSCL`. See "Road
-  and entrance"
-- **the entrance is buried, not framed**: no field walls beside the stairs, no perimeter
-  masonry within 900 of the stair centreline, and an asymmetric earth-and-rock bank laid
-  against each flight's own wall
-- **open-backed cliff strips are never free-spun** and cliff skins are only placed where
-  both ends are buried
+- **the staircase is project-authored**: `SkyrimFair_Stair_192`, steps only, box
+  collider built in, same geometry as the vanilla flight so the chain maths is unchanged.
+  The vanilla `StonewallTerraceStairs01` is a fallback behind `entrance.kitStair`. See
+  "Road and entrance"
+- **the only masonry at the entrance is a pair of low drystone cheeks** (`Stonewall01` at
+  0.6, stepping down beside the steps, different crest heights per side), plus an
+  asymmetric closed-rock and grassy-pile bank leaning on them
+- **no dirt-cliff piece is placed anywhere** (Barry, 2026-09-22: "they have an invisible
+  piece to them"). The cliff-skin pass is off and every cliff STAT is out of every pool
+- **the layered low-wall perimeter runs on all four edges**, courses at 0.75 scale
 - the generator is deterministic: two runs give byte-identical plugins
 - no LAND edits
 - no NAVM edits
@@ -165,18 +167,21 @@ Rules, in force for all future perimeter work:
   the stair centreline: adding either made it read as a gatehouse (Barry, 2026-09-22).
   What the player sees beside the steps is bank - closed boulders on one side, a grassy
   hump on the other - laid against the stair walls to bury them.
-- **Open-backed pieces must have the missing side completely buried.** `DirtCliffs01`
-  and `DirtCliffs02` are one-sided strips (measured: 5 to 7 times more face area on the
-  front than the back) with open ends. They may only be placed face-outward with the
-  back inside the structural body, and only where both ends run into something. Never
-  in a pool that spins pieces at random. Prefer closed boulders and
-  `DirtCliffsIsland01` near anything the player walks past.
+- **No dirt-cliff pieces. At all.** `DirtCliffs01` and `DirtCliffs02` are one-sided
+  strips with open ends (measured: 5 to 7 times more face area on the front than the
+  back) and Barry has ruled the whole family out after seeing the hollow sides in game,
+  `DirtCliffsIsland01` included. The cliff-skin code remains but is disabled by
+  `cliffMinRunSegments` 99; do not re-enable it. Banks are closed boulders, rock piles
+  and grassy piles only.
+- **Small walls, not slabs.** The concept's masonry is waist high: `Stonewall01` at 0.6
+  for the stair cheeks, 0.75 for the perimeter courses. Anything that reads as a wall
+  taller than a person is wrong here.
 - **The existing road is the approach.** Do not build a separate path aimed at the fair.
 - **Vanilla first.** Audit Whiterun and tundra assets before authoring anything.
 
-Implemented as a **prototype on the north and west edges only**
-(`PerimeterWall.PrototypeEdges`), so it can be judged against the older treatment on
-south and east before being rolled out. See `docs/AUDIT.md` for the verified state.
+Rolled out to **all four edges** on 2026-09-22 (`PerimeterWall.PrototypeEdges` empty),
+with courses at `PieceScale` 0.75 so they read waist high. See `docs/AUDIT.md` for the
+verified state.
 
 ## External assets: replacers need no dependency
 
@@ -198,10 +203,11 @@ grass hill with shrubbery and rocks". From the paving outward and down:
    retaining is actually built, and it keeps the face made of small repeated pieces.
    Up to three courses, covering about 525.
 2. **Shrubbery** on and against it.
-3. **Grass and earth bank.** `DirtCliffsIsland01FieldGrass01` is in the embankment pool
-   - a closed, all-round earth hump with a grass top, which is the "grass hill" layer
-   rather than more bare rock. `DirtCliffs02FieldGrass01` was removed from that pool on
-   2026-09-22: it is an open-backed strip and the pool spins its pieces at random.
+3. **Grass and earth bank.** Grassy rock piles (`RockPileL02FieldGrass01Moss`,
+   `RockPileM02FieldGrass01Moss`, `RockPileM01FieldGrass01Moss`) and the verge wedges
+   carry this layer. Every dirt-cliff STAT was removed from every pool on 2026-09-22 at
+   Barry's direction; vanilla has no closed grassy mound taller than these piles, so a
+   project-authored earth bank piece is the eventual answer if more height is wanted.
 4. **Shrubbery and rock** on the bank.
 
 This replaced relying on the stair piece's own wall for the look. Scaling the stair to
@@ -294,28 +300,42 @@ flight then brings a 1024 x 344 wall, which reads as fortification. Flights are
 registered with the ramp-tile list so the entrance channel and the paving guard cover
 the steps. `Entrance.UseStairs = false` falls back to a plain ramp.
 
-**The stairs need their own collision.** The vanilla mesh's `bhkCompressedMeshShape`
-does not scale reliably with a reference's `XSCL`: at 1.0 the flight was climbable, at
-1.3 it was not, and there was no other blocker. So the kit has
-`SkyrimFair_StairCollision`: a 160-wide slab, 192 long, dropping 112 (one flight at
-scale 1.0), whose collider is a `bhkBoxShape` rotated to the tread line. Primitives do
-scale. The generator places one per flight at the flight's scale, top on the flight's
-top tread, plain outward rotation (the piece descends in local +Y, the stair faces the
-other way). The visible slab is sunk 24 under the tread line with the earth material so
-it is invisible in normal play. **If a scaled vanilla piece ever needs to be walked on,
-assume its compressed-mesh collision will fail and give it a box.**
+**The flight is now the kit's own piece, `SkyrimFair_Stair_192`** (2026-09-22). The
+vanilla flight cannot be separated from its 666-wide wall, and three of those walls each
+side were the gatehouse Barry rejected. The kit flight is steps only: 112 rise over 192
+run and 168 wide, identical to the vanilla flight at scale 1, eight steps of 14, a solid
+192 deep beneath, Whiterun flagstones on the treads and farmhouse drystone on the
+flanks. Its origin is its top tread and it descends in local +Y, so it takes the plain
+outward rotation with no inset. It is placed with `Put("stair", ...)` at `stairScale`.
 
-**The entrance bank** (`Dressing.EntranceBank`) hides the walls the stair mesh brings.
-Per flight and per side: pieces sized to the wall face from below grade to just under
-the crest, bedded to the lowest ground sampled under them, crown capped below the floor
-plane, leaning into the wall face then into each other, never reaching inside the
-217-wide stair gap plus a 32 margin. One side draws closed boulders, the other draws
-the closed grassy hump, with different counts, so the two sides never match. This is
-the mechanism for "cut into the bank"; do not add masonry to get that effect.
+**Collision is a box on the nosing line, built into the piece.** The lesson that forced
+this stands: the vanilla mesh's `bhkCompressedMeshShape` does not scale reliably with
+`XSCL` (climbable at 1.0, not at 1.3, no other blocker), while a `bhkBoxShape` scales
+perfectly. **If a scaled vanilla piece ever needs to be walked on, assume its
+compressed-mesh collision will fail and give it a box.** The standalone slab
+`SkyrimFair_StairCollision` still exists for the vanilla fallback and is not placed.
 
-The stair surface guard protects the 217-wide gap for one flight run per tile, not the
-whole 512 tile - the full-tile version refused the bank. Plain ramp tiles keep the
+**Cheek walls** (`Dressing.EntranceCheeks`): `Stonewall01` at 0.6, two per flight per
+side, laid along the steps, each crest a fixed rise above the nosing line under it
+(56 west, 80 east, so the sides differ). Inner face flush with the stair flank, first
+piece flush with the stair head. These are the concept's stair cheeks and the only
+masonry at the entrance.
+
+**The entrance bank** (`Dressing.EntranceBank`) leans on the cheeks: per flight and per
+side, closed pieces sized from below grade to just under the cheek crest, bedded to the
+lowest ground sampled under them, crown capped below the floor plane, never inside the
+walkable width. West draws boulders, east draws grassy rock piles, with different
+counts. Do not add masonry to get "cut into the bank"; this is the mechanism.
+
+The stair surface guard protects the walkable width for one flight run per tile, not
+the whole 512 tile - the full-tile version refused the bank. Plain ramp tiles keep the
 full-tile rectangle.
+
+**Next for the entrance, in Barry's concept order:** timber post-and-rail on a low stone
+base along the top edge and the road (`WRFenceStr01` on `WRFenceBaseStr01`, both
+audited), braziers on drystone plinths at the stair foot, then the cobbled spur from the
+road. Stair width is one number, `entrance.stairScale`; the piece, its collider and the
+cheeks scale together.
 
 **Skyrim Fair now disables no vanilla references at all.** At this floor height the four
 that were disabled sit 200 to 300 units below the paving, so they are invisible and go
