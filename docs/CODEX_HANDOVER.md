@@ -51,10 +51,9 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
   collider built in, same geometry as the vanilla flight so the chain maths is unchanged.
   The vanilla `StonewallTerraceStairs01` is a fallback behind `entrance.kitStair`. See
   "Road and entrance"
-- **the only masonry at the entrance is a pair of low project-authored drystone cheeks**
-  (`SkyrimFair_StairCheek_192`, one closed section per side per flight, its eight-step
-  crest matching the stair), plus an asymmetric closed-rock and grassy-pile bank
-  leaning on them
+- **the only masonry at the entrance is the original small vanilla `Stonewall01` cheek
+  blocks**, two per side per flight at scale 0.6, now pitched -30.3 degrees to match the
+  stair descent, plus an asymmetric closed-rock and grassy-pile bank leaning on them
 - two closed `SkyrimFair_EntranceRetainWing_144` solids restore the terrace face on
   either side of the 217-wide stair opening; the entrance segment must never be left
   structurally open again
@@ -80,11 +79,11 @@ textured in-game test. The single biggest one: **every face of every piece in th
 wound inward**, so the whole kit rendered inside-out. That had been true since the kit was
 first authored and was invisible on untextured grey geometry. See `docs/AUDIT.md`.
 
-Barry's next in-game review found the raised vanilla cheek walls reading as vertical
-towers with open undersides and the retaining face missing around the stair head. The
-2026-09-22 corrective build replaces them with closed, descending project kit pieces.
-The current gate is Barry's visual/collision retest of that entrance. Only after approval
-does work move to the **approach from the road**.
+Barry's comparison of the original vanilla blocks and the closed project-authored cheeks
+found the latter too engineered. The active build restores the original blocks and only
+rotates them to follow the staircase. The retaining wings remain to close the missing
+rear face. The current gate is Barry's visual/collision retest of this simpler entrance.
+Only after approval does work move to the **approach from the road**.
 
 The project-owned procedural cobble candidate is kept as a reproducible comparison, but
 it is not the current NIF material. Keep the wall/cliff decision separate from the
@@ -319,11 +318,12 @@ perfectly. **If a scaled vanilla piece ever needs to be walked on, assume its
 compressed-mesh collision will fail and give it a box.** The standalone slab
 `SkyrimFair_StairCollision` still exists for the vanilla fallback and is not placed.
 
-**Cheek walls** (`Dressing.EntranceCheeks`): `SkyrimFair_StairCheek_192`, one per flight
-per side, placed at the stair's 1.3 scale. Its closed solid has the same eight-step crest
-as the stair, so it descends continuously instead of exposing raised vertical field-wall
-pieces. Crests remain 56 west / 80 east above the nosing and the inner face overlaps the
-stair by 4 to hide the seam. These are the only masonry at the entrance.
+**Cheek walls** (`Dressing.EntranceCheeks`): vanilla `Stonewall01`, two per flight per
+side at scale 0.6. They retain the original irregular block silhouette but are rotated
+to the stair's 30.3-degree descent (`X -30.3`, `Y 0`, `Z 90` at the current north
+entrance). Their crest centres remain 56 west / 80 east above the nosing. The unused
+`SkyrimFair_StairCheek_192` comparison mesh remains reproducible in the asset kit but has
+no STAT or placement in the current plugin.
 
 **Entrance retaining wings**: reserving the 512-wide stair segment also omitted its
 retaining face. Two closed 144 x 128 x 256 `SkyrimFair_EntranceRetainWing_144` pieces now

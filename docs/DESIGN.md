@@ -328,12 +328,12 @@ terraced complex to look like B would have the two fighting each other. The reso
 
 ### Stair retaining-edge rule
 
-The cheek walls beside the approach steps must track the staircase as a continuous
-descending retaining edge. Each flight section is lower than the one above it and its
-crest follows the stair profile; it must never read as upright wall towers or repeated
-buttresses. The walls are low, closed drystone solids, partly embedded into the bank,
-with no visible back or underside. The structural terrace face must close cleanly around
-the stair-head opening without placing geometry or collision across the walking route.
+The cheek walls beside the approach steps use the original small vanilla drystone blocks,
+not a continuous purpose-built slab. Keep their irregular, handmade silhouette, but pitch
+each block to the same overall descent as the stair so they do not stand as vertical
+towers. They remain low and partly embedded into the bank. Separately, the structural
+terrace face must close cleanly around the stair-head opening without placing geometry
+or collision across the walking route.
 
 ### Explicit non-goal: the backdrop
 

@@ -122,7 +122,9 @@ internal static class FairFoundation
             result.Counts[role] = result.Counts.GetValueOrDefault(role) + 1;
         }
 
-        void PutVanilla(string formKey, float x, float y, float z, float rotZ, float scale)
+        void PutVanilla(
+            string formKey, float x, float y, float z, float rotZ, float scale,
+            float rotX = 0f, float rotY = 0f)
         {
             var placed = new PlacedObject(mod)
             {
@@ -131,7 +133,7 @@ internal static class FairFoundation
                 Placement = new Placement
                 {
                     Position = new P3Float(x, y, z),
-                    Rotation = new P3Float(0f, 0f, rotZ),
+                    Rotation = new P3Float(rotX, rotY, rotZ),
                 },
             };
             place(placed, x, y);
@@ -1056,17 +1058,17 @@ internal static class FairFoundation
         LayeredPerimeter();
 
         // ---- entrance bank ----------------------------------------------------
-        // Earth and part-sunk rock lean against the closed project cheek sections, so
+        // Earth and part-sunk rock lean against the tilted vanilla cheek blocks, so
         // the staircase reads as cut into a bank rather than placed on top of one.
         //
         // The two sides are deliberately different. One gets rock, the other earth and
         // scrub, with different counts, so the approach cannot be read as a designed
         // pair. Which side is which is fixed by config, not chance, so it reproduces.
         // ---- cheek walls ------------------------------------------------------
-        // Closed project-authored drystone walls follow each flight step for step.
-        // Each side is one continuous section per flight, with no raised vanilla
-        // terrain pieces, exposed undersides or repeated upright towers. The two
-        // sides keep different low crest heights so the pair is not perfectly formal.
+        // The original small Stonewall01 blocks retain their chunky, irregular
+        // silhouette, but are pitched to the same overall descent as the stair.
+        // Their top edges therefore run diagonally with the flight instead of rising
+        // as upright towers. Two pieces per side and flight keep the handmade rhythm.
         var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
         var stairHalf = f.Entrance.StairHalfWidth * f.Entrance.StairScale;
         var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
@@ -1076,22 +1078,41 @@ internal static class FairFoundation
         if (f.Entrance.UseStairs && d.EntranceCheeks.Enabled && rampTiles.Count > 0)
         {
             var ck = d.EntranceCheeks;
-            cheekDepth = ck.PieceDepth * f.Entrance.StairScale;
+            var cb = boundsOf(FormKeyHelper.Parse(ck.Piece));
+            var len = ck.PieceLength * ck.Scale;
+            cheekDepth = ck.PieceDepth * ck.Scale;
             cheekRiseMax = MathF.Max(ck.RiseLeft, ck.RiseRight);
+            var alongRot = OutwardRotation[f.RampEdge.ToUpperInvariant()] + MathF.PI / 2f;
+            var slope = MathF.Atan2(f.Entrance.StairDrop, f.Entrance.StairRun);
 
             foreach (var t in rampTiles.Where(t => t.Stair))
             {
+                var n = Math.Max(1, (int)MathF.Ceiling(flightRun / len));
                 for (var side = -1; side <= 1; side += 2)
                 {
                     var rise = side < 0 ? ck.RiseLeft : ck.RiseRight;
                     var lateral = side * (stairHalf + ck.Gap + cheekDepth / 2f);
-                    var px = t.X + (t.Dc == 0 ? lateral : 0f);
-                    var py = t.Y + (t.Dr == 0 ? lateral : 0f);
-                    var pz = t.Z + rise;
-                    Put(ck.Role, px, py, pz,
-                        OutwardRotation[f.RampEdge.ToUpperInvariant()], f.Entrance.StairScale);
-                    result.CheekWalls++;
-                    if (trace) Console.Error.WriteLine($"cheek side {side} flight at ({t.X:F0},{t.Y:F0}) -> ({px:F0},{py:F0},{pz:F0}) crest {pz:F0}");
+                    for (var j = 0; j < n; j++)
+                    {
+                        var along = stairInset + MathF.Min((j + 0.5f) * len, flightRun - len / 2f);
+                        var nosing = t.Z - flightDrop * ((along - stairInset) / flightRun);
+                        var px = t.X + t.Dc * along + (t.Dc == 0 ? lateral : 0f);
+                        var py = t.Y - t.Dr * along + (t.Dr == 0 ? lateral : 0f);
+
+                        // Anchor the centre of the tilted crest at the same height the
+                        // upright piece used. Rotation shortens its vertical component
+                        // by cos(slope), so compensate rather than sinking the wall.
+                        var pz = nosing + rise - cb.ZMax * ck.Scale * MathF.Cos(slope);
+                        var pitchX = t.Dr * slope;
+                        var pitchY = t.Dc * slope;
+                        PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale,
+                            rotX: pitchX, rotY: pitchY);
+                        result.CheekWalls++;
+                        if (trace) Console.Error.WriteLine(
+                            $"cheek side {side} flight at ({t.X:F0},{t.Y:F0}) j {j} " +
+                            $"-> ({px:F0},{py:F0},{pz:F0}) crest {nosing + rise:F0} " +
+                            $"pitch {slope * 180f / MathF.PI:F1}");
+                    }
                 }
             }
         }

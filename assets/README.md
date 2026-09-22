@@ -133,7 +133,7 @@ All dimensions in Skyrim units, and **verified exact** in the converted NIFs. Se
 | `SkyrimFair_Shoulder_512` | 512 x 256 | tapers 32 to 0 | **none, intentional** | rough-earth / grass transition outside the paving |
 | `SkyrimFair_StairCollision` | 160 x 192 | 192 overall | child Box at 30.3 degrees | fallback collision for a scaled vanilla stair |
 | `SkyrimFair_Stair_192` | 168 x 192 | 192 overall | child Box at 30.3 degrees | eight-step project stair flight |
-| `SkyrimFair_StairCheek_192` | 48 x 192 | 240 overall | child Box at 30.3 degrees | closed low cheek with an eight-step crest matching one flight |
+| `SkyrimFair_StairCheek_192` | 48 x 192 | 240 overall | child Box at 30.3 degrees | unused comparison prototype; current plugin uses tilted vanilla blocks |
 | `SkyrimFair_EntranceRetainWing_144` | 144 x 128 | 256 tall | self, Box | one closed wing restoring the face beside the stair opening |
 | `SkyrimFair_PaveCap_1024` | 1024 x 1024 | zero thickness | none | visual-only worn-earth cap |
 | `SkyrimFair_PaveCap_512` | 512 x 512 | zero thickness | none | visual-only worn-earth cap |

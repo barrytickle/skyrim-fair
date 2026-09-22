@@ -273,6 +273,7 @@ def scan_references(path, cells, out):
                         "cell": list(cell),
                         "base": plugin.key(struct.unpack_from("<I", base, 0)[0]),
                         "pos": list(struct.unpack_from("<3f", placement, 0)),
+                        "rot": list(struct.unpack_from("<3f", placement, 12)),
                         "rot_z": struct.unpack_from("<3f", placement, 12)[2],
                         "scale": (struct.unpack("<f", subs[b"XSCL"])[0]
                                   if b"XSCL" in subs else 1.0),

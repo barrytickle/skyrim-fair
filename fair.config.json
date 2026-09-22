@@ -107,10 +107,6 @@
           "editorId": "SkyrimFairStair192",
           "model": "SkyrimFair\\SkyrimFair_Stair_192.nif"
         },
-        "stairCheek": {
-          "editorId": "SkyrimFairStairCheek192",
-          "model": "SkyrimFair\\SkyrimFair_StairCheek_192.nif"
-        },
         "entranceRetainWing": {
           "editorId": "SkyrimFairEntranceRetainWing144",
           "model": "SkyrimFair\\SkyrimFair_EntranceRetainWing_144.nif"
@@ -234,8 +230,10 @@
         "cliffEndInset": 96,
         "entranceCheeks": {
           "enabled": true,
-          "role": "stairCheek",
-          "pieceDepth": 48,
+          "piece": "0000099B:Skyrim.esm",
+          "scale": 0.6,
+          "pieceLength": 256,
+          "pieceDepth": 138,
           "gap": -4,
           "riseLeft": 56,
           "riseRight": 80
