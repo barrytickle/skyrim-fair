@@ -190,7 +190,7 @@ for it (gaps of 20-45); and two camps, which found no room near the wall.
   and across the eating row).
 
 **Test**:
-- Do the braziers and cook fires glow at night?
+- ~~Do the braziers and cook fires glow at night?~~ **Confirmed by Barry: the braziers glow.**
 - Do the rival banners and the Whiterun banners hang right?
 - Can you walk through the fence gap to the archery field?
 - Frame rate with the 10 lights.
