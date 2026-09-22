@@ -155,7 +155,7 @@ For retaining, ramp and shoulder pieces, **+Y points away from the platform cent
 - Every piece is an **unyielding rigidbody with mass 0** — static world geometry, not a loose prop. The BGS default is mass 80 with unyielding off, which would have made the platform a physics object.
 - The four box-shaped pieces use their own mesh as the collider. BGS defaults that to a bounding box, which is exactly right for a box.
 - The **ramp** cannot use a bounding box: that would be a solid 512 x 512 x 384 block and would stop the player walking up it. It instead uses a separate box child collider rotated 13.19 degrees to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide.
-- The **stair and stair cheek** use separate child box colliders at 30.3 degrees. The visible meshes keep the step profile; the collision follows the overall descent smoothly.
+- The **stair and stair cheek** use separate child box colliders at 30.3 degrees. The visible meshes keep the step profile; the collision follows the overall descent smoothly. The stair collider is lifted one 14-unit source riser above the nosing line, so its slope never drops below a flat tread (18.2 units after the current 1.3 placement scale).
 - The **shoulder** deliberately has no collider; it sits on native ground and would only create a snag lip.
 
 ### Scale — the one real trap
@@ -170,11 +170,12 @@ If a future piece comes out the wrong size, check this constant first.
 
 Confirmed by parsing `assets/nif/SkyrimFair/*.nif` directly:
 
-- all 12 are valid SSE NIFs — `Gamebryo File Format, Version 20.2.0.7`, userVersion 12, bsVersion 100
+- all 13 are valid SSE NIFs — `Gamebryo File Format, Version 20.2.0.7`, userVersion 12, bsVersion 100
 - **visual mesh scale is exact**: every bounding sphere matches its expected radius, ratio 1.000
 - **collision half-extents are exact**: 512x512x32, 1024x1024x32, 512x128x256, 128x128x256 as specified
-- the five collision-bearing pieces carry `bhkCollisionObject`, `bhkRigidBodyT`, `bhkBoxShape` and `bhkConvexTransformShape`
+- the collision-bearing pieces carry `bhkCollisionObject`, `bhkRigidBodyT`, `bhkBoxShape` and, where the box is a rotated child, `bhkConvexTransformShape`
 - the **ramp's rotated collider survived conversion** — 10.62 degrees, with slope length `hypot(512, 96)` = 520.9 units
+- the **stair collision lift survived conversion** — both stair NIFs move the child transform by `0.200025` Havok metres, the converted representation of 14 Skyrim units
 - the **shoulder has no collision blocks at all**, as intended
 - all visual pieces carry `BSLightingShaderProperty` and `BSShaderTextureSet`; paving and ramp use the selected comparison material
 

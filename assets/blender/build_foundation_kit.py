@@ -72,6 +72,10 @@ STAIRCOL_RUN = 192
 STAIRCOL_RISE = 112
 STAIRCOL_HALF_X = 80        # inside the 167-wide stair gap, so it never protrudes
 STAIRCOL_SINK = 24          # visible slab sits this far under the tread line
+# A smooth diagonal through the step noses falls by one complete 14-unit riser
+# across each flat tread. Lift the collision plane by that riser height so it is
+# never below the visible walking surface; otherwise boots sink into every tread.
+STAIRCOL_LIFT = 14
 # Must exceed SINK + RISE (136) or the sloped top dips below the base at the far
 # end and the box turns itself inside out - the orientation guard caught exactly that.
 STAIRCOL_DEPTH = 192
@@ -652,14 +656,20 @@ def apply_collision(obj, collider="self"):
                     -slope_len / 2.0, slope_len / 2.0, -thickness, 0)
         child.rotation_euler = (-angle, 0.0, 0.0)
         s2 = BLENDER_UNITS_PER_SKYRIM_UNIT
-        # top face on the TREAD line, which is STAIRCOL_SINK above the visible slab
-        child.location = (0.0, STAIRCOL_RUN / 2.0 * s2, -STAIRCOL_RISE / 2.0 * s2)
+        # The diagonal top face is lifted one riser above the nosing line. Across
+        # each flat tread it descends from one riser above to exactly flush, so the
+        # actor never stands below the visible stone surface.
+        child.location = (
+            0.0,
+            STAIRCOL_RUN / 2.0 * s2,
+            (-STAIRCOL_RISE / 2.0 + STAIRCOL_LIFT) * s2)
         child.parent = obj
         child.matrix_parent_inverse = obj.matrix_world.inverted()
         select_only(child)
         try:
             bpy.ops.bgs_skyrim.create_collider_skyrim()
-            result["collider"] = (f"stair collision slope {math.degrees(angle):.1f} deg "
+            result["collider"] = (f"stair collision slope {math.degrees(angle):.1f} deg, "
+                                  f"lift {STAIRCOL_LIFT} "
                                   f"({child.name}, {child.bgs_collider.type})")
         except Exception as exc:                             # noqa: BLE001
             result["collider"] = f"child failed: {exc}"

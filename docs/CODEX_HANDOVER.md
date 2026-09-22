@@ -55,8 +55,9 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
   cheek blocks** at scale 0.6: seven overlapping +30.3-degree `Stonewall01` blocks per
   side across the whole stair chain, one level `Stonewall01` at each lower end, and one
   compact level `StonewallEndL01` cap at each terrace landing. They are sunk 48 units,
-  leaving the west/east crests 8 / 32 above the nosing. An asymmetric closed-rock and
-  grassy-pile bank leans on them; the upper landing itself stays entirely masonry
+  leaving both crests 32 above the nosing, and tucked 16.7 units over the stair edges so
+  no dark seam remains. An asymmetric closed-rock and grassy-pile bank leans on them;
+  the upper landing itself stays entirely masonry
 - two closed `SkyrimFair_EntranceRetainWing_144` solids restore the terrace face on
   either side of the 217-wide stair opening; the entrance segment must never be left
   structurally open again
@@ -314,8 +315,12 @@ run and 168 wide, identical to the vanilla flight at scale 1, eight steps of 14,
 flanks. Its origin is its top tread and it descends in local +Y, so it takes the plain
 outward rotation with no inset. It is placed with `Put("stair", ...)` at `stairScale`.
 
-**Collision is a box on the nosing line, built into the piece.** The lesson that forced
-this stands: the vanilla mesh's `bhkCompressedMeshShape` does not scale reliably with
+**Collision is a smooth box slope built into the piece.** It is lifted one complete
+14-unit source riser above the nosing line (18.2 world units at scale 1.3). Across each
+flat tread it therefore falls from one riser above to flush at the downhill edge, never
+below the visible stone; the earlier exact nosing-line placement made boots clip through
+the treads. The lesson that forced the box still stands: the vanilla mesh's
+`bhkCompressedMeshShape` does not scale reliably with
 `XSCL` (climbable at 1.0, not at 1.3, no other blocker), while a `bhkBoxShape` scales
 perfectly. **If a scaled vanilla piece ever needs to be walked on, assume its
 compressed-mesh collision will fail and give it a box.** The standalone slab
@@ -327,8 +332,11 @@ flight joins cannot gap, and a level `Stonewall01` overlaps the bottom by 16. At
 terrace landing, a matching level `StonewallEndL01` (`00099E`) replaces the former full
 top block. It is 222 rather than 256 units long before scaling, its finished end faces
 uphill, and its continuing edge overlaps the diagonal run by about 26; never add another
-full wall segment there. The blocks are sunk 48, leaving crest centres 8 west / 32 east
-above the nosing. Rotation is `X +30.3`, `Y 0`, `Z 90` at the current north entrance;
+full wall segment there. The blocks are sunk 48, leaving both crest centres 32 above the
+nosing. A configured `gap` of -16 tucks the irregular inner wall edge about 16.7 units
+over the authored stair footprint; do not restore a positive clearance, because even the
+previous nominal four-unit overlap showed a dark seam in game. Rotation is `X +30.3`,
+`Y 0`, `Z 90` at the current north entrance;
 the caps and lower blocks are `[0, 0, 90]`. The unused
 `SkyrimFair_StairCheek_192` comparison mesh remains reproducible in the asset kit but has
 no STAT or placement in the current plugin.

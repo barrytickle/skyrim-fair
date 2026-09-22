@@ -853,11 +853,14 @@ internal sealed record EntranceCheekConfig
     /// <summary>Overlap of each level end block into the diagonal run.</summary>
     public float EndOverlap { get; init; } = 16f;
 
-    /// <summary>Clearance between the stair flank and the wall's inner face.</summary>
-    public float Gap { get; init; } = 8f;
+    /// <summary>
+    /// Clearance between the stair flank and the wall's inner face. Negative values
+    /// deliberately tuck the irregular wall edge under the stair so no dark seam opens.
+    /// </summary>
+    public float Gap { get; init; } = -16f;
 
-    /// <summary>Crest height above the nosing line, per side; different on purpose.</summary>
-    public float RiseLeft { get; init; } = 56f;
+    /// <summary>Crest height above the nosing line; both sides match.</summary>
+    public float RiseLeft { get; init; } = 80f;
 
     public float RiseRight { get; init; } = 80f;
 }

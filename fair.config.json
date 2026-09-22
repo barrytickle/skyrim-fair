@@ -239,8 +239,8 @@
           "sink": 48,
           "overlap": 24,
           "endOverlap": 16,
-          "gap": -4,
-          "riseLeft": 56,
+          "gap": -16,
+          "riseLeft": 80,
           "riseRight": 80
         }
       },
