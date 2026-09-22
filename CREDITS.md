@@ -64,6 +64,29 @@ Attribution:
 
 > Medieval Markets by JJerem.
 
+## Whiterun Stone Stairs
+
+**Mod:** Whiterun Stone Stairs  
+**Nexus Mods:** https://www.nexusmods.com/skyrimspecialedition/mods/147164  
+**Created by:** Chiselsky  
+**Current referenced version:** 1.2
+
+Whiterun Stone Stairs provides higher-detail meshes and 4K complex-material textures for Whiterun stairs and wall borders while preserving the vanilla Whiterun visual language. It is being evaluated for The Wanderer's Fair entrance and retaining-wall treatment.
+
+The Nexus permissions state that the mod's assets may not be reused in another mod without permission from Chiselsky. The author specifically permits reuse of their meshes/files for compatibility patches between Whiterun Stone Stairs and other mods. The mod page also credits Arthmoor for USSEP meshes used as a base.
+
+### Skyrim Fair usage
+
+Treat Whiterun Stone Stairs as an external visual dependency / optional replacer unless explicit asset-use permission is obtained from Chiselsky.
+
+Do not copy, modify, convert, or redistribute its meshes or textures inside Skyrim Fair solely because the mod has been downloaded locally. If the fair ultimately references vanilla Whiterun assets whose paths are replaced by Whiterun Stone Stairs at runtime, users without the mod should retain the vanilla appearance.
+
+If direct asset reuse is later approved, record the exact files, permission, required attribution, and any upstream provenance before bundling anything.
+
+Attribution:
+
+> Whiterun Stone Stairs by Chiselsky.
+
 ## Bethesda Game Studios
 
 The Elder Scrolls V: Skyrim Special Edition and its original game assets are property of Bethesda Game Studios / Bethesda Softworks.
@@ -78,4 +101,5 @@ As assets are selected for the shipped mod, record them here.
 | --- | --- | --- | --- | --- | --- |
 | Stage dancing | TBD | Professional Dancer | contentcat and davidgilbertking / underlying animation creators | Pending exact integration audit | Prefer dependency |
 | Market stalls / tents | TBD | Medieval Markets | TBD per asset | Pending downloaded-file audit | TBD |
+| Entrance stairs / wall borders | TBD | Whiterun Stone Stairs | Chiselsky | Asset reuse requires author permission; patch reuse allowed | Prefer external dependency / optional replacer |
 
