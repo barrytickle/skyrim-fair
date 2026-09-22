@@ -445,6 +445,81 @@
     },
     "Sack02Small": {
       "source": "meshes/clutter/containers/miscsack02small.nif"
+    },
+    "Inkwell": {
+      "source": "meshes/clutter/common/inkwell01.nif"
+    },
+    "Quill": {
+      "source": "meshes/clutter/common/quill01.nif"
+    },
+    "OreOrichalcum": {
+      "source": "meshes/dungeons/mines/ore/ore_orichalcum.nif"
+    },
+    "OreCorundum": {
+      "source": "meshes/dungeons/mines/ore/ore_corundum.nif"
+    },
+    "OreMoonstone": {
+      "source": "meshes/dungeons/mines/ore/ore_moonstone.nif"
+    },
+    "IngotOrichalcum": {
+      "source": "meshes/dungeons/mines/ore/ingotorichalcum.nif"
+    },
+    "Pickaxe": {
+      "source": "meshes/clutter/common/pickaxe02.nif"
+    },
+    "Staff01": {
+      "source": "meshes/weapons/staff01/staff01.nif"
+    },
+    "Staff02": {
+      "source": "meshes/weapons/staff02/staff02.nif"
+    },
+    "Staff03": {
+      "source": "meshes/weapons/staff03/staff03.nif"
+    },
+    "Honeycomb": {
+      "source": "meshes/critters/bee/beehoneycomb.nif"
+    },
+    "Lavender": {
+      "source": "meshes/plants/lavender01.nif"
+    },
+    "FlowerRed": {
+      "source": "meshes/plants/mountainflower01red.nif"
+    },
+    "FlowerPurple": {
+      "source": "meshes/plants/mountainflower01purple.nif"
+    },
+    "FlowerBlue": {
+      "source": "meshes/plants/mountainflower01blue.nif"
+    },
+    "Deathbell": {
+      "source": "meshes/plants/deathbell01.nif"
+    },
+    "Nightshade": {
+      "source": "meshes/plants/nightshade01.nif"
+    },
+    "FlowerBasket": {
+      "source": "meshes/clutter/flowerbasket.nif"
+    },
+    "Garnet": {
+      "source": "meshes/clutter/gemstones/garnet.nif"
+    },
+    "Satchel": {
+      "source": "meshes/clutter/containers/satchel.nif"
+    },
+    "TrollSkull": {
+      "source": "meshes/clutter/bones/trollskull.nif"
+    },
+    "CanopicJar": {
+      "source": "meshes/clutter/ruins/ruinscanopicjar01.nif"
+    },
+    "MilkJug": {
+      "source": "meshes/clutter/glazed02potteryjug01.nif"
+    },
+    "WoodAxe": {
+      "source": "meshes/clutter/chopping block/axe01.nif"
+    },
+    "Shovel": {
+      "source": "meshes/clutter/common/shovel01.nif"
     }
   }
 }

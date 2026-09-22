@@ -205,7 +205,7 @@ parallax slots), so installing them is optional and improves the look:
 
 | Mod | Nexus (SE) | What the fair uses it for |
 | --- | --- | --- |
-| Whiterun Mossy Wet Stonefloor – Grey 2k | 99294 | the cobbled avenue (`architecture\whiterun\wrstonefloor01` with `_n` and `_p`) |
+| Whiterun Mossy Wet Stonefloor – Grey 2k | 99294 | **now copied** for the cobbled avenue to `textures\SkyrimFair\Ground\Cobble01*.dds` (a fair-only path, so Whiterun city is untouched). Shipped in Barry's local build only and kept out of git: **redistribution permission must be confirmed before any public release** |
 | Terrain Parallax 1.5 – 4K2K | 54860 | parallax on the fair's grass, dirt and path ground (landscape `_p` maps) |
 
 ## Bethesda Game Studios

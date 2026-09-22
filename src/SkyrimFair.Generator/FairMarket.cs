@@ -44,6 +44,7 @@ internal static class FairMarket
             .ToList();
 
         var placed = new List<Placed>();
+        var frontages = new List<Placed>();
         var stalls = new List<MarketStall>();
         var themeCounts = new Dictionary<string, int>();
         var pieceCount = 0;
@@ -53,7 +54,7 @@ internal static class FairMarket
         var lights = 0;
 
         // Null when the stall fits; otherwise what it collides with.
-        string? WhyNot(MarketModule m, float x, float y, float yaw, Lane? ignore = null, float? wallMargin = null)
+        string? WhyNot(MarketModule m, float x, float y, float yaw, Lane? ignore = null, float? wallMargin = null, bool keepFrontages = false)
         {
             var (hw, hd) = (m.Width / 2f, m.Depth / 2f);
             var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
@@ -93,7 +94,8 @@ internal static class FairMarket
             }
 
             var candidate = new Placed(x, y, yaw, hw + market.Clearance / 2f, hd + market.Clearance / 2f);
-            return placed.Any(p => Overlap(p, candidate)) ? "another stall" : null;
+            if (placed.Any(p => Overlap(p, candidate))) return "another stall";
+            return keepFrontages && frontages.Any(f => Overlap(f, new Placed(x, y, yaw, hw, hd))) ? "a stall's frontage" : null;
         }
 
         var vignettes = market.Vignettes.ToDictionary(v => v.Name);
@@ -192,6 +194,7 @@ internal static class FairMarket
             }
 
             // Ground spots: one vignette each, or none now and then.
+            var used = new HashSet<string>();
             void Spots(List<float[]> spots, List<string> choices, int salt)
             {
                 foreach (var spot in spots.Where(sp => sp.Length >= 2))
@@ -199,7 +202,12 @@ internal static class FairMarket
                     n++;
                     if (choices.Count == 0 || FairHash.Hash3(seed, n, salt) < kit.EmptyChance) continue;
                     var (px, py) = At(spot[0], spot[1]);
-                    var name = choices[(int)(FairHash.Hash3(seed, n, salt + 1) * choices.Count) % choices.Count];
+
+                    // Each ground vignette once per stall (one spit fire, not two).
+                    var start = (int)(FairHash.Hash3(seed, n, salt + 1) * choices.Count) % choices.Count;
+                    var name = Enumerable.Range(0, choices.Count).Select(k => choices[(start + k) % choices.Count]).FirstOrDefault(c => !used.Contains(c));
+                    if (name is null) continue;
+                    used.Add(name);
                     PutVignette(name, px, py, ground(px, py), yaw + mirror * (spot.Length > 2 ? spot[2] : 0f), mirror, seed * 53 + n);
                 }
             }
@@ -278,6 +286,12 @@ internal static class FairMarket
 
             placed.Add(new Placed(x, y, yaw, m.Width / 2f + market.Clearance / 2f, m.Depth / 2f + market.Clearance / 2f));
             footprints.Add(new MarketFootprint("stall", x, y, yaw, m.Width / 2f, m.Depth / 2f));
+
+            // Keep the ground in front of the counter clear, so its keeper can be reached.
+            var reach = m.Depth / 2f + market.FrontageDepth / 2f;
+            var (sfx, sfy) = (MathF.Sin(yaw * Deg), MathF.Cos(yaw * Deg));
+            frontages.Add(new Placed(x + sfx * reach, y + sfy * reach, yaw, m.Width / 2f - 10f, market.FrontageDepth / 2f));
+            footprints.Add(new MarketFootprint("frontage", x + sfx * reach, y + sfy * reach, yaw, m.Width / 2f - 10f, market.FrontageDepth / 2f));
 
             // The shell marker stands at the stall's front edge, facing into it.
             var number = themeCounts[theme] = themeCounts.GetValueOrDefault(theme) + 1;
@@ -398,13 +412,13 @@ internal static class FairMarket
                 _ => new[] { 1f, -1f },
             };
 
+            var themeIndex = 0;  // one sequence per lane, left side then right, so no theme repeats
             foreach (var side in sides)
             {
                 var seedA = lane.Index * 2 + (side > 0 ? 0 : 1);
                 var s = MathF.Max(0f, c.From) + FairHash.Hash3(seedA, 0, 66) * c.GapMax;
                 var end = MathF.Min(c.To, lane.Length);
                 var n = 0;
-                var themeIndex = side > 0 ? 0 : c.Themes.Count / 2;
                 while (s < end)
                 {
                     n++;
@@ -493,7 +507,7 @@ internal static class FairMarket
                 var y = cy + tx * seating.Offset;
                 // The module's long side (its local X) runs along the lane.
                 var yaw = MathF.Atan2(tx, ty) / Deg - 90f + FairHash.Signed(500 + i, k, 75) * seating.AngleJitter;
-                var why = WhyNot(m, x, y, yaw, ignore: seating.Offset == 0f ? lane : null, wallMargin: seating.WallMargin);
+                var why = WhyNot(m, x, y, yaw, ignore: seating.Offset == 0f ? lane : null, wallMargin: seating.WallMargin, keepFrontages: true);
                 var runName = $"{seating.Lane} {(seating.Modules.Count > 0 ? string.Join("/", seating.Modules) : seating.Module)} @{seating.Offset:0}";
                 if (why is null)
                 {
@@ -517,7 +531,7 @@ internal static class FairMarket
             {
                 var group = modules[d.Module];
                 var (gx, gy) = (d.X, d.Y);
-                var why = WhyNot(group, gx, gy, d.Yaw, wallMargin: 60f);
+                var why = WhyNot(group, gx, gy, d.Yaw, wallMargin: 60f, keepFrontages: true);
 
                 // Spiral out from the requested point until the group fits.
                 for (var r = 60f; why is not null && r <= d.SearchRadius; r += 60f)
@@ -525,7 +539,7 @@ internal static class FairMarket
                     for (var a = 0; a < 360 && why is not null; a += 30)
                     {
                         var (tx, ty) = (d.X + r * MathF.Sin(a * Deg), d.Y + r * MathF.Cos(a * Deg));
-                        if (WhyNot(group, tx, ty, d.Yaw, wallMargin: 60f) is null)
+                        if (WhyNot(group, tx, ty, d.Yaw, wallMargin: 60f, keepFrontages: true) is null)
                         {
                             (gx, gy, why) = (tx, ty, null);
                         }
@@ -620,10 +634,15 @@ internal static class FairMarket
                 {
                     var (nx, ny) = (-ty * side, tx * side);
                     (float X, float Y)? found = null;
-                    foreach (var slide in new[] { 0f, 40f, -40f, 80f, -80f, 120f, -120f })
+                    foreach (var slide in new[] { 0f, 40f, -40f, 80f, -80f, 120f, -120f, 160f, -160f, 200f, -200f, 240f, -240f })
                     {
                         var off = half + market.Clearance + run.PoleMargin;
                         var (px, py) = (cx + nx * off + tx * slide, cy + ny * off + ty * slide);
+
+                        // A pole may stand at the end of a stall's frontage but not across the
+                        // middle of its counter.
+                        var core = new Placed(px, py, 0f, 12f, 12f);
+                        if (frontages.Any(f => Overlap(f with { HalfW = f.HalfW * 0.6f }, core))) continue;
                         if (WhyNot(poleModule, px, py, 0f, ignore: lane, wallMargin: 60f) is null && !poles.Any(q => MathF.Abs(q.X - px) < 60f && MathF.Abs(q.Y - py) < 60f))
                         {
                             found = (px, py);

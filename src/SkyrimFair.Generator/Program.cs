@@ -223,6 +223,18 @@ try
             Console.WriteLine($"  stall kits: {lively.KitDressed} stalls dressed, {lively.Lights} stall lights; overhead: {lively.Crossings} festival line crossings");
         }
 
+        if (world.WallBoxes > 0)
+        {
+            Console.WriteLine($"  invisible walls: {world.WallBoxes} collision boxes");
+        }
+
+        if (world.Market is { } directory && config.FairWorld.StallDirectory.Length > 0)
+        {
+            var path = Path.Combine(FairPaths.ConfigDirectory, config.FairWorld.StallDirectory);
+            File.WriteAllText(path, StallDirectory.Write(directory, config.FairWorld), new System.Text.UTF8Encoding(false));
+            Console.WriteLine($"  stall directory: {directory.Stalls.Count} stalls -> {config.FairWorld.StallDirectory}");
+        }
+
         if (world.Crowds is { } crowds)
         {
             Console.WriteLine($"  visitors: {crowds.Positions.Count} from {crowds.Records} records: {string.Join(", ", crowds.Groups.Select(g => $"{g.Name} {g.Placed}"))}");

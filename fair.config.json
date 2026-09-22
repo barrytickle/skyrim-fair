@@ -222,21 +222,20 @@
           "width": 560,
           "depth": 400,
           "pieces": [
-            {"name": "WRMarketStand01", "piece": "0005B2A7:Skyrim.esm", "x": 0, "y": -20, "z": 75},
-            {"name": "WRMarketDisplayShelf01", "piece": "0005B2AB:Skyrim.esm", "x": -120, "y": 150},
-            {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": 130, "y": 150},
+            {"piece": "0005B2E2:Skyrim.esm", "name": "WRMarketStand02", "x": -122, "y": -20},
+            {"piece": "0005B2E2:Skyrim.esm", "name": "WRMarketStand02", "x": 122, "y": -20},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -252, "y": -95},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -258, "y": -30, "optional": true},
             {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 250, "y": -105, "z": 24, "yaw": 10},
             {"name": "CrateSmall02", "piece": "0007A609:Skyrim.esm", "x": 250, "y": -105, "z": 69, "yaw": 28, "optional": true},
             {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": -262, "y": 160, "optional": true}
           ],
-          "vendorSpots": [[-105, -145], [105, -145]],
+          "vendorSpots": [[-122, -98], [122, -98]],
           "slots": {
-            "counter": [[-190, 190, 40, 77], [-185, 185, -60, 77], [-200, -40, 120, 28], [-200, -40, 178, 10], [78, 174, 120, 28], [78, 174, 178, 10]],
-            "hang": [[-180, 180, 30, 200]],
-            "side": [[-252, 60, 0], [256, 30, 0]],
-            "rear": [[-205, -178, 180], [205, -178, 180]],
+            "counter": [[-230, -15, 20, 76], [-225, -20, -50, 76], [15, 230, 20, 76], [20, 225, -50, 76]],
+            "hang": [[-215, -30, -20, 196], [30, 215, -20, 196]],
+            "side": [[-262, 70, 90], [262, 60, 90]],
+            "rear": [[-150, -165, 180], [150, -165, 180]],
             "sign": [[262, 150, 0]]
           }
         },
@@ -252,13 +251,7 @@
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 200, "y": 112, "yaw": 20, "optional": true}
           ],
           "vendorSpots": [[-105, -40], [100, -40]],
-          "slots": {
-            "counter": [[-200, -12, 12, 77], [28, 172, -29, 67]],
-            "hang": [[-195, -15, 12, 188]],
-            "side": [[-150, 125, 0], [0, 118, 0], [150, 128, 0]],
-            "rear": [[-150, -125, 180], [150, -122, 180]],
-            "sign": [[-212, 0, 0]]
-          }
+          "slots": {"counter": [[-200, -12, 12, 77], [28, 172, -29, 67]], "hang": [[-195, -15, 12, 188]], "rear": [[-150, -125, 180], [150, -122, 180]]}
         },
         {
           "name": "whiterun_stand",
@@ -266,16 +259,15 @@
           "depth": 340,
           "pieces": [
             {"name": "WRMarketStand02", "piece": "0005B2E2:Skyrim.esm", "x": 0, "y": -20},
-            {"name": "WRMarketDisplayShelf02", "piece": "0005B2B2:Skyrim.esm", "x": 0, "y": 138},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -165, "y": -95},
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 160, "y": -105, "yaw": 35, "optional": true},
             {"name": "CrateSmall03", "piece": "0007A617:Skyrim.esm", "x": 162, "y": 60, "z": 24, "yaw": -12, "optional": true}
           ],
-          "vendorSpots": [[0, -105]],
+          "vendorSpots": [[0, -98]],
           "slots": {
             "counter": [[-105, 105, 20, 76], [-100, 100, -50, 76]],
             "hang": [[-95, 95, -20, 196]],
-            "side": [[165, 75, 0], [-120, 138, 0]],
+            "side": [[160, -5, 90]],
             "rear": [[-120, -150, 180], [120, -150, 180]],
             "sign": [[-168, 20, 0]]
           }
@@ -287,17 +279,14 @@
           "pieces": [
             {"name": "WHMarketStall01", "piece": "000F3C72:Skyrim.esm", "x": -140, "y": 0},
             {"name": "WRMarketStand02", "piece": "0005B2E2:Skyrim.esm", "x": 135, "y": -12},
-            {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": -140, "y": 130, "optional": true},
             {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": 245, "y": 95, "z": 24, "yaw": 15, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -245, "y": -110, "optional": true}
           ],
-          "vendorSpots": [[-140, -40], [135, -100]],
+          "vendorSpots": [[-140, -40], [135, -98]],
           "slots": {
             "counter": [[-235, -45, 12, 77], [30, 240, 20, 76], [35, 235, -45, 76]],
             "hang": [[-230, -50, 12, 188], [50, 220, -30, 196]],
-            "side": [[-245, 95, 0], [0, 125, 0]],
-            "rear": [[0, -130, 180]],
-            "sign": [[-252, -20, 0]]
+            "rear": [[0, -130, 180]]
           }
         },
         {
@@ -313,7 +302,7 @@
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -120, "optional": true}
           ],
           "vendorSpots": [[95, -40]],
-          "slots": {"counter": [[25, 165, -39, 67]], "side": [[-200, 130, 0], [200, 120, 0]], "rear": [[170, -150, 180]], "sign": [[215, 40, 0]]}
+          "slots": {"counter": [[25, 165, -39, 67]], "side": [[-205, 130, 0]], "rear": [[170, -150, 180]], "sign": [[215, 40, 0]]}
         },
         {
           "name": "open_trader",
@@ -321,14 +310,13 @@
           "depth": 250,
           "pieces": [
             {"name": "ExteriorWoodenTable01", "piece": "0003DE44:Skyrim.esm", "x": 0, "y": 40},
-            {"name": "WRMarketDisplayShelf03", "piece": "0005B2E6:Skyrim.esm", "x": -10, "y": -70},
             {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": -135, "y": -65, "z": 24, "yaw": 8},
-            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 125, "y": -70, "z": 40, "yaw": 90, "optional": true},
+            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 125, "y": -70, "yaw": 90, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 140, "y": 70, "optional": true},
             {"name": "FirewoodPileMedium01", "piece": "000185B5:Skyrim.esm", "x": -130, "y": 80, "optional": true}
           ],
           "vendorSpots": [[0, -40]],
-          "slots": {"counter": [[-95, 95, 60, 62], [-60, 40, -70, 20]], "side": [[140, 105, 0]], "sign": [[-150, 40, 0]]}
+          "slots": {"counter": [[-95, 95, 60, 62]], "side": [[140, 105, 90]], "sign": [[-150, 40, 0]]}
         },
         {
           "name": "trestle",
@@ -340,7 +328,7 @@
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 100, "y": -55, "optional": true}
           ],
           "vendorSpots": [[0, -50]],
-          "slots": {"counter": [[-95, 95, 45, 62]], "side": [[115, 75, 0]]}
+          "slots": {"counter": [[-95, 95, 45, 62]], "side": [[118, 70, 90]]}
         },
         {
           "name": "picnic",
@@ -393,7 +381,7 @@
             {"name": "NorTentSmall", "piece": "000800E2:Skyrim.esm", "x": 0, "y": -10},
             {"name": "HandCart01", "piece": "0001C0C0:Skyrim.esm", "x": 175, "y": 70, "z": 32, "yaw": 30, "optional": true},
             {"name": "FirewoodPileMedium01", "piece": "000185B5:Skyrim.esm", "x": -175, "y": 50, "optional": true},
-            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": -165, "y": -90, "z": 40, "yaw": 90, "optional": true}
+            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": -165, "y": -90, "yaw": 90, "optional": true}
           ]
         },
         {
@@ -412,7 +400,7 @@
           "depth": 140,
           "vendorSpots": [],
           "pieces": [
-            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 0, "y": 0, "z": 40},
+            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 0, "y": 0},
             {"name": "HayMound01", "piece": "00019B13:Skyrim.esm", "x": 0, "y": 55, "optional": true}
           ]
         },
@@ -469,7 +457,7 @@
             {"piece": "00041EC7:Skyrim.esm", "x": -55, "y": 95},
             {"piece": "00041EC7:Skyrim.esm", "x": 58, "y": 97},
             {"piece": "0002BCD5:Skyrim.esm", "x": -70, "y": -90, "yaw": 20},
-            {"piece": "0005B198:Skyrim.esm", "x": 60, "y": -110, "z": 40, "yaw": 90, "optional": true},
+            {"piece": "0005B198:Skyrim.esm", "x": 60, "y": -110, "yaw": 90, "optional": true},
             {"piece": "@PropTankard", "x": -40, "y": 20, "z": 61, "yaw": 30},
             {"piece": "@PropTankard", "x": 30, "y": 36, "z": 61, "yaw": 140},
             {"piece": "@PropWoodenPlate", "x": -5, "y": 30, "z": 61, "yaw": 90},
@@ -504,8 +492,8 @@
           "width": 300,
           "depth": 240,
           "pieces": [
-            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": 60, "z": 40, "yaw": 90},
-            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": -60, "z": 40, "yaw": 90},
+            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": 60, "yaw": 90},
+            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": -60, "yaw": 90},
             {"piece": "000DAE82:Skyrim.esm", "x": 0, "y": 0},
             {"piece": "@PropTankard", "x": -10, "y": 6, "z": 31, "yaw": 30},
             {"piece": "@PropTankard", "x": 12, "y": -4, "z": 31, "yaw": 160},
@@ -565,7 +553,7 @@
           "width": 220,
           "depth": 140,
           "pieces": [
-            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": 0, "z": 40, "yaw": 90},
+            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": 0, "yaw": 90},
             {"piece": "@PropBasket03", "x": 80, "y": 30},
             {"piece": "00019B15:Skyrim.esm", "x": 20, "y": 50},
             {"piece": "@PropBread01A", "x": 80, "y": 30, "z": 30, "optional": true}
@@ -701,7 +689,7 @@
             {"piece": "00038642:Skyrim.esm", "x": -170, "y": 0},
             {"piece": "00038642:Skyrim.esm", "x": 20, "y": 0},
             {"piece": "0002BCD5:Skyrim.esm", "x": 150, "y": 10, "yaw": 20},
-            {"piece": "0005B198:Skyrim.esm", "x": 220, "y": -20, "z": 40, "yaw": 90, "optional": true},
+            {"piece": "0005B198:Skyrim.esm", "x": 220, "y": -20, "yaw": 90, "optional": true},
             {"piece": "0010C0E3:Skyrim.esm", "x": -250, "y": 20},
             {"piece": "@PropTankard", "x": -255, "y": 25, "z": 80},
             {"piece": "@PropTankard", "x": -60, "y": 5, "z": 30, "yaw": 50, "optional": true},
@@ -716,7 +704,7 @@
             {"piece": "@PropBarrelFood", "x": 0, "y": 0},
             {"piece": "00066AF6:Skyrim.esm", "x": 90, "y": 20, "yaw": 60, "rotY": 12},
             {"piece": "0007A60D:Skyrim.esm", "x": -80, "y": 10, "z": 24, "yaw": 90},
-            {"piece": "0005B198:Skyrim.esm", "x": 10, "y": -70, "z": 40, "optional": true},
+            {"piece": "0005B198:Skyrim.esm", "x": 10, "y": -70, "optional": true},
             {"piece": "@PropIronArrow", "x": 0, "y": 0, "z": 82, "rotX": 90},
             {"piece": "@PropIronArrow", "x": 4, "y": 3, "z": 84, "yaw": 60, "rotX": 90}
           ]
@@ -761,7 +749,7 @@
             {"module": "whiterun_stand", "weight": 3},
             {"module": "canvas_wide", "weight": 2}
           ],
-          "themes": ["food", "drink", "sweets", "pies", "cheese", "roast", "produce", "bakery", "honey", "spices"],
+          "themes": ["produce", "pies", "mead", "cheese", "bakery", "roast", "hotdrinks", "honey", "spices"],
           "gapMin": 20,
           "gapMax": 45,
           "pocketChance": 0,
@@ -781,7 +769,7 @@
             {"module": "whiterun_stand", "weight": 3},
             {"module": "canvas_wide", "weight": 2}
           ],
-          "themes": ["smith", "armour", "hunter", "leather", "furs", "jewellery", "dwemer", "elven", "mage", "alchemy", "books", "scrolls", "curios", "herbs"],
+          "themes": ["smith", "hunter", "elven", "dwemer", "mage", "alchemy", "books", "jeweller", "curios", "furs", "herbalist", "fishmonger", "fletcher"],
           "gapMin": 20,
           "gapMax": 45,
           "pocketChance": 0,
@@ -800,7 +788,7 @@
             {"module": "whiterun_stand", "weight": 3},
             {"module": "canvas_wide", "weight": 2}
           ],
-          "themes": ["tanner", "cooper", "weaver", "potter", "carver", "rugs", "timber", "bone", "candles", "toys"],
+          "themes": ["clothing", "woodworker", "pottery", "toys", "fortune", "rare", "candles", "bard"],
           "gapMin": 20,
           "gapMax": 45,
           "pocketChance": 0,
@@ -811,7 +799,7 @@
         {"name": "EastCross", "points": [[2300, 1000], [3780, 1000]], "halfWidths": [[0, 210], [1500, 210]], "mix": []}
       ],
       "backFill": [],
-      "backFillThemes": ["books", "scrolls", "curios", "candles", "pottery", "toys", "herbs", "rugs", "weaver", "tanner", "carver", "cooper", "bone", "timber"],
+      "backFillThemes": [],
       "dressing": [
         {"name": "RoadSignPost", "piece": "0003AF9D:Skyrim.esm", "x": 2360, "y": -1650},
         {"name": "RoadSignWhiterun01", "piece": "0003AF9A:Skyrim.esm", "x": 2360, "y": -1650, "z": 230, "yaw": 180},
@@ -1559,7 +1547,7 @@
           "name": "hay_basket",
           "width": 170,
           "pieces": [
-            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": 0, "z": 40, "yaw": 90},
+            {"piece": "0005B198:Skyrim.esm", "x": 0, "y": 0, "yaw": 90},
             {"piece": "@PropBasket03", "x": 70, "y": 20},
             {"piece": "00019B15:Skyrim.esm", "x": 30, "y": 50}
           ]
@@ -1850,217 +1838,469 @@
             {"piece": "00038229:Skyrim.esm", "x": 0, "y": 0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
+        },
+        {
+          "name": "dairy",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropMilkJug", "x": -20, "y": 0},
+            {"piece": "@PropJugSmall", "x": 6, "y": 6},
+            {"piece": "@PropCheeseWedge01", "x": 22, "y": -8, "yaw": 30},
+            {"piece": "@PropCremeTreat", "x": 4, "y": -14}
+          ]
+        },
+        {
+          "name": "pies_plated",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropWoodenPlate", "x": -12, "y": 0, "yaw": 90},
+            {"piece": "@PropPie", "x": -12, "y": 0, "z": 6},
+            {"piece": "@PropPie", "x": 18, "y": 4, "z": 5, "yaw": 40},
+            {"piece": "@PropPlate", "x": 20, "y": -12}
+          ]
+        },
+        {
+          "name": "pastries",
+          "width": 60,
+          "pieces": [
+            {"piece": "@PropHoneyNutTreat", "x": -14, "y": 0, "yaw": 20},
+            {"piece": "@PropHoneyNutTreat", "x": 2, "y": 6, "yaw": 70},
+            {"piece": "@PropCremeTreat", "x": 16, "y": -4},
+            {"piece": "@PropCremeTreat", "x": -2, "y": -10, "yaw": 40}
+          ]
+        },
+        {
+          "name": "meats_board",
+          "width": 76,
+          "pieces": [
+            {"piece": "@PropWoodenPlate", "x": 0, "y": 0, "yaw": 90},
+            {"piece": "@PropBeef", "x": -14, "y": 0, "z": 2, "yaw": 20},
+            {"piece": "@PropHorkerMeat", "x": 16, "y": 4, "z": 2, "yaw": 60},
+            {"piece": "@PropVenison", "x": 0, "y": -14, "yaw": 10, "optional": true}
+          ]
+        },
+        {
+          "name": "hot_drinks",
+          "width": 64,
+          "pieces": [
+            {"piece": "@PropIronPot", "x": -18, "y": 0},
+            {"piece": "@PropGobletGlazed", "x": 6, "y": 6},
+            {"piece": "@PropGobletGlazed", "x": 14, "y": -6, "yaw": 60},
+            {"piece": "@PropSaltPile", "x": 24, "y": 8}
+          ]
+        },
+        {
+          "name": "spice_cups",
+          "width": 56,
+          "pieces": [
+            {"piece": "@PropTankard", "x": -14, "y": 0, "yaw": 30},
+            {"piece": "@PropTankard", "x": 0, "y": 6, "yaw": 120},
+            {"piece": "@PropWoodenBowl", "x": 16, "y": -2},
+            {"piece": "@PropFireSalts", "x": 16, "y": -2, "z": 3}
+          ]
+        },
+        {
+          "name": "honeycomb",
+          "width": 56,
+          "pieces": [
+            {"piece": "@PropWoodenPlate", "x": 0, "y": 0, "yaw": 90},
+            {"piece": "@PropHoneycomb", "x": -10, "y": 0, "z": 11, "yaw": 90},
+            {"piece": "@PropHoneycomb", "x": 10, "y": 4, "z": 11, "yaw": 80},
+            {"piece": "@PropJugSmall", "x": 22, "y": -10}
+          ]
+        },
+        {
+          "name": "spice_sacks",
+          "width": 64,
+          "pieces": [
+            {"piece": "@PropSack02Small", "x": -18, "y": 0, "z": 16, "yaw": 20},
+            {"piece": "@PropSaltPile", "x": 4, "y": 6},
+            {"piece": "@PropHangingGarlic", "x": 18, "y": -4, "z": 3, "rotX": 90},
+            {"piece": "@PropJugSmall", "x": 20, "y": 10}
+          ]
+        },
+        {"name": "cuirass", "width": 70, "pieces": [{"piece": "@PropIronCuirass", "x": 0, "y": 0, "z": 3}]},
+        {
+          "name": "staves",
+          "width": 100,
+          "pieces": [
+            {"piece": "@PropStaff01", "x": -4, "y": -10, "z": 6, "yaw": 90},
+            {"piece": "@PropStaff02", "x": 0, "y": 4, "z": 6, "yaw": 92},
+            {"piece": "@PropStaff03", "x": 4, "y": 16, "z": 6, "yaw": 88, "optional": true}
+          ]
+        },
+        {
+          "name": "flowers",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropLavender", "x": -18, "y": 0, "z": 6, "yaw": 20},
+            {"piece": "@PropFlowerRed", "x": 2, "y": 4, "z": 7},
+            {"piece": "@PropFlowerPurple", "x": 10, "y": -6, "z": 7},
+            {"piece": "@PropFlowerBlue", "x": 20, "y": 6, "z": 7},
+            {"piece": "@PropDeathbell", "x": -4, "y": -12, "z": 7, "optional": true}
+          ]
+        },
+        {
+          "name": "writing",
+          "width": 60,
+          "pieces": [
+            {"piece": "@PropParchment", "x": -10, "y": 0, "z": 2, "yaw": 10},
+            {"piece": "@PropInkwell", "x": 12, "y": 4},
+            {"piece": "@PropQuill", "x": 12, "y": 4, "z": 20, "rotX": 15},
+            {"piece": "@PropBook05", "x": 22, "y": -10, "yaw": 20}
+          ]
+        },
+        {
+          "name": "gems_cut",
+          "width": 50,
+          "pieces": [
+            {"piece": "000481B0:Skyrim.esm", "x": -12, "y": 0},
+            {"piece": "@PropGarnet", "x": 6, "y": 2, "z": 1},
+            {"piece": "@PropGarnet", "x": 12, "y": -6, "z": 1, "yaw": 40},
+            {"piece": "@PropGarnet", "x": 18, "y": 6, "z": 1, "yaw": 70},
+            {"piece": "@PropSoulGemLesser", "x": -14, "y": 12}
+          ]
+        },
+        {
+          "name": "trinkets",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropGobletSilver", "x": -18, "y": 0},
+            {"piece": "@PropDweCup", "x": -2, "y": 6},
+            {"piece": "@PropSilverBowl", "x": 14, "y": -2},
+            {"piece": "00092DE5:Skyrim.esm", "x": 22, "y": 10, "yaw": 30, "optional": true}
+          ]
+        },
+        {
+          "name": "fish_salted",
+          "width": 64,
+          "pieces": [
+            {"piece": "@PropSalmonSteak", "x": -14, "y": 0, "yaw": 20},
+            {"piece": "@PropSalmonSteak", "x": 4, "y": 4, "yaw": 60},
+            {"piece": "@PropSaltPile", "x": 18, "y": -4},
+            {"piece": "@PropBasket03", "x": 0, "y": -20, "scale": 0.6, "optional": true}
+          ]
+        },
+        {
+          "name": "arrow_bundle",
+          "width": 64,
+          "pieces": [
+            {"piece": "@PropIronArrow", "x": -18, "y": -7, "z": 1, "yaw": 88},
+            {"piece": "@PropIronArrow", "x": -15, "y": -5, "z": 1, "yaw": 91},
+            {"piece": "@PropIronArrow", "x": -12, "y": -3, "z": 1, "yaw": 94},
+            {"piece": "@PropIronArrow", "x": -9, "y": -1, "z": 1, "yaw": 97},
+            {"piece": "@PropIronArrow", "x": -6, "y": 1, "z": 1, "yaw": 100},
+            {"piece": "@PropIronArrow", "x": -3, "y": 3, "z": 1, "yaw": 103},
+            {"piece": "@PropIronArrow", "x": 0, "y": 5, "z": 1, "yaw": 106},
+            {"piece": "@PropIronArrow", "x": 3, "y": 7, "z": 1, "yaw": 109},
+            {"piece": "@PropLeatherStrips", "x": 20, "y": 8, "z": 2, "yaw": 30}
+          ]
+        },
+        {
+          "name": "bows",
+          "width": 110,
+          "pieces": [
+            {"piece": "@PropLongBow", "x": 0, "y": -6, "z": 3, "yaw": 90},
+            {"piece": "@PropHuntingBow", "x": 0, "y": 8, "z": 3, "yaw": 92}
+          ]
+        },
+        {
+          "name": "carved_tools",
+          "width": 80,
+          "pieces": [
+            {"piece": "@PropWoodAxe", "x": -18, "y": 0, "z": 2, "yaw": 80},
+            {"piece": "@PropSmithHammer", "x": 10, "y": 6, "z": 1, "yaw": 70, "rotY": 90},
+            {"piece": "@PropWoodenBowl", "x": 22, "y": -8},
+            {"piece": "@PropWoodenPlate", "x": 0, "y": -12, "yaw": 10}
+          ]
+        },
+        {
+          "name": "toys",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropDrum", "x": -18, "y": 0, "scale": 0.6},
+            {"piece": "@PropFlute", "x": 6, "y": 6, "z": 2, "yaw": 80},
+            {"piece": "@PropSatchel", "x": 18, "y": -6, "yaw": 30},
+            {"piece": "@PropIronDagger", "x": 0, "y": -14, "z": 2, "yaw": 90, "optional": true}
+          ]
+        },
+        {
+          "name": "gifts",
+          "width": 60,
+          "pieces": [
+            {"piece": "@PropSatchel", "x": -14, "y": 0, "yaw": 20},
+            {"piece": "@PropSatchel", "x": 6, "y": 6, "yaw": 70},
+            {"piece": "00034D23:Skyrim.esm", "x": 18, "y": -4, "z": 30, "rotX": 80, "optional": true},
+            {"piece": "@PropAmuletSilver", "x": -2, "y": -12, "z": 1, "yaw": 40}
+          ]
+        },
+        {
+          "name": "mystic",
+          "width": 70,
+          "pieces": [
+            {"piece": "000C49EF:Skyrim.esm", "x": -16, "y": 0, "z": 8, "yaw": 20},
+            {"piece": "000C841C:Skyrim.esm", "x": 6, "y": 6},
+            {"piece": "@PropSoulGemGrand", "x": 16, "y": -6},
+            {"piece": "00073CD8:Skyrim.esm", "x": 0, "y": -14, "yaw": 60, "optional": true}
+          ]
+        },
+        {
+          "name": "mystic_candles",
+          "width": 50,
+          "pieces": [
+            {"piece": "0001F24A:Skyrim.esm", "x": -8, "y": 0, "yaw": 90},
+            {"piece": "@PropTrollSkull", "x": 14, "y": 4, "z": 28, "yaw": 30, "scale": 0.6}
+          ]
+        },
+        {
+          "name": "antiquities",
+          "width": 80,
+          "pieces": [
+            {"piece": "@PropCanopicJar", "x": -20, "y": 0},
+            {"piece": "@PropDweGyro", "x": 10, "y": 6},
+            {"piece": "@PropIngotGold", "x": 20, "y": -8, "z": 2},
+            {"piece": "@PropSoulGemGrand", "x": 0, "y": -14}
+          ]
+        },
+        {
+          "name": "antiquities2",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropDweUrn", "x": -16, "y": 0},
+            {"piece": "@PropCirclet", "x": 10, "y": 4, "z": 1},
+            {"piece": "@PropAmuletGems", "x": 20, "y": -6, "z": 1, "yaw": 30}
+          ]
+        },
+        {
+          "name": "songbooks",
+          "width": 60,
+          "pieces": [
+            {"piece": "@PropBook01", "x": -12, "y": 0, "yaw": 10},
+            {"piece": "@PropBook03", "x": -12, "y": 0, "z": 4, "yaw": 25},
+            {"piece": "@PropFlute", "x": 12, "y": 6, "z": 2, "yaw": 70},
+            {"piece": "@PropParchment", "x": 14, "y": -10, "z": 2, "yaw": 20}
+          ]
+        },
+        {
+          "name": "lute_stand",
+          "width": 40,
+          "pieces": [
+            {"piece": "@PropLute", "x": 0, "y": 0, "z": 38, "rotX": -12}
+          ]
+        },
+        {
+          "name": "ores",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropOreOrichalcum", "x": -16, "y": 0, "z": 4, "yaw": 20},
+            {"piece": "@PropOreCorundum", "x": 2, "y": 6, "z": 4, "yaw": 70},
+            {"piece": "@PropOreMoonstone", "x": 16, "y": -4, "z": 4},
+            {"piece": "@PropIngotOrichalcum", "x": 0, "y": -14, "z": 2, "yaw": 10}
+          ]
+        },
+        {
+          "name": "mining_tools",
+          "width": 90,
+          "pieces": [
+            {"piece": "@PropPickaxe", "x": -10, "y": 0, "z": 4, "yaw": 80},
+            {"piece": "@PropShovel", "x": 14, "y": 6, "z": 6, "yaw": 90, "rotX": 90},
+            {"piece": "@PropIngotIron", "x": 26, "y": -10, "z": 2}
+          ]
+        },
+        {
+          "name": "travel",
+          "width": 90,
+          "pieces": [
+            {"piece": "@PropParchment", "x": -20, "y": 0, "z": 2, "yaw": 10},
+            {"piece": "@PropQuill", "x": -6, "y": 6, "z": 1, "yaw": 70, "rotX": 90},
+            {"piece": "@PropInkwell", "x": 4, "y": -6},
+            {"piece": "@PropSatchel", "x": 22, "y": 6, "yaw": 20}
+          ]
+        },
+        {
+          "name": "amulets",
+          "width": 80,
+          "pieces": [
+            {"piece": "000BF9D1:Skyrim.esm", "x": 0, "y": 0, "yaw": 90, "scale": 0.55},
+            {"piece": "@PropAmuletGold", "x": -18, "y": 0, "z": 1, "yaw": 20},
+            {"piece": "@PropAmuletSilver", "x": 0, "y": 4, "z": 1, "yaw": 60},
+            {"piece": "@PropAmuletGems", "x": 16, "y": -4, "z": 1},
+            {"piece": "000C841C:Skyrim.esm", "x": 26, "y": 8}
+          ]
+        },
+        {
+          "name": "decorations",
+          "width": 70,
+          "pieces": [
+            {"piece": "00034D23:Skyrim.esm", "x": -14, "y": 0, "z": 30, "rotX": 80},
+            {"piece": "@PropTowerLantern", "x": 14, "y": 4, "yaw": 30},
+            {"piece": "00034CD8:Skyrim.esm", "x": 0, "y": -10, "yaw": 20, "scale": 0.5}
+          ]
+        },
+        {
+          "name": "imports",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropSilverJug", "x": -16, "y": 0},
+            {"piece": "@PropSaltPile", "x": 4, "y": 4},
+            {"piece": "000BF9CF:Skyrim.esm", "x": 0, "y": 0, "yaw": 90, "scale": 0.3},
+            {"piece": "@PropGarnet", "x": 18, "y": -6, "z": 1}
+          ]
+        },
+        {
+          "name": "small_brazier",
+          "width": 110,
+          "pieces": [
+            {"piece": "0008278C:Skyrim.esm", "x": 0, "y": 0},
+            {"piece": "000CD823:Skyrim.esm", "x": 0, "y": 0, "z": 20, "scale": 0.5},
+            {"piece": "@PropIronPot", "x": 0, "y": 0, "z": 30, "optional": true},
+            {"piece": "0007A603:Skyrim.esm", "x": 60, "y": 6, "z": 24, "yaw": 20}
+          ]
+        },
+        {
+          "name": "arrow_barrel",
+          "width": 70,
+          "pieces": [
+            {"piece": "@PropBarrelFood", "x": 0, "y": 0},
+            {"piece": "@PropIronArrow", "x": -6, "y": 0, "z": 82, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 4, "y": 4, "z": 82, "yaw": 40, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 0, "y": -6, "z": 82, "yaw": 80, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": 6, "y": -2, "z": 82, "yaw": 120, "rotX": 90},
+            {"piece": "@PropIronArrow", "x": -4, "y": 6, "z": 82, "yaw": 160, "rotX": 90}
+          ]
+        },
+        {
+          "name": "flower_baskets",
+          "width": 90,
+          "pieces": [
+            {"piece": "@PropFlowerBasket", "x": 0, "y": 0},
+            {"piece": "@PropBasket02", "x": 40, "y": 8, "yaw": 20},
+            {"piece": "@PropLavender", "x": 40, "y": 8, "z": 30, "yaw": 20}
+          ]
+        },
+        {
+          "name": "tools_rack",
+          "width": 90,
+          "pieces": [
+            {"piece": "@PropShovel", "x": 0, "y": 0, "z": 53, "rotX": 8},
+            {"piece": "@PropBroom", "x": 30, "y": 4, "yaw": 20, "rotX": 6},
+            {"piece": "0007A603:Skyrim.esm", "x": -40, "y": 6, "z": 24, "yaw": 30}
+          ]
+        },
+        {
+          "name": "bedrolls",
+          "width": 120,
+          "pieces": [
+            {"piece": "00094AC6:Skyrim.esm", "x": 0, "y": 0, "yaw": 90, "scale": 0.6},
+            {"piece": "00090726:Skyrim.esm", "x": 60, "y": 0, "z": 21, "optional": true}
+          ]
         }
       ],
       "stallKits": [
         {
           "themes": ["sweetroll"],
           "counter": ["sweetroll_platter", "sweetroll_plate", "sweetroll_row", "sweetroll_plate"],
-          "side": ["barrel_table", "sacks_grain"],
+          "side": ["sacks_grain", "barrel_table"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
           "sign": ["sign_honey"],
-          "emptyChance": 0,
+          "emptyChance": 0.1,
           "hang": ["hang_lantern0", "hang_lantern1", "hang_lantern2", "hang_lantern3", "hang_lantern4", "hang_lantern5"],
           "hangSpacing": 55,
           "light": "0008278A:Skyrim.esm"
         },
         {
-          "themes": ["food", "produce"],
-          "counter": ["veg_cabbages", "veg_basket", "veg_apples", "veg_gourds"],
-          "side": ["produce_spill", "apple_crates", "sacks"],
+          "themes": ["pies"],
+          "counter": ["pies", "pies_plated", "pies"],
+          "side": ["small_brazier", "crates_stack"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_general", "sign_trader"],
-          "emptyChance": 0.15,
-          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
-          "hangSpacing": 45
+          "sign": ["sign_general"],
+          "emptyChance": 0.1,
+          "light": "0008278A:Skyrim.esm"
         },
         {
-          "themes": ["drink"],
+          "themes": ["mead"],
           "counter": ["mead_bottles", "tankards", "wine_bottles", "drinks_crate"],
           "side": ["mead_stack", "barrel_table"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
           "sign": ["sign_mead"],
-          "emptyChance": 0.05,
+          "emptyChance": 0.1,
           "hang": ["hang_lantern0", "hang_lantern1", "hang_lantern2", "hang_lantern3", "hang_lantern4", "hang_lantern5"],
-          "hangSpacing": 60,
+          "hangSpacing": 55,
           "light": "0008278A:Skyrim.esm"
-        },
-        {
-          "themes": ["sweets", "honey"],
-          "counter": ["honey_jars", "sweets", "sweetroll_plate", "bread_board"],
-          "side": ["sacks_grain", "barrel_table"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_honey"],
-          "emptyChance": 0.15,
-          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
-          "hangSpacing": 45
-        },
-        {
-          "themes": ["pies", "bakery"],
-          "counter": ["pies", "bread_board", "bread_basket", "pies"],
-          "side": ["sacks_grain", "firewood"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_general", "sign_wrgeneral"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["cheese"],
-          "counter": ["cheese_board", "cheese_stack", "bread_board", "cheese_board"],
-          "side": ["barrels_pair", "sacks"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_general"],
-          "emptyChance": 0.15
         },
         {
           "themes": ["roast"],
-          "counter": ["meats", "fish", "meats"],
+          "counter": ["meats", "meats_board"],
           "side": ["spit_roast", "firewood"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_hunter", "sign_fish"],
-          "emptyChance": 0.15,
-          "hang": ["hang_rabbit", "hang_pheasant", "hang_rabbit2", "hang_salmon"],
-          "hangSpacing": 45,
+          "sign": ["sign_hunter"],
+          "emptyChance": 0.1,
+          "hang": ["hang_rabbit", "hang_pheasant", "hang_rabbit2"],
+          "hangSpacing": 55,
           "light": "0008278A:Skyrim.esm"
         },
         {
-          "themes": ["spices"],
-          "counter": ["spices", "alchemy_ingredients", "honey_jars"],
-          "side": ["sacks", "herb_baskets"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_aromatics"],
-          "emptyChance": 0.15,
-          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
-          "hangSpacing": 45
-        },
-        {
-          "themes": ["smith", "armour"],
-          "counter": ["swords", "helmets", "axes", "shield_flat", "smith_bits"],
-          "side": ["weapon_barrel", "smith_crate"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_smith", "sign_rtsmith"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["hunter", "leather", "tanner"],
-          "counter": ["hunter_arrows", "leather", "hunter_hides"],
-          "side": ["pelt_rack", "pelt_pile"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_hunter", "sign_fletcher"],
-          "emptyChance": 0.15,
-          "hang": ["hang_rabbit", "hang_pheasant", "hang_rabbit2"],
-          "hangSpacing": 45
-        },
-        {
-          "themes": ["furs"],
-          "counter": ["furs", "hunter_hides", "leather"],
-          "side": ["pelt_rack", "pelt_pile"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_hunter"],
-          "emptyChance": 0.15,
-          "hang": ["hang_rabbit", "hang_pheasant", "hang_rabbit2"],
-          "hangSpacing": 45
-        },
-        {
-          "themes": ["jewellery"],
-          "counter": ["jewellery", "gems", "ingots_gold", "jewellery"],
-          "side": ["crates_stack"],
-          "rear": ["stock_pile"],
-          "sign": ["sign_pawn", "sign_curios"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["dwemer", "curios"],
-          "counter": ["dwemer", "dwemer2", "silver", "candles"],
-          "side": ["dwemer_ground", "pottery_ground"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_curios", "sign_pawn"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["elven"],
-          "counter": ["elven", "silver", "gems"],
-          "side": ["crates_stack"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_curios"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["mage", "alchemy"],
-          "counter": ["potions", "alchemy_ingredients", "gems", "candles", "books"],
-          "side": ["candle_stand", "herb_baskets"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_alchemy"],
-          "emptyChance": 0.15,
-          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
-          "hangSpacing": 45
-        },
-        {
-          "themes": ["herbs"],
-          "counter": ["alchemy_ingredients", "spices", "potions"],
-          "side": ["herb_baskets", "sacks"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_aromatics"],
-          "emptyChance": 0.15,
-          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
-          "hangSpacing": 35
-        },
-        {
-          "themes": ["books", "scrolls"],
-          "counter": ["books", "scrolls", "candles", "books"],
-          "side": ["book_crate", "candle_stand"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_curios", "sign_trader"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["candles"],
-          "counter": ["candles", "tallow", "candles"],
-          "side": ["candle_stand", "crates_stack"],
+          "themes": ["cheese"],
+          "counter": ["cheese_board", "dairy", "cheese_stack"],
+          "side": ["barrels_pair", "sacks"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
           "sign": ["sign_general"],
-          "emptyChance": 0.15,
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["produce"],
+          "counter": ["veg_cabbages", "veg_apples", "veg_basket", "veg_gourds"],
+          "side": ["produce_spill", "apple_crates"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_trader"],
+          "emptyChance": 0.1,
+          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["bakery"],
+          "counter": ["bread_board", "bread_basket", "pastries"],
+          "side": ["sacks_grain", "firewood"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_wrgeneral"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["hotdrinks"],
+          "counter": ["hot_drinks", "spice_cups", "hot_drinks"],
+          "side": ["small_brazier", "barrel_table"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_mead"],
+          "emptyChance": 0.1,
           "hang": ["hang_lantern0", "hang_lantern1", "hang_lantern2", "hang_lantern3", "hang_lantern4", "hang_lantern5"],
-          "hangSpacing": 45
+          "hangSpacing": 55,
+          "light": "0008278A:Skyrim.esm"
         },
         {
-          "themes": ["potter"],
-          "counter": ["pottery", "pottery2", "household"],
-          "side": ["pottery_ground"],
+          "themes": ["honey"],
+          "counter": ["honey_jars", "honeycomb", "candles"],
+          "side": ["sacks", "crates_stack"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_trader"],
-          "emptyChance": 0.15
+          "sign": ["sign_honey"],
+          "emptyChance": 0.1
         },
         {
-          "themes": ["cooper"],
-          "counter": ["household", "carved"],
-          "side": ["buckets", "barrels_pair"],
+          "themes": ["spices"],
+          "counter": ["spices", "spice_sacks", "spices"],
+          "side": ["sacks_grain", "herb_baskets"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_trader"],
-          "emptyChance": 0.15
+          "sign": ["sign_aromatics"],
+          "emptyChance": 0.1,
+          "hang": ["hang_garlic"],
+          "hangSpacing": 55
         },
         {
-          "themes": ["weaver", "rugs"],
-          "counter": ["linens", "rug_rolls", "linens"],
-          "side": ["rug_ground", "rug_ground2"],
+          "themes": ["smith"],
+          "counter": ["swords", "axes", "smith_bits", "helmets"],
+          "side": ["weapon_barrel", "smith_crate"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_clothes"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["carver", "timber", "toys"],
-          "counter": ["carved", "instruments", "household"],
-          "side": ["timber", "firewood"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_trader", "sign_general"],
-          "emptyChance": 0.15
-        },
-        {
-          "themes": ["bone"],
-          "counter": ["bones", "carved"],
-          "side": ["pelt_pile", "crates_stack"],
-          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
-          "sign": ["sign_hunter"],
-          "emptyChance": 0.15
+          "sign": ["sign_smith"],
+          "emptyChance": 0.1
         },
         {
           "themes": ["imperial"],
@@ -2068,7 +2308,7 @@
           "side": ["weapon_barrel", "smith_crate"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
           "sign": [],
-          "emptyChance": 0
+          "emptyChance": 0.1
         },
         {
           "themes": ["stormcloak"],
@@ -2076,7 +2316,231 @@
           "side": ["pelt_rack", "weapon_barrel"],
           "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
           "sign": [],
-          "emptyChance": 0
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["hunter"],
+          "counter": ["hunter_hides", "leather", "hunter_arrows"],
+          "side": ["pelt_rack", "pelt_pile"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_hunter"],
+          "emptyChance": 0.1,
+          "hang": ["hang_rabbit", "hang_pheasant", "hang_rabbit2"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["elven"],
+          "counter": ["elven", "silver", "gems"],
+          "side": ["crates_stack"],
+          "rear": ["stock_pile"],
+          "sign": ["sign_curios"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["dwemer"],
+          "counter": ["dwemer", "dwemer2"],
+          "side": ["dwemer_ground"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_pawn"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["mage"],
+          "counter": ["staves", "gems", "candles", "books"],
+          "side": ["candle_stand"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_alchemy"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["alchemy"],
+          "counter": ["potions", "alchemy_ingredients", "potions", "flowers"],
+          "side": ["herb_baskets"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_alchemy"],
+          "emptyChance": 0.1,
+          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["books"],
+          "counter": ["books", "scrolls", "writing"],
+          "side": ["book_crate", "candle_stand"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_curios"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["jeweller"],
+          "counter": ["jewellery", "gems_cut", "ingots_gold"],
+          "side": ["crates_stack"],
+          "rear": ["stock_pile"],
+          "sign": ["sign_pawn"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["curios"],
+          "counter": ["trinkets", "silver", "trinkets"],
+          "side": ["pottery_ground", "crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_curios"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["furs"],
+          "counter": ["furs", "hunter_hides"],
+          "side": ["pelt_pile", "rug_ground"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_hunter"],
+          "emptyChance": 0.1,
+          "hang": ["hang_rabbit", "hang_pheasant", "hang_rabbit2"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["herbalist"],
+          "counter": ["flowers", "alchemy_ingredients", "flowers"],
+          "side": ["flower_baskets", "herb_baskets"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_aromatics"],
+          "emptyChance": 0.1,
+          "hang": ["hang_garlic", "hang_elvesear", "hang_frost"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["fishmonger"],
+          "counter": ["fish", "fish_salted"],
+          "side": ["sacks", "barrels_pair"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_fish"],
+          "emptyChance": 0.1,
+          "hang": ["hang_salmon"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["fletcher"],
+          "counter": ["arrow_bundle", "bows", "arrow_bundle"],
+          "side": ["arrow_barrel", "crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_fletcher"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["clothing"],
+          "counter": ["linens", "rug_rolls", "linens"],
+          "side": ["rug_ground", "rug_ground2"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_clothes"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["woodworker"],
+          "counter": ["carved", "carved_tools"],
+          "side": ["timber", "tools_rack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_trader"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["pottery"],
+          "counter": ["pottery", "pottery2", "household"],
+          "side": ["pottery_ground", "buckets"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_general"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["toys"],
+          "counter": ["toys", "gifts", "toys"],
+          "side": ["crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_general"],
+          "emptyChance": 0.1,
+          "hang": ["hang_lantern0", "hang_lantern1", "hang_lantern2", "hang_lantern3", "hang_lantern4", "hang_lantern5"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["fortune"],
+          "counter": ["mystic", "mystic_candles", "gems"],
+          "side": ["candle_stand"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_curios"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["rare"],
+          "counter": ["antiquities", "antiquities2"],
+          "side": ["dwemer_ground", "stock_pile"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_pawn"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["candles"],
+          "counter": ["candles", "tallow", "candles"],
+          "side": ["candle_stand", "crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_general"],
+          "emptyChance": 0.1,
+          "hang": ["hang_lantern0", "hang_lantern1", "hang_lantern2", "hang_lantern3", "hang_lantern4", "hang_lantern5"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["bard"],
+          "counter": ["instruments", "songbooks", "lute_stand"],
+          "side": ["crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_trader"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["miner"],
+          "counter": ["ores", "mining_tools", "ingots_gold"],
+          "side": ["smith_crate"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_smith"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["saddler"],
+          "counter": ["leather", "hunter_hides"],
+          "side": ["hay_basket", "pelt_pile"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_hunter"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["religious"],
+          "counter": ["amulets", "candles"],
+          "side": ["candle_stand"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_curios"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["cartographer"],
+          "counter": ["travel", "writing"],
+          "side": ["bedrolls", "crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_trader"],
+          "emptyChance": 0.1
+        },
+        {
+          "themes": ["decorations"],
+          "counter": ["decorations", "gifts"],
+          "side": ["crates_stack"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_general"],
+          "emptyChance": 0.1,
+          "hang": ["hang_lantern0", "hang_lantern1", "hang_lantern2", "hang_lantern3", "hang_lantern4", "hang_lantern5"],
+          "hangSpacing": 55
+        },
+        {
+          "themes": ["imports"],
+          "counter": ["imports", "spices"],
+          "side": ["rug_ground", "sacks"],
+          "rear": ["crates_stack", "barrels_pair", "sacks", "stock_pile"],
+          "sign": ["sign_trader"],
+          "emptyChance": 0.1
         }
       ]
     },
@@ -2101,7 +2565,48 @@
           "female": true,
           "outfits": ["0007144A:Skyrim.esm", "0009D4B5:Skyrim.esm", "0009D5E0:Skyrim.esm", "0005FB81:Skyrim.esm"]
         }
-      ]
+      ],
+      "themeNames": {
+        "sweetroll": "Sweetroll Stall",
+        "pies": "Hot Pie Stall",
+        "mead": "Mead & Ale Stall",
+        "roast": "Roast Meat Stall",
+        "cheese": "Cheese & Dairy Stall",
+        "produce": "Fruit & Produce Stall",
+        "bakery": "Bakery Stall",
+        "hotdrinks": "Spiced / Hot Drinks Stall",
+        "honey": "Honey & Beekeeping Stall",
+        "spices": "Spice & Imported Foods Trader",
+        "smith": "Iron & Steel Smith",
+        "imperial": "Imperial Armourer",
+        "stormcloak": "Stormcloak / Nord Armourer",
+        "hunter": "Hunter & Leatherworker",
+        "elven": "Elven Goods Trader",
+        "dwemer": "Dwemer Curios Stall",
+        "mage": "Mage Supplies Stall",
+        "alchemy": "Alchemy Stall",
+        "books": "Books & Scrolls Stall",
+        "jeweller": "Jeweller",
+        "curios": "General Trinkets & Curios",
+        "furs": "Fur Trader",
+        "herbalist": "Herbalist / Apothecary",
+        "fishmonger": "Fishmonger / Smoked Fish",
+        "fletcher": "Bowyer & Fletcher",
+        "clothing": "Clothing & Fine Fabrics",
+        "woodworker": "Woodworker / Carpenter",
+        "pottery": "Pottery & Household Goods",
+        "toys": "Festival Toys & Gifts",
+        "fortune": "Fortune Teller / Mystic Curios",
+        "rare": "Rare Goods / Travelling Merchant",
+        "candles": "Candle & Tallow Maker",
+        "bard": "Bard & Instrument Merchant",
+        "miner": "Miner & Prospector",
+        "saddler": "Saddler / Horse Tack Merchant",
+        "religious": "Religious Charms & Amulets",
+        "cartographer": "Cartographer / Traveller's Supplies",
+        "decorations": "Festival Decorations & Ribbons",
+        "imports": "Provincial Imports Trader"
+      }
     },
     "archery": {
       "enabled": true,
@@ -2124,7 +2629,8 @@
         {"archer": [100, 1250], "target": [-450, 1250]},
         {"archer": [100, 1550], "target": [-450, 1550]},
         {"archer": [100, 1850], "target": [-450, 1850]}
-      ]
+      ],
+      "backstopZ": 0
     },
     "projectStatics": [
       {"editorId": "SkyrimFairOuthouse", "model": "Stroti\\Outdoor Toilet\\OutdoorToilet.nif", "width": 100, "depth": 126, "height": 195},
@@ -2290,7 +2796,8 @@
       "name": "Fair Visitor",
       "groups": [
         {"name": "sweetroll queue", "theme": "sweetroll", "count": 6, "radius": 240, "arc": 70, "frontOffset": 90},
-        {"name": "mead", "theme": "drink", "count": 3, "radius": 200, "arc": 80},
+        {"name": "mead", "theme": "mead", "count": 3, "radius": 200, "arc": 80},
+        {"name": "hot drinks", "theme": "hotdrinks", "count": 3, "radius": 200, "arc": 70},
         {"name": "roast", "theme": "roast", "count": 2, "radius": 180, "arc": 60},
         {"name": "bakery", "theme": "bakery", "count": 1, "radius": 150, "arc": 40},
         {"name": "cheese", "theme": "cheese", "count": 1, "radius": 150, "arc": 40},
@@ -2298,9 +2805,9 @@
         {"name": "imperial onlookers", "theme": "imperial", "count": 2, "radius": 180, "arc": 60},
         {"name": "stormcloak onlookers", "theme": "stormcloak", "count": 1, "radius": 160, "arc": 40},
         {"name": "lonely dwemer browser", "theme": "dwemer", "count": 1, "radius": 110, "arc": 20},
-        {"name": "jewellery", "theme": "jewellery", "count": 1, "radius": 130, "arc": 30},
+        {"name": "jewellery", "theme": "jeweller", "count": 1, "radius": 130, "arc": 30},
         {"name": "smith", "theme": "smith", "count": 1, "radius": 150, "arc": 40},
-        {"name": "stage approach", "at": [2048, 4980, 0], "count": 5, "radius": 430, "arc": 55},
+        {"name": "stage approach", "at": [2048, 4470, 0], "count": 5, "radius": 400, "arc": 55},
         {"name": "archery spectators", "at": [240, 1400, 270], "count": 3, "radius": 260, "arc": 55},
         {"name": "traders' crossing", "at": [3780, 1000, 0], "count": 3, "radius": 360, "arc": 180},
         {"name": "picnic", "near": "picnic_busy", "count": 2, "radius": 200, "arc": 180, "chance": 0.7},
@@ -2321,9 +2828,9 @@
         {
           "role": "cobble",
           "source": "0007F943:Skyrim.esm",
-          "diffuse": "Architecture\\Whiterun\\WRStoneFloor01.dds",
-          "normal": "Architecture\\Whiterun\\WRStoneFloor01_n.dds",
-          "height": "Architecture\\Whiterun\\WRStoneFloor01_p.dds"
+          "diffuse": "SkyrimFair\\Ground\\Cobble01.dds",
+          "normal": "SkyrimFair\\Ground\\Cobble01_n.dds",
+          "height": "SkyrimFair\\Ground\\Cobble01_p.dds"
         }
       ],
       "cobbleHalfWidth": 250,
@@ -2336,7 +2843,18 @@
       "dressingRadius": 220,
       "laneWear": 0.6,
       "wornZones": ["Entrance", "Crowd"]
-    }
+    },
+    "collisionWalls": [
+      {"name": "stage steps foot", "from": [1661, 4523], "to": [2435, 4523]},
+      {"name": "stage steps west", "from": [1661, 4523], "to": [1661, 5073]},
+      {"name": "stage steps east", "from": [2435, 4523], "to": [2435, 5073]},
+      {"name": "stage front west", "from": [1158, 5073], "to": [1661, 5073]},
+      {"name": "stage front east", "from": [2435, 5073], "to": [2938, 5073]},
+      {"name": "stage west", "from": [1158, 5073], "to": [1158, 6015]},
+      {"name": "stage east", "from": [2938, 5073], "to": [2938, 6015]},
+      {"name": "stage back", "from": [1158, 6015], "to": [2938, 6015]}
+    ],
+    "stallDirectory": "docs/STALLS.md"
   },
   "site": {
     "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",

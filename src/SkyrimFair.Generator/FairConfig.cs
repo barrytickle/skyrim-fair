@@ -152,6 +152,15 @@ internal sealed record FairWorldConfig
     /// <summary>Visitors gathered unevenly round the fair's attractions.</summary>
     public CrowdsConfig Crowds { get; init; } = new();
 
+    /// <summary>
+    /// Invisible walls: vanilla CollisionMarker box primitives laid along segments, as the
+    /// game's own invisible walls are (keeps visitors off the stage).
+    /// </summary>
+    public List<CollisionWall> CollisionWalls { get; init; } = new();
+
+    /// <summary>Where the generated stall directory is written, relative to the config (empty: none).</summary>
+    public string StallDirectory { get; init; } = string.Empty;
+
     /// <summary>The archery range: townsfolk practising at targets, Solitude-style.</summary>
     public ArcheryConfig Archery { get; init; } = new();
 
@@ -1754,6 +1763,12 @@ internal sealed record MarketConfig
     /// <summary>Clearance kept between neighbouring modules and from lane edges.</summary>
     public float Clearance { get; init; } = 20f;
 
+    /// <summary>
+    /// A keep-clear strip this deep in front of every stall's counter: later dressing,
+    /// festival poles and visitors stay out of it, so every keeper can be reached.
+    /// </summary>
+    public float FrontageDepth { get; init; } = 130f;
+
     /// <summary>Zones no stall may stand in (the crowd square, the stage, the entrance forecourt).</summary>
     public List<string> KeepOutZones { get; init; } = new();
 
@@ -1990,6 +2005,13 @@ internal sealed record VendorsConfig
     public short Level { get; init; } = 5;
 
     public List<VendorLook> Looks { get; init; } = new();
+
+    /// <summary>
+    /// What each stall's keeper is called, by the stall's theme ("cheese" -> "Cheese Seller"),
+    /// so the stall's trade shows when looking at its keeper. Themes not listed keep
+    /// <see cref="Name"/>.
+    /// </summary>
+    public Dictionary<string, string> ThemeNames { get; init; } = new();
 }
 
 internal sealed record VendorLook
@@ -2376,4 +2398,21 @@ internal sealed record CrowdGroup
 
     /// <summary>Arc they fill, degrees either side of facing the point from the front (360 = all round).</summary>
     public float Arc { get; init; } = 90f;
+}
+
+internal sealed record CollisionWall
+{
+    public string Name { get; init; } = string.Empty;
+
+    public float[] From { get; init; } = Array.Empty<float>();
+
+    public float[] To { get; init; } = Array.Empty<float>();
+
+    /// <summary>Height above the ground.</summary>
+    public float Height { get; init; } = 400f;
+
+    public float Thickness { get; init; } = 16f;
+
+    /// <summary>Longest single box; longer segments are split.</summary>
+    public float PieceLength { get; init; } = 256f;
 }

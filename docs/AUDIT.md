@@ -2,6 +2,76 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
+## Current pass: review fixes and one trade per stall (2026-09-23)
+
+Barry's in-game review (18 screenshots): props covering stall fronts, several stalls looking
+like the same vendor (the drum and bowls), keepers too far to talk to (the long double
+stall), the stage walkable, unused containers in front of stalls, two spit fires at the
+meat stall, floating hay bales, and the parallax cobbles to include. Then: "could we now
+determine which stall is which vendor", and a list of 39 stall identities to use.
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Props covering stall fronts; empty containers in front | the original kits' `WRMarketDisplayShelf01/02/03` sat on the ground in front of counters (they read as empty boxes and steps); some kit "spill" spots were in front of counters; nothing kept later dressing out of a stall's frontage | shelves removed from every module; side spots moved to the stall ends; a **keep-clear frontage** (`market.frontageDepth`, 130) in front of every counter, which seating, dressing groups and visitors must stay out of, and poles must keep off the middle of. Read back: **0 of 33 stalls have anything low in front of the counter** |
+| Keeper out of reach (the double stall) | `WRMarketStand01`'s table is 210 deep; its keepers stood 230 from the customer's side | `grand_double` is now two `WRMarketStand02` counters (124 deep) with a keeper each, just behind the counter (y -98). `whiterun_stand` and `canvas_wide` keepers moved to y -98 too |
+| Same-looking vendors | kits shared goods (carver, timber and toys all had the drum and bowls; cooper and potter shared household goods); EastLane's right side restarted its theme list | **one trade per stall**, from Barry's list, each with its own kit; one theme sequence per lane across both sides |
+| Two spit fires | both side spots of the roast kit picked the spit | no vignette twice on one stall |
+| Floating hay bales | `HayBale01`'s origin is its base (z 0..85), but modules placed it at z 40 | z 0 everywhere, archery backstops included (16 bales, all at ground) |
+| Stage walkable | nothing stopped the player | **29 invisible collision boxes** (vanilla `CollisionMarker` box primitives, default layer as vanilla's 897) round the deck and its steps, 15 outside every edge, 400 high; the performers stay inside |
+| Cobbles | the cobble texture set pointed at vanilla `WRStoneFloor01`, whose `_p` only the Whiterun pack supplies, and installing the pack would change Whiterun city too | the pack's `wrstonefloor01` diffuse, normal and parallax maps copied to a **fair-only path**, `textures\SkyrimFair\Ground\Cobble01*.dds`, so only the fair's avenue uses them (git-ignored; redistribution permission unverified) |
+
+**Which stall is which.** The fair fits 33 stalls; 33 of Barry's 39 trades are placed:
+- **Avenue food row**: Fruit & Produce, Hot Pie, Mead & Ale, Cheese & Dairy, Bakery,
+  Roast Meat, Spiced / Hot Drinks, Honey & Beekeeping, Spice & Imported Foods.
+- **EastLane**: Iron & Steel Smith, Hunter & Leatherworker, Elven Goods, Dwemer Curios,
+  Mage Supplies, Alchemy, Books & Scrolls, Jeweller, General Trinkets & Curios, Fur Trader,
+  Herbalist / Apothecary, Fishmonger / Smoked Fish, Bowyer & Fletcher, plus the signature
+  Imperial Armourer, Stormcloak / Nord Armourer and Sweetroll Stall.
+- **East Wall Walk**: Clothing & Fine Fabrics, Woodworker / Carpenter, Pottery & Household
+  Goods, Festival Toys & Gifts, Fortune Teller / Mystic Curios, Rare Goods / Travelling
+  Merchant, Candle & Tallow Maker, Bard & Instrument Merchant.
+- **Left out** (kits ready): Miner & Prospector, Saddler, Religious Charms, Cartographer,
+  Festival Decorations and **Provincial Imports**, which removes the #27 / #39 overlap.
+
+**Every keeper is now its own NPC record named for the trade** ("Cheese & Dairy Stall"),
+so looking at a keeper says what the stall is (59 records, `SkyrimFairVendor<Theme><NN>`).
+The build writes **`docs/STALLS.md`**:
+- number, trade, theme id, lane, position, shell, counter goods, side and rear goods, sign
+- each stall's marker for `player.moveto`
+- the kits not yet placed
+
+`docs/images/stalls_map.png` numbers the stalls on the plan.
+
+**New goods** (25 more physics-free props, 173 in all): inkwell, quill, ores and an
+orichalcum ingot, pickaxe, three staves, honeycomb, lavender and mountain flowers,
+deathbell, nightshade, a flower basket, garnet, a gift satchel, troll skull, canopic jar,
+a milk jug, a woodcutter's axe, a shovel. Also 37 new vignettes, among them dairy, plated
+pies, pastries, hot drinks, honeycomb, spice sacks, staves, flowers, writing, cut gems,
+trinkets, salted fish, arrow bundles, bows, carved tools, toys and gifts, mystic,
+antiquities, songbooks, a standing lute, ores and mining tools, a small brazier, an arrow
+barrel, flower baskets and a tools rack.
+
+**Numbers**:
+- 33 stalls, 1,566 pieces, 68 dressing groups, 24 festival crossings, 38 visitors,
+  59 keepers.
+- 5 stall lights: sweetroll, pies, mead, roast, hot drinks.
+- 20 real lights in all.
+
+**Verification**:
+- Generator run twice: identical SHA256 `2a044aea1a73d744...` (558,669 bytes). **Deployed
+  byte-identical**, with the 25 new props and `textures\SkyrimFair\Ground\`.
+- Masters read back: `Skyrim.esm, Holidays.esp`.
+- The cobble texture set reads the fair-only paths.
+- 0 stall frontages obstructed; 0 floating hay bales.
+
+**Test**:
+- Can every keeper be reached and talked to, especially on the rebuilt double stalls?
+- Do the stalls read as different trades from the path? Look at a keeper to see its name.
+- Is the stage blocked at the steps and all round, with the performers still on it?
+- Are the cobbles visible along the avenue, with parallax?
+- Is the meat stall down to one fire?
+- Any hay bale or prop still floating?
+
 ## Hotfix 2: the real cause, a BSA extractor bug (2026-09-23)
 
 The same crash came back after the rigid-body change (same file, same instruction). Two

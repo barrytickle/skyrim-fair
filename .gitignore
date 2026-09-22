@@ -24,3 +24,8 @@ assets/textures/Stroti/
 #   python tools/make_static_props.py --data "<stock Data>"
 assets/meshes/SkyrimFair/TowerLantern.nif
 assets/meshes/SkyrimFair/Props/
+
+# The Whiterun Mossy Wet Stonefloor textures (Nexus 99294), copied to a fair-only path for the
+# cobbled avenue; redistribution permission unverified, so kept out of git.
+#   unzip wrstonefloor01*.dds from external/ into assets/textures/SkyrimFair/Ground/Cobble01*.dds
+assets/textures/SkyrimFair/Ground/

@@ -274,6 +274,39 @@ internal static class FairWorld
             }, FaceList);
         }
 
+        // ---- invisible walls ------------------------------------------------------------
+        var wallBoxes = 0;
+        foreach (var wall in config.CollisionWalls)
+        {
+            var (ax, ay, bx, by) = (wall.From[0], wall.From[1], wall.To[0], wall.To[1]);
+            var length = MathF.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+            var pieces = Math.Max(1, (int)MathF.Ceiling(length / wall.PieceLength));
+            var heading = MathF.Atan2(bx - ax, by - ay);  // along the wall; the box's local Y runs along it
+            for (var i = 0; i < pieces; i++)
+            {
+                var t = (i + 0.5f) / pieces;
+                var (cx, cy) = (ax + (bx - ax) * t, ay + (by - ay) * t);
+                Put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
+                    Primitive = new PlacedPrimitive
+                    {
+                        // Half-extents: across, along, up.
+                        Bounds = new P3Float(wall.Thickness / 2f, length / pieces / 2f + 4f, wall.Height / 2f),
+                        Color = System.Drawing.Color.FromArgb(0, 255, 255, 0),
+                        Unknown = 0.15f,
+                        Type = PlacedPrimitive.TypeEnum.Box,
+                    },
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(cx, cy, plan.Height(cx, cy) + wall.Height / 2f),
+                        Rotation = new P3Float(0f, 0f, heading),
+                    },
+                });
+                wallBoxes++;
+            }
+        }
+
         // ---- visitors -------------------------------------------------------------------
         CrowdsResult? crowds = null;
         if (config.Crowds.Enabled)
@@ -303,7 +336,7 @@ internal static class FairWorld
                 }
             }
 
-            foreach (var f in market?.Footprints.Where(f => f.Kind is not "stall" and not "pole") ?? Enumerable.Empty<MarketFootprint>())
+            foreach (var f in market?.Footprints.Where(f => f.Kind is not "stall" and not "pole" and not "frontage") ?? Enumerable.Empty<MarketFootprint>())
             {
                 wear.Add((f.X, f.Y, MathF.Max(f.HalfW, f.HalfD) + config.Ground.DressingRadius * 0.5f, 0.7f));
             }
@@ -402,6 +435,7 @@ internal static class FairWorld
             archery,
             towers,
             crowds,
+            wallBoxes,
             props,
             groundTextures?.Count ?? 0,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
@@ -1314,6 +1348,7 @@ internal sealed record FairWorldResult(
     ArcheryResult? Archery,
     TowersResult? Towers,
     CrowdsResult? Crowds,
+    int WallBoxes,
     int Props,
     int GroundTextures,
     string Plan,
