@@ -139,6 +139,49 @@
         }
       ]
     },
+    "stage": {
+      "enabled": true,
+      "zone": "Stage",
+      "forwardOffset": 160,
+      "deckHeight": 134,
+      "deck": {
+        "piece": "0001C570:Skyrim.esm", "name": "Walkway01",
+        "pieceWidth": 250, "pieceDepth": 228, "pieceCentreX": -15, "pieceCentreY": -5, "pieceTopZ": 6,
+        "columns": 7, "rows": 4
+      },
+      "skirt": {
+        "enabled": true, "piece": "000533D8:Skyrim.esm", "name": "StockadeWoodplanks04",
+        "length": 250, "topZ": 79, "belowDeck": 4, "gap": 5,
+        "faces": ["front", "left", "right", "back"]
+      },
+      "steps": {
+        "piece": "000533C0:Skyrim.esm", "name": "StockadeScaffoldTop0Sided01",
+        "pieceWidth": 248, "pieceDepth": 262, "pieceTopZ": 4,
+        "treads": 5, "across": 3, "exposed": 110,
+        "riserPiece": "000533D5:Skyrim.esm", "riserName": "StockadeWoodplanks01", "riserLength": 250, "riserTopZ": 36
+      },
+      "log": { "piece": "000533D0:Skyrim.esm", "name": "StockadeWoodbeam01", "length": 306, "beamScale": 2.0, "overlap": 30 },
+      "postHeight": 700,
+      "posts": [[-905, 490], [905, 490], [-905, -490], [-300, -490], [300, -490], [905, -490]],
+      "beams": [
+        { "from": [-955, 490], "to": [955, 490], "z": 640 },
+        { "from": [-935, 490], "to": [935, 490], "z": 575 },
+        { "from": [-955, -490], "to": [955, -490], "z": 640 },
+        { "from": [-935, -490], "to": [935, -490], "z": 380 },
+        { "from": [-905, -550], "to": [-905, 550], "z": 655 },
+        { "from": [905, -550], "to": [905, 550], "z": 655 }
+      ],
+      "rafters": { "u": [-780, -520, -260, 0, 260, 520, 780], "fromV": -540, "toV": 540, "z": 690, "scale": 1.6 },
+      "braces": [
+        { "from": [-905, -490], "to": [-300, -490], "zLow": 395, "zHigh": 625 },
+        { "from": [-300, -490], "to": [300, -490], "zLow": 395, "zHigh": 625 },
+        { "from": [300, -490], "to": [905, -490], "zLow": 395, "zHigh": 625 }
+      ],
+      "zJitter": 5,
+      "yawJitterDegrees": 1,
+      "scaleJitter": 0.03,
+      "postLeanDegrees": 0.8
+    },
     "avenue": [[2048, -2752], [1898, 48], [2198, 2748], [2048, 4748]],
     "avenueWidth": 800,
     "zoneMarker": "00000034:Skyrim.esm",
@@ -180,7 +223,8 @@
         "name": "Stage",
         "texture": "00000C16:Skyrim.esm",
         "polygon": [[1048, 6298], [3048, 6248], [3148, 6848], [998, 6898]],
-        "marker": [2048, 6548, 180]
+        "marker": [2048, 6548, 180],
+        "markerHeight": 134
       }
     ]
   },

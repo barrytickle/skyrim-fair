@@ -151,6 +151,19 @@ try
         Console.WriteLine("  Forest (north up, 1024 units per character, ^ = trees, G = gate):");
         Console.Write(world.ForestPlan);
 
+        if (world.Stage is { } stage)
+        {
+            Console.WriteLine(
+                $"  main stage: deck {stage.DeckWidth:0} x {stage.DeckDepth:0} at {stage.DeckHeight:0} high, " +
+                $"centred ({stage.CentreX:0}, {stage.CentreY:0}) on ground Z {stage.GroundZ:0}, facing {stage.Heading:0}; " +
+                $"steps {stage.StairWidth:0} wide over {stage.StairRun:0}, risers {stage.Riser:0.0}, " +
+                $"foot at ({stage.StairFoot.X:0}, {stage.StairFoot.Y:0}); {stage.Total} references");
+            foreach (var (role, count) in stage.Counts.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                Console.WriteLine($"    {count,3} x {role}");
+            }
+        }
+
         Console.WriteLine($"  mountains: {world.Mountains.Count}, persistent + Full LOD");
         foreach (var m in world.Mountains)
         {

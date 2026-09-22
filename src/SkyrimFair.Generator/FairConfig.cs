@@ -118,6 +118,9 @@ internal sealed record FairWorldConfig
     /// <summary>Distant vanilla mountains, always drawn.</summary>
     public MountainsConfig Mountains { get; init; } = new();
 
+    /// <summary>The main stage, placed from its zone.</summary>
+    public StageConfig Stage { get; init; } = new();
+
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
 
@@ -180,6 +183,31 @@ internal sealed record FairWorldConfig
         {
             throw new InvalidOperationException(
                 "Every FairWorld mountain row needs a count, radii, and pieces with positive weights.");
+        }
+
+        if (Stage.Enabled)
+        {
+            var stageZone = Zones.FirstOrDefault(z => z.Name == Stage.Zone)
+                ?? throw new InvalidOperationException($"FairWorld.Stage.Zone '{Stage.Zone}' is not a zone.");
+            var turn = ((stageZone.Marker.Length == 3 ? stageZone.Marker[2] : 0f) % 90f + 90f) % 90f;
+            if (turn > 0.01f && turn < 89.99f)
+            {
+                throw new InvalidOperationException(
+                    "The stage zone's marker must face along a world axis (a multiple of 90 degrees): " +
+                    "every stage log is laid with one tilt about a world axis.");
+            }
+
+            if (Stage.Deck.Columns < 1 || Stage.Deck.Rows < 1 || Stage.Steps.Treads < 1 || Stage.Steps.Across < 1)
+            {
+                throw new InvalidOperationException("The stage needs at least one deck piece and one tread.");
+            }
+
+            if (Stage.Beams.Concat<object>(Stage.Braces).Any(b => b is StageBeam { From.Length: not 2 } or StageBeam { To.Length: not 2 }
+                    or StageBrace { From.Length: not 2 } or StageBrace { To.Length: not 2 })
+                || Stage.Posts.Any(p => p.Length != 2))
+            {
+                throw new InvalidOperationException("Stage posts, beams and braces need [u, v] points.");
+            }
         }
 
         if (Forest.Enabled && (Forest.Trees.Count == 0 || Forest.Trees.Any(t => t.Weight <= 0f)))
@@ -446,7 +474,195 @@ internal sealed record FairWorldZone
 
     /// <summary><c>[x, y, headingDegrees]</c> for the zone's named marker.</summary>
     public float[] Marker { get; init; } = Array.Empty<float>();
+
+    /// <summary>Height of the marker above the floor, when it stands on something (the stage deck).</summary>
+    public float MarkerHeight { get; init; }
 }
+
+/// <summary>
+/// The main stage: an open timber pavilion built from vanilla pieces, placed from the
+/// configured stage zone. Everything below is in the stage's own frame: <c>u</c> runs
+/// across the stage (positive to the performers' left, the audience's right), <c>v</c> runs
+/// toward the audience, and the origin is the deck centre on the ground. The deck centre
+/// is the zone marker moved <see cref="ForwardOffset"/> toward the audience, and the stage
+/// faces the marker's heading.
+/// </summary>
+internal sealed record StageConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Zone whose marker places and turns the stage.</summary>
+    public string Zone { get; init; } = "Stage";
+
+    public float ForwardOffset { get; init; } = 60f;
+
+    /// <summary>Top of the performance deck above the ground.</summary>
+    public float DeckHeight { get; init; } = 134f;
+
+    public StageDeck Deck { get; init; } = new();
+
+    public StageSkirt Skirt { get; init; } = new();
+
+    public StageSteps Steps { get; init; } = new();
+
+    /// <summary>The log used for every post, beam, rafter and brace. Its length runs along local Y, centred.</summary>
+    public StageLog Log { get; init; } = new();
+
+    /// <summary>Upright posts, <c>[u, v]</c>, standing on the ground.</summary>
+    public List<float[]> Posts { get; init; } = new();
+
+    public float PostHeight { get; init; } = 700f;
+
+    /// <summary>Horizontal beams: straight runs between two plan points at a height.</summary>
+    public List<StageBeam> Beams { get; init; } = new();
+
+    public StageRafters Rafters { get; init; } = new();
+
+    /// <summary>X-braced bays: two crossing diagonals in the vertical plane between two plan points.</summary>
+    public List<StageBrace> Braces { get; init; } = new();
+
+    /// <summary>Hand-built wander: largest height change of a log.</summary>
+    public float ZJitter { get; init; } = 5f;
+
+    public float YawJitterDegrees { get; init; } = 1f;
+
+    public float ScaleJitter { get; init; } = 0.03f;
+
+    /// <summary>Largest lean of a post, degrees.</summary>
+    public float PostLeanDegrees { get; init; } = 0.8f;
+}
+
+internal sealed record StageDeck
+{
+    public string Piece { get; init; } = "0001C570:Skyrim.esm";
+
+    public string Name { get; init; } = "Walkway01";
+
+    /// <summary>Along the piece's local X (the stage's width).</summary>
+    public float PieceWidth { get; init; } = 272f;
+
+    /// <summary>Along the piece's local Y (the stage's depth).</summary>
+    public float PieceDepth { get; init; } = 256f;
+
+    /// <summary>Where the piece's plank surface is centred on its local X (measured from the mesh).</summary>
+    public float PieceCentreX { get; init; } = -15f;
+
+    /// <summary>Where the piece's plank surface is centred on its local Y.</summary>
+    public float PieceCentreY { get; init; } = -5f;
+
+    /// <summary>Height of the walking surface above the piece's origin.</summary>
+    public float PieceTopZ { get; init; } = 6f;
+
+    public int Columns { get; init; } = 6;
+
+    public int Rows { get; init; } = 3;
+}
+
+internal sealed record StageSkirt
+{
+    public bool Enabled { get; init; } = true;
+
+    public string Piece { get; init; } = "000533D8:Skyrim.esm";
+
+    public string Name { get; init; } = "StockadeWoodplanks04";
+
+    /// <summary>Along the panel's local Y.</summary>
+    public float Length { get; init; } = 250f;
+
+    /// <summary>Height of the panel's top above its origin.</summary>
+    public float TopZ { get; init; } = 79f;
+
+    /// <summary>How far below the deck surface the panel's top sits.</summary>
+    public float BelowDeck { get; init; } = 4f;
+
+    /// <summary>Distance outside the deck edge.</summary>
+    public float Gap { get; init; } = 5f;
+
+    /// <summary>Faces to board: any of <c>front</c>, <c>back</c>, <c>left</c>, <c>right</c>.</summary>
+    public List<string> Faces { get; init; } = new() { "front", "left", "right", "back" };
+}
+
+internal sealed record StageSteps
+{
+    public string Piece { get; init; } = "000533C0:Skyrim.esm";
+
+    public string Name { get; init; } = "StockadeScaffoldTop0Sided01";
+
+    public float PieceWidth { get; init; } = 248f;
+
+    public float PieceDepth { get; init; } = 262f;
+
+    public float PieceTopZ { get; init; } = 4f;
+
+    /// <summary>Treads between the ground and the deck; the risers are equal.</summary>
+    public int Treads { get; init; } = 5;
+
+    /// <summary>Pieces side by side across each tread.</summary>
+    public int Across { get; init; } = 3;
+
+    /// <summary>Visible depth of each tread; the rest runs under the tread above.</summary>
+    public float Exposed { get; init; } = 110f;
+
+    /// <summary>Board closing each riser, standing at the tread's front edge. Length along its local Y.</summary>
+    public string RiserPiece { get; init; } = "000533D5:Skyrim.esm";
+
+    public string RiserName { get; init; } = "StockadeWoodplanks01";
+
+    public float RiserLength { get; init; } = 250f;
+
+    /// <summary>Height of the board's top above its origin.</summary>
+    public float RiserTopZ { get; init; } = 36f;
+}
+
+internal sealed record StageLog
+{
+    public string Piece { get; init; } = "000533D0:Skyrim.esm";
+
+    public string Name { get; init; } = "StockadeWoodbeam01";
+
+    public float Length { get; init; } = 306f;
+
+    /// <summary>Scale for horizontal beams: sets their thickness. Runs are filled with as many as needed.</summary>
+    public float BeamScale { get; init; } = 2f;
+
+    /// <summary>Overlap between consecutive logs in a run.</summary>
+    public float Overlap { get; init; } = 30f;
+}
+
+internal sealed record StageBeam
+{
+    public float[] From { get; init; } = Array.Empty<float>();
+
+    public float[] To { get; init; } = Array.Empty<float>();
+
+    public float Z { get; init; }
+}
+
+internal sealed record StageRafters
+{
+    /// <summary>Across-stage positions of the rafters.</summary>
+    public List<float> U { get; init; } = new();
+
+    public float FromV { get; init; } = -470f;
+
+    public float ToV { get; init; } = 470f;
+
+    public float Z { get; init; } = 700f;
+
+    public float Scale { get; init; } = 1.6f;
+}
+
+internal sealed record StageBrace
+{
+    public float[] From { get; init; } = Array.Empty<float>();
+
+    public float[] To { get; init; } = Array.Empty<float>();
+
+    public float ZLow { get; init; }
+
+    public float ZHigh { get; init; }
+}
+
 
 /// <summary>
 /// A private interior cell, paved with the project's own floor kit and open to the

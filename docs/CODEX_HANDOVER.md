@@ -89,6 +89,27 @@ Rules for this direction:
   (the trees) still only draw while their cell is loaded.
 - **The gate model is open** (the asset). Keep the view through it dressed: the forest
   keeps only a short clearing straight out of it, and the mountains close the view.
+- **The main stage** (`FairStage.cs`, `fairWorld.stage`), 2026-09-22, night, **pending
+  Barry's visual review**:
+  - An open timber pavilion of vanilla pieces, anchored on the Stage zone marker and
+    facing its heading, centred on the gate-to-stage axis:
+    - farmhouse `Walkway01` porch deck, 1,750 x 912 at 134 high
+    - broad `StockadeScaffoldTop0Sided01` steps with plank risers
+    - a plank skirt
+    - `StockadeWoodbeam01` logs for posts, beams, rafters and rear X-braces
+  - Keep the crowd square in front of it empty of permanent clutter, and the axis
+    clear.
+  - Rejected pieces and why are in `docs/AUDIT.md`. Vanilla has **no standalone cloth
+    awning** (the canvas exists only inside whole stall meshes), so a cloth canopy
+    would be a small project mesh using vanilla `whmarketstallroof01.dds` by path.
+    That is Barry's call.
+- **Rotations are about world axes, Z then Y then X.** Lay logs with a yaw plus at
+  most one tilt about the world axis across them. Build braces as crossing pairs, which
+  are immune to a tilt's sign.
+- **Measure usable surfaces, not bounds.** `tools/nif_preview.py` renders vanilla NIFs
+  (extract them with `tools/bsa_extract.py`) so pieces can be audited without the CK. In
+  this modlist the vanilla texture BSAs live in the *Vanilla Remastered* mod folders,
+  not in stock Data.
 - **FormID stability**: exterior CELL and LAND are allocated before anything placed in
   them, so wall, gate and forest changes never renumber them. Anything new that is
   placed goes after them.

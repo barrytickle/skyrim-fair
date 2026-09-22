@@ -2,7 +2,160 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: mountain backdrop and the view through the gate (2026-09-22, night)
+## Current pass: main stage architecture (2026-09-22, night)
+
+The brief: an open, handmade, temporary Nordic timber pavilion at the north end of the
+avenue, facing the gate, built from vanilla pieces. Barry's concept image was used as
+loose art direction ("take the concept with a pinch of salt"). **Nothing else moved**:
+read back against the mountain build (`b77160ca...`), 835 of 836 existing non-backdrop
+records are identical. The one change is intended: `SkyrimFairWorldStageMarker` now
+stands on the deck, at Z 134. The 133 stage references are new, and the trees and
+mountains are unchanged in content, only renumbered. No NPCs, music, animation,
+navmesh, stalls or dressing.
+
+Preview renders from the written plugin (every placed mesh, rotated as the engine
+does): `docs/images/stage_preview_views.png` (from the gate, and from the crowd square,
+both at eye height 120), `stage_preview_side.png` and `stage_preview_plan.png`. The red
+boxes are 128-tall figures for scale.
+
+### Placement, derived from the config
+
+- **Anchor**: the configured `Stage` zone's marker, (2048, 6548), heading **180**
+  (south). The stage faces the marker's heading. The deck centre is the marker moved
+  `forwardOffset` 160 toward the audience, to **(2048, 6388)**, which keeps the rear
+  timbers clear of the wall.
+- **On the sightline**: the main gate at (2048, -2777) already faces the Stage marker,
+  so the deck, steps and frame are centred on **x 2048**, the gate-to-stage axis. No
+  post, beam or clutter stands on that axis in front of the deck; the steps are on it by
+  design.
+- `fairWorld.stage` holds everything in stage-local coordinates (`u` across, `v`
+  toward the audience), so the stage follows its zone if the zone ever moves. The
+  marker must face along a world axis, and the generator refuses otherwise (see the
+  rotation note below).
+
+### Dimensions
+
+| Part | Value |
+| --- | --- |
+| Deck | **1,750 wide x 912 deep**, top **134** above the crowd square (about head height), 7 x 4 porch sections |
+| Steps | one central flight, **744 wide**, 5 treads, **22.3 risers**, 110 treads, **550 run** (about 14 degrees), foot at (2048, 5382) |
+| Frame | posts **700** tall; header beams at 640 and 575, rafters at 690; overall about 1,900 x 1,560 on plan, **713** high |
+| Audience space | the crowd square in front, from the step foot (y 5382) back to about 4,350: roughly 1,000 deep, **empty** |
+
+### Vanilla assets used (all Skyrim.esm, referenced, nothing copied)
+
+| Role | STAT | FormID | Count | Scale | Collision |
+| --- | --- | --- | --- | --- | --- |
+| Deck | `Walkway01` (farmhouse porch: plank deck on corner posts with knee braces) | `01C570` | 28 | 1.0 | compressed mesh, unscaled |
+| Steps | `StockadeScaffoldTop0Sided01` (camp scaffold plank top) | `0533C0` | 15 | 1.0 | **box** |
+| Risers | `StockadeWoodplanks01` | `0533D5` | 15 | 1.0 | compressed mesh |
+| Deck skirt | `StockadeWoodplanks04` (250 x 143 plank panel) | `0533D8` | 22 | 1.0 | compressed mesh |
+| Posts, beams, rafters, braces | `StockadeWoodbeam01` (bark log, 306 long) | `0533D0` | 6 + 20 + 21 + 6 | 1.55-2.34 | convex hull |
+
+**133 references in total.**
+
+- **Deck**: tiled at **250 x 228**, the size of the plank surface measured from the mesh.
+  The object bounds say 272 x 256, which includes post ends; tiled at that size, the
+  preview showed a slit at every joint. The porch's own posts carry it down to the
+  ground, with a plank skirt on the front, sides and back, left open behind the steps.
+- **Steps**: each tread rests on the one below. A board under each front edge closes
+  the riser. There are no railings.
+- **Frame**:
+  - chunky round-log posts at the front corners, with four more along the rear
+  - a doubled header at the front and a top beam and rail at the rear
+  - side beams, and seven log rafters as a slatted partial canopy
+  - the rear bays X-braced as a light timber backing
+  - the sides and front left open
+- **Handmade**: every log wanders up to 5 in height, 1 degree in yaw and 3% in size.
+  Posts lean up to 0.8 degrees and sink up to 12, all from fixed integer hashes.
+
+### Rejected, and why
+
+| Candidate | Why not |
+| --- | --- |
+| `WalkwayStairs1/3/4/8/15` (farmhouse porch stairs) | steep narrow flights with newel posts, and `WalkwayREnd01` has a rope rail; the brief asks for broad and welcoming, no rails |
+| `StockadeScaffoldStairs01` | 45 degrees with open ladder treads: defensive, not welcoming |
+| `ShipStairs01` | small, awkward profile |
+| `StockadeScaffoldBase*` as the deck | 192 tall, wants sinking, and reads as military scaffolding; the farmhouse porch reads rustic and civilian |
+| Stepping with `Walkway01` pieces | their corner posts would stand in the treads, in the walking line |
+| `ShackRoofMid01` / `Side01` as a canopy | **single-sided** planes: invisible from below, where the audience stands |
+| `OrcAwning*` | bone and hide: reads orcish |
+| `LargeNordicTent01`, `LargeImperialTent01` | a closed hide mound, and an Imperial military tent with the dragon emblem |
+| `SMarketStallTop`, `MrkMarketStallRoof01` | a wooden slat pergola; a roof built onto its own small stall frame |
+| Market-stall canvas (`whmarketstallroof01.dds`, the concept's cream-and-grey stripe) | **exists only baked into whole Windhelm and Riften stall meshes**, with their counters and frames |
+| `StockadeFreewallBeam01` as posts | compressed-mesh collision, which the project knows scales unreliably; the log's convex hull scales |
+
+**Cloth canopy: open question for Barry.** Vanilla has no standalone cloth awning, so
+this pass uses the brief's "timber and/or cloth" allowance: log rafters give the
+silhouette and leave the stage open. A true cloth awning like the concept's needs a
+small project-owned mesh, either a draped sheet or a pair of swags, textured with
+vanilla `whmarketstallroof01.dds` by path, not copied. The brief said not to author one
+unless vanilla genuinely can't, and the audit above shows that vanilla can't. It is
+left for Barry to approve.
+
+### Rotation note (durable)
+
+Skyrim applies a reference's rotations about the world axes, **Z first, then Y, then
+X**. The approved pitched stair cheeks depend on it: they are yawed 90 degrees, then
+pitched about world X. So every stage log is laid with a yaw, then at most one tilt
+about the world axis across it, which is why the stage must face along a world axis.
+Braces are crossing pairs about a shared centre, so they come out right whichever sign
+a tilt takes. The preview renderer uses the same convention.
+
+### Future attachment points (nothing placed yet)
+
+These are all in `fairWorld.stage`, in stage-local coordinates:
+
+| For | Where |
+| --- | --- |
+| Front banners and bunting | the header beams at 640 and 575, spanning u ±955 |
+| Rear backdrop banners | the rear rail at 380 and the rear top beam at 640 (v -490) |
+| Braziers at the front corners | on the deck, inside the posts at u ±905, v 490 |
+| Performer markers | on the deck (top 134, 1,750 x 912); the Stage marker already stands on it |
+
+### Collision observations (not yet tested in game)
+
+- **Deck**: `Walkway01` at scale 1, its own compressed mesh, so it should walk like any
+  farmhouse porch.
+- **Steps**: box colliders at scale 1, with 22-unit risers, well within the player's
+  step height.
+- **Logs**: convex hulls at scale 1.55-2.34. They should scale with the mesh, but walk
+  into a post to confirm.
+- **Skirt boards**: compressed mesh, unscaled.
+
+### Verification of this pass
+
+- Release build: zero warnings, zero errors. Generator run twice: identical SHA256
+  `158d7203...`.
+- Read back against `b77160ca...`: 835 of 836 non-backdrop records identical, 1
+  intended change (the Stage marker's Z), 133 new stage references. Trees (518) and
+  mountains (24, all `0x10400`) are unchanged in content.
+- Geometry checked against the written plugin's meshes:
+  - 0 stage vertices outside the compound, and the nearest above-ground stage geometry
+    is 100 from the wall line
+  - 0 stage geometry in the audience area south of the step foot
+  - nothing but the steps on the gate-to-stage axis in front of the deck
+- Preview renders made from the plugin: the deck is continuous (after the 250 x 228
+  fix), the risers are closed, and the frame reads from the gate.
+- ESP deployed byte-identical. No new assets this pass.
+
+### What Barry should test in game (this pass)
+
+1. **From the gate** (`player.moveto SkyrimFairWorldEntranceMarker`, face north): do you
+   immediately read the timber pavilion at the end of the avenue as the main stage?
+2. **Walk up the avenue and the steps**: are the steps broad and easy, is the deck solid,
+   and do any tiles show a seam?
+3. **Walk round it**: how does it read from the sides and behind, and does anything float
+   or poke through?
+4. **Collision**: walk into a post and a skirt board.
+5. **Scale**: the deck is at head height and the frame about 5.5 people tall. Does it
+   hold the crowd square, or want to be bigger or smaller?
+6. **The canopy**: are timber rafters enough for now, or do you want the small cloth
+   awning mesh (see above)?
+
+## Mountain backdrop and the view through the gate (previous pass; awaiting review)
+
+Still current. The trees and mountains are renumbered by the stage pass, with their content unchanged.
 
 Barry reviewed the palisade in game: "the gate looks incredible". Two things came back.
 The gate model **is open** (the asset, not the placement). And through it, and over
@@ -591,11 +744,11 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 412,426 bytes (408,356 before the mountains; 366,226 before the palisade; 88,124 before the worldspace) |
-| SHA256 | `b77160caabb0e5a5bef664c6590efb95e1889e8649b5ac31e7590fac845dd09c` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `da78301a...`, the reviewed palisade build) |
+| Size | 421,468 bytes (412,426 before the stage; 408,356 before the mountains; 366,226 before the palisade; 88,124 before the worldspace) |
+| SHA256 | `158d72035e5ba11ecc0e18710357250774a81e26d6fa381ab5859e14d647249e` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `b77160ca...`, the mountain build) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
-| Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the current pass |
+| Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |
 | Kit meshes | unchanged this pass; all 13 deployed NIFs match `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |

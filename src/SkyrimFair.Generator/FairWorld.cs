@@ -106,7 +106,7 @@ internal static class FairWorld
         foreach (var zone in config.Zones)
         {
             var (x, y, heading) = (zone.Marker[0], zone.Marker[1], zone.Marker[2]);
-            var marker = Place(mod, markerBase, x, y, config.FloorZ, heading);
+            var marker = Place(mod, markerBase, x, y, config.FloorZ + zone.MarkerHeight, heading);
             marker.EditorID = $"{config.EditorId}{zone.Name}Marker";
             marker.MajorRecordFlagsRaw = PersistentRecordFlag;
             topCell.Persistent.Add(marker);
@@ -175,6 +175,9 @@ internal static class FairWorld
             placed.Scale = panel.Scale;
             Put(placed);
         }
+
+        // ---- the main stage ---------------------------------------------------------
+        var stage = config.Stage.Enabled ? FairStage.Build(mod, config, plan.Height, Put) : null;
 
         // ---- distant mountains ------------------------------------------------------
         var mountains = new List<MountainPlacement>();
@@ -245,6 +248,7 @@ internal static class FairWorld
                     g.Min(t => t.Distance), g.Max(t => t.Distance)))
                 .ToList(),
             mountains,
+            stage,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
             plan.RenderPlan(1024f, config.Forest.OuterDistance, trees),
             plan.RenderMountains(mountains, 2048f));
@@ -911,20 +915,9 @@ internal static class FairWorld
 
         private static float Lerp(float a, float b, float t) => a + (b - a) * t;
 
-        /// <summary>Hash of three integers in 0..1: a position and a salt naming what it decides.</summary>
-        private static float Hash3(int a, int b, int salt)
-            => Hash(unchecked(a * 73856093 ^ salt * 83492791), unchecked(b * 19349663 + salt));
+        private static float Hash3(int a, int b, int salt) => FairHash.Hash3(a, b, salt);
 
-        private static float Hash(int x, int y)
-        {
-            unchecked
-            {
-                var h = (uint)x * 374761393u + (uint)y * 668265263u;
-                h = (h ^ (h >> 13)) * 1274126177u;
-                h ^= h >> 16;
-                return (h & 0xFFFFFF) / 16777216f;
-            }
-        }
+        private static float Hash(int x, int y) => FairHash.Hash(x, y);
     }
 }
 
@@ -966,6 +959,7 @@ internal sealed record FairWorldResult(
     FairWorldWall Wall,
     IReadOnlyList<FairWorldTreeCount> Trees,
     IReadOnlyList<MountainPlacement> Mountains,
+    StageResult? Stage,
     string Plan,
     string ForestPlan,
     string MountainPlan);
