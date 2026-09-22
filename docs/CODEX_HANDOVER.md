@@ -119,7 +119,8 @@ Rules for this direction:
 - **Placeholder stall-keepers** (`FairVendors.cs`, `fairWorld.vendors`): 34 visual-only
   NPCs, one per stall. They take only their Traits from vanilla commoner leveled lists
   (vanilla FaceGen, so no dark faces), have their own vanilla town clothes, the Citizen
-  class and a hold-position package, and no merchant, faction, dialogue or script.
+  class and `DefaultStayAtEditorLocation` (never a hold-position package: they draw
+  weapons), one per counter, and no merchant, faction, dialogue or script.
   When real merchants come, keep this template approach, or make faces in the CK and
   ship their FaceGen.
 - **MCM Helper is planned** (`docs/MCM.md`). Generate every switchable feature under one

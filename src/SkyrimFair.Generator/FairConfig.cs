@@ -1774,8 +1774,11 @@ internal sealed record MarketModule
 
     public List<MarketPiece> Pieces { get; init; } = new();
 
-    /// <summary><c>[x, y]</c> in the module frame where the stall-keeper stands, facing the front.</summary>
-    public float[] VendorSpot { get; init; } = Array.Empty<float>();
+    /// <summary>
+    /// <c>[x, y]</c> in the module frame where stall-keepers stand, facing the front: one
+    /// per counter, so a merged pair of stalls gets two.
+    /// </summary>
+    public List<float[]> VendorSpots { get; init; } = new();
 }
 
 internal sealed record MarketPiece
@@ -1895,8 +1898,11 @@ internal sealed record VendorsConfig
 
     public string Class { get; init; } = "0001326B:Skyrim.esm";
 
-    /// <summary>Keeps them where they are placed, with no navmesh needed.</summary>
-    public string Package { get; init; } = "000A6854:Skyrim.esm";
+    /// <summary>
+    /// Keeps them where they are placed, with no navmesh needed and no weapons out:
+    /// DefaultStayAtEditorLocation. (The hold-position packages draw weapons.)
+    /// </summary>
+    public string Package { get; init; } = "00025BFC:Skyrim.esm";
 
     public short Level { get; init; } = 5;
 

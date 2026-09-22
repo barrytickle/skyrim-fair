@@ -5,15 +5,15 @@ using Noggog;
 namespace SkyrimFair.Generator;
 
 /// <summary>
-/// Stall-keepers described by <see cref="VendorsConfig"/>: one NPC standing behind each
-/// stall's counter, facing the street. For picturing the market only: they sell nothing,
+/// Stall-keepers described by <see cref="VendorsConfig"/>: one NPC standing behind every
+/// counter (a merged pair of stalls has two), facing the street. For picturing the market only: they sell nothing,
 /// say nothing of their own, and belong to no faction or quest.
 ///
 /// Faces come from vanilla: each vendor record takes only its Traits (race, sex, face,
 /// voice, height) from a vanilla leveled list, so every reference is a different
 /// vanilla face with its own FaceGen, and no generated face can come out dark. Clothes,
 /// class and AI are the vendor's own: vanilla town clothes, the Citizen class, and a
-/// hold-position package so they stay put without a navmesh.
+/// stay-at-location package with no weapons out, so they stay put without a navmesh.
 /// </summary>
 internal static class FairVendors
 {
@@ -74,22 +74,21 @@ internal static class FairVendors
         for (var i = 0; i < stalls.Count; i++)
         {
             var stall = stalls[i];
-            if (stall.VendorX is not { } x || stall.VendorY is not { } y)
+            for (var k = 0; k < stall.Vendors.Count; k++)
             {
-                continue;
-            }
-
-            var npc = looks[(int)(FairHash.Hash3(i, 9, 81) * looks.Count) % looks.Count];
-            put(new PlacedNpc(mod)
-            {
-                Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
-                Placement = new Placement
+                var (x, y) = stall.Vendors[k];
+                var npc = looks[(int)(FairHash.Hash3(i, 9 + k, 81) * looks.Count) % looks.Count];
+                put(new PlacedNpc(mod)
                 {
-                    Position = new P3Float(x, y, ground(x, y) + 2f),
-                    Rotation = new P3Float(0f, 0f, stall.Yaw * Deg),
-                },
-            });
-            placed++;
+                    Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(x, y, ground(x, y) + 2f),
+                        Rotation = new P3Float(0f, 0f, stall.Yaw * Deg),
+                    },
+                });
+                placed++;
+            }
         }
 
         return new VendorsResult(looks.Count, placed);

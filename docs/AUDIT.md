@@ -2,7 +2,27 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: placeholder stall-keepers (2026-09-22, night)
+## Current pass: stall-keeper fixes from Barry's first test (2026-09-22, night)
+
+Barry's test: the keepers showed up and "the faces look okay", but paired stalls had one
+empty counter, and "they all look ready to wanna punch me".
+
+- **Fists up, found and fixed.** The package I used, `DefaultHoldPositionCurrentLoc64`,
+  carries the **WeaponDrawn** flag, so every keeper stood in the unarmed combat stance.
+  It is now **`DefaultStayAtEditorLocation`** (`025BFC`), which 20 vanilla NPCs use,
+  with no weapon flag. They stay at their spot and idle normally. (Lesson: check a
+  vanilla package's flags, not just its name. The hold-position family all draw
+  weapons.)
+- **One keeper per counter.** Modules now carry `vendorSpots`, a list: `canvas_pair`
+  and `canvas_wide` get one per structure, and the `grand_double` two across its double
+  stand. **58 keepers** across the 34 stalls, where there were 34.
+- Generator run twice: identical SHA256 `f661bcc4...` (408,300 bytes). Read back: all 8
+  vendor records use the new package, and 58 are placed.
+- **Deployment pending.** The copy to the MO2 mod folder was refused because the file
+  was in use (the game or MO2 still running from Barry's test). The deployed plugin is
+  still the previous build; copy `dist/SkyrimFair.esp` once Skyrim is closed.
+
+## Placeholder stall-keepers (previous pass; package and counts superseded above)
 
 Barry: "add NPCs to the stalls, but have them sell nothing for the time being... just to
 help me envision it". **34 stall-keepers, one behind each stall's counter, facing the
@@ -969,9 +989,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 406,764 bytes (east market + vendors) |
-| SHA256 | `0aa38d0d93fe554613f3df8375abc10ccc22259e71c146d271561a533a91b78c` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `b921f86d...`, the east-market build) |
+| Size | 408,300 bytes (east market + 58 vendors) |
+| SHA256 | `f661bcc4c3b2b141a7ecc53bd358d1fe693dbe2276f156e664f9cf98f97de189` |
+| Deployed | **pending**: the file was locked by the running game; the deployed copy is still the previous build (`0aa38d0d...`) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |

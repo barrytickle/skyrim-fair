@@ -219,7 +219,9 @@
             {"name": "CrateSmall02", "piece": "0007A609:Skyrim.esm", "x": 250, "y": -105, "z": 69, "yaw": 28, "optional": true},
             {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": -262, "y": 160, "optional": true}
           ],
-          "vendorSpot": [0, -60]
+          "vendorSpots": [
+            [-105, -60], [105, -60]
+          ]
         },
         {
           "name": "canvas_pair",
@@ -232,7 +234,9 @@
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -100, "optional": true},
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 200, "y": 112, "yaw": 20, "optional": true}
           ],
-          "vendorSpot": [-105, -40]
+          "vendorSpots": [
+            [-105, -40], [100, -40]
+          ]
         },
         {
           "name": "whiterun_stand",
@@ -245,7 +249,9 @@
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 160, "y": -105, "yaw": 35, "optional": true},
             {"name": "CrateSmall03", "piece": "0007A617:Skyrim.esm", "x": 162, "y": 60, "z": 24, "yaw": -12, "optional": true}
           ],
-          "vendorSpot": [0, -65]
+          "vendorSpots": [
+            [0, -65]
+          ]
         },
         {
           "name": "canvas_wide",
@@ -258,7 +264,9 @@
             {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": 245, "y": 95, "z": 24, "yaw": 15, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -245, "y": -110, "optional": true}
           ],
-          "vendorSpot": [-140, -40]
+          "vendorSpots": [
+            [-140, -40], [135, -60]
+          ]
         },
         {
           "name": "cask_bar",
@@ -272,7 +280,9 @@
             {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 70, "y": 150},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -120, "optional": true}
           ],
-          "vendorSpot": [95, -40]
+          "vendorSpots": [
+            [95, -40]
+          ]
         },
         {
           "name": "open_trader",
@@ -286,7 +296,9 @@
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 140, "y": 70, "optional": true},
             {"name": "FirewoodPileMedium01", "piece": "000185B5:Skyrim.esm", "x": -130, "y": 80, "optional": true}
           ],
-          "vendorSpot": [0, -40]
+          "vendorSpots": [
+            [0, -40]
+          ]
         },
         {
           "name": "trestle",
@@ -297,7 +309,9 @@
             {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": -95, "y": -60, "z": 24, "yaw": 12},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 100, "y": -55, "optional": true}
           ],
-          "vendorSpot": [0, -50]
+          "vendorSpots": [
+            [0, -50]
+          ]
         }
       ],
       "fixed": [
@@ -383,7 +397,7 @@
       "name": "Fair Trader",
       "race": "00013746:Skyrim.esm",
       "class": "0001326B:Skyrim.esm",
-      "package": "000A6854:Skyrim.esm",
+      "package": "00025BFC:Skyrim.esm",
       "level": 5,
       "looks": [
         { "name": "Male", "template": "0001A319:Skyrim.esm", "female": false, "outfits": ["0007144A:Skyrim.esm", "0009D4B5:Skyrim.esm", "0009D5E0:Skyrim.esm", "0005FB81:Skyrim.esm"] },

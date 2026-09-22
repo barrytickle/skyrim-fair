@@ -140,14 +140,12 @@ internal static class FairMarket
                 },
             };
             persistentCell.Persistent.Add(marker);
-            float? vx = null, vy = null;
-            if (m.VendorSpot is { Length: 2 })
-            {
-                var (su, sv) = (mirror * m.VendorSpot[0], m.VendorSpot[1]);
-                (vx, vy) = (x + su * rx + sv * fx, y + su * ry + sv * fy);
-            }
+            var vendors = m.VendorSpots
+                .Where(v => v.Length == 2)
+                .Select(v => (X: x + mirror * v[0] * rx + v[1] * fx, Y: y + mirror * v[0] * ry + v[1] * fy))
+                .ToList();
 
-            stalls.Add(new MarketStall(laneName, m.Name, theme, marker.EditorID, x, y, yaw, m.Width, m.Depth, vx, vy));
+            stalls.Add(new MarketStall(laneName, m.Name, theme, marker.EditorID, x, y, yaw, m.Width, m.Depth, vendors));
         }
 
         // A stall beside a lane at a station, pushed back behind the lane edge, facing it.
@@ -434,7 +432,7 @@ internal static class FairMarket
 
 internal sealed record MarketStall(
     string Lane, string Module, string Theme, string MarkerEditorId, float X, float Y, float Yaw, float Width, float Depth,
-    float? VendorX, float? VendorY);
+    IReadOnlyList<(float X, float Y)> Vendors);
 
 internal sealed record MarketResult(
     IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons);
