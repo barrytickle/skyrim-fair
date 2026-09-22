@@ -194,7 +194,7 @@
         {
           "name": "ArcheryRange",
           "polygon": [
-            [3250, -1100], [5400, -700], [5400, 3700], [3250, 3700]
+            [-1100, -900], [1500, -900], [1500, 3900], [-1100, 3900]
           ]
         },
         {
@@ -294,15 +294,15 @@
         }
       ],
       "fixed": [
-        {"lane": "Avenue", "at": 3000, "side": "left", "module": "grand_double", "theme": "imperial"},
-        {"lane": "Avenue", "at": 3000, "side": "right", "module": "grand_double", "theme": "stormcloak"},
-        {"lane": "Avenue", "at": 5520, "side": "right", "module": "canvas_pair", "theme": "sweetroll"}
+        {"lane": "EastLane", "at": 2600, "side": "left", "module": "grand_double", "theme": "imperial"},
+        {"lane": "EastLane", "at": 2600, "side": "right", "module": "grand_double", "theme": "stormcloak"},
+        {"lane": "EastLane", "at": 4150, "side": "right", "module": "canvas_pair", "theme": "sweetroll"}
       ],
       "lanes": [
         {
           "name": "Avenue",
           "useAvenue": true,
-          "from": 300,
+          "from": 500,
           "to": 5950,
           "halfWidths": [
             [0, 300], [6300, 300]
@@ -314,16 +314,60 @@
             {"module": "whiterun_stand", "weight": 3},
             {"module": "canvas_wide", "weight": 2}
           ],
-          "themes": ["food", "drink", "sweets", "pies", "cheese", "roast", "produce", "bakery", "curios", "leather"],
+          "themes": ["food", "drink", "sweets", "pies", "cheese", "roast", "produce", "bakery", "honey", "spices"],
+          "gapMin": 20,
+          "gapMax": 45,
+          "pocketChance": 0,
+          "setBack": 15,
+          "angleJitter": 3,
+          "sides": "right"
+        },
+        {
+          "name": "EastLane",
+          "points": [
+            [3700, -800], [3700, 3700]
+          ],
+          "halfWidths": [
+            [0, 300], [4600, 300]
+          ],
+          "meander": [0, 1000],
+          "sides": "right",
+          "mix": [
+            {"module": "grand_double", "weight": 2},
+            {"module": "canvas_pair", "weight": 3},
+            {"module": "whiterun_stand", "weight": 3},
+            {"module": "canvas_wide", "weight": 2}
+          ],
+          "themes": ["smith", "armour", "hunter", "leather", "furs", "jewellery", "dwemer", "elven", "mage", "alchemy"],
           "gapMin": 20,
           "gapMax": 45,
           "pocketChance": 0,
           "setBack": 15,
           "angleJitter": 3
+        },
+        {
+          "name": "EastEntry",
+          "points": [
+            [2250, -1650], [3050, -1300], [3700, -850]
+          ],
+          "halfWidths": [
+            [0, 200], [1700, 200]
+          ],
+          "mix": []
+        },
+        {
+          "name": "EastCross",
+          "points": [
+            [2300, 1000], [3700, 1000]
+          ],
+          "halfWidths": [
+            [0, 210], [1500, 210]
+          ],
+          "mix": []
         }
       ],
       "backFill": ["canvas_wide", "grand_double", "canvas_pair", "whiterun_stand"],
-      "backFillThemes": ["smith", "armour", "mage", "dwemer", "jewellery", "alchemy", "books", "elven", "hunter", "furs", "scrolls", "curios", "pottery", "candles", "toys", "herbs", "rugs", "weaver", "tanner", "carver"],
+      "backFillThemes": ["books", "scrolls", "curios", "candles", "pottery", "toys", "herbs", "rugs", "weaver", "tanner", "carver", "cooper", "bone", "timber"],
       "dressing": []
     },
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
@@ -334,20 +378,20 @@
         "name": "Market",
         "texture": "000134B7:Skyrim.esm",
         "polygon": [
-          [-505, -296], [1504, -756], [1504, 374], [1378, 2634],
-          [1462, 3931], [123, 3889], [-589, 2885], [-630, 1044]
+          [2592, -798], [3889, -1174], [4978, -505], [5270, 792],
+          [5145, 2634], [5312, 3806], [4057, 3931], [2634, 3889],
+          [2676, 1211]
         ],
-        "marker": [458, 1797, 90]
+        "marker": [3650, 1400, 270]
       },
       {
         "name": "Activity",
         "texture": "00024E46:Skyrim.esm",
         "polygon": [
-          [2592, -798], [3889, -1174], [4978, -505], [5270, 792],
-          [5145, 2634], [5312, 3806], [4057, 3931], [2634, 3889],
-          [2676, 1211]
+          [-505, -296], [1504, -756], [1504, 374], [1378, 2634],
+          [1462, 3931], [123, 3889], [-589, 2885], [-630, 1044]
         ],
-        "marker": [3304, 1378, 90]
+        "marker": [700, 1400, 270]
       },
       {
         "name": "Entrance",

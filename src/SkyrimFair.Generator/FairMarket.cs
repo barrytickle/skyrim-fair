@@ -295,9 +295,16 @@ internal static class FairMarket
             {
                 var front = fronts[i];
                 var (fx, fy) = (MathF.Sin(front.Yaw * Deg), MathF.Cos(front.Yaw * Deg));
-                foreach (var name in market.BackFill)
+                // Prefer the stall closest in frontage to the one in front, so the back row
+                // lines up with it instead of overlapping its neighbours.
+                var candidates = market.BackFill
+                    .Select(n => modules[n])
+                    .OrderBy(x => x.Width > front.Width + 20f ? 1 : 0)
+                    .ThenBy(x => MathF.Abs(x.Width - front.Width))
+                    .ToList();
+                foreach (var m in candidates)
                 {
-                    var m = modules[name];
+                    var name = m.Name;
                     var back = front.Depth / 2f + m.Depth / 2f + market.Clearance + 40f;
                     var (x, y) = (front.X - fx * back, front.Y - fy * back);
                     var yaw = front.Yaw + 180f + FairHash.Signed(i, 3, 74) * 5f;

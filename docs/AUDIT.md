@@ -2,62 +2,67 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: market as two stall columns along the avenue (2026-09-22, night)
+## Current pass: east market, west games field (2026-09-22, night)
 
-Barry's review of the first market layout: "rather than a maze, could we have it in
-columns? maybe 1x 20 and 1x 19 stalls", with "just all stalls" (no open traders, trestle
-tables or cask bars) and "keep stalls big".
+Barry: "could we have just an 'east market' and have the west for the archery and
+anything else?" The market now fills the **east half** as two market streets built
+from stall islands. The **west half is open for archery and games**.
 
-**The market is now one straight market street: 40 proper stalls in two columns down
-both sides of the avenue**, from just inside the gate to the crowd square, with the
-stage closing the view.
+```
+            west wall                                   east wall
+   ┌───────────────────────── crowd square ─── stage ────────────────┐
+   │                          │ A-front ▌A-back │ East │B-front ▌B-back│
+   │  ARCHERY / GAMES FIELD   │ (faces  ▌(faces │ Lane │(faces  ▌(faces│
+   │  (open; shoots west)     │ avenue) ▌ lane) │      │ lane)  ▌ wall)│
+   │        avenue (west side open) ──▶ stage │      │        ▌      │
+   └──────────── gate ───────────────────────────────────────────────┘
+```
 
-| Column | Front row (faces the avenue) | Back row (back to back, faces out) | Total |
+| Column | Front row | Back row (back to back) | Total |
 | --- | --- | --- | --- |
-| **West** | 11 | 10 | **21** |
-| **East** | 10 | 9 | **19** |
-| | | | **40 stalls, 173 pieces** |
+| **A**, along the avenue's east side | 9, facing the avenue | 6, facing the East Lane | 15 + the Imperial stall = **16** |
+| **B**, along the East Lane's far side | 9, facing the lane | 9, facing the east-wall walkway | **18** |
+| | | | **34 stalls, 141 pieces** |
 
-- **Stall types only**: `grand_double` (Whiterun canvas double stand), `canvas_pair`
-  (merged Windhelm canvas stalls), `whiterun_stand` (gabled timber stall) and
-  `canvas_wide` (Windhelm canvas + Whiterun stand). The `open_trader`, `trestle` and
-  `cask_bar` modules remain defined in the config but are no longer used.
-- **Why double-depth.** At full size a stall averages about 470 of frontage, so a single
-  row down the ~5,500 of avenue holds about 10 a side. The second, back-to-back row is
-  how the columns reach Barry's numbers without shrinking the stalls, as Christmas
-  market stall islands do. The west column came out one over the 20 asked for; it can
-  be trimmed if wanted.
-- **The street**: straight (no meander), a constant 600 between the column fronts, with
-  20-45 gaps between stalls and no pockets.
-- The maze lanes, branches, alleys, back-lane infill and crossing banner posts are
-  removed from the config. The lane and infill machinery stays in `FairMarket.cs` for
-  later.
-- **Signature slots kept**: `SkyrimFairStallImperial01` and `...Stormcloak01` face
-  each other across the avenue at mid-length; `...Sweetroll01` stands near the crowd
-  square. Every stall still has a themed shell marker: food and drink along the
-  front rows, specialists and trades along the back rows.
-- The forecourt is no longer a keep-out. The first stalls stand 562 from the gate, so
-  the arrival space inside it stays open.
+- **Zones swapped**: the `Market` zone (worn-earth ground) now takes the east polygon,
+  marker (3650, 1400). The `Activity` zone (grass-free ground) takes the west polygon,
+  marker (700, 1400) **facing west**, so a future archery line shoots at the west wall,
+  away from the avenue. Their ground paint follows.
+- **Lanes**:
+  - the avenue, lined on its east side only
+  - the **East Lane**, x 3,700, y -800..3,700, 600 wide, lined on its far side
+  - two stall-free openings: an **entrance passage** leaving the forecourt diagonally
+    to the lane's south end, and a **mid crossing** at y 1,000
+  - the crowd square joins both streets at the north
+- **Keep-outs**: the archery range is now the west field (x < 1,500). The crowd square,
+  the stage and the gate-to-stage sightline band are unchanged.
+- **Stalls only** (Whiterun double and gabled stands, Windhelm canvas pairs, the wide
+  mixed stall). Back rows now take the stall type closest in frontage to the one in
+  front, so the islands line up.
+- **Signature slots**: `SkyrimFairStallImperial01` and `...Stormcloak01` face each
+  other across the East Lane, and `...Sweetroll01` is at the lane's north end by the
+  crowd square. Every stall has a themed shell marker: food along the avenue,
+  specialists and faction trades on the East Lane, trades on the back rows.
+- **Count**: 34, against 40 when both avenue sides were lined, because both columns now
+  share the east half at full stall size.
 
-Previews from the plugin: `docs/images/market_plan.png`, and
-`docs/images/market_views.png` (from inside the gate, looking up the avenue).
+Previews: `docs/images/market_plan.png`, and `docs/images/market_views.png` (from the
+gate; down the East Lane).
 
 ### Verification
 
-- Generator run twice: identical SHA256 `613c3418...` (405,255 bytes). Deployed
+- Generator run twice: identical SHA256 `b921f86d...` (402,644 bytes). Deployed
   byte-identical.
-- Market meshes, vertex by vertex:
-  - 0 outside the compound, nearest 266 from the wall line
-  - 0 in the crowd square, the stage zone, the archery range and the 260-wide
-    gate-to-stage sightline band
-  - nearest to the gate 562
+- Market meshes: 0 outside the compound (nearest 419 from the wall line); 0 in the
+  crowd square, the stage zone, the west activity field or archery range, and the
+  gate-to-stage sightline band.
 
 ### What Barry should test
 
-1. Walk from the gate up the avenue: two solid columns of stalls, the stage at the end.
-2. Walk behind a column: the back rows face out onto the grass either side. Is that
-   useful, or should the back rows face the avenue in a second, set-back line instead?
-3. Is 600 between the fronts a comfortable street width?
+1. From the gate: the market down the right, the open field on the left, the stage ahead.
+2. The entrance passage and the mid crossing into the East Lane: are they easy to find?
+3. Walk the East Lane: does it feel like a second market street?
+4. Is the west field the right size and shape for archery and games?
 
 ### Stall kit (all vanilla Skyrim.esm, referenced, nothing copied)
 
@@ -928,9 +933,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 405,255 bytes (market as two columns; 404,261 for the maze version) |
-| SHA256 | `613c34181d5d7da61e9abf17372eb121a350f434c9411f7ac3d186ad425dab48` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `c0e25d02...`, the maze market build) |
+| Size | 402,644 bytes (east market) |
+| SHA256 | `b921f86db8c25ba8edec902bc3b755a0e407e8add22b9d956f01f48e3c9a468c` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `613c3418...`, the two-column build) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |
