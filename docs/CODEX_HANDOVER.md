@@ -81,6 +81,14 @@ Rules for this direction:
   beyond the wall, with none near the gate or in front of it. Only trees in cells
   -1..1 are always loaded, so far trees can pop in. Tree LOD for this worldspace is the
   eventual fix.
+- **Distant scenery must be Persistent + Is Full LOD (`0x10400`) in the persistent
+  cell, inside the world's object bounds.** That is vanilla's method for its small
+  worlds' distant clouds, and how the 24 snow-mountain `_HeavySN` STATs (`Plan.Mountains`,
+  `fairWorld.mountains`) draw with no LOD. Sink every mountain by its own mesh bounds
+  (lowest point at Z -1,000) so no base shows over the wall. Ordinary cell references
+  (the trees) still only draw while their cell is loaded.
+- **The gate model is open** (the asset). Keep the view through it dressed: the forest
+  keeps only a short clearing straight out of it, and the mountains close the view.
 - **FormID stability**: exterior CELL and LAND are allocated before anything placed in
   them, so wall, gate and forest changes never renumber them. Anything new that is
   placed goes after them.

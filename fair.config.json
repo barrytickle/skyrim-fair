@@ -92,8 +92,9 @@
       "peakDensity": 0.8,
       "clusterPeriod": 1700,
       "clearingThreshold": 0.34,
-      "gateClearRadius": 1800,
-      "gateApproachDegrees": 28,
+      "gateClearRadius": 700,
+      "gateApproachDegrees": 18,
+      "gateApproachLength": 2200,
       "leanDegrees": 1.5,
       "sink": 24,
       "trees": [
@@ -102,6 +103,40 @@
         { "name": "TreePineForest04", "formKey": "0004FBB0:Skyrim.esm", "weight": 3, "minScale": 0.8, "maxScale": 1.25, "minDistance": 450 },
         { "name": "TreePineForest05", "formKey": "00051126:Skyrim.esm", "weight": 3, "minScale": 0.85, "maxScale": 1.35, "minDistance": 380 },
         { "name": "TreePineForest03", "formKey": "0004B016:Skyrim.esm", "weight": 1.5, "minScale": 0.9, "maxScale": 1.5, "minDistance": 320, "maxDistance": 1800 }
+      ]
+    },
+    "mountains": {
+      "enabled": true,
+      "baseZ": -1000,
+      "rows": [
+        {
+          "name": "near",
+          "count": 11,
+          "minRadius": 13000,
+          "maxRadius": 15500,
+          "angleJitter": 0.3,
+          "startDegrees": 9,
+          "pieces": [
+            { "name": "MountainRidge02_Heavy_SN", "formKey": "0005304E:Skyrim.esm", "weight": 3, "minScale": 0.9, "maxScale": 1.2 },
+            { "name": "MountainRidge01_HeavySN", "formKey": "0005205B:Skyrim.esm", "weight": 2, "minScale": 0.9, "maxScale": 1.2 },
+            { "name": "MountainCliffSm01_HeavySN", "formKey": "00050DC0:Skyrim.esm", "weight": 2, "minScale": 0.9, "maxScale": 1.15 },
+            { "name": "MountainCliff04_HeavySN", "formKey": "00027DDC:Skyrim.esm", "weight": 1, "minScale": 0.8, "maxScale": 1.0 }
+          ]
+        },
+        {
+          "name": "far",
+          "count": 13,
+          "minRadius": 17500,
+          "maxRadius": 20500,
+          "angleJitter": 0.35,
+          "startDegrees": 23,
+          "pieces": [
+            { "name": "MountainPeak01_HeavySN", "formKey": "00043321:Skyrim.esm", "weight": 3, "minScale": 0.95, "maxScale": 1.2 },
+            { "name": "MountainPeak02_HeavySN", "formKey": "00046031:Skyrim.esm", "weight": 2, "minScale": 0.85, "maxScale": 1.1 },
+            { "name": "MountainCliff01_HeavySN", "formKey": "00048DE0:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.25 },
+            { "name": "MountainCliff04_HeavySN", "formKey": "00027DDC:Skyrim.esm", "weight": 1, "minScale": 1.0, "maxScale": 1.3 }
+          ]
+        }
       ]
     },
     "avenue": [[2048, -2752], [1898, 48], [2198, 2748], [2048, 4748]],

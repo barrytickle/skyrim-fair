@@ -115,6 +115,9 @@ internal sealed record FairWorldConfig
     /// <summary>The ring of vanilla conifers outside the wall.</summary>
     public ForestConfig Forest { get; init; } = new();
 
+    /// <summary>Distant vanilla mountains, always drawn.</summary>
+    public MountainsConfig Mountains { get; init; } = new();
+
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
 
@@ -170,6 +173,13 @@ internal sealed record FairWorldConfig
         if (!Zones.Any(z => z.Name == GateFacesZone))
         {
             throw new InvalidOperationException($"FairWorld.GateFacesZone '{GateFacesZone}' is not a zone.");
+        }
+
+        if (Mountains.Enabled && Mountains.Rows.Any(r => r.Count < 1 || r.Pieces.Count == 0 || r.Pieces.Any(p => p.Weight <= 0f)
+                || r.MinRadius <= 0f || r.MaxRadius < r.MinRadius))
+        {
+            throw new InvalidOperationException(
+                "Every FairWorld mountain row needs a count, radii, and pieces with positive weights.");
         }
 
         if (Forest.Enabled && (Forest.Trees.Count == 0 || Forest.Trees.Any(t => t.Weight <= 0f)))
@@ -302,16 +312,71 @@ internal sealed record ForestConfig
     public float ClearingThreshold { get; init; } = 0.34f;
 
     /// <summary>No tree within this distance of the gate.</summary>
-    public float GateClearRadius { get; init; } = 1800f;
+    public float GateClearRadius { get; init; } = 700f;
 
-    /// <summary>Half-angle of the open approach kept in front of the gate, outward.</summary>
-    public float GateApproachDegrees { get; init; } = 28f;
+    /// <summary>
+    /// Half-angle of the clearing kept straight out of the gate, like a path leading
+    /// away. It runs only <see cref="GateApproachLength"/> out, so the forest closes
+    /// behind it and the view through the open gate is of trees and mountains.
+    /// </summary>
+    public float GateApproachDegrees { get; init; } = 18f;
+
+    public float GateApproachLength { get; init; } = 2200f;
 
     /// <summary>Largest lean off vertical, degrees.</summary>
     public float LeanDegrees { get; init; } = 1.5f;
 
     /// <summary>How far each trunk is sunk below the ground at its position.</summary>
     public float Sink { get; init; } = 24f;
+}
+
+/// <summary>
+/// Vanilla mountain meshes ringing the world far beyond the forest. The world has no
+/// LOD, so they are placed as vanilla places distant scenery in its small worlds
+/// (Skuldafn's and Sovngarde's clouds): in the persistent cell, flagged Persistent and
+/// Is Full LOD, which draws them whatever cells are loaded. Each row is a ring round the
+/// compound centre; pieces are sunk so their lowest point sits at <see cref="BaseZ"/>,
+/// well below anything the wall lets the player see.
+/// </summary>
+internal sealed record MountainsConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    public float BaseZ { get; init; } = -1000f;
+
+    public List<MountainRow> Rows { get; init; } = new();
+}
+
+internal sealed record MountainRow
+{
+    public string Name { get; init; } = string.Empty;
+
+    public int Count { get; init; }
+
+    public float MinRadius { get; init; }
+
+    public float MaxRadius { get; init; }
+
+    /// <summary>Fraction of the even angular spacing each piece may wander.</summary>
+    public float AngleJitter { get; init; } = 0.35f;
+
+    /// <summary>Turns the row's pattern so its pieces do not line up with the other row's.</summary>
+    public float StartDegrees { get; init; }
+
+    public List<MountainPiece> Pieces { get; init; } = new();
+}
+
+internal sealed record MountainPiece
+{
+    public string Name { get; init; } = string.Empty;
+
+    public string FormKey { get; init; } = string.Empty;
+
+    public float Weight { get; init; } = 1f;
+
+    public float MinScale { get; init; } = 1f;
+
+    public float MaxScale { get; init; } = 1f;
 }
 
 internal sealed record ForestTree

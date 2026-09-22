@@ -150,6 +150,17 @@ try
         Console.Write(world.Plan);
         Console.WriteLine("  Forest (north up, 1024 units per character, ^ = trees, G = gate):");
         Console.Write(world.ForestPlan);
+
+        Console.WriteLine($"  mountains: {world.Mountains.Count}, persistent + Full LOD");
+        foreach (var m in world.Mountains)
+        {
+            Console.WriteLine(
+                $"    {m.Row,-5} {m.Name,-26} bearing {m.Bearing,5:0}  radius {m.Radius,6:0}  scale {m.Scale:0.00}  " +
+                $"base Z {m.Z,6:0}  yaw {m.Heading,3:0}");
+        }
+
+        Console.WriteLine("  Mountains (north up, 2048 units per character, n = near row, M = far row, o = compound):");
+        Console.Write(world.MountainPlan);
     }
 
     Console.WriteLine();

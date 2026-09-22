@@ -2,7 +2,139 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: palisade compound, main gate and forest backdrop (2026-09-22, night)
+## Current pass: mountain backdrop and the view through the gate (2026-09-22, night)
+
+Barry reviewed the palisade in game: "the gate looks incredible". Two things came back.
+The gate model **is open** (the asset, not the placement). And through it, and over
+the wall, the outside looked bare. So this pass adds vanilla mountains to the backdrop
+and closes the forest behind a short clearing in front of the gate. **Nothing else
+changed**: read back against the reviewed build (`da78301a...`), all **836** records
+that are not trees or mountains are identical. That covers the wall, gate, terrain,
+zones, markers, Tamriel and the sandbox.
+
+### How the mountains draw in a world with no LOD
+
+The world has no LOD, so an ordinary reference draws only while its cell is loaded. A
+mountain 15,000 away would come and go as the player walked about. Vanilla solves this
+in its small worlds, and it was audited before anything was placed. Skuldafn, Sovngarde,
+Japhet's Folly and Tamriel itself keep their distant cloud meshes as references in the
+worldspace's **persistent cell**, flagged **Persistent + Is Full LOD (`0x10400`)**, and
+always inside the world's object bounds (Skuldafn's sit about 200,000 out, within its
+bounds of cells 0..65). The mountains are placed exactly that way. Full LOD alone,
+without Persistent, is not what vanilla does for distant scenery, so it was not tried.
+
+### The mountains
+
+**24 vanilla snow-covered mountain STATs** (the `_HeavySN` snow-shader variants, to match
+the concept's snowy peaks), in two irregular rings round the compound centre (2223, 2198):
+
+| Row | Radius | Count | Pieces |
+| --- | --- | --- | --- |
+| near | 13,000-15,500 | 11 | ridges and small cliffs: tops 1,970-4,840, 8-18 degrees above a standing player's eye at the centre |
+| far | 17,500-20,500 | 13 | peaks and big cliffs: tops 5,420-8,220, 15-24 degrees |
+
+| STAT | FormID | Placed | Scale |
+| --- | --- | --- | --- |
+| `MountainPeak01_HeavySN` | `043321` | 7 | 0.95-1.13 |
+| `MountainCliffSm01_HeavySN` | `050DC0` | 6 | 0.90-1.14 |
+| `MountainCliff04_HeavySN` | `027DDC` | 3 | 0.84-1.16 |
+| `MountainRidge01_HeavySN` | `05205B` | 3 | 0.94-1.07 |
+| `MountainCliff01_HeavySN` | `048DE0` | 2 | 1.18-1.19 |
+| `MountainPeak02_HeavySN` | `046031` | 2 | 1.00-1.07 |
+| `MountainRidge02_Heavy_SN` | `05304E` | 1 | 1.08 |
+
+- Each row is evenly spaced in angle, with each piece wandering up to 30-35% of the
+  spacing. The two rows are offset (start bearings 9 and 23) so near and far pieces do
+  not line up, and every piece takes a hashed radius within its band, yaw and scale.
+- **Sunk so no base ever shows.** Every mesh's lowest point is placed at Z -1,000, read
+  from its own bounds in Skyrim.esm. At mountain distance the wall hides everything
+  below about 500 from anywhere inside the compound. When the hill cells beyond are not
+  loaded, a mountain therefore still reads as rising from behind the trees, not floating.
+- Everything sits inside the world's object bounds (cells -5..6). The generator
+  refuses a mountain outside them. The WRLD record is unchanged.
+- Due south, straight out through the open gate, is a far `MountainCliff01` at bearing
+  186 with near ridges at 164 and 211 either side.
+
+Plan, 2,048 units per character, north up (`o` compound, `n` near row, `M` far row):
+
+```text
+    ......................
+    ..............M.......
+    .........M............
+    .......M..............
+    .......n...n..........
+    ....M..........n......
+    ..................M...
+    ......................
+    .....n................
+    .........oooo....n....
+    .........oooo.......M.
+    ..M.n....oooo.........
+    .........oooo.........
+    .................n....
+    ....n.............M...
+    ...M..................
+    .......n.......n......
+    ...M........n...M.....
+    ......................
+    ...............M......
+    .........M............
+    ......................
+```
+
+### The view through the gate
+
+The palisade pass kept every tree 1,800 from the gate and out of a 28-degree cone
+straight out of it. That was for an approach from outside, which this isolated world
+will never have, and it is why the open gate showed bare ground. Now the rules are:
+
+- no tree within 700 of the gate;
+- an 18-degree clearing straight out, only for the first 2,200, which reads as a path
+  leading away;
+- beyond that the forest closes in.
+
+Trees: **518** (was 487). The nearest to the gate is 936 away. 17 now stand in the view
+straight out of the gate, the nearest 2,300 out, with the far mountain behind them. The
+per-species spread is otherwise as before: `TreePineForest01` 77, `02` 142, `03` 12,
+`04` 131, `05` 156.
+
+The gate's own collision is unchanged. Barry's package gives it a closed-gate box, so the
+opening should be solid even though it looks open. **Walk into it to confirm.** The
+teleport pass will decide what the open gateway shows.
+
+### Records changed
+
+| Type | Change |
+| --- | --- |
+| REFR, persistent cell | +24 mountains (`0x10400`) |
+| REFR, cells | trees 487 -> 518, and all renumbered (they are placed last; nothing references them) |
+| Everything else | identical |
+
+### Verification of this pass
+
+- Release build clean; generator run twice, identical SHA256 `b77160ca...`.
+- Read back against `da78301a...`: 836 of 836 non-backdrop records identical. The 24
+  mountains are all `0x10400`, all vanilla STATs, all in the persistent cell, 0 outside
+  the world's bounds, and every mesh bottom is at -1,000. The persistent cell still
+  holds the five zone markers.
+- ESP deployed byte-identical. No new assets this pass.
+- **Not verified in game**: how the mountains look, their draw distance and fog, and
+  frame rate.
+
+### What Barry should test in game (this pass)
+
+1. From the centre, turn round: snowy mountains above the treeline all the way round,
+   with the far peaks behind the near ridges, and none floating.
+2. At the gate, look out through it: a short path, then trees, then mountains.
+3. Walk from one end of the compound to the other. The mountains should never pop in
+   or out. If they do, the Full LOD approach is not working in this world. Say so.
+4. Are they too big, too small or too close? Each row's radius and scales are config
+   values.
+5. Frame rate.
+
+## Palisade compound, main gate and forest backdrop (previous pass; gate approved in game)
+
+Still current, except the forest's gate clearing, which the mountain pass above shortened (518 trees now, renumbered).
 
 Barry approved the isolated `SkyrimFairWorld` prototype in game. This pass replaces the
 temporary banner-pole markers with his custom palisade, adds the Viking gate at the main
@@ -459,11 +591,11 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 408,356 bytes (366,226 before the palisade pass; 88,124 before the worldspace) |
-| SHA256 | `da78301a587473b376cc12d61298c7b509d427fdd71df4469b14e1ab1c338330` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `8b7eb313...`, the approved worldspace build) |
+| Size | 412,426 bytes (408,356 before the mountains; 366,226 before the palisade; 88,124 before the worldspace) |
+| SHA256 | `b77160caabb0e5a5bef664c6590efb95e1889e8649b5ac31e7590fac845dd09c` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `da78301a...`, the reviewed palisade build) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
-| Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the current pass above |
+| Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |
 | Kit meshes | unchanged this pass; all 13 deployed NIFs match `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |

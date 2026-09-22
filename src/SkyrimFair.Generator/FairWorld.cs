@@ -38,6 +38,12 @@ internal static class FairWorld
     private const int PersistentRecordFlag = 0x400;
 
     /// <summary>
+    /// Is Full LOD: never fades and draws beyond the loaded cells. Vanilla gives it, with
+    /// Persistent, to the distant scenery in its small worlds.
+    /// </summary>
+    private const int FullLodRecordFlag = 0x10000;
+
+    /// <summary>
     /// DATA flags on LAND, written raw as 0x1D: normals + heights (0x01), layers (0x04),
     /// and the 0x08 and 0x10 bits every vanilla LAND carries. Sovngarde's LAND, which
     /// also has no vertex colours, is exactly this value. Not built from Mutagen's names:
@@ -170,6 +176,40 @@ internal static class FairWorld
             Put(placed);
         }
 
+        // ---- distant mountains ------------------------------------------------------
+        var mountains = new List<MountainPlacement>();
+        if (config.Mountains.Enabled)
+        {
+            if (master is null)
+            {
+                throw new InvalidOperationException(
+                    "FairWorld mountains are sunk by their mesh bounds, which are read from Skyrim.esm; " +
+                    "set Site.SkyrimDataPath or disable fairWorld.mountains.");
+            }
+
+            var lowest = master.Statics.ToDictionary(r => r.FormKey, r => (float)r.ObjectBounds.First.Z);
+            var worldMin = config.CellRadius * -CellSize;
+            var worldMax = (config.CellRadius + 1) * CellSize;
+            mountains = plan.Mountains(config.Mountains, key => lowest.TryGetValue(key, out var z)
+                ? z
+                : throw new InvalidOperationException($"Mountain {key} is not a STAT in Skyrim.esm.")).ToList();
+
+            foreach (var mountain in mountains)
+            {
+                // Vanilla keeps its always-drawn scenery inside the world's object bounds.
+                if (mountain.X < worldMin || mountain.X >= worldMax || mountain.Y < worldMin || mountain.Y >= worldMax)
+                {
+                    throw new InvalidOperationException(
+                        $"Mountain at {mountain.X:0}, {mountain.Y:0} falls outside the world's bounds; reduce its row radius.");
+                }
+
+                var placed = Place(mod, mountain.Base, mountain.X, mountain.Y, mountain.Z, mountain.Heading);
+                placed.Scale = mountain.Scale;
+                placed.MajorRecordFlagsRaw = PersistentRecordFlag | FullLodRecordFlag;
+                topCell.Persistent.Add(placed);
+            }
+        }
+
         // ---- forest backdrop ---------------------------------------------------------
         var trees = config.Forest.Enabled ? plan.ForestTrees(config.Forest, gateHeading).ToList() : new List<TreePlacement>();
         foreach (var tree in trees)
@@ -204,8 +244,10 @@ internal static class FairWorld
                     g.Key, g.Count(), g.Min(t => t.Scale), g.Max(t => t.Scale),
                     g.Min(t => t.Distance), g.Max(t => t.Distance)))
                 .ToList(),
+            mountains,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
-            plan.RenderPlan(1024f, config.Forest.OuterDistance, trees));
+            plan.RenderPlan(1024f, config.Forest.OuterDistance, trees),
+            plan.RenderMountains(mountains, 2048f));
     }
 
     /// <summary>
@@ -606,7 +648,8 @@ internal static class FairWorld
                     var gdx = x - config.Gate[0];
                     var gdy = y - config.Gate[1];
                     var fromGate = MathF.Sqrt(gdx * gdx + gdy * gdy);
-                    if (fromGate < forest.GateClearRadius || (gdx * ox + gdy * oy) / fromGate > coneCos)
+                    if (fromGate < forest.GateClearRadius
+                        || (fromGate < forest.GateApproachLength && (gdx * ox + gdy * oy) / fromGate > coneCos))
                     {
                         continue;
                     }
@@ -658,6 +701,89 @@ internal static class FairWorld
                         distance);
                 }
             }
+        }
+
+        /// <summary>
+        /// Distant mountains, row by row, round the compound centre: evenly spaced in
+        /// angle with each piece wandering by up to <see cref="MountainRow.AngleJitter"/> of
+        /// the spacing, at a radius anywhere in the row's band, turned at random, and
+        /// sunk so the mesh's lowest point lands on <see cref="MountainsConfig.BaseZ"/>.
+        /// </summary>
+        public IEnumerable<MountainPlacement> Mountains(MountainsConfig mountains, Func<FormKey, float> lowestPoint)
+        {
+            var (minX, minY, maxX, maxY) = Bounds;
+            var (cx, cy) = ((minX + maxX) / 2f, (minY + maxY) / 2f);
+
+            for (var r = 0; r < mountains.Rows.Count; r++)
+            {
+                var row = mountains.Rows[r];
+                var pieces = row.Pieces.Select(p => (Piece: p, Key: FormKeyHelper.Parse(p.FormKey))).ToList();
+                var totalWeight = pieces.Sum(p => p.Piece.Weight);
+                var spacing = 360f / row.Count;
+
+                for (var k = 0; k < row.Count; k++)
+                {
+                    var angle = row.StartDegrees + (k + (Hash3(r, k, 21) * 2f - 1f) * row.AngleJitter) * spacing;
+                    var radius = row.MinRadius + Hash3(r, k, 22) * (row.MaxRadius - row.MinRadius);
+                    var rad = angle * MathF.PI / 180f;
+                    var x = cx + MathF.Sin(rad) * radius;
+                    var y = cy + MathF.Cos(rad) * radius;
+
+                    var pick = Hash3(r, k, 23) * totalWeight;
+                    var chosen = pieces[^1];
+                    foreach (var p in pieces)
+                    {
+                        pick -= p.Piece.Weight;
+                        if (pick < 0f)
+                        {
+                            chosen = p;
+                            break;
+                        }
+                    }
+
+                    var scale = chosen.Piece.MinScale + Hash3(r, k, 24) * (chosen.Piece.MaxScale - chosen.Piece.MinScale);
+                    yield return new MountainPlacement(
+                        chosen.Key, chosen.Piece.Name, row.Name, x, y,
+                        mountains.BaseZ - lowestPoint(chosen.Key) * scale,
+                        Hash3(r, k, 25) * 360f, scale, angle, radius);
+                }
+            }
+        }
+
+        /// <summary>Mountains on a coarse plan, north up: <c>n</c> near row, <c>M</c> far row, <c>o</c> the compound.</summary>
+        public string RenderMountains(IReadOnlyList<MountainPlacement> mountains, float cell)
+        {
+            if (mountains.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var (minX, minY, maxX, maxY) = Bounds;
+            var reach = mountains.Max(m => m.Radius) + cell;
+            var (cx, cy) = ((minX + maxX) / 2f, (minY + maxY) / 2f);
+            var size = (int)MathF.Ceiling(reach * 2f / cell);
+            var marks = new Dictionary<(int, int), char>();
+            foreach (var m in mountains)
+            {
+                marks[((int)((m.X - cx + reach) / cell), (int)((cy + reach - m.Y) / cell))] =
+                    m.Row == mountains[0].Row ? 'n' : 'M';
+            }
+
+            var sb = new StringBuilder();
+            for (var row = 0; row < size; row++)
+            {
+                sb.Append("    ");
+                for (var col = 0; col < size; col++)
+                {
+                    var x = cx - reach + (col + 0.5f) * cell;
+                    var y = cy + reach - (row + 0.5f) * cell;
+                    sb.Append(marks.TryGetValue((col, row), out var c) ? c : Outside(x, y) <= 0f ? 'o' : '.');
+                }
+
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -820,6 +946,10 @@ internal sealed record FairWorldWall(
     float GateHeight,
     float GateHeading);
 
+internal sealed record MountainPlacement(
+    FormKey Base, string Name, string Row, float X, float Y, float Z,
+    float Heading, float Scale, float Bearing, float Radius);
+
 internal sealed record FairWorldTreeCount(
     string Name, int Count, float MinScale, float MaxScale, float MinDistance, float MaxDistance);
 
@@ -835,5 +965,7 @@ internal sealed record FairWorldResult(
     (float MinX, float MinY, float MaxX, float MaxY) CompoundBounds,
     FairWorldWall Wall,
     IReadOnlyList<FairWorldTreeCount> Trees,
+    IReadOnlyList<MountainPlacement> Mountains,
     string Plan,
-    string ForestPlan);
+    string ForestPlan,
+    string MountainPlan);
