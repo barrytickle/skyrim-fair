@@ -22,7 +22,7 @@
     "plannedPlatformFloorZ": -5672,
     "placement": {
       "x": -5888,
-      "y": -12928,
+      "y": -13440,
       "z": -5720
     },
     "testObject": {
@@ -48,9 +48,9 @@
       "tileSize": 512,
       "floorZ": -5592,
       "rampEdge": "N",
-      "rampTiles": 2,
+      "rampTiles": 3,
       "rampWidth": 2,
-      "rampRise": 168,
+      "rampRise": 120,
       "shoulderOffset": 64,
       "minExposure": 16,
       "footprint": [
@@ -110,8 +110,8 @@
         "cliffMeshDepth": 465,
         "minOffset": 192,
         "spread": 384,
-        "minScale": 0.7,
-        "maxScale": 1.5,
+        "minScale": 0.6,
+        "maxScale": 1.7,
         "rockSink": 24,
         "rocks": [
           "0001BFB0:Skyrim.esm",
@@ -149,10 +149,10 @@
           "0001A6E2:Skyrim.esm"
         ],
         "wallMinDrop": 96,
-        "wallPerSegment": 3,
-        "wallTopOvershoot": 48,
+        "wallPerSegment": 4,
+        "wallTopOvershoot": 96,
         "wallBedding": 80,
-        "wallEdgeOverlap": 80,
+        "wallEdgeOverlap": 112,
         "wallMaxRadius": 640,
         "toePerSegment": 2,
         "vergePerSegment": 2,
@@ -162,7 +162,7 @@
         "shoulderRun": 256,
         "cliffInset": 48,
         "cliffTopSink": 40,
-        "pavingRimAllowance": 112,
+        "pavingRimAllowance": 144,
         "pavingClearance": 8
       },
       "retainHeight": 256,

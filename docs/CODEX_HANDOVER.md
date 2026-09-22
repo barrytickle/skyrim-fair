@@ -29,7 +29,7 @@ The current site, footprint, height and entrance are approved unless Barry expli
 
 Read `docs/AUDIT.md` for exact current values and hashes. At handover time the important state is:
 
-- centre `X -5888, Y -12928`
+- centre `X -5888, Y -13440` (pushed back 512 from the road on 2026-09-22)
 - floor `Z -5592`
 - the platform was deliberately raised by +192 from the earlier test
 - irregular 22-tile paving footprint
@@ -102,9 +102,11 @@ references. The following are **decisions**, not suggestions. See
      up on flat ground made the outer walls worse (402-422u). What stops it reading
      as a plinth is that the wall now **varies 120-222** instead of a uniform
      192-288 band - the variation comes from the terrain, not from architecture.
-   - *moving the site 512 south*: checked, and the only gain was the deepest corner
-     dropping 311 -> 274 with min and median identical. Not worth moving an approved,
-     tested placement. **The site centre is unchanged at X -5888, Y -12928.**
+   - *moving the site 512 south*: first rejected, because the only measurable gain was
+     the deepest corner dropping 311 -> 274. **Then done anyway on 2026-09-22**, for a
+     reason measurement had not been asked about: in game the terrace felt too close to
+     the road. Pushing back 512 also lengthened the run to the road from 1,141 to 1,653,
+     which relaxed the ramp from 1:3.8 to 1:4.3. **Centre is now X -5888, Y -13440.**
 4. **Edge language follows the second concept, not the first**: low, irregular, mostly
    natural rock outcrop. **Confirmed by Barry:** rock is the *default* edge treatment;
    drystone terrace walling appears only on the long straight runs that are genuinely

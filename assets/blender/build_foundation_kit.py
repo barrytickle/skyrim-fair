@@ -50,12 +50,11 @@ FLOOR_THICKNESS = 32
 RETAIN_HEIGHT = 256
 RETAIN_DEPTH = 128
 RAMP_RUN = 512
-# 1:3.0 grade. The terrace floor moved down to -5592 with the larger footprint, but
-# the ground between its north edge and the road falls harder than the ramp did -
-# 189 units over the first 1024, with a 1:2.2 pitch in the middle of it. A gentler
-# ramp simply floats, and a longer one overshoots the road entirely. 168 over 512
-# matches the bank it is cut into and lands the foot on grade at the roadside.
-RAMP_RISE = 168
+# 1:4.3 grade. Sized against the GROUND at the ramp foot, not the road mesh on top of
+# it - the road sits about 20 units proud of the ground it is laid on, and targeting the
+# mesh left the foot floating 48 to 104. Over the 1,536 run now available, 120 per tile
+# lands the foot within 32 units of grade on both lanes.
+RAMP_RISE = 120
 # Deep enough that the underside never surfaces. This is a measured figure, not a
 # guess: the ramp head stands 288 units above native ground on its western flank, so
 # at 256 the slab's underside sat 32 units clear of the ground and you could see
