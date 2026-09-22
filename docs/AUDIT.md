@@ -2,7 +2,57 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: main stage architecture (2026-09-22, night)
+## Current pass: condensed compound, stage fire pits, closed gate, open tundra (2026-09-22, night)
+
+Barry reviewed the stage and the area in game ("looks really good... the stage looks
+great"), then asked for four changes. This pass makes those four changes and nothing else.
+
+| Change | What was done |
+| --- | --- |
+| **Condense by about 30%** | Read as **30% less area**: the whole plan (perimeter, gate, avenue, every zone polygon and marker) was scaled by **0.837** about the centre of cell 0,0 (2048, 2048). The gate-to-stage axis stays on x 2048, and `cow SkyrimFairWorld 0 0` still lands mid-compound. The numbers were rewritten in `fair.config.json` (`scratchpad` tool `condense.py`), so the config stays the source of truth. If "30%" meant each dimension, rerun it with 0.7/0.837 on the new numbers. |
+| **Fire pits on the stage** | **4 `WHfirebrazier01`** (`093A89`, the Windhelm fire basket on a stand) **with `FXfireWithEmbersHeavy`** (`033DA4`) above each. It is the same pair, at the same fire offset (-6, -2, +92), as Barry's braziers at the Tamriel stair foot. They stand on the deck at its front corners (u ±760, v 390) and rear corners (u ±760, v -380), with feet on the planks. They are in `fairWorld.stage.braziers`. |
+| **Closed gate** | `SkyrimFairPalisadeGate` (`000B10`) now uses **`barry_palisades\viking_palisade_gate_closed.nif`**. It has the same 181 x 175 footprint and the same `viking_palisade_gate` textures. Deployed alongside the open version (SHA256 `329a9253...`). No texture changes. |
+| **Fewer trees (Whiterun tundra, not forest)** | Forest `peakDensity` 0.8 -> **0.28**, `clearingThreshold` 0.34 -> **0.46** (bigger clearings): **99 trees** (was 518), in scattered stands. The mountains are unchanged. |
+
+### Knock-on changes
+
+- **Compound**: now **7,157 x 8,370** (X -1,384..5,773, Y -2,011..6,359). It has **89**
+  palisade panels (was 106). The gate is at (2048, -1991).
+- **Terrain**: the flat area and painted zones follow the smaller outline, so the LAND
+  records changed. The terrain strategy is unchanged.
+- **The stage keeps its approved size.** It needed `forwardOffset` 160 -> **270** so its
+  rear timbers clear the nearer north wall (nearest above-ground stage geometry is now
+  114 from the wall line). The deck centre is now (2048, 5544), with the step foot at
+  (2048, 4538).
+- **The audience area in front of the stage is now about 560 deep** (the step foot back
+  to the crowd square's south edge, y 3973), where it was about 1,000. That is the cost
+  of condensing round a stage that did not shrink. The Crowd marker moved from on the
+  steps to (2048, 4290), in the audience space.
+
+### Verification
+
+- Build clean. Generator run twice: identical SHA256 **`092515db...`** (390,425 bytes).
+- **Wall closure** re-proved on the new outline:
+  - 3,235 points every 8 units all lie inside a wall or gate footprint.
+  - 20,160 sightline rays from seven interior points (moved to the condensed layout)
+    all cross a wall or gate.
+  - The panels either side of the gate tuck 25 and 36 units into it.
+- **Stage**: 0 mesh vertices outside the compound; nearest to the wall line 114.
+- ESP and `viking_palisade_gate_closed.nif` deployed byte-identical.
+- **Not verified in game**: the closed gate model, the braziers on the deck, and the
+  tighter crowd square.
+
+### What Barry should test
+
+1. The closed gate, from inside and outside.
+2. The braziers on the stage: lit, feet on the planks, not in the performers' way.
+3. Is the condensed compound the right size, and is ~560 in front of the stage enough
+   audience room?
+4. Does the thinner tree cover read as Whiterun tundra?
+
+## Main stage architecture (previous pass; approved by Barry)
+
+Still current, except the stage now stands at (2048, 5544) after the condense, with `forwardOffset` 270, and carries four braziers.
 
 The brief: an open, handmade, temporary Nordic timber pavilion at the north end of the
 avenue, facing the gate, built from vanilla pieces. Barry's concept image was used as
@@ -744,9 +794,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 421,468 bytes (412,426 before the stage; 408,356 before the mountains; 366,226 before the palisade; 88,124 before the worldspace) |
-| SHA256 | `158d72035e5ba11ecc0e18710357250774a81e26d6fa381ab5859e14d647249e` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `b77160ca...`, the mountain build) |
+| Size | 390,425 bytes (after the condense; 421,468 before) |
+| SHA256 | `092515dbbaa7520abe761dfc73076580d22a6ecad82535668f574a4bcb8f12b6` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night; replaced `158d7203...`, the stage build) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |

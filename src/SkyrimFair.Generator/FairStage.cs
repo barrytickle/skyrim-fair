@@ -218,6 +218,17 @@ internal static class FairStage
             }
         }
 
+        // ---- fire braziers on the deck ------------------------------------------------
+        foreach (var b in s.Braziers)
+        {
+            var feet = s.DeckHeight + s.BrazierFeet;
+            Place("braziers", s.BrazierPiece, b[0], b[1], feet, 0f);
+            var (ox, oy) = (s.FireOffset[0], s.FireOffset[1]);
+            // The fire's offset is in world units; convert it to the stage frame.
+            Place("fire", s.FirePiece,
+                b[0] + ox * r.X + oy * r.Y, b[1] + ox * f.X + oy * f.Y, feet + s.FireOffset[2], 0f);
+        }
+
         var (cx, cy) = At(0f, 0f);
         var (fx, fy) = At(0f, halfDepth);
         var (sx, sy) = At(0f, halfDepth + steps.Exposed * steps.Treads);

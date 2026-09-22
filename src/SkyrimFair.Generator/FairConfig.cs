@@ -530,6 +530,22 @@ internal sealed record StageConfig
 
     /// <summary>Largest lean of a post, degrees.</summary>
     public float PostLeanDegrees { get; init; } = 0.8f;
+
+    /// <summary>
+    /// Fire braziers standing on the deck, <c>[u, v]</c>: the same Windhelm fire basket on a
+    /// stand, with the same fire above it, as Barry placed at the Tamriel stair foot.
+    /// </summary>
+    public List<float[]> Braziers { get; init; } = new();
+
+    public string BrazierPiece { get; init; } = "00093A89:Skyrim.esm";
+
+    /// <summary>How far the brazier's feet reach below its origin (its OBND Z min).</summary>
+    public float BrazierFeet { get; init; } = 33f;
+
+    public string FirePiece { get; init; } = "00033DA4:Skyrim.esm";
+
+    /// <summary>The fire's offset from the brazier, <c>[x, y, z]</c>, as at the stair foot.</summary>
+    public float[] FireOffset { get; init; } = { -6f, -2f, 92f };
 }
 
 internal sealed record StageDeck
