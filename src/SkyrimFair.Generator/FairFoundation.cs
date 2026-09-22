@@ -1066,9 +1066,9 @@ internal static class FairFoundation
         // pair. Which side is which is fixed by config, not chance, so it reproduces.
         // ---- cheek walls ------------------------------------------------------
         // The original small Stonewall01 blocks retain their chunky, irregular
-        // silhouette, but are pitched to the same overall descent as the stair.
-        // Their top edges therefore run diagonally with the flight instead of rising
-        // as upright towers. Two pieces per side and flight keep the handmade rhythm.
+        // silhouette, but are pitched to the same overall descent as the stair. Treat
+        // the three flights as one continuous run: restarting placement per flight left
+        // visible gaps at both joins. Level blocks overlap the run at top and bottom.
         var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
         var stairHalf = f.Entrance.StairHalfWidth * f.Entrance.StairScale;
         var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
@@ -1081,42 +1081,63 @@ internal static class FairFoundation
             var cb = boundsOf(FormKeyHelper.Parse(ck.Piece));
             var len = ck.PieceLength * ck.Scale;
             cheekDepth = ck.PieceDepth * ck.Scale;
-            cheekRiseMax = MathF.Max(ck.RiseLeft, ck.RiseRight);
+            cheekRiseMax = MathF.Max(ck.RiseLeft, ck.RiseRight) - ck.Sink;
             var alongRot = OutwardRotation[f.RampEdge.ToUpperInvariant()] + MathF.PI / 2f;
             var slope = MathF.Atan2(f.Entrance.StairDrop, f.Entrance.StairRun);
+            var head = rampTiles.First(t => t.Stair);
+            var totalRun = flightRun * f.Entrance.StairFlights;
+            var totalDrop = flightDrop * f.Entrance.StairFlights;
+            var projectedLen = len * MathF.Cos(slope);
+            var targetStep = MathF.Max(1f, projectedLen - ck.Overlap);
+            var slopedCount = Math.Max(1,
+                (int)MathF.Ceiling(MathF.Max(0f, totalRun - projectedLen) / targetStep) + 1);
+            var slopedStep = slopedCount == 1
+                ? 0f
+                : (totalRun - projectedLen) / (slopedCount - 1);
 
-            foreach (var t in rampTiles.Where(t => t.Stair))
+            for (var side = -1; side <= 1; side += 2)
             {
-                var n = Math.Max(1, (int)MathF.Ceiling(flightRun / len));
-                for (var side = -1; side <= 1; side += 2)
-                {
-                    var rise = side < 0 ? ck.RiseLeft : ck.RiseRight;
-                    var lateral = side * (stairHalf + ck.Gap + cheekDepth / 2f);
-                    for (var j = 0; j < n; j++)
-                    {
-                        var along = stairInset + MathF.Min((j + 0.5f) * len, flightRun - len / 2f);
-                        var nosing = t.Z - flightDrop * ((along - stairInset) / flightRun);
-                        var px = t.X + t.Dc * along + (t.Dc == 0 ? lateral : 0f);
-                        var py = t.Y - t.Dr * along + (t.Dr == 0 ? lateral : 0f);
+                var rise = side < 0 ? ck.RiseLeft : ck.RiseRight;
+                var lateral = side * (stairHalf + ck.Gap + cheekDepth / 2f);
 
-                        // Anchor the centre of the tilted crest at the same height the
-                        // upright piece used. Rotation shortens its vertical component
-                        // by cos(slope), so compensate rather than sinking the wall.
-                        var pz = nosing + rise - cb.ZMax * ck.Scale * MathF.Cos(slope);
-                        // Skyrim's placed-reference Euler convention is opposite the
-                        // construction-space sign used for the outward stair vector.
-                        // Positive X makes the current north-facing blocks descend
-                        // toward the road; the previous negative sign leaned uphill.
-                        var pitchX = -t.Dr * slope;
-                        var pitchY = -t.Dc * slope;
-                        PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale,
-                            rotX: pitchX, rotY: pitchY);
-                        result.CheekWalls++;
-                        if (trace) Console.Error.WriteLine(
-                            $"cheek side {side} flight at ({t.X:F0},{t.Y:F0}) j {j} " +
-                            $"-> ({px:F0},{py:F0},{pz:F0}) crest {nosing + rise:F0} " +
-                            $"pitch {slope * 180f / MathF.PI:F1}");
-                    }
+                // The diagonal blocks cover the complete stair chain and are evenly
+                // redistributed. Their projected ends meet exactly; their requested
+                // minimum overlap determines how many pieces the run needs.
+                for (var j = 0; j < slopedCount; j++)
+                {
+                    var along = projectedLen / 2f + j * slopedStep;
+                    var nosing = head.Z - flightDrop * (along / flightRun);
+                    var px = head.X + head.Dc * along + (head.Dc == 0 ? lateral : 0f);
+                    var py = head.Y - head.Dr * along + (head.Dr == 0 ? lateral : 0f);
+                    var pz = nosing + rise - ck.Sink
+                        - cb.ZMax * ck.Scale * MathF.Cos(slope);
+                    var pitchX = -head.Dr * slope;
+                    var pitchY = -head.Dc * slope;
+                    PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale,
+                        rotX: pitchX, rotY: pitchY);
+                    result.CheekWalls++;
+                    if (trace) Console.Error.WriteLine(
+                        $"cheek slope side {side} j {j} -> ({px:F0},{py:F0},{pz:F0}) " +
+                        $"crest {nosing + rise - ck.Sink:F0} pitch {slope * 180f / MathF.PI:F1}");
+                }
+
+                // One ordinary upright piece at each landing gives a level termination
+                // rather than ending the diagonal wall abruptly: flat / slope / flat.
+                foreach (var (label, along, nosing) in new[]
+                {
+                    ("top", -len / 2f + ck.EndOverlap, head.Z),
+                    ("bottom", totalRun + len / 2f - ck.EndOverlap, head.Z - totalDrop),
+                })
+                {
+                    var px = head.X + head.Dc * along + (head.Dc == 0 ? lateral : 0f);
+                    var py = head.Y - head.Dr * along + (head.Dr == 0 ? lateral : 0f);
+                    var pz = nosing + rise - ck.Sink - cb.ZMax * ck.Scale;
+                    PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale);
+                    result.CheekWalls++;
+                    result.CheekEndWalls++;
+                    if (trace) Console.Error.WriteLine(
+                        $"cheek {label} side {side} -> ({px:F0},{py:F0},{pz:F0}) " +
+                        $"crest {nosing + rise - ck.Sink:F0} pitch 0.0");
                 }
             }
         }
@@ -1533,6 +1554,8 @@ internal sealed class FoundationResult
 
     /// <summary>Low drystone pieces stepping down beside the steps.</summary>
     public int CheekWalls { get; set; }
+
+    public int CheekEndWalls { get; set; }
 
     /// <summary>Tall rocks facing an exposed retaining edge.</summary>
     public int WallRocks { get; set; }

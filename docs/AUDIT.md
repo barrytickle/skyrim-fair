@@ -2,14 +2,13 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: original cheek blocks pitched downhill with the stairs
+## Current pass: low continuous cheek run with level ends
 
 Barry compared the original small vanilla cheek blocks with the continuous
 project-authored replacement in game. The replacement was structurally tidy but too
-engineered. The chosen direction is the simpler original arrangement, with one change:
-each block is rotated to follow the stair's overall descent. The first implementation
-used Skyrim's opposite Euler sign and visibly leaned uphill; the corrected sign is now
-verified directly in the written ESP.
+engineered. The chosen direction is the simpler original arrangement: small vanilla
+blocks pitched downhill. Barry's next review approved that direction and requested the
+final shaping pass: lower the walls, close the gaps, and add level pieces at both ends.
 
 The approved site, footprint, elevation, stair dimensions and content scope did not
 change. The closed retaining wings added around the stair head remain, because they fix
@@ -19,8 +18,8 @@ the independently reported missing rear face.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 85,670 bytes |
-| SHA256 | `2c5fc97600616b4ce05e2be288ce07e7e0b9a160fdbf6bae447ab6241bff365a` |
+| Size | 86,114 bytes |
+| SHA256 | `b79194281e92a8184c15f948d681c61b8064fe680baf7ec9ae94d7e9a3ae8ac0` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
 | Kit meshes deployed | 13 NIFs under `meshes\SkyrimFair\`; unchanged in this ESP-only pass |
 | Masters | `Skyrim.esm` only |
@@ -33,30 +32,34 @@ the independently reported missing rear face.
 
 ## Diagonal original cheek blocks
 
-The entrance again uses twelve vanilla `Stonewall01` references (`0000099B:Skyrim.esm`):
-two per side per flight, at scale 0.6. Their spacing, asymmetry and chunky mesh are the
-same as the original version Barry preferred.
+The entrance uses eighteen vanilla `Stonewall01` references (`0000099B:Skyrim.esm`) at
+scale 0.6: seven pitched blocks plus a level top and bottom block on each side.
 
 The only visual change from that original is rotation:
 
-- each block remains aligned along the stair with Z rotation 90 degrees;
-- each block now has X rotation **+30.3 degrees**, matching
+- every block remains aligned along the stair with Z rotation 90 degrees;
+- fourteen diagonal blocks have X rotation **+30.3 degrees**, matching
   `atan2(112 stair rise, 192 stair run)`;
-- Y rotation is zero at the current north-facing entrance;
-- the centre of each tilted crest is anchored to the same nosing-relative height as the
-  upright version. West stays 56 above the nosing and east stays 80 above it;
+- four end blocks have zero X/Y pitch, forming a level–slope–level profile;
+- all blocks were lowered 48 units without changing the diagonal angle. The west crest
+  is now 8 above the nosing and the east crest 32 above it;
+- the three flights are treated as one 748.8-unit run. Seven diagonal pieces per side
+  are evenly spaced 102.7 apart; their 132.8-unit projected lengths overlap by about
+  30.1, including across both former flight joins;
+- each level end block overlaps the diagonal run by 16 units;
 - the generator applies the pitch from the entrance direction, so the same logic remains
   correct if the entrance edge changes later.
 
-The written ESP was read independently after generation: exactly 12 references use
-`Stonewall01` at scale 0.6, and every one serializes rotation `[+30.3, 0, 90]` degrees.
+The written ESP was read independently after generation: exactly 18 references use
+`Stonewall01` at scale 0.6—14 serialize `[+30.3, 0, 90]` degrees and four serialize
+`[0, 0, 90]`.
 
 World placements:
 
-| Side | X | Y | Z origins |
+| Side | X | diagonal Y centres | level-end Y centres |
 | --- | --- | --- | --- |
-| W | -6034 | -11571, -11475, -11322, -11226, -11072, -10976 | -5415, -5471, -5561, -5617, -5706, -5762 |
-| E | -5742 | same | -5391, -5447, -5537, -5593, -5682, -5738 |
+| W | -6034 | -11582, -11479, -11376, -11274, -11171, -11068, -10966 | -11709, -10838 |
+| E | -5742 | same | -11709, -10838 |
 
 The project-authored `SkyrimFair_StairCheek_192` remains in the reproducible asset kit as
 an unused comparison/prototype, but it has no STAT record and no placed reference in the
@@ -86,9 +89,10 @@ face on either side of the entrance while leaving a 224-unit central opening aro
 | --- | --- |
 | Paving bodies / visual caps | 12 / 12 |
 | Kit stair flights | 3 |
-| Tilted vanilla cheek blocks | 12 |
+| Tilted vanilla cheek blocks | 14 |
+| Level cheek end blocks | 4 |
 | Entrance retaining wings | 2 |
-| Entrance bank pieces | 10 |
+| Entrance bank pieces | 11 |
 | Structural retaining courses | 53 |
 | Drystone field-wall pieces (all edges) | 57 |
 | Part-buried rocks ending a run | 12 |
@@ -96,20 +100,20 @@ face on either side of the entrance while leaving a 224-unit central opening aro
 | Corner stones | 8 |
 | Toe rocks | 68 |
 | Rough-earth verge wedges | 23 |
-| Shrubs and scrub | 143 |
+| Shrubs and scrub | 142 |
 | Cliff pieces | 0 |
-| Vanilla references placed | 394 |
+| Vanilla references placed | 400 |
 | Project-kit references placed | 108 |
 | Test stall and map marker | 2 |
 | STAT records created | 9 |
 | Rejected as oversized | 18 |
-| Rejected for blocking the entrance | 75 |
+| Rejected for blocking the entrance | 74 |
 | Rejected for protruding through the market floor | 45 |
 
-Relative to the prior plugin, six project cheek references and their STAT were removed,
-and twelve rotated vanilla wall references were restored. Deterministic bank/plant
-placement returned to 10 entrance-bank pieces and 143 shrubs. Tamriel WRLD and the same
-four exterior CELL records remain overridden.
+Relative to the prior plugin, two additional pitched blocks per side remove the joins and
+four level termination blocks were added. Lowering the permitted bank crown changes the
+deterministic dressing result to 11 entrance-bank pieces and 142 shrubs. Tamriel WRLD and
+the same four exterior CELL records remain overridden.
 
 ## Verification performed
 
@@ -122,9 +126,9 @@ python tools\footprint_audit.py --data <stock Data> \
 ```
 
 - Release build: zero warnings, zero errors.
-- Generator run twice: identical 85,670-byte output and identical SHA256.
+- Generator run twice: identical 86,114-byte output and identical SHA256.
 - The audit reader now exposes all three serialized rotation components. Direct ESP read
-  confirmed 12 cheek references at scale 0.6 and pitch +30.3 degrees.
+  confirmed 14 pitched and four level cheek references at scale 0.6.
 - Full-load-order audit: 40 vanilla references intersect the footprint/margin, with zero
   references standing proud of floor `-5336`.
 - Generated ESP copied to the MO2 mod and compared byte-for-byte by SHA256.
@@ -146,11 +150,13 @@ python tools\footprint_audit.py --data <stock Data> \
 
 ## What Barry should test in game
 
-1. Compare directly with the original: the same chunky blocks should now lean down the
-   staircase rather than stand vertically.
-2. Check whether the diagonal blocks remain low enough and whether their overlaps read
-   naturally from both sides.
-3. Look beneath and behind the tilted blocks for exposed open mesh; the separate rear
+1. Confirm the cheek walls are now low enough: west should barely clear the nosing and
+   east should remain only modestly higher.
+2. Check the complete diagonal run from both sides. There should be no gaps at individual
+   blocks or at the two former flight joins.
+3. Check that the ordinary level block at each top and bottom end reads as a natural
+   termination rather than a post.
+4. Look beneath and behind the tilted blocks for exposed open mesh; the separate rear
    retaining wings should still close the terrace at the stair head.
-4. Walk up, down and brush both edges to confirm the rotated vanilla collision does not
+5. Walk up, down and brush both edges to confirm the rotated vanilla collision does not
    snag or intrude into the stair route.

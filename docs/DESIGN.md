@@ -331,9 +331,11 @@ terraced complex to look like B would have the two fighting each other. The reso
 The cheek walls beside the approach steps use the original small vanilla drystone blocks,
 not a continuous purpose-built slab. Keep their irregular, handmade silhouette, but pitch
 each block to the same overall descent as the stair so they do not stand as vertical
-towers. They remain low and partly embedded into the bank. Separately, the structural
-terrace face must close cleanly around the stair-head opening without placing geometry
-or collision across the walking route.
+towers. Treat all flights as one continuous wall run: overlap the diagonal blocks so no
+join gaps remain, sink them until they sit low against the steps, and terminate the run
+with one level block at both top and bottom. They will ultimately be partly embedded into
+the bank. Separately, the structural terrace face must close cleanly around the stair-head
+opening without placing geometry or collision across the walking route.
 
 ### Explicit non-goal: the backdrop
 

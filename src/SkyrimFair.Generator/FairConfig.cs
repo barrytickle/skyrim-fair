@@ -835,6 +835,15 @@ internal sealed record EntranceCheekConfig
 
     public float PieceDepth { get; init; } = 138f;
 
+    /// <summary>Lower every cheek crest by this amount while preserving its angle.</summary>
+    public float Sink { get; init; } = 48f;
+
+    /// <summary>Minimum projected overlap between consecutive tilted blocks.</summary>
+    public float Overlap { get; init; } = 24f;
+
+    /// <summary>Overlap of each level end block into the diagonal run.</summary>
+    public float EndOverlap { get; init; } = 16f;
+
     /// <summary>Clearance between the stair flank and the wall's inner face.</summary>
     public float Gap { get; init; } = 8f;
 

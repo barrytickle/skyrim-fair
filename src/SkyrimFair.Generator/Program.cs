@@ -67,6 +67,7 @@ try
         Console.WriteLine($"  {foundation.TerminalRocks,3} x part-buried rock ending a masonry run");
         Console.WriteLine($"  {foundation.EntranceBankPieces,3} x earth or rock burying a stair wall");
         Console.WriteLine($"  {foundation.CheekWalls,3} x low drystone cheek beside the steps");
+        Console.WriteLine($"  {foundation.CheekEndWalls,3} x level cheek termination at top / bottom");
         Console.WriteLine($"  {foundation.CornerStones,3} x corner stone breaking the outline");
         Console.WriteLine($"  {foundation.ToeRocks,3} x toe rock bedded into native grade");
         Console.WriteLine($"  {foundation.VergeWedges,3} x rough-earth verge wedge");
