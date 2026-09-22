@@ -85,6 +85,99 @@ Two `SkyrimFair_EntranceRetainWing_144` references remain at
 face on either side of the entrance while leaving a 224-unit central opening around the
 217.1-unit stair. They do not bridge the walking route visually or with collision.
 
+## Approved embankment reference, from Barry's Creation Kit layout plugin
+
+`reference/SkyrimFair_CK_LAYOUT_REFERENCE.esp` (40,056 bytes, SHA256
+`6e74233a982809d617a1...`, saved 2026-09-22 15:21) is a hand-edited copy of the
+generated plugin. **It is a visual and layout reference only.** It is not authoritative,
+it does not replace the generator-owned `SkyrimFair.esp`, and nothing from it has been
+merged into the generator yet. It was read independently and diffed against the current
+generated plugin by reference FormID.
+
+### What the diff says
+
+- 498 references in the CK plugin against 509 generated. 21 added, 32 removed, and 4
+  genuinely moved. The other ~290 "changes" are the Creation Kit rounding every scale to
+  two decimals on save; positions and rotations are untouched.
+- **The staircase itself is unchanged**: all three `SkyrimFairStair192` flights are at
+  their generated positions, rotation and scale. Approved; the generator will not alter
+  them.
+- **Cheek caps moved in the CK**: both upper `StonewallEndL01` caps sit at
+  `Y -11611.1, Z -5379.1`, rotation `95.73` degrees, against the generated
+  `Y -11698.6, Z -5406.6, 90` degrees. That is 87 further out, 27.5 higher, splayed
+  5.7 degrees. The east cap is duplicated in the CK file (`000F6A` and `000F6F` are
+  identical). Recorded, not adopted; Barry's instruction is that the staircase layout is
+  not to be altered.
+- **Removed in the CK**: the east entrance retaining wing, six structural `Retain512`
+  bodies and one `RetainCorner128` along the stepped north-east corner, three generated
+  perimeter `Stonewall01` courses and a dozen embankment rocks in the same area. They
+  were cleared to make room for the hand-laid bank below.
+- **Added**: one `SkyrimFairPaveCap512` at `(-4865, -11908)`, filling the row-0 / col-5
+  notch of the footprint mask with paving (cap only; no structural body under it in the
+  CK file). Two `StonewallTerraceCorner01` at the north-east corners. One
+  `StonewallTerrace01` at `Z 0.0` (`000FCF`, at `-4588, -11889`) is a CK accident
+  floating 5,300 units in the air and is ignored.
+
+### The approved pattern, east of the stairs
+
+Three layers, measured in the written plugin. World Y increases outward (north) on this
+edge; the paving edge is `Y -11648`, the floor `Z -5336`, native ground about `Z -5777`.
+The `StonewallTerrace01` profile was measured from the vanilla mesh: a 69-thick wall at
+local `Y -325..-256` with its face on local -Y and crest at 175, then a grass slope
+falling from 168 at the wall back to 96 at local `Y +256`.
+
+| Layer | Base object | Scale | Rotation Z | Origin Z | Origin Y (offset from paving edge) | X positions |
+| --- | --- | --- | --- | --- | --- | --- |
+| Upper wall | `Stonewall01` `0000099B` | 0.98 | 180 (face outward) | -5489.0 (floor -153) | -11662.9 (-15, straddling the edge) | -5622.2, -5521.1, -5272.6 |
+| Sloped grass | `StonewallTerrace01` `000009C6` | 1.0 | 0 (face inward, buried) | -5662.0 (ground +115) | -11536.8 (+111) | -5616.3, -5508.1, -5253.8, -5000.1 |
+| Lower wall | `StonewallTerrace01` `000009C6` | 1.0 | 180 (face outward) | -5777.0 (on ground) | -11531.1 (+117) | -5784.1, -5541.2, -5288.4 |
+
+Where each layer lands in the world:
+
+- **Upper `Stonewall01`**: spans `Y -11730 .. -11595`, so 83 of its 135 depth is inside
+  the paving edge and 53 shows outside. Base `Z -5489`, crest `Z -5317.5`, which is 18.5
+  above the floor: a knee-high parapet along the terrace edge. Along-edge spacing 101
+  then 248: the first two overlap by 150, then a clean run at piece length (251).
+- **Sloped grass** (`StonewallTerrace01` turned to face the terrace): its own wall is
+  buried inside the structural body at `Y -11862`, and only the grass slope shows. It
+  emerges from the retaining face at about `Z -5514` (178 below the floor) and falls to
+  `Z -5566` at `Y -11281`, a gentle 8 degree bank 367 long. Along-edge spacing 108, 254,
+  254: an overlapped pair at the stair end, then piece length.
+- **Lower `StonewallTerrace01`** (facing outward): wall face at `Y -11206`, 442 out from
+  the paving edge, standing 175 tall from ground to a crest at `Z -5602`. Its own grass
+  slope runs back toward the terrace under the middle layer and is hidden. Along-edge
+  spacing 243, 253, 239. A `StonewallTerrace02` (the variant with a rubble apron in
+  front) continues the row at `X -5050`, and `StonewallTerraceCorner01` turns the corner
+  at `X -4673`.
+
+Vertical relationship, foot to crest: ground `-5777` -> lower wall crest `-5602` (175)
+-> 36 lip -> grass slope foot `-5566` rising to `-5514` at the retaining face -> upper
+parapet base `-5489` and crest `-5317.5`. Two masonry tiers with a grass bank between
+them, the upper tier lower than the lower one, and the total 460 rise broken into three
+readable steps.
+
+Fit notes for the later generator pass, not corrections to the reference:
+
+- The parapet's base sits 23 to 31 above the grass slope on its outer face
+  (`Z -5489` over `-5514 .. -5522`). Sink the parapet about 32 when generating so its
+  footing is in the bank.
+- The middle layer's origin is only 6 further in than the lower layer's and 115 higher;
+  the two share one Y line. That is the whole trick: same plan position, one turned
+  round and lifted.
+- The lower row's first piece (`X -5784`) reaches to `X -5912`, across the stair's
+  east flank at `-5779`; it is hidden under the stair solid, which reaches 250 below the
+  treads. Any generated version should stop the lower row at the cheek line instead.
+- The bank is finished with two closed boulders (`RockL05` at 0.7, `RockL04` at 1.13)
+  and the existing scrub. No cliff piece anywhere.
+
+### What this changes about the plan
+
+This pattern replaces the generated `Stonewall01` 0.75 courses as the target language
+for the **irregular-footprint embankment pass**: lower terrace wall on grade, grass
+slope, knee-high parapet at the edge. Not applied around the perimeter yet, by Barry's
+instruction. The generated plugin, its hash and the deployed copy are unchanged by this
+audit.
+
 ## Foundation and entrance retained unchanged
 
 - 33-cell irregular footprint, emitted as 12 structural paving bodies and 12 caps.

@@ -192,6 +192,22 @@ Rolled out to **all four edges** on 2026-09-22 (`PerimeterWall.PrototypeEdges` e
 with courses at `PieceScale` 0.75 so they read waist high. See `docs/AUDIT.md` for the
 verified state.
 
+## Approved references (2026-09-22, afternoon)
+
+- **The staircase layout is approved and frozen.** Three `SkyrimFair_Stair_192` flights
+  at scale 1.3 with their cheek blocks and caps as generated. Do not alter it without
+  Barry asking.
+- **`reference/SkyrimFair_CK_LAYOUT_REFERENCE.esp` is Barry's hand-edited Creation Kit
+  layout.** Visual and layout reference only: never authoritative, never deployed, never
+  a replacement for the generator's plugin. Diff it against `dist/SkyrimFair.esp` by
+  FormID; the CK rounds scales to two decimals, so ignore scale deltas under 0.006.
+- **The approved embankment pattern** beside the stairs is documented in `docs/AUDIT.md`
+  ("Approved embankment reference"): lower `StonewallTerrace01` on grade facing out,
+  the same piece turned to face inward and lifted 115 to give a grass slope, and a
+  knee-high `Stonewall01` at 0.98 straddling the paving edge. It is the target language
+  for the later irregular-footprint embankment pass and replaces the 0.75-scale course
+  runs as the goal. **Not to be replicated round the perimeter yet.**
+
 ## External assets: replacers need no dependency
 
 Whiterun Stone Stairs (Nexus 147164 v1.2) was inspected and **not adopted**: it is a
