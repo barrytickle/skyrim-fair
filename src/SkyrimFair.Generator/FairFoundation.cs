@@ -1313,6 +1313,324 @@ internal static class FairFoundation
             }
         }
 
+        // ---- terrace band -----------------------------------------------------
+        // Barry's approved embankment, measured from his Creation Kit layout beside
+        // the stairs (docs/AUDIT.md, "Approved embankment reference") and carried round
+        // the whole outline. Three layers sharing one plan line:
+        //
+        //   lower   StonewallTerrace01 on native ground, wall face outward, 442 out
+        //           from the paving edge: the 175-tall lower wall
+        //   middle  the same piece turned to face the terrace and lifted 115: its wall
+        //           is buried inside the body, only its grass slope shows, rising
+        //           from the lower crest to the retaining face
+        //   upper   Stonewall01 at 0.98 straddling the paving edge, crest a knee above
+        //           the floor: the parapet
+        //
+        // Each layer is laid along an OFFSET of the paved outline, so the band keeps
+        // the same width round every corner, and pieces on each run are spaced evenly
+        // at or just under piece length so nothing gaps. At convex corners the lower
+        // wall dies into a grass knoll - the vanilla terrace corner piece turned so its
+        // walls face the terrace and its rounded grass shoulder faces out, with two
+        // boulders set on it - which is exactly how Barry finished his north-east
+        // corner. At re-entrant corners the two runs simply meet.
+        if (d.TerraceBand.Enabled)
+        {
+            TerraceBand();
+        }
+
+        void TerraceBand()
+        {
+            var tb = d.TerraceBand;
+            var straight = boundsOf(FormKeyHelper.Parse(tb.Piece));
+            var corner = boundsOf(FormKeyHelper.Parse(tb.CornerPiece));
+            var bandRng = new Random(d.Seed + 4441);
+
+            // ---- outline polygon, counter-clockwise, collinear edges merged ----
+            // Each unpaved-neighbour side of a paved cell is a directed edge with the
+            // interior on its left; chaining them gives the outline.
+            var half = tile / 2f;
+            var edges = new Dictionary<(int, int), ((int, int) End, int Tx, int Ty)>();
+            foreach (var (col, row) in paved)
+            {
+                var (cx, cy) = Centre(col, row);
+                var c = ((int)MathF.Round(cx), (int)MathF.Round(cy));
+                var h = (int)half;
+                if (!paved.Contains((col, row - 1)))      // north side, travel west
+                {
+                    edges[(c.Item1 + h, c.Item2 + h)] = ((c.Item1 - h, c.Item2 + h), -1, 0);
+                }
+                if (!paved.Contains((col - 1, row)))      // west side, travel south
+                {
+                    edges[(c.Item1 - h, c.Item2 + h)] = ((c.Item1 - h, c.Item2 - h), 0, -1);
+                }
+                if (!paved.Contains((col, row + 1)))      // south side, travel east
+                {
+                    edges[(c.Item1 - h, c.Item2 - h)] = ((c.Item1 + h, c.Item2 - h), 1, 0);
+                }
+                if (!paved.Contains((col + 1, row)))      // east side, travel north
+                {
+                    edges[(c.Item1 + h, c.Item2 - h)] = ((c.Item1 + h, c.Item2 + h), 0, 1);
+                }
+            }
+
+            var verts = new List<(float X, float Y)>();
+            var startKey = edges.Keys.OrderBy(k => k.Item2).ThenBy(k => k.Item1).First();
+            var key = startKey;
+            var guard = 0;
+            (int, int)? lastDir = null;
+            do
+            {
+                var e = edges[key];
+                if (lastDir is not { } ld || ld.Item1 != e.Tx || ld.Item2 != e.Ty)
+                {
+                    verts.Add((key.Item1, key.Item2));
+                }
+
+                lastDir = (e.Tx, e.Ty);
+                key = e.End;
+                guard++;
+            }
+            while (key != startKey && guard < 4096);
+
+            // The first vertex may sit mid-run if the start edge continued a direction;
+            // drop it when it is collinear with its neighbours.
+            if (verts.Count > 2)
+            {
+                var a = verts[^1]; var b = verts[0]; var c2 = verts[1];
+                if ((a.X == b.X && b.X == c2.X) || (a.Y == b.Y && b.Y == c2.Y))
+                {
+                    verts.RemoveAt(0);
+                }
+            }
+
+            var n = verts.Count;
+            (float X, float Y) Tangent(int i)
+            {
+                var a = verts[i]; var b = verts[(i + 1) % n];
+                var dx = b.X - a.X; var dy = b.Y - a.Y;
+                var len = MathF.Sqrt(dx * dx + dy * dy);
+                return (dx / len, dy / len);
+            }
+
+            (float X, float Y) Normal(int i)      // outward: right of travel
+            {
+                var t = Tangent(i);
+                return (t.Y, -t.X);
+            }
+
+            bool Convex(int i)                    // left turn between edge i-1 and i
+            {
+                var a = Tangent((i - 1 + n) % n); var b = Tangent(i);
+                return a.X * b.Y - a.Y * b.X > 0f;
+            }
+
+            float RotFacing((float X, float Y) dir)   // piece local -Y ends up pointing along dir
+                => MathF.Atan2(dir.Y, dir.X) + MathF.PI / 2f;
+
+            // Where the stairs cut the band, on the entrance edge only.
+            var stairTile = rampTiles.Count > 0 ? rampTiles[0] : default;
+            var haveStairs = rampTiles.Count > 0 && f.Entrance.UseStairs;
+            var stairNormal = (X: (float)stairTile.Dc, Y: (float)-stairTile.Dr);
+            var stairCentre = (X: stairTile.X, Y: stairTile.Y);
+            var cheekOuter = stairHalf + (cheekDepth > 0f ? d.EntranceCheeks.Gap + cheekDepth : 0f);
+
+            // ---- one layer along one offset of the outline ----
+            void LayRow(float originOffset, float faceOffset, bool faceOutward, string piece,
+                float pieceLen, float scale, Func<float, float, float?> zAt, float clearAtStairs,
+                Action<float, float, float, float, float> place)
+            {
+                for (var i = 0; i < n; i++)
+                {
+                    var t = Tangent(i);
+                    var nn = Normal(i);
+                    var np = Normal((i - 1 + n) % n);
+                    var nx = Normal((i + 1) % n);
+
+                    // Offset vertices: each is the paving vertex pushed out along both
+                    // of its edges' normals. That is exact for a rectilinear outline
+                    // and works the same at convex and re-entrant corners.
+                    var a = verts[i]; var b = verts[(i + 1) % n];
+                    var ax = a.X + (np.X + nn.X) * originOffset; var ay = a.Y + (np.Y + nn.Y) * originOffset;
+                    var bx = b.X + (nn.X + nx.X) * originOffset; var by = b.Y + (nn.Y + nx.Y) * originOffset;
+
+                    // Runs continue a little past convex corners so their ends are
+                    // swallowed by the knoll; at re-entrant corners the runs just meet.
+                    var s0 = Convex(i) ? -tb.ConvexExtend : 0f;
+                    var s1 = ((bx - ax) * t.X + (by - ay) * t.Y) + (Convex((i + 1) % n) ? tb.ConvexExtend : 0f);
+                    var length = s1 - s0;
+                    if (length < pieceLen * 0.5f)
+                    {
+                        continue;
+                    }
+
+                    // On the entrance edge the run is split either side of the stairs,
+                    // and each part is spaced on its own, so both parts finish exactly
+                    // at the clearance and the band meets the steps evenly.
+                    var parts = new List<(float A, float B)>();
+                    var onStairEdge = haveStairs
+                        && MathF.Abs(nn.X - stairNormal.X) < 0.01f && MathF.Abs(nn.Y - stairNormal.Y) < 0.01f;
+                    if (onStairEdge)
+                    {
+                        var sc = (stairCentre.X - ax) * t.X + (stairCentre.Y - ay) * t.Y;
+                        if (sc - clearAtStairs > s0 + pieceLen * 0.5f) { parts.Add((s0, MathF.Min(s1, sc - clearAtStairs))); }
+                        if (sc + clearAtStairs < s1 - pieceLen * 0.5f) { parts.Add((MathF.Max(s0, sc + clearAtStairs), s1)); }
+                        if (sc - clearAtStairs <= s0 && sc + clearAtStairs >= s1) { parts.Clear(); }
+                        if (!(sc + clearAtStairs > s0 && sc - clearAtStairs < s1)) { parts.Clear(); parts.Add((s0, s1)); }
+                    }
+                    else
+                    {
+                        parts.Add((s0, s1));
+                    }
+
+                    foreach (var (pa, pb) in parts)
+                    {
+                        var partLen = pb - pa;
+                        if (partLen < pieceLen * 0.5f)
+                        {
+                            continue;
+                        }
+
+                        // Ends flush with the run: the first and last pieces sit exactly
+                        // at the run's ends and the rest are spread evenly between,
+                        // overlapping a little rather than overshooting a corner.
+                        var count = Math.Max(1, (int)MathF.Ceiling(partLen / pieceLen));
+                        var spacing = count > 1 ? (partLen - pieceLen) / (count - 1) : 0f;
+                        for (var k = 0; k < count; k++)
+                        {
+                            var sAlong = count > 1 ? pa + pieceLen / 2f + k * spacing : (pa + pb) / 2f;
+                            var px = ax + t.X * sAlong;
+                            var py = ay + t.Y * sAlong;
+
+                            // Ground is read where the wall FACE stands, not at the origin.
+                            var fx = px + nn.X * (faceOffset - originOffset);
+                            var fy = py + nn.Y * (faceOffset - originOffset);
+                            var z = zAt(fx, fy);
+                            if (!z.HasValue)
+                            {
+                                if (trace) Console.Error.WriteLine($"band SKIP {piece} at ({px:F0},{py:F0}) face ({fx:F0},{fy:F0}) ground {sampleTerrain(fx, fy):F0}");
+                                result.BandSkipped++;
+                                continue;
+                            }
+
+                            var rot = RotFacing(faceOutward ? nn : (-nn.X, -nn.Y));
+                            place(px, py, z.Value, rot, scale);
+                        }
+                    }
+                }
+            }
+
+            var lowerH = straight.Height > 1f ? straight.Height : 175f;
+
+            // Lower wall: on grade, crest kept below the floor.
+            float? LowerZ(float fx, float fy)
+            {
+                var g = sampleTerrain(fx, fy);
+                if (!g.HasValue) { return null; }
+                var z = g.Value - tb.LowerSink;
+                if (g.Value > f.FloorZ - tb.MinDropForLower) { return null; }
+                return MathF.Min(z, f.FloorZ - tb.CrestClear - lowerH);
+            }
+
+            // Grass slope: the lower piece turned round and lifted, so its slope foot
+            // lands a hand above the lower crest and its top meets the retaining face.
+            float? MiddleZ(float fx, float fy)
+            {
+                var g = sampleTerrain(fx, fy);
+                if (!g.HasValue) { return null; }
+                if (g.Value > f.FloorZ - tb.MinDropForMiddle) { return null; }
+                return MathF.Min(g.Value - tb.LowerSink + tb.MiddleLift, f.FloorZ - tb.CrestClear - tb.MiddleTopAtFace);
+            }
+
+            float? ParapetZ(float fx, float fy) => f.FloorZ - tb.ParapetDrop;
+
+            LayRow(tb.LowerOriginOffset, tb.LowerFaceOffset, true, tb.Piece, tb.PieceLength, 1f, LowerZ,
+                stairHalf,
+                (x, y, z, rot, sc) => { PutVanilla(tb.Piece, x, y, z, rot, sc); result.TerraceLower++; });
+            LayRow(tb.MiddleOriginOffset, tb.LowerFaceOffset, false, tb.Piece, tb.PieceLength, 1f, MiddleZ,
+                cheekOuter + tb.StairClearance,
+                (x, y, z, rot, sc) => { PutVanilla(tb.Piece, x, y, z, rot, sc); result.TerraceMiddle++; });
+            LayRow(tb.ParapetOriginOffset, tb.ParapetOriginOffset, true, tb.ParapetPiece,
+                tb.ParapetLength * tb.ParapetScale, tb.ParapetScale, ParapetZ,
+                cheekOuter + tb.StairClearance,
+                (x, y, z, rot, sc) => { PutVanilla(tb.ParapetPiece, x, y, z, rot, sc); result.TerraceParapet++; });
+
+            // ---- knolls at convex corners ----
+            // The corner piece has its two walls on local -Y and local +X, meeting in a
+            // rounded corner at local (300, -300), and its grass falling away toward
+            // local (-X, +Y). Turned so the walls face the terrace, that grass becomes
+            // a rounded shoulder wrapping the corner, which the straight runs die into.
+            for (var i = 0; i < n; i++)
+            {
+                if (!Convex(i))
+                {
+                    continue;
+                }
+
+                var v = verts[i];
+                var np = Normal((i - 1 + n) % n);
+                var nn = Normal(i);
+
+                // Rotation: local +X (leg B's face) points against the incoming edge's
+                // normal, local -Y (leg A's face) against the outgoing edge's normal.
+                var rot = MathF.Atan2(-nn.Y, -nn.X);
+                var cosR = MathF.Cos(rot); var sinR = MathF.Sin(rot);
+                (float X, float Y) World(float lx, float ly)
+                    => (v.X + (np.X + nn.X) * tb.KnollWallInset + cosR * lx - sinR * ly,
+                        v.Y + (np.Y + nn.Y) * tb.KnollWallInset + sinR * lx + cosR * ly);
+
+                // Origin so that the walls' corner lands KnollWallInset outside the
+                // paving corner on both axes.
+                var origin = World(-tb.CornerWallX, tb.CornerWallY);
+                var g = sampleTerrain(origin.X, origin.Y);
+                if (!g.HasValue || g.Value > f.FloorZ - tb.MinDropForLower)
+                {
+                    continue;
+                }
+
+                if (haveStairs && MathF.Abs(origin.X - stairCentre.X) < cheekOuter + 512f
+                    && MathF.Abs(origin.Y - stairCentre.Y) < 512f)
+                {
+                    continue;
+                }
+
+                var kz = MathF.Min(g.Value - tb.LowerSink, f.FloorZ - tb.CrestClear - (corner.Height > 1f ? corner.Height : 175f));
+                PutVanilla(tb.CornerPiece, origin.X, origin.Y, kz, rot, 1f);
+                result.TerraceKnolls++;
+
+                // Two closed boulders on the shoulder, off-centre, different sizes.
+                // Positions are relative to the walls' corner, on the grass side.
+                var picks = new[] { (lx: -200f, ly: 120f, sc: 1.0f), (lx: -60f, ly: 330f, sc: 0.7f) };
+                foreach (var pk in picks)
+                {
+                    var pick = tb.KnollRocks[bandRng.Next(tb.KnollRocks.Count)];
+                    var rb = boundsOf(FormKeyHelper.Parse(pick));
+                    if (rb.Height <= 1f) { continue; }
+                    var pos = World(pk.lx + (float)(bandRng.NextDouble() - 0.5) * 60f,
+                                    pk.ly + (float)(bandRng.NextDouble() - 0.5) * 60f);
+                    var rg = sampleTerrain(pos.X, pos.Y) ?? g.Value;
+                    var scale = Math.Clamp(pk.sc * (0.9f + (float)bandRng.NextDouble() * 0.2f), 0.6f, 1.15f);
+
+                    // Bedded into grade, but the grass shoulder is up to 168 above
+                    // grade here, so lift until the crown clears it by a margin.
+                    var rz = rg - tb.RockBury - rb.ZMin * scale;
+                    var shoulder = kz + 150f;
+                    if (rz + rb.ZMax * scale < shoulder + tb.RockShow)
+                    {
+                        rz = shoulder + tb.RockShow - rb.ZMax * scale;
+                    }
+
+                    if (!ClearsMarketFloor(pos.X, pos.Y, rb.Radius * scale, rz + rb.ZMax * scale))
+                    {
+                        result.PavingGuardSkipped++;
+                        continue;
+                    }
+
+                    PutVanilla(pick, pos.X, pos.Y, rz, Spin(), scale);
+                    result.TerraceKnollRocks++;
+                }
+            }
+        }
+
         // ---- ramp flanks ---------------------------------------------------
         // Without this the ramp is a grey slab hanging in the air beside the terrace.
         // Each tile is treated on both sides against the exposure measured at that
@@ -1361,8 +1679,14 @@ internal static class FairFoundation
         // ---- corner stones -------------------------------------------------
         // A flat top edge reads as a built rectangle most obviously at its corners,
         // so every convex corner of the outline gets one larger stone set across it.
+        // Off when the terrace band is on: its knolls carry the corner rocks.
         foreach (var (col, row) in paved.OrderBy(c => c.Item2).ThenBy(c => c.Item1))
         {
+            if (d.TerraceBand.Enabled)
+            {
+                break;
+            }
+
             foreach (var (vdc, vdr) in new[] { (0, -1), (0, 1) })
             {
                 foreach (var (hdc, hdr) in new[] { (1, 0), (-1, 0) })
@@ -1570,6 +1894,19 @@ internal sealed class FoundationResult
 
     /// <summary>Low drystone pieces stepping down beside the steps.</summary>
     public int CheekWalls { get; set; }
+
+    public int TerraceLower { get; set; }
+
+    public int TerraceMiddle { get; set; }
+
+    public int TerraceParapet { get; set; }
+
+    public int TerraceKnolls { get; set; }
+
+    public int TerraceKnollRocks { get; set; }
+
+    /// <summary>Band pieces refused because the ground there is too close to the floor.</summary>
+    public int BandSkipped { get; set; }
 
     public int CheekEndWalls { get; set; }
 

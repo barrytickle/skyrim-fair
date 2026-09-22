@@ -67,6 +67,12 @@ try
         Console.WriteLine($"  {foundation.TerminalRocks,3} x part-buried rock ending a masonry run");
         Console.WriteLine($"  {foundation.EntranceBankPieces,3} x earth or rock burying a stair wall");
         Console.WriteLine($"  {foundation.CheekWalls,3} x low drystone cheek beside the steps");
+        Console.WriteLine($"  {foundation.TerraceLower,3} x terrace band: lower wall");
+        Console.WriteLine($"  {foundation.TerraceMiddle,3} x terrace band: grass slope");
+        Console.WriteLine($"  {foundation.TerraceParapet,3} x terrace band: parapet");
+        Console.WriteLine($"  {foundation.TerraceKnolls,3} x terrace band: corner knoll");
+        Console.WriteLine($"  {foundation.TerraceKnollRocks,3} x terrace band: knoll boulder");
+        Console.WriteLine($"  {foundation.BandSkipped,3} x terrace band: piece refused, ground too near the floor");
         Console.WriteLine($"  {foundation.CheekEndWalls,3} x level cheek termination at top / bottom");
         Console.WriteLine($"  {foundation.CheekTopCaps,3} x tapered masonry cap at the terrace landing");
         Console.WriteLine($"  {foundation.CornerStones,3} x corner stone breaking the outline");

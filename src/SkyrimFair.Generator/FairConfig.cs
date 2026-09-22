@@ -461,6 +461,8 @@ internal sealed record DressingConfig
 
     public EntranceCheekConfig EntranceCheeks { get; init; } = new();
 
+    public TerraceBandConfig TerraceBand { get; init; } = new();
+
     /// <summary>
     /// Toe rocks: low piles laid at native ground where the embankment meets grass.
     /// Deliberately small and medium piles only - the big RockTundraLand landscape
@@ -863,4 +865,89 @@ internal sealed record EntranceCheekConfig
     public float RiseLeft { get; init; } = 80f;
 
     public float RiseRight { get; init; } = 80f;
+}
+
+/// <summary>
+/// Barry's approved three-layer embankment, measured from his Creation Kit layout
+/// beside the stairs and carried round the outline. Offsets are plan distances from the
+/// paving edge, positive outward.
+/// </summary>
+internal sealed record TerraceBandConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>StonewallTerrace01: 256 long, wall face on local -Y at 325, crest 175, grass falling to 96 at +256.</summary>
+    public string Piece { get; init; } = "000009C6:Skyrim.esm";
+
+    public float PieceLength { get; init; } = 256f;
+
+    /// <summary>StonewallTerraceCorner01: walls on local -Y and +X meeting in a rounded corner.</summary>
+    public string CornerPiece { get; init; } = "00000A74:Skyrim.esm";
+
+    /// <summary>Stonewall01 for the parapet.</summary>
+    public string ParapetPiece { get; init; } = "0000099B:Skyrim.esm";
+
+    public float ParapetLength { get; init; } = 256f;
+
+    public float ParapetScale { get; init; } = 0.98f;
+
+    /// <summary>Lower wall origin, 117 out: puts its face at LowerFaceOffset.</summary>
+    public float LowerOriginOffset { get; init; } = 117f;
+
+    public float LowerFaceOffset { get; init; } = 442f;
+
+    /// <summary>Grass-slope piece origin, 111 out, turned to face the terrace.</summary>
+    public float MiddleOriginOffset { get; init; } = 111f;
+
+    /// <summary>Grass-slope piece sits this much above the lower piece.</summary>
+    public float MiddleLift { get; init; } = 115f;
+
+    /// <summary>Height of the slope where it meets the retaining face, above the middle origin.</summary>
+    public float MiddleTopAtFace { get; init; } = 148f;
+
+    /// <summary>Parapet origin, 15 inside the paving edge.</summary>
+    public float ParapetOriginOffset { get; init; } = -15f;
+
+    /// <summary>Parapet origin below the floor; with Stonewall01 at 0.98 the crest is 18.5 above it.</summary>
+    public float ParapetDrop { get; init; } = 153f;
+
+    /// <summary>Footing buried this far into grade.</summary>
+    public float LowerSink { get; init; } = 6f;
+
+    /// <summary>No wall crest closer than this to the floor plane.</summary>
+    public float CrestClear { get; init; } = 60f;
+
+    public float MinDropForLower { get; init; } = 240f;
+
+    public float MinDropForMiddle { get; init; } = 300f;
+
+    /// <summary>Runs continue this far past a convex corner, into the knoll.</summary>
+    public float ConvexExtend { get; init; } = 64f;
+
+    /// <summary>Clearance kept between the middle and parapet runs and the cheek outer face.</summary>
+    public float StairClearance { get; init; } = 16f;
+
+    /// <summary>Knoll walls' corner sits this far outside the paving corner on both axes.</summary>
+    public float KnollWallInset { get; init; } = 40f;
+
+    /// <summary>Local plan position of the corner piece's wall corner.</summary>
+    public float CornerWallX { get; init; } = 300f;
+
+    public float CornerWallY { get; init; } = 300f;
+
+    public float RockBury { get; init; } = 24f;
+
+    /// <summary>A knoll boulder's crown clears the grass shoulder by at least this.</summary>
+    public float RockShow { get; init; } = 60f;
+
+    /// <summary>
+    /// Boulders for the knolls: narrow closed rocks, the sizes Barry set by hand
+    /// (RockL05 at 0.7, RockL04 at about 1.1). Not the broad rock piles.
+    /// </summary>
+    public IReadOnlyList<string> KnollRocks { get; init; } = new[]
+    {
+        "0001A6E2:Skyrim.esm", // RockL04
+        "0001B0A8:Skyrim.esm", // RockL05
+        "0001819A:Skyrim.esm", // RockL02
+    };
 }

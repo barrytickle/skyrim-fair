@@ -204,9 +204,19 @@ verified state.
 - **The approved embankment pattern** beside the stairs is documented in `docs/AUDIT.md`
   ("Approved embankment reference"): lower `StonewallTerrace01` on grade facing out,
   the same piece turned to face inward and lifted 115 to give a grass slope, and a
-  knee-high `Stonewall01` at 0.98 straddling the paving edge. It is the target language
-  for the later irregular-footprint embankment pass and replaces the 0.75-scale course
-  runs as the goal. **Not to be replicated round the perimeter yet.**
+  knee-high `Stonewall01` at 0.98 straddling the paving edge.
+- **It is now generated round the whole outline** (`Dressing.TerraceBand`, 2026-09-22
+  evening, at Barry's request). The generator traces the paved outline as a polygon,
+  offsets it per layer, and spaces pieces evenly along each offset edge with flush ends,
+  so the band keeps one width round every corner. Convex corners get
+  `StonewallTerraceCorner01` turned walls-inward as a grass knoll with two boulders,
+  exactly Barry's north-east treatment. The old 0.75 course runs, embankment wall rocks,
+  corner stones and entrance bank rocks are switched off in config; the code remains.
+  Runs split either side of the stairs and finish at the same clearance both sides. Do
+  not add rocks between the band and the cheeks.
+- **Offsets are the prototype's numbers**: lower origin +117 (face +442), slope +111 and
+  +115 up, parapet -15 and floor -153. Change them only if Barry says the band is the
+  wrong width; keep all three layers on one plan line.
 
 ## External assets: replacers need no dependency
 

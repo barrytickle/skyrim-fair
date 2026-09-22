@@ -120,8 +120,8 @@
         "cliffMaxRunSegments": 99,
         "cliffMeshLength": 1944,
         "cliffMeshDepth": 465,
-        "minOffset": 192,
-        "spread": 384,
+        "minOffset": 480,
+        "spread": 480,
         "minScale": 0.6,
         "maxScale": 1.7,
         "rockSink": 24,
@@ -161,7 +161,7 @@
           "0001A6E2:Skyrim.esm"
         ],
         "wallMinDrop": 96,
-        "wallPerSegment": 4,
+        "wallPerSegment": 0,
         "wallTopOvershoot": 96,
         "wallBedding": 80,
         "wallEdgeOverlap": 112,
@@ -178,7 +178,7 @@
         "pavingClearance": 8,
         "rampRimAllowance": 32,
         "perimeterWall": {
-          "enabled": true,
+          "enabled": false,
           "piece": "0000099B:Skyrim.esm",
           "courseHeight": 175,
           "courseBatter": 48,
@@ -204,8 +204,8 @@
         "entranceBank": {
           "enabled": true,
           "rockOnLeft": true,
-          "rockSide": 3,
-          "earthSide": 3,
+          "rockSide": 0,
+          "earthSide": 0,
           "rockPool": [
             "0001819A:Skyrim.esm",
             "0001A6E2:Skyrim.esm",
@@ -242,6 +242,38 @@
           "gap": -16,
           "riseLeft": 80,
           "riseRight": 80
+        },
+        "terraceBand": {
+          "enabled": true,
+          "piece": "000009C6:Skyrim.esm",
+          "pieceLength": 256,
+          "cornerPiece": "00000A74:Skyrim.esm",
+          "parapetPiece": "0000099B:Skyrim.esm",
+          "parapetLength": 256,
+          "parapetScale": 0.98,
+          "lowerOriginOffset": 117,
+          "lowerFaceOffset": 442,
+          "middleOriginOffset": 111,
+          "middleLift": 115,
+          "middleTopAtFace": 148,
+          "parapetOriginOffset": -15,
+          "parapetDrop": 153,
+          "lowerSink": 6,
+          "crestClear": 48,
+          "minDropForLower": 200,
+          "minDropForMiddle": 200,
+          "convexExtend": 64,
+          "stairClearance": 16,
+          "knollWallInset": 40,
+          "cornerWallX": 300,
+          "cornerWallY": 300,
+          "rockBury": 24,
+          "rockShow": 60,
+          "knollRocks": [
+            "0001A6E2:Skyrim.esm",
+            "0001B0A8:Skyrim.esm",
+            "0001819A:Skyrim.esm"
+          ]
         }
       },
       "retainHeight": 256,
