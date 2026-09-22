@@ -217,7 +217,8 @@ internal static class FairWorld
         TowersResult? towers = null;
         if (config.Towers.Enabled && config.Towers.Towers.Count > 0)
         {
-            towers = FairTowers.Build(mod, config.Towers, AddStatic(mod, config.Towers.Tower), plan.Height, Put);
+            towers = FairTowers.Build(
+                mod, config.Towers, AddStatic(mod, config.Towers.Tower), AddStatic(mod, config.Towers.Lantern), plan.Height, Put);
         }
 
         // ---- the market ---------------------------------------------------------------
@@ -241,7 +242,15 @@ internal static class FairWorld
         ArcheryResult? archery = null;
         if (config.Archery.Enabled)
         {
-            archery = FairArchery.Build(mod, config.Archery, plan.Height, Put, npc =>
+            // Targets are persistent, as Castle Dour's are: an archer's linked target in
+            // another cell only resolves when the target is a persistent reference.
+            void PutPersistent(PlacedObject placed)
+            {
+                placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
+                topCell.Persistent.Add(placed);
+            }
+
+            archery = FairArchery.Build(mod, config.Archery, plan.Height, Put, PutPersistent, npc =>
             {
                 var pos = npc.Placement!.Position;
                 cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);

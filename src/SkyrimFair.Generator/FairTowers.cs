@@ -6,9 +6,10 @@ namespace SkyrimFair.Generator;
 
 /// <summary>
 /// The festival light towers described by <see cref="TowersConfig"/>: Barry's scaffold
-/// watchtower, with no guard. A large lantern (a scaled-up vanilla candle lantern and a
-/// vanilla Whiterun fire light) stands where the guard would, and tall Whiterun city
-/// banners hang from the deck's edge on the faces named per tower.
+/// watchtower, with no guard. A large lantern stands where the guard would: a scaled-up
+/// vanilla candle lantern with its physics removed, a small fire inside it, a soft glow
+/// round it and a vanilla Whiterun fire light. Tall Whiterun city banners hang from the
+/// deck's edge on the faces named per tower, tilted back as Dragonsreach hangs them.
 ///
 /// The tower's ladder is on its local -X face, so no banner hangs there. A banner hangs
 /// from its origin, with the cloth across its local Y and swaying out toward its local -X,
@@ -19,11 +20,13 @@ internal static class FairTowers
     private const float Deg = MathF.PI / 180f;
 
     public static TowersResult Build(
-        SkyrimMod mod, TowersConfig config, Static tower, Func<float, float, float> ground, Action<PlacedObject> put)
+        SkyrimMod mod, TowersConfig config, Static tower, Static lantern, Func<float, float, float> ground,
+        Action<PlacedObject> put)
     {
         var banner = FormKeyHelper.Parse(config.Banner);
-        var lantern = FormKeyHelper.Parse(config.Lantern);
         var light = FormKeyHelper.Parse(config.Light);
+        var fire = FormKeyHelper.Parse(config.Fire);
+        var glow = FormKeyHelper.Parse(config.Glow);
         var scale = config.Tower.Scale;
         var footprints = new List<(float X, float Y)[]>();
         var banners = 0;
@@ -55,7 +58,7 @@ internal static class FairTowers
             var floorZ = z + config.FloorZ * scale;
             put(new PlacedObject(mod)
             {
-                Base = new FormLinkNullable<IPlaceableObjectGetter>(lantern),
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(lantern.FormKey),
                 Scale = config.LanternScale,
                 Placement = new Placement
                 {
@@ -69,6 +72,26 @@ internal static class FairTowers
                 Placement = new Placement
                 {
                     Position = new P3Float(x, y, floorZ + config.LightZ),
+                    Rotation = new P3Float(0f, 0f, 0f),
+                },
+            });
+            put(new PlacedObject(mod)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(fire),
+                Scale = config.FireScale,
+                Placement = new Placement
+                {
+                    Position = new P3Float(x, y, floorZ + config.FireZ),
+                    Rotation = new P3Float(0f, 0f, 0f),
+                },
+            });
+            put(new PlacedObject(mod)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(glow),
+                Scale = config.GlowScale,
+                Placement = new Placement
+                {
+                    Position = new P3Float(x, y, floorZ + config.GlowZ),
                     Rotation = new P3Float(0f, 0f, 0f),
                 },
             });
@@ -89,6 +112,12 @@ internal static class FairTowers
                 // World outward normal; the banner's local -X points along it.
                 var (wx, wy) = (World(nx, ny).X - x, World(nx, ny).Y - y);
                 var bannerYaw = MathF.Atan2(wy, -wx);  // local +X = (cos t, -sin t) = -n
+
+                // Tilt back about the banner's local Y, split into the world-axis X and Y
+                // rotations Skyrim applies after Z; Dragonsreach's (0,-23,0), (0,23,180),
+                // (-23,0,90) and (23,0,270) are this at the four yaws.
+                var tilt = config.BannerTiltDegrees * Deg;
+                var (tiltX, tiltY) = (-tilt * MathF.Sin(bannerYaw), -tilt * MathF.Cos(bannerYaw));
                 put(new PlacedObject(mod)
                 {
                     Base = new FormLinkNullable<IPlaceableObjectGetter>(banner),
@@ -96,7 +125,7 @@ internal static class FairTowers
                     Placement = new Placement
                     {
                         Position = new P3Float(bx, by, deckZ + config.BannerZ),
-                        Rotation = new P3Float(0f, 0f, bannerYaw),
+                        Rotation = new P3Float(tiltX, tiltY, bannerYaw),
                     },
                 });
                 banners++;

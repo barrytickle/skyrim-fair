@@ -2073,11 +2073,20 @@ internal sealed record TowersConfig
     /// <summary>How far outside the deck edge each banner hangs.</summary>
     public float BannerOut { get; init; } = 8f;
 
+    /// <summary>
+    /// The tall banner's cloth leans in the mesh; Dragonsreach tilts every one back by 23
+    /// degrees about its local Y so it hangs straight.
+    /// </summary>
+    public float BannerTiltDegrees { get; init; } = 23f;
+
     /// <summary>Banner origin (its top) relative to the deck top.</summary>
     public float BannerZ { get; init; }
 
-    /// <summary>CandleLanternwithCandle01, scaled up into a large lantern.</summary>
-    public string Lantern { get; init; } = "0002D847:Skyrim.esm";
+    /// <summary>
+    /// The lantern: vanilla CandleLanternwithCandle01 with its physics unhooked by
+    /// <c>tools/make_tower_lantern.py</c>, since the vanilla one is havok clutter and falls.
+    /// </summary>
+    public ProjectStaticConfig Lantern { get; init; } = new();
 
     public float LanternScale { get; init; } = 3f;
 
@@ -2086,6 +2095,22 @@ internal sealed record TowersConfig
 
     /// <summary>Light height above the deck floor, inside the lantern.</summary>
     public float LightZ { get; init; } = 60f;
+
+    /// <summary>FXfireWithEmbersLight, shrunk to a flame inside the lantern.</summary>
+    public string Fire { get; init; } = "00033DA9:Skyrim.esm";
+
+    public float FireScale { get; init; } = 0.3f;
+
+    /// <summary>Fire base above the deck floor.</summary>
+    public float FireZ { get; init; } = 28f;
+
+    /// <summary>FXGlowFillRoundMid, a soft halo so the lantern reads from across the fair.</summary>
+    public string Glow { get; init; } = "0002EB0E:Skyrim.esm";
+
+    public float GlowScale { get; init; } = 0.45f;
+
+    /// <summary>Glow centre above the deck floor.</summary>
+    public float GlowZ { get; init; } = 75f;
 
     public float KeepOutMargin { get; init; } = 60f;
 

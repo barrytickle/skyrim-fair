@@ -18,3 +18,7 @@ external/
 # Restore with: unzip external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip (see CREDITS.md)
 assets/meshes/Stroti/
 assets/textures/Stroti/
+
+# The towers' lantern is a modified vanilla mesh: generate it, never commit it.
+#   python tools/make_tower_lantern.py --data "<stock Data>"
+assets/meshes/SkyrimFair/TowerLantern.nif

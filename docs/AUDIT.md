@@ -2,7 +2,53 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: festival light towers at the gate and the stage (2026-09-22, late)
+## Current pass: tower fixes and working archery (2026-09-22, late)
+
+Barry tested the towers and the range: "The lantern doesn't glow nor does it sit in the
+tower top, can we use fireFX to just make the lanterns glow?", "The flags on the towers
+seem to be going inside of the tower rather than hanging off naturally", and "the archery
+doesn't seem to be doing its animation... people stood there with bows".
+
+**1. The lantern fell to the ground.** Vanilla `CandleLanternwithCandle01` is havok
+clutter (a `bhkRigidBody`, BSX `0x9b`). Spawned on the deck, inside the tower's collision,
+it was pushed out and dropped. **Fix**: `tools/make_tower_lantern.py` extracts it from
+the BSA and unhooks its physics (the one collision link set to none; BSX havok, complex
+and articulated bits cleared, to `0x11`, which keeps the flicker animation and the candle
+add-on). The result is `meshes\SkyrimFair\TowerLantern.nif`, record
+`SkyrimFairTowerLantern`. It's a modified Bethesda mesh, so it is **generated, git-ignored
+and shipped only in the built mod**. **Glow**: inside the lantern, a flame
+(`FXfireWithEmbersLight` `033DA9` at 0.3), a soft halo round it (`FXGlowFillRoundMid`
+`02EB0E`, the vanilla ambient glow sphere, placed 498 times in vanilla, at 0.45, about
+115 across), and the `WRFireLightNS` light as before.
+
+**2. The banners leaned into the tower.** Every one of the 33 vanilla placements of
+`CityBannerWhiterun01InsideTall` is tilted 23 degrees back about the banner's local Y (Dragonsreach:
+`(0,-23,0)`, `(0,23,180)`, `(-23,0,90)`, `(23,0,270)`), because the cloth leans in the
+mesh. The towers now apply the same tilt (`bannerTiltDegrees`), computed per yaw; the
+rotations written match those four vanilla combinations exactly. The banners hang 16
+outside the deck edge (was 8), clear of the cross-braces.
+
+**3. The archers never shot.** In Castle Dour **every target a trainee links to is a
+persistent reference** (`0B2FE5`, `0B2FE7`; the one temporary target, `0B2FE6`, is linked
+to nobody). Ours were temporary, and in a different cell from the archers (targets at x
+-650 in cell -1, archers at x 300 in cell 0), so the `TrainingTarget` link had nothing to
+resolve. **Fix**: the four `ArcheryTarget` references now go in the worldspace's
+persistent cell with the persistent flag (`0x400`), and move in to x -450, so each archer
+is **750** from its target (Solitude's trainees shoot from about 300-850). Read back from
+the ESP: 4 persistent targets, 0 temporary, each archer linked to its own.
+
+**Verification**: generator run twice, identical SHA256 `ef7aac9985a79042...` (423,273
+bytes). **Deployed byte-identical**, with `meshes\SkyrimFair\TowerLantern.nif`.
+
+**Test**:
+- The lanterns stand on the deck, glow, and have a small flame (tune `fireScale`,
+  `glowScale` if too big or small).
+- Banners hang straight down the tower faces.
+- The archers draw and shoot. A save made before this build may still have the old
+  targets baked in; if they stand idle, try `coc` from a fresh cell or a save from
+  before your first visit to the fair.
+
+## Previous pass: festival light towers at the gate and the stage (2026-09-22, late)
 
 Barry: "a new asset... barry_scaffold... festival watchtowers more than guard
 watchtowers... two near the main gate and two near the stage... large whiterun banners

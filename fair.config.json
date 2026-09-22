@@ -617,7 +617,7 @@
             950
           ],
           "target": [
-            -650,
+            -450,
             950
           ]
         },
@@ -627,7 +627,7 @@
             1250
           ],
           "target": [
-            -650,
+            -450,
             1250
           ]
         },
@@ -637,7 +637,7 @@
             1550
           ],
           "target": [
-            -650,
+            -450,
             1550
           ]
         },
@@ -647,7 +647,7 @@
             1850
           ],
           "target": [
-            -650,
+            -450,
             1850
           ]
         }
@@ -673,9 +673,16 @@
       "deckHalf": 59,
       "banner": "000DEE54:Skyrim.esm",
       "bannerScale": 1.25,
-      "bannerOut": 8,
+      "bannerOut": 16,
+      "bannerTiltDegrees": 23,
       "bannerZ": 0,
-      "lantern": "0002D847:Skyrim.esm",
+      "lantern": {"editorId": "SkyrimFairTowerLantern", "model": "SkyrimFair\\TowerLantern.nif", "width": 18, "depth": 17, "height": 44},
+      "fire": "00033DA9:Skyrim.esm",
+      "fireScale": 0.3,
+      "fireZ": 28,
+      "glow": "0002EB0E:Skyrim.esm",
+      "glowScale": 0.45,
+      "glowZ": 75,
       "lanternScale": 3.5,
       "light": "000BBAE5:Skyrim.esm",
       "lightZ": 90,

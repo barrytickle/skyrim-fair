@@ -10,7 +10,8 @@ namespace SkyrimFair.Generator;
 /// one <c>ArcheryTarget</c> by a linked reference with the <c>TrainingTarget</c> keyword,
 /// and runs vanilla <c>GuardSolitudeRangedTrainingPackage</c>, which has no conditions and
 /// shoots at that linked target all day. The archers are ordinary townsfolk rather than
-/// soldiers: their looks come, as the stall-keepers' do, from a Traits template on
+/// soldiers. As in Castle Dour, the targets are persistent references, which is what
+/// lets the linked reference resolve across cells. Their looks come, as the stall-keepers' do, from a Traits template on
 /// vanilla commoner leveled lists, with hunter clothes, a hunting bow and arrows.
 /// </summary>
 internal static class FairArchery
@@ -19,7 +20,8 @@ internal static class FairArchery
 
     public static ArcheryResult Build(
         SkyrimMod mod, ArcheryConfig config, Func<float, float, float> ground,
-        Action<PlacedObject> putObject, Action<PlacedNpc> putNpc, Func<string, FormKey> faceList)
+        Action<PlacedObject> putObject, Action<PlacedObject> putPersistent, Action<PlacedNpc> putNpc,
+        Func<string, FormKey> faceList)
     {
         var archers = new List<Npc>();
         foreach (var look in config.Looks)
@@ -94,7 +96,7 @@ internal static class FairArchery
                     Rotation = new P3Float(0f, 0f, targetYaw * Deg),
                 },
             };
-            putObject(target);
+            putPersistent(target);
 
             // A hay bale behind the target stops the stray arrows.
             var (bx, by) = (tx + dx * config.BackstopDistance, ty + dy * config.BackstopDistance);
