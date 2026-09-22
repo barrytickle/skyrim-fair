@@ -32,7 +32,7 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
 - centre `X -5888, Y -13440` (pushed back 512 from the road on 2026-09-22)
 - floor `Z -5336` (raised 2026-09-22 to make the terrace tall, per concept reference)
 - the platform was deliberately raised by +192 from the earlier test
-- irregular 22-tile paving footprint
+- irregular 33-cell paving footprint, emitted as 12 structural bodies and 12 caps
 - broad ramp connects toward the existing road
 - the ramp seam to the paving is geometrically continuous
 - ramp slab depth was increased to remove visible daylight beneath the head
@@ -51,9 +51,13 @@ Read `docs/AUDIT.md` for exact current values and hashes. At handover time the i
   collider built in, same geometry as the vanilla flight so the chain maths is unchanged.
   The vanilla `StonewallTerraceStairs01` is a fallback behind `entrance.kitStair`. See
   "Road and entrance"
-- **the only masonry at the entrance is a pair of low drystone cheeks** (`Stonewall01` at
-  0.6, stepping down beside the steps, different crest heights per side), plus an
-  asymmetric closed-rock and grassy-pile bank leaning on them
+- **the only masonry at the entrance is a pair of low project-authored drystone cheeks**
+  (`SkyrimFair_StairCheek_192`, one closed section per side per flight, its eight-step
+  crest matching the stair), plus an asymmetric closed-rock and grassy-pile bank
+  leaning on them
+- two closed `SkyrimFair_EntranceRetainWing_144` solids restore the terrace face on
+  either side of the 217-wide stair opening; the entrance segment must never be left
+  structurally open again
 - **no dirt-cliff piece is placed anywhere** (Barry, 2026-09-22: "they have an invisible
   piece to them"). The cliff-skin pass is off and every cliff STAT is out of every pool
 - **the layered low-wall perimeter runs on all four edges**, courses at 0.75 scale
@@ -76,9 +80,11 @@ textured in-game test. The single biggest one: **every face of every piece in th
 wound inward**, so the whole kit rendered inside-out. That had been true since the kit was
 first authored and was invisible on untextured grey geometry. See `docs/AUDIT.md`.
 
-Barry reviewed that build and it reads much better, but still blocky. That review
-produced the direction decisions recorded below, and the next implementation step is the
-**approach from the road**, not further edge polish.
+Barry's next in-game review found the raised vanilla cheek walls reading as vertical
+towers with open undersides and the retaining face missing around the stair head. The
+2026-09-22 corrective build replaces them with closed, descending project kit pieces.
+The current gate is Barry's visual/collision retest of that entrance. Only after approval
+does work move to the **approach from the road**.
 
 The project-owned procedural cobble candidate is kept as a reproducible comparison, but
 it is not the current NIF material. Keep the wall/cliff decision separate from the
@@ -173,9 +179,9 @@ Rules, in force for all future perimeter work:
   `DirtCliffsIsland01` included. The cliff-skin code remains but is disabled by
   `cliffMinRunSegments` 99; do not re-enable it. Banks are closed boulders, rock piles
   and grassy piles only.
-- **Small walls, not slabs.** The concept's masonry is waist high: `Stonewall01` at 0.6
-  for the stair cheeks, 0.75 for the perimeter courses. Anything that reads as a wall
-  taller than a person is wrong here.
+- **Small walls, not slabs.** The concept's masonry is waist high: the project-authored
+  stair cheeks sit 56 / 80 above the nosing, while `Stonewall01` stays at 0.75 for the
+  perimeter courses. Anything that reads as a wall taller than a person is wrong here.
 - **The existing road is the approach.** Do not build a separate path aimed at the fair.
 - **Vanilla first.** Audit Whiterun and tundra assets before authoring anything.
 
@@ -282,21 +288,19 @@ Do not enlarge the platform simply because more space might be useful. First pro
 
 ## Road and entrance
 
-**The entrance is a CHAIN of vanilla stair flights, not a ramp** (built 2026-09-22, to match Barry's
-second concept reference). `StonewallTerraceStairs01`, `000009D0:Skyrim.esm`, is a
-512-wide drystone wall with a 167-wide staircase cut through it; its treads climb 112
-units over a 192 run, about 30 degrees. Measured off the shipped mesh, not the LOD.
+**The entrance is a chain of project-authored stair flights, not a ramp.** Its dimensions
+were measured from vanilla `StonewallTerraceStairs01`: 168 wide, climbing 112 over a
+192 run at about 30 degrees. The vanilla piece remains only as a config fallback.
 
 Flights chain nose to tail: each is stepped one `StairRun` further out and one
 `StairDrop` lower, which puts the top tread of each on the bottom tread of the one
-above, so no landings are needed and it reads as one long staircase. Each flight brings
-its own 512-wide drystone wall, so the chain also builds the stepped retaining tiers
-either side of the steps.
+above, so no landings are needed and it reads as one long staircase. Closed cheek
+sections use the same profile and transform on both sides.
 
 **Three flights at scale 1.3** carry the current floor of `-5336` down to native ground,
 landing 8 units into grade and stopping 885 short of the road, which leaves the last
-stretch to the dirt path still to be built. Scale 2.0 was tried and rejected: each
-flight then brings a 1024 x 344 wall, which reads as fortification. Flights are
+stretch to the dirt path still to be built. Scale 2.0 was tried and rejected when the
+vanilla wall-bearing flight was active because it read as fortification. Flights are
 registered with the ramp-tile list so the entrance channel and the paving guard cover
 the steps. `Entrance.UseStairs = false` falls back to a plain ramp.
 
@@ -315,11 +319,16 @@ perfectly. **If a scaled vanilla piece ever needs to be walked on, assume its
 compressed-mesh collision will fail and give it a box.** The standalone slab
 `SkyrimFair_StairCollision` still exists for the vanilla fallback and is not placed.
 
-**Cheek walls** (`Dressing.EntranceCheeks`): `Stonewall01` at 0.6, two per flight per
-side, laid along the steps, each crest a fixed rise above the nosing line under it
-(56 west, 80 east, so the sides differ). Inner face flush with the stair flank, first
-piece flush with the stair head. These are the concept's stair cheeks and the only
-masonry at the entrance.
+**Cheek walls** (`Dressing.EntranceCheeks`): `SkyrimFair_StairCheek_192`, one per flight
+per side, placed at the stair's 1.3 scale. Its closed solid has the same eight-step crest
+as the stair, so it descends continuously instead of exposing raised vertical field-wall
+pieces. Crests remain 56 west / 80 east above the nosing and the inner face overlaps the
+stair by 4 to hide the seam. These are the only masonry at the entrance.
+
+**Entrance retaining wings**: reserving the 512-wide stair segment also omitted its
+retaining face. Two closed 144 x 128 x 256 `SkyrimFair_EntranceRetainWing_144` pieces now
+fill from each outer edge to a 224-wide central opening. They have independent box
+collision, so nothing spans the 217.1-wide stair.
 
 **The entrance bank** (`Dressing.EntranceBank`) leans on the cheeks: per flight and per
 side, closed pieces sized from below grade to just under the cheek crest, bedded to the
@@ -331,7 +340,7 @@ The stair surface guard protects the walkable width for one flight run per tile,
 the whole 512 tile - the full-tile version refused the bank. Plain ramp tiles keep the
 full-tile rectangle.
 
-**Next for the entrance, in Barry's concept order:** timber post-and-rail on a low stone
+**After Barry approves the corrected entrance, next in concept order:** timber post-and-rail on a low stone
 base along the top edge and the road (`WRFenceStr01` on `WRFenceBaseStr01`, both
 audited), braziers on drystone plinths at the stair foot, then the cobbled spur from the
 road. Stair width is one number, `entrance.stairScale`; the piece, its collider and the

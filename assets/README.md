@@ -78,16 +78,17 @@ AssetWatcher **mirrors the Source folder's subfolder structure into the Output f
 ```text
 assets\nif\SkyrimFair\SkyrimFair_FloorFill_1024.nif
                      \SkyrimFair_FloorEdge_512.nif
-                     \SkyrimFair_FloorEdge_512_U1.nif
-                     \SkyrimFair_FloorEdge_512_V1.nif
-                     \SkyrimFair_FloorEdge_512_U1V1.nif
                      \SkyrimFair_Retain_512.nif
                      \SkyrimFair_RetainCorner_128.nif
                      \SkyrimFair_Ramp_512.nif
-                     \SkyrimFair_Ramp_512_U1.nif
-                     \SkyrimFair_Ramp_512_V1.nif
-                     \SkyrimFair_Ramp_512_U1V1.nif
                      \SkyrimFair_Shoulder_512.nif
+                     \SkyrimFair_StairCollision.nif
+                     \SkyrimFair_Stair_192.nif
+                     \SkyrimFair_StairCheek_192.nif
+                     \SkyrimFair_EntranceRetainWing_144.nif
+                     \SkyrimFair_PaveCap_1024.nif
+                     \SkyrimFair_PaveCap_512.nif
+                     \SkyrimFair_RampCap_512.nif
 ```
 
 That `SkyrimFair` folder level is what gives the plugin its mesh paths, which are **relative to `Data`**:
@@ -102,7 +103,7 @@ Output goes to `assets\nif` inside the repo rather than a game `Data\Meshes`, wh
 
 ### Triggering the conversion
 
-AssetWatcher converts on file change, so with the project ON, re-run the build script and the six FBX files will be rewritten and converted:
+AssetWatcher converts on file change, so with the project ON, re-run the build script and the 13 FBX files will be rewritten and converted:
 
 ```powershell
 & "C:\Blender\blender-3.6.23-windows-x64\blender-3.6.23-windows-x64\blender.exe" --background --python assets\blender\build_foundation_kit.py
@@ -124,12 +125,19 @@ All dimensions in Skyrim units, and **verified exact** in the converted NIFs. Se
 
 | Piece | Footprint | Height | Collision | Purpose |
 | --- | --- | --- | --- | --- |
-| `SkyrimFair_FloorFill_1024` | 1024 x 1024 | 32 thick | self, Box | interior paving. 9 cover a 3072 core |
-| `SkyrimFair_FloorEdge_512` (+ 3 UV variants) | 512 x 512 | 32 thick | self, Box | outer ring, half size so the outline can step in 512u increments |
+| `SkyrimFair_FloorFill_1024` | 1024 x 1024 | 32 thick | self, Box | interior structural paving body |
+| `SkyrimFair_FloorEdge_512` | 512 x 512 | 32 thick | self, Box | outer structural paving body |
 | `SkyrimFair_Retain_512` | 512 x 128 | 256 tall | self, Box | retaining face hanging below the floor plane |
 | `SkyrimFair_RetainCorner_128` | 128 x 128 | 256 tall | self, Box | turns the stepped outline |
-| `SkyrimFair_Ramp_512` (+ 3 UV variants) | 512 x 512 | falls 96 | **child box rotated 10.62 deg** | chainable entrance ramp; 4 tiles reach grade |
+| `SkyrimFair_Ramp_512` | 512 x 512 | falls 120 | child Box at 13.19 degrees | fallback ramp body |
 | `SkyrimFair_Shoulder_512` | 512 x 256 | tapers 32 to 0 | **none, intentional** | rough-earth / grass transition outside the paving |
+| `SkyrimFair_StairCollision` | 160 x 192 | 192 overall | child Box at 30.3 degrees | fallback collision for a scaled vanilla stair |
+| `SkyrimFair_Stair_192` | 168 x 192 | 192 overall | child Box at 30.3 degrees | eight-step project stair flight |
+| `SkyrimFair_StairCheek_192` | 48 x 192 | 240 overall | child Box at 30.3 degrees | closed low cheek with an eight-step crest matching one flight |
+| `SkyrimFair_EntranceRetainWing_144` | 144 x 128 | 256 tall | self, Box | one closed wing restoring the face beside the stair opening |
+| `SkyrimFair_PaveCap_1024` | 1024 x 1024 | zero thickness | none | visual-only worn-earth cap |
+| `SkyrimFair_PaveCap_512` | 512 x 512 | zero thickness | none | visual-only worn-earth cap |
+| `SkyrimFair_RampCap_512` | 512 x 512 | falls 120 | none | visual-only fallback ramp cap |
 
 ### Pivot conventions
 
@@ -146,7 +154,8 @@ For retaining, ramp and shoulder pieces, **+Y points away from the platform cent
 
 - Every piece is an **unyielding rigidbody with mass 0** — static world geometry, not a loose prop. The BGS default is mass 80 with unyielding off, which would have made the platform a physics object.
 - The four box-shaped pieces use their own mesh as the collider. BGS defaults that to a bounding box, which is exactly right for a box.
-- The **ramp** cannot use a bounding box: that would be a solid 512 x 512 x 384 block and would stop the player walking up it. It instead uses a separate box child collider rotated 10.62 degrees to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide. Verified present in every ramp-variant FBX.
+- The **ramp** cannot use a bounding box: that would be a solid 512 x 512 x 384 block and would stop the player walking up it. It instead uses a separate box child collider rotated 13.19 degrees to lie along the slope — the "Adding Collision using Child Collider Meshes" method from Bethesda's guide.
+- The **stair and stair cheek** use separate child box colliders at 30.3 degrees. The visible meshes keep the step profile; the collision follows the overall descent smoothly.
 - The **shoulder** deliberately has no collider; it sits on native ground and would only create a snag lip.
 
 ### Scale — the one real trap

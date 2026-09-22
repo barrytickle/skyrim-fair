@@ -326,6 +326,15 @@ terraced complex to look like B would have the two fighting each other. The reso
    dirt spur curving off it, and steps for the final climb. The fair should read as a
    path that has been worn to somewhere new, not as a structure dropped beside the road.
 
+### Stair retaining-edge rule
+
+The cheek walls beside the approach steps must track the staircase as a continuous
+descending retaining edge. Each flight section is lower than the one above it and its
+crest follows the stair profile; it must never read as upright wall towers or repeated
+buttresses. The walls are low, closed drystone solids, partly embedded into the bank,
+with no visible back or underside. The structural terrace face must close cleanly around
+the stair-head opening without placing geometry or collision across the walking route.
+
 ### Explicit non-goal: the backdrop
 
 Both references put Whiterun's walls in the mid-distance. Measured from the approved

@@ -76,6 +76,18 @@ STAIRCOL_SINK = 24          # visible slab sits this far under the tread line
 # end and the box turns itself inside out - the orientation guard caught exactly that.
 STAIRCOL_DEPTH = 192
 
+# Closed project-authored stair cheeks.  Their top profile uses the same 8 steps
+# as the stair flight, so each section descends with the nosing instead of
+# standing up as a terrain-dependent vanilla wall segment.  The solid continues
+# below that profile so no underside or missing back can be exposed.
+STAIR_CHEEK_HALF_X = 24
+STAIR_CHEEK_DEPTH = 128
+
+# The 512-wide perimeter segment at the stair head needs a structural face on
+# both sides of the 217-wide opening.  Two 144-wide wings leave a few units of
+# tolerance around the stair at its configured 1.3 scale.
+ENTRANCE_WING_HALF_X = 72
+
 # Project-authored staircase, replacing the vanilla StonewallTerraceStairs01 flight
 # whose 666-wide drystone wall read as a gatehouse. Same 112 rise over 192 run and
 # same 167 width as the vanilla flight at scale 1.0, so every placement the generator
@@ -341,6 +353,38 @@ def stair(name, half_x, run, rise, steps, depth):
     return obj
 
 
+def stair_cheek(name, half_x, run, rise, steps, depth):
+    """Closed drystone cheek whose crest follows the staircase step for step.
+
+    The lower edge descends in parallel with the flight, keeping a substantial
+    retaining body beneath every tread.  Unlike a raised vanilla field-wall
+    reference, this has a closed back, ends and underside and therefore never
+    depends on native terrain to hide empty space.
+    """
+    t = run / steps
+    r = rise / steps
+    profile = []
+    for i in range(steps):
+        profile.append((i * t, -i * r))
+        profile.append(((i + 1) * t, -i * r))
+    profile.append((run, -rise - depth))
+    profile.append((0.0, -depth))
+    n = len(profile)
+    verts = [(-half_x, y, z) for y, z in profile] + [(half_x, y, z) for y, z in profile]
+    faces = [tuple(range(n)), tuple(reversed(range(n, 2 * n)))]
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((i, j, n + j, n + i))
+    obj = make_object(name, verts, faces)
+    select_only(obj)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.mesh.quads_convert_to_tris(quad_method="BEAUTY", ngon_method="BEAUTY")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return obj
+
+
 def apply_split_material(obj, top, sides, period):
     """Treads take one material, risers and flanks another. World-scale UVs as usual."""
     obj.data.materials.append(top)
@@ -484,6 +528,24 @@ def build_kit():
     apply_split_material(pieces["SkyrimFair_Stair_192"], steps_top, steps_side, period=256)
     nonconvex.add("SkyrimFair_Stair_192")
 
+    # 9. One closed low retaining cheek per side and flight.  The generator places
+    #    it at the same scale and origin as the stair, offset sideways and raised by
+    #    the configured low crest height.
+    pieces["SkyrimFair_StairCheek_192"] = stair_cheek(
+        "SkyrimFair_StairCheek_192", STAIR_CHEEK_HALF_X, STAIR_RUN,
+        STAIR_RISE, STAIR_STEPS, STAIR_CHEEK_DEPTH)
+    apply_paving_material(pieces["SkyrimFair_StairCheek_192"], steps_side, period=256)
+    nonconvex.add("SkyrimFair_StairCheek_192")
+
+    # 10. One of two closed structural wings around the opening at the stair head.
+    #     Together they restore the retaining face that the entrance reservation
+    #     intentionally omits, without putting collision across the steps.
+    pieces["SkyrimFair_EntranceRetainWing_144"] = box(
+        "SkyrimFair_EntranceRetainWing_144",
+        -ENTRANCE_WING_HALF_X, ENTRANCE_WING_HALF_X,
+        -RETAIN_DEPTH, 0, -RETAIN_HEIGHT, 0)
+    apply_paving_material(pieces["SkyrimFair_EntranceRetainWing_144"], earth, period=512)
+
     # --- visual paving caps: the only upward-facing surfaces on the terrace ---
     pieces["SkyrimFair_PaveCap_1024"] = quad(
         "SkyrimFair_PaveCap_1024",
@@ -563,6 +625,25 @@ def apply_collision(obj, collider="self"):
 
     # child box collider, aligned to the ramp slope
     import math
+    if obj.name.startswith("SkyrimFair_StairCheek_"):
+        angle = math.atan2(STAIRCOL_RISE, STAIRCOL_RUN)
+        slope_len = math.hypot(STAIRCOL_RUN, STAIRCOL_RISE)
+        child = box(obj.name + "_Collider", -STAIR_CHEEK_HALF_X, STAIR_CHEEK_HALF_X,
+                    -slope_len / 2.0, slope_len / 2.0, -STAIR_CHEEK_DEPTH, 0)
+        child.rotation_euler = (-angle, 0.0, 0.0)
+        s2 = BLENDER_UNITS_PER_SKYRIM_UNIT
+        child.location = (0.0, STAIRCOL_RUN / 2.0 * s2, -STAIRCOL_RISE / 2.0 * s2)
+        child.parent = obj
+        child.matrix_parent_inverse = obj.matrix_world.inverted()
+        select_only(child)
+        try:
+            bpy.ops.bgs_skyrim.create_collider_skyrim()
+            result["collider"] = (f"cheek collision slope {math.degrees(angle):.1f} deg "
+                                  f"({child.name}, {child.bgs_collider.type})")
+        except Exception as exc:                             # noqa: BLE001
+            result["collider"] = f"child failed: {exc}"
+        return result
+
     if obj.name.startswith("SkyrimFair_StairCollision") or obj.name.startswith("SkyrimFair_Stair_"):
         angle = math.atan2(STAIRCOL_RISE, STAIRCOL_RUN)
         slope_len = math.hypot(STAIRCOL_RUN, STAIRCOL_RISE)
@@ -666,7 +747,7 @@ def main():
 
     collider_mode = {}
     for name in pieces:
-        if name == "SkyrimFair_StairCollision" or name == "SkyrimFair_Stair_192":
+        if name in {"SkyrimFair_StairCollision", "SkyrimFair_Stair_192", "SkyrimFair_StairCheek_192"}:
             collider_mode[name] = "child"
         elif name in visual_only:
             # Visual caps get no rigidbody at all. Collision stays on the

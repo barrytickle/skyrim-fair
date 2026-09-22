@@ -665,6 +665,12 @@ internal sealed record EntranceConfig
     /// the edge itself. The mesh's top tread is 64 units in front of its origin.
     /// </summary>
     public float StairInset { get; init; } = 64f;
+
+    /// <summary>Project kit role for each closed retaining wing beside the stair head.</summary>
+    public string RetainWingRole { get; init; } = "entranceRetainWing";
+
+    /// <summary>Lateral centre of each 144-wide wing in the 512-wide entrance segment.</summary>
+    public float RetainWingOffset { get; init; } = 184f;
 }
 
 
@@ -820,14 +826,11 @@ internal sealed record EntranceCheekConfig
 {
     public bool Enabled { get; init; } = true;
 
-    public string Piece { get; init; } = "0000099B:Skyrim.esm"; // Stonewall01
+    /// <summary>Project-authored closed cheek whose eight-step crest matches one flight.</summary>
+    public string Role { get; init; } = "stairCheek";
 
-    /// <summary>Scale of the wall piece. 0.6 makes the 175-tall field wall waist high.</summary>
-    public float Scale { get; init; } = 0.6f;
-
-    public float PieceLength { get; init; } = 256f;
-
-    public float PieceDepth { get; init; } = 138f;
+    /// <summary>Width across the wall at scale 1; scales with the stair flight.</summary>
+    public float PieceDepth { get; init; } = 48f;
 
     /// <summary>Clearance between the stair flank and the wall's inner face.</summary>
     public float Gap { get; init; } = 8f;

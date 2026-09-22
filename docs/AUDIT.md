@@ -2,84 +2,89 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: wall-less staircase, low cheek walls, no cliff pieces
+## Current pass: closed stair cheeks and restored entrance retaining face
 
-Barry's direction of 2026-09-22, after seeing the previous build in game: **no dirt-cliff
-pieces at all** ("they have an invisible piece to them"), **just small rock walls**, and
-the two concept images: broad stone steps with low drystone cheeks either side, terraces
-of short low walls, boulders, grass and scrub.
+Barry's in-game screenshots of 2026-09-22 showed two related construction faults:
+
+- the vanilla `Stonewall01` cheek references were raised to keep their crests near the
+  stair nosing, exposing the terrain-dependent meshes as repeated vertical towers with
+  visible undersides;
+- reserving the 512-unit entrance segment skipped its structural retaining face, leaving
+  the terrace open around the narrower stair head.
+
+Both are now project-authored closed geometry. The approved site, footprint, elevation,
+stair dimensions and content scope did not change.
 
 | Field | Verified value |
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 85,389 bytes |
-| SHA256 | `8aeba0275e8954ee642bf7c5855578c30552513e0f181d9fbfde6e920522c314` |
+| Size | 85,363 bytes |
+| SHA256 | `ea456f0b74de7c21633f705323761431dbcaa29b575bf37c48b50088d8d46b6b` |
 | Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` |
-| Kit meshes deployed | all 11 NIFs under `meshes\SkyrimFair\`, hashes identical to `assets/nif/SkyrimFair/` |
+| Kit meshes deployed | all 13 NIFs under `meshes\SkyrimFair\`, hashes identical to `assets/nif/SkyrimFair/` |
 | Masters | `Skyrim.esm` only |
 | Centre / floor | `X -5888, Y -13440`, floor `Z -5336` |
 | Cells | `-2,-4`, `-1,-4`, `-2,-3`, `-1,-3` |
-| **Vanilla references disabled** | **0** |
-| **Dirt-cliff pieces placed** | **0** (DirtCliffs01, DirtCliffs02, DirtCliffsIsland01 all out) |
+| Vanilla references disabled | 0 |
+| Dirt-cliff pieces placed | 0 |
 | Forbidden records | 0 LAND, NAVM, NPC_, QUST, PACK, DIAL, INFO, SCEN |
-| Floor material | `road01.dds` worn earth on the paving caps (Barry's choice; brief still says WRStoneFloor02) |
+| Floor material | `road01.dds` worn earth on the paving caps |
 
-## The staircase is now project-authored
+## Continuous descending stair cheeks
 
-`SkyrimFair_Stair_192` replaces the vanilla `StonewallTerraceStairs01` flight. The vanilla
-piece could not be separated from its 666-wide drystone wall, and three of those walls
-stacked each side were the gatehouse. Vanilla was audited first: there is no free-standing
-outdoor stone stair without a wall in the base game (the Whiterun stairs are platform
-pieces built into their own terrain).
+`SkyrimFair_StairCheek_192` replaces all twelve raised `Stonewall01` cheek references.
+There is now one closed cheek per side per flight: six total.
 
-- **Same geometry as the vanilla flight at scale 1**: 112 rise over 192 run, 168 wide. So
-  the three-flight chain at scale 1.3, every guard, and the bank placement carry over.
-- **Eight steps of 14 rise**, a real step, instead of the vanilla piece's 17 ripples.
-- **Collision built in**: a `bhkBoxShape` on the nosing line, the same box the hidden slab
-  used. Verified in the NIF: one box shape, no compressed mesh, one rigid body. The
-  separate slab piece is kept for the vanilla fallback (`entrance.kitStair = false`) and
-  is not placed in this build.
-- **Two vanilla materials**: Whiterun flagstones (`WRStoneFloor02`) on the treads, farmhouse
-  drystone (`StoneWall01`) on risers and flanks, so it ties into the cheek walls. Both
-  referenced by game path; replacers win at runtime.
-- A solid 192 deep below the treads, so nothing shows under the steps.
+- At scale 1 the piece is 48 wide, 192 long and 240 overall depth. Its visible crest
+  has the same eight 24-run / 14-rise steps as `SkyrimFair_Stair_192`.
+- It is placed at the stair's scale 1.3, so each section runs 249.6 and drops 145.6,
+  exactly matching its flight. Consecutive sections meet on the next stair riser rather
+  than forming upright towers.
+- West crests remain 56 above the nosing; east crests remain 80 above it. The inner
+  face overlaps the stair flank by 4 units, hiding the seam without narrowing the
+  217.1-unit walking surface.
+- The solid extends 128 below the descending crest at scale 1 and is closed on its
+  back, ends and underside. It no longer relies on terrain to hide empty space.
+- Each NIF contains farmhouse `StoneWall01` diffuse/normal paths and a child
+  `bhkBoxShape` aligned to the 30.3-degree flight.
 
-Flights at `(-5888, -11648 / -11398 / -11149)`, `Z -5336 / -5482 / -5627`, scale 1.3,
-rotation 0. The top tread is on the floor plane.
+World placements:
 
-## Cheek walls: the only masonry at the entrance
-
-`Stonewall01` at scale 0.6 (105 tall, 154 long), two pieces per flight per side, laid
-along the steps with each piece's crest 56 (west) or 80 (east) above the nosing line
-where it stands, so the two sides never match. Inner face flush with the stair flank
-(4 units into the solid, so no seam), first piece flush with the stair head so nothing
-pokes onto the paving.
-
-| Side | X | Y | crest Z |
+| Side | X | Y flight heads | crest Z at each head |
 | --- | --- | --- | --- |
-| W | -6034 | -11571, -11475, -11322, -11226, -11072, -10976 | -5325 ... -5672 |
-| E | -5742 | same | -5301 ... -5648 |
+| W | -6024 | -11648, -11398, -11149 | -5280, -5426, -5571 |
+| E | -5752 | -11648, -11398, -11149 | -5256, -5402, -5547 |
 
-The top piece's crest is 11 to 35 above the floor plane: a low parapet at the stair head,
-as in the concept.
+## Closed retaining face around the stair head
 
-## Nothing open-backed anywhere
+Two `SkyrimFair_EntranceRetainWing_144` references restore the structural face omitted
+for the entrance segment. Each wing is a closed 144 x 128 x 256 solid with earth/cliff
+material and its own `bhkBoxShape`.
 
-- `DirtCliffs02FieldGrass01` and `DirtCliffsIsland01FieldGrass01` are out of every pool.
-- The cliff-skin pass is switched off (`cliffMinRunSegments` 99): zero placed.
-- The entrance bank draws only closed boulders (`RockL02/04/05`, `RockPileL01`) on the
-  west and closed grassy piles (`RockPileL02FieldGrass01Moss`, `RockPileM02FieldGrass01Moss`,
-  `RockPileL01TundraRocks`) on the east. 10 placed, all bedded to the lowest ground
-  under them, crowns below the cheek crest and below the floor plane.
+- positions: `(-6072, -11648, -5336)` and `(-5704, -11648, -5336)`;
+- outer edges meet the 512-unit segment at X `-6144` / `-5632`;
+- inner edges stop at X `-6000` / `-5776`, leaving a 224-unit opening;
+- the scaled stair is 217.1 wide, leaving about 3.45 units clearance on each side;
+- because the wings are separate meshes, no visual face or collision bridges the steps.
 
-## Perimeter: the layered language on all four edges
+The new NIF hashes are:
 
-`PerimeterWall.PrototypeEdges` is now empty, which means every edge. Courses are
-`Stonewall01` at `PieceScale` 0.75 (131 tall, 192 long, three per 512 segment), stepped
-outward as they descend, in short stretches with gaps, each stretch ending in a
-part-buried rock. Per-edge bias N 0.5, W 0.6, S 0.45, E 0.35. No masonry within 900 of
-the stair centreline on the north edge.
+| Mesh | SHA256 |
+| --- | --- |
+| `SkyrimFair_StairCheek_192.nif` | `c43742bf54355c9ff057ae75ce83145762cc6b3e7c5fd9b604b8a2d01b68aca8` |
+| `SkyrimFair_EntranceRetainWing_144.nif` | `e795b75631f58828e7758111db7c4397451a1594e60ed7c448e3702ff23776c6` |
+
+## Foundation and entrance retained unchanged
+
+- 33-cell irregular footprint, emitted as 12 structural paving bodies and 12 caps.
+- Three `SkyrimFair_Stair_192` flights at scale 1.3: 112 rise over 192 run at scale 1,
+  eight steps, built-in smooth box collision.
+- Stair heads remain `(-5888, -11648 / -11398 / -11149)`, at
+  `Z -5336 / -5482 / -5627` (rounded display values).
+- Entrance banks use closed boulders on the west and closed grassy piles on the east.
+- No dirt-cliff mesh is placed anywhere; `cliffMinRunSegments` remains 99.
+- All-four-edge layered perimeter remains enabled with `Stonewall01` at scale 0.75.
 
 ## What is on the site
 
@@ -87,8 +92,9 @@ the stair centreline on the north edge.
 | --- | --- |
 | Paving bodies / visual caps | 12 / 12 |
 | Kit stair flights | 3 |
-| Low drystone cheeks | 12 |
-| Entrance bank pieces | 10 |
+| Project-authored descending cheek sections | 6 |
+| Entrance retaining wings | 2 |
+| Entrance bank pieces | 11 |
 | Structural retaining courses | 53 |
 | Drystone field-wall pieces (all edges) | 57 |
 | Part-buried rocks ending a run | 12 |
@@ -96,58 +102,67 @@ the stair centreline on the north edge.
 | Corner stones | 8 |
 | Toe rocks | 68 |
 | Rough-earth verge wedges | 23 |
-| Shrubs and scrub | 143 |
+| Shrubs and scrub | 142 |
 | Cliff pieces | 0 |
-| **Vanilla references placed** | **394** |
+| Vanilla references placed | 382 |
+| Project-kit references placed | 114 |
+| Test stall and map marker | 2 |
+| STAT records created | 10 |
 | Rejected as oversized | 18 |
 | Rejected for blocking the entrance | 75 |
 | Rejected for protruding through the market floor | 45 |
+
+Relative to the previous plugin, twelve vanilla cheek-wall references were removed, six
+project cheek references and two retaining-wing references were added, and two STAT
+records were added. One deterministic bank placement was gained and one shrub placement
+was lost after the cheek depth changed; total vanilla references therefore fell from
+394 to 382. Tamriel WRLD and the same four exterior CELL records remain overridden.
 
 ## Verification performed
 
 ```powershell
 dotnet build SkyrimFair.sln -c Release
 blender.exe --background --python assets\blender\build_foundation_kit.py
-dotnet run --project src/SkyrimFair.Generator -- fair.config.json
-python tools/footprint_audit.py --data <stock Data> --profile "Still in Skyrim Plus" --mods <mods> \
+dotnet run --project src/SkyrimFair.Generator -- fair.config.json  # twice
+python tools\footprint_audit.py --data <stock Data> \
+    --profile <Still in Skyrim Plus profile> --mods <mods> \
     --esp dist/SkyrimFair.esp --floor=-5336
 ```
 
 - Release build: zero warnings, zero errors.
-- Kit build: 11 pieces; `SkyrimFair_Stair_192` reports 16 upward tread triangles and a
-  Box collider at 30.3 degrees; every convex piece wound outward.
-- Converted NIF inspected: two shapes (treads / sides), both vanilla texture paths, one
-  `bhkBoxShape`, no compressed mesh.
-- Generator run twice: identical SHA256.
-- `footprint_audit.py` against the full load order: 0 vanilla references proud of the
-  floor; 40 intersect the footprint, all buried by 200 or more.
-- Independent read of the written ESP: every vanilla-based placement checked against the
-  eroded market floor and the 208-wide walkable stair width. **One hit: the deliberate
-  `SMarketStall01` test stall.** The cheek walls stop exactly at the walkable width.
-- **All four cell overrides byte-identical to vanilla.** WRLD deviation unchanged (RNAM
-  dropped, FULL literal).
-- `modlist.txt`, `plugins.txt` and `loadorder.txt` untouched.
+- Blender build: 13 pieces; all convex faces wound outward. Both stair and cheek report
+  16 upward tread triangles. Cheek collision reports 30.3 degrees.
+- AssetWatcher converted all FBXs; the two new NIFs were checked directly for their
+  expected texture paths and `bhkBoxShape` records.
+- Generator run twice: identical 85,363-byte output and identical SHA256.
+- Full-load-order audit: 40 vanilla references intersect the footprint/margin, with zero
+  references standing proud of floor `-5336`.
+- Opening arithmetic independently checked: 224 structural opening, 217.1 stair width,
+  no wing overlap; cheek/stair seam overlap is 4 units.
+- Generated ESP copied to the MO2 mod and compared byte-for-byte by SHA256.
+- All 13 source/deployed NIF hashes compared; zero mismatches.
+- `modlist.txt`, `plugins.txt`, `loadorder.txt`, saves, grass cache and generated LOD were
+  not touched.
 
 ## Known and deliberately not done
 
-- **Timber fence** along the top edge and the road (`WRFenceStr01` on `WRFenceBaseStr01`,
-  both audited: 106 and 75 tall). Prominent in the concept; the intended next pass.
-- **Braziers on plinths at the stair foot**: fair dressing, not started.
-- **Stair width** kept at 217 per the earlier brief. The concept's steps are broader;
-  `entrance.stairScale` is the one number that changes it (the kit piece, its collider
-  and the cheeks all scale together).
-- Cobbled approach from the road, bunting, pavilion, signpost text: unchanged, not started.
-- NGIO grass cache not regenerated. No navmesh.
-- Untracked `music/` folder left out of git; provenance unknown.
+- This pass is structurally verified but still needs Barry's in-game visual and collision
+  test; a NIF/parser check cannot prove the final read under Skyrim lighting and terrain.
+- Timber fence, braziers and the cobbled road spur remain unstarted pending entrance
+  approval.
+- NGIO grass cache has not been regenerated. No navmesh exists.
+- The Tamriel WRLD override still writes literal English `Skyrim` and drops RNAM.
+- The deliberate `SMarketStall01` test stall remains on the paving.
+- Untracked `music/` WAV files remain untouched and outside git.
 
 ## What Barry should test in game
 
-1. **Walk up the steps from the road.** They are now real steps with a hidden ramp
-   collider, so it should feel like any vanilla stair.
-2. From the road: does the entrance now read as steps cut into a bank with low walls
-   either side, rather than a gate? The only masonry beside you should be waist high.
-3. Walk all four edges. Every edge now has the short-run low-wall language. Is the wall
-   height right (about waist high), or should it go lower still?
-4. Look for anything hollow or see-through. There should be nothing: no cliff strips
-   exist in this build.
-5. Is the market floor still clean, and does the stair head meet the floor cleanly?
+1. Approach from both sides: the walls should now form two low descending lines that
+   follow the staircase, with no tall repeated towers.
+2. Look beneath and behind every cheek section: no black underside or missing back should
+   be visible.
+3. Check the wall directly around the top stair opening: the former open rear face should
+   be closed on both sides without narrowing or blocking the steps.
+4. Walk up, down and brush both edges. Stair and cheek collision should remain smooth,
+   and the 217-unit route should stay clear.
+5. Check the joins between the three cheek sections and the floor at the stair head.

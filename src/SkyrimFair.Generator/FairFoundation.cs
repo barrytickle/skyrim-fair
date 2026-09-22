@@ -212,8 +212,8 @@ internal static class FairFoundation
 
                     if (e.UseStairs)
                     {
-                        // A chain of vanilla stair flights, nose to tail, which reads as
-                        // one long staircase climbing the terrace rather than a ramp.
+                        // A chain of stair flights, nose to tail, which reads as one
+                        // staircase climbing the terrace rather than a ramp.
                         //
                         // Measured off the shipped mesh: the treads run from local
                         // Y -256 at Z 18 up to Y -64 at Z 130, so one flight is 112 of
@@ -222,11 +222,27 @@ internal static class FairFoundation
                         // one drop lower puts the top tread of each on the bottom tread
                         // of the one above, with no landing needed.
                         //
-                        // Each flight brings its own 512-wide drystone wall, so the
-                        // chain also builds the stepped retaining tiers either side of
-                        // the steps.
+                        // The project-authored flight is steps only. Closed descending
+                        // cheeks are placed separately after the perimeter pass.
                         var stairDrop = e.StairDrop * e.StairScale;
                         var stairRun = e.StairRun * e.StairScale;
+                        if (e.KitStair)
+                        {
+                            // Reserving this 512-wide perimeter segment keeps the
+                            // entrance clear, but it also omits the ordinary retaining
+                            // face. Restore that face as two closed wings around the
+                            // scaled stair opening, never across it.
+                            foreach (var side in new[] { -1, 1 })
+                            {
+                                var lateral = side * e.RetainWingOffset;
+                                Put(e.RetainWingRole,
+                                    ex + (dc == 0 ? lateral : 0f),
+                                    ey + (dr == 0 ? lateral : 0f),
+                                    f.FloorZ,
+                                    rot);
+                                result.EntranceRetainingWings++;
+                            }
+                        }
                         for (var i = 0; i < e.StairFlights; i++)
                         {
                             if (e.KitStair)
@@ -1040,22 +1056,17 @@ internal static class FairFoundation
         LayeredPerimeter();
 
         // ---- entrance bank ----------------------------------------------------
-        // Each stair flight brings a 666-wide drystone wall with it, and three of them
-        // stacked either side of the steps read as a gatehouse. The wall cannot be
-        // removed from the mesh, so it is BURIED instead: earth and part-sunk rock laid
-        // against the outer face of each flight's wall, so what the player sees beside
-        // the steps is bank, not masonry. The stair width itself is untouched.
+        // Earth and part-sunk rock lean against the closed project cheek sections, so
+        // the staircase reads as cut into a bank rather than placed on top of one.
         //
         // The two sides are deliberately different. One gets rock, the other earth and
         // scrub, with different counts, so the approach cannot be read as a designed
         // pair. Which side is which is fixed by config, not chance, so it reproduces.
         // ---- cheek walls ------------------------------------------------------
-        // Small drystone walls stepping down beside the steps, one line each side,
-        // waist high - the concept's stair cheeks. Stonewall01 scaled down, laid along
-        // the flight, each piece's crest set a little above the nosing line where it
-        // stands. The two sides get different crest heights so the pair never reads
-        // as designed symmetry. These, and only these, are the masonry at the
-        // entrance.
+        // Closed project-authored drystone walls follow each flight step for step.
+        // Each side is one continuous section per flight, with no raised vanilla
+        // terrain pieces, exposed undersides or repeated upright towers. The two
+        // sides keep different low crest heights so the pair is not perfectly formal.
         var trace = Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 };
         var stairHalf = f.Entrance.StairHalfWidth * f.Entrance.StairScale;
         var flightRun = f.Entrance.StairRun * f.Entrance.StairScale;
@@ -1065,32 +1076,22 @@ internal static class FairFoundation
         if (f.Entrance.UseStairs && d.EntranceCheeks.Enabled && rampTiles.Count > 0)
         {
             var ck = d.EntranceCheeks;
-            var cb = boundsOf(FormKeyHelper.Parse(ck.Piece));
-            var len = ck.PieceLength * ck.Scale;
-            cheekDepth = ck.PieceDepth * ck.Scale;
+            cheekDepth = ck.PieceDepth * f.Entrance.StairScale;
             cheekRiseMax = MathF.Max(ck.RiseLeft, ck.RiseRight);
-            var alongRot = OutwardRotation[f.RampEdge.ToUpperInvariant()] + MathF.PI / 2f;
 
             foreach (var t in rampTiles.Where(t => t.Stair))
             {
-                var n = Math.Max(1, (int)MathF.Ceiling(flightRun / len));
                 for (var side = -1; side <= 1; side += 2)
                 {
                     var rise = side < 0 ? ck.RiseLeft : ck.RiseRight;
                     var lateral = side * (stairHalf + ck.Gap + cheekDepth / 2f);
-                    for (var j = 0; j < n; j++)
-                    {
-                        // First piece flush with the stair head so nothing pokes onto the
-                        // paving; later pieces overlap toward the foot rather than overhang.
-                        var along = stairInset + MathF.Min((j + 0.5f) * len, flightRun - len / 2f);
-                        var nosing = t.Z - flightDrop * ((along - stairInset) / flightRun);
-                        var px = t.X + t.Dc * along + (t.Dc == 0 ? lateral : 0f);
-                        var py = t.Y - t.Dr * along + (t.Dr == 0 ? lateral : 0f);
-                        var pz = nosing + rise - cb.ZMax * ck.Scale;
-                        PutVanilla(ck.Piece, px, py, pz, alongRot, ck.Scale);
-                        result.CheekWalls++;
-                        if (trace) Console.Error.WriteLine($"cheek side {side} flight at ({t.X:F0},{t.Y:F0}) j {j} -> ({px:F0},{py:F0},{pz:F0}) crest {nosing + rise:F0}");
-                    }
+                    var px = t.X + (t.Dc == 0 ? lateral : 0f);
+                    var py = t.Y + (t.Dr == 0 ? lateral : 0f);
+                    var pz = t.Z + rise;
+                    Put(ck.Role, px, py, pz,
+                        OutwardRotation[f.RampEdge.ToUpperInvariant()], f.Entrance.StairScale);
+                    result.CheekWalls++;
+                    if (trace) Console.Error.WriteLine($"cheek side {side} flight at ({t.X:F0},{t.Y:F0}) -> ({px:F0},{py:F0},{pz:F0}) crest {pz:F0}");
                 }
             }
         }
@@ -1101,7 +1102,7 @@ internal static class FairFoundation
             var bankRng = new Random(d.Seed + 7919);
 
             // What the bank leans on: the outer face of the cheek wall if there is
-            // one, else the vanilla flight's own 666-wide wall. And how high it may
+            // one, otherwise the vanilla fallback flight's wall. And how high it may
             // rise: a little under that wall's crest at mid-flight.
             var wallHalf = cheekDepth > 0f
                 ? stairHalf + d.EntranceCheeks.Gap + cheekDepth
@@ -1491,8 +1492,10 @@ internal sealed class FoundationResult
     /// <summary>Picks refused for protruding through the usable market floor.</summary>
     public int PavingGuardSkipped { get; set; }
 
-    /// <summary>Vanilla entrance pieces, currently the stair-through-a-wall.</summary>
+    /// <summary>Visible stair flights placed at the entrance.</summary>
     public int EntrancePieces { get; set; }
+
+    public int EntranceRetainingWings { get; set; }
 
     /// <summary>Drystone field-wall courses stepped back to batter the perimeter.</summary>
     public int WallCourses { get; set; }
