@@ -2,7 +2,40 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: aligned rows and eating areas (2026-09-22, night)
+## Current pass: archery range on the west field (2026-09-22, night)
+
+Barry: "use the archery practise from solitude... replace the soldiers with standard
+npc's. Have about 3-4 targets". Built as a copy of how **Castle Dour's practice yard**
+works, read from Skyrim.esm:
+- Solitude's bow trainees run **`GuardSolitudeRangedTrainingPackage`** (`0B4C54`), a
+  UseWeapon package with no conditions and no schedule limits.
+- Each trainee is linked to one **`ArcheryTarget`** (`066AF6`) by a linked reference
+  with keyword **`TrainingTarget`** (`0B4C5A`).
+
+The fair does the same with townsfolk.
+
+| Piece | Value |
+| --- | --- |
+| Lanes | **4**. Archers on a firing line at x 300, targets at x -650 (950 away), at y 950 / 1,250 / 1,550 / 1,850 |
+| Direction | shooting **west**, away from the avenue; the west wall is 500+ beyond the targets. A `HayBale01` backstop stands 140 behind each target |
+| Targets | `SkyrimFairArcherTarget01-04`. The face is the mesh's local -X (checked by rendering it), turned to point at its archer (read back: face-to-archer 1.00 on all four) |
+| Archers | 2 records, `SkyrimFairArcherMale` / `...Female`: Traits template from the vanilla commoner lists (as for the stall-keepers), `HunterClothesRND`, `HuntingBow`, 100 `IronArrow`, Citizen class, Unaggressive, Protected, and the Solitude package |
+
+Config: `fairWorld.archery` (lanes, pieces, looks). The Activity zone marker (700, 1400)
+already faces west.
+
+Generator run twice: identical SHA256 `3535cd98...`. **Deployment pending**: the game
+held the file open. Copy `dist/SkyrimFair.esp` once Skyrim is closed.
+
+**Test**: do the four archers draw and shoot at their targets on a loop, with no one
+wandering into the line of fire (the stall-keepers are all on the east side)?
+
+**Parked**: outhouses (Toilets resource pack, "Toilet 2"): wooden, corrugated roof,
+plinth and steps. They wait for Astra's LE-to-SE conversion; that pack's meshes, and
+Stroti's, are all BS 83. Confirm the pack's Nexus permissions before bundling (the
+page was not readable from here).
+
+## Aligned rows and eating areas (previous pass; deployed)
 
 From Barry's walk-through:
 - "big gaps in the middle of the east stalls and the centre stalls... benches... eating
@@ -1020,9 +1053,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | 412,046 bytes (aligned rows, picnic sets, 59 vendors) |
-| SHA256 | `24dbe3a2d2ca756bce5dc5b515616286a5536bd27ce096786671dc9b8f79b21e` |
-| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night) |
+| Size | about 413 KB (with the archery range) |
+| SHA256 | `3535cd989a7f215beafdb9dc15c41f1c922a3af55e854938e10493586e129dfc` |
+| Deployed | **pending**: the file was locked by the running game; the deployed copy is the aligned-rows build (`24dbe3a2...`) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |

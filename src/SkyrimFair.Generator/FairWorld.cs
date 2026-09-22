@@ -195,6 +195,17 @@ internal static class FairWorld
             });
         }
 
+        // ---- archery range ------------------------------------------------------------
+        ArcheryResult? archery = null;
+        if (config.Archery.Enabled)
+        {
+            archery = FairArchery.Build(mod, config.Archery, plan.Height, Put, npc =>
+            {
+                var pos = npc.Placement!.Position;
+                cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
+            });
+        }
+
         // ---- distant mountains ------------------------------------------------------
         var mountains = new List<MountainPlacement>();
         if (config.Mountains.Enabled)
@@ -267,6 +278,7 @@ internal static class FairWorld
             stage,
             market,
             vendors,
+            archery,
             plan.RenderPlan(512f, 0f, Array.Empty<TreePlacement>()),
             plan.RenderPlan(1024f, config.Forest.OuterDistance, trees),
             plan.RenderMountains(mountains, 2048f));
@@ -949,6 +961,7 @@ internal sealed record FairWorldResult(
     StageResult? Stage,
     MarketResult? Market,
     VendorsResult? Vendors,
+    ArcheryResult? Archery,
     string Plan,
     string ForestPlan,
     string MountainPlan);

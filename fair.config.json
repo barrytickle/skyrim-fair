@@ -446,6 +446,73 @@
         { "name": "Female", "template": "0001A31E:Skyrim.esm", "female": true, "outfits": ["0007144A:Skyrim.esm", "0009D4B5:Skyrim.esm", "0009D5E0:Skyrim.esm", "0005FB81:Skyrim.esm"] }
       ]
     },
+    "archery": {
+      "enabled": true,
+      "editorIdPrefix": "SkyrimFairArcher",
+      "name": "Fair Archer",
+      "outfit": "00073FC7:Skyrim.esm",
+      "bow": "00013985:Skyrim.esm",
+      "arrows": "0001397D:Skyrim.esm",
+      "arrowCount": 100,
+      "package": "000B4C54:Skyrim.esm",
+      "targetKeyword": "000B4C5A:Skyrim.esm",
+      "target": "00066AF6:Skyrim.esm",
+      "backstop": "0005B198:Skyrim.esm",
+      "looks": [
+        {
+          "name": "Male",
+          "template": "0001A319:Skyrim.esm",
+          "female": false
+        },
+        {
+          "name": "Female",
+          "template": "0001A31E:Skyrim.esm",
+          "female": true
+        }
+      ],
+      "lanes": [
+        {
+          "archer": [
+            300,
+            950
+          ],
+          "target": [
+            -650,
+            950
+          ]
+        },
+        {
+          "archer": [
+            300,
+            1250
+          ],
+          "target": [
+            -650,
+            1250
+          ]
+        },
+        {
+          "archer": [
+            300,
+            1550
+          ],
+          "target": [
+            -650,
+            1550
+          ]
+        },
+        {
+          "archer": [
+            300,
+            1850
+          ],
+          "target": [
+            -650,
+            1850
+          ]
+        }
+      ]
+    },
     "avenue": [[2048, -1970], [1922, 374], [2174, 2634], [2048, 4308]],
     "avenueWidth": 800,
     "zoneMarker": "00000034:Skyrim.esm",

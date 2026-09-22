@@ -195,6 +195,11 @@ try
             Console.WriteLine($"  vendors: {vendors.Placed} stall-keepers from {vendors.Records} vendor records (sell nothing)");
         }
 
+        if (world.Archery is { } archery)
+        {
+            Console.WriteLine($"  archery: {archery.Lanes} lanes (target, backstop, townsfolk archer) from {archery.Records} archer records");
+        }
+
         Console.WriteLine($"  mountains: {world.Mountains.Count}, persistent + Full LOD");
         foreach (var m in world.Mountains)
         {

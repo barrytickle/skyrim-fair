@@ -127,6 +127,9 @@ internal sealed record FairWorldConfig
     /// <summary>Placeholder stall-keepers, one per stall.</summary>
     public VendorsConfig Vendors { get; init; } = new();
 
+    /// <summary>The archery range: townsfolk practising at targets, Solitude-style.</summary>
+    public ArcheryConfig Archery { get; init; } = new();
+
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
 
@@ -1944,4 +1947,62 @@ internal sealed record MarketSeating
     public float Spacing { get; init; } = 900f;
 
     public float AngleJitter { get; init; } = 6f;
+}
+
+/// <summary>
+/// The archery range, set up as Solitude's Castle Dour practice yard: each archer is
+/// linked to one target by the <c>TrainingTarget</c> keyword and runs vanilla
+/// <c>GuardSolitudeRangedTrainingPackage</c>. The archers are townsfolk, not soldiers.
+/// </summary>
+internal sealed record ArcheryConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairArcher";
+
+    public string Name { get; init; } = "Fair Archer";
+
+    public string Race { get; init; } = "00013746:Skyrim.esm";
+
+    public string Class { get; init; } = "0001326B:Skyrim.esm";
+
+    /// <summary>HunterClothesRND.</summary>
+    public string Outfit { get; init; } = "00073FC7:Skyrim.esm";
+
+    /// <summary>HuntingBow.</summary>
+    public string Bow { get; init; } = "00013985:Skyrim.esm";
+
+    /// <summary>IronArrow.</summary>
+    public string Arrows { get; init; } = "0001397D:Skyrim.esm";
+
+    public int ArrowCount { get; init; } = 100;
+
+    /// <summary>GuardSolitudeRangedTrainingPackage: shoot at the TrainingTarget linked ref, all day.</summary>
+    public string Package { get; init; } = "000B4C54:Skyrim.esm";
+
+    /// <summary>TrainingTarget, the keyword the package reads the target from.</summary>
+    public string TargetKeyword { get; init; } = "000B4C5A:Skyrim.esm";
+
+    /// <summary>ArcheryTarget: its face is its local -X, turned toward the archer.</summary>
+    public string Target { get; init; } = "00066AF6:Skyrim.esm";
+
+    /// <summary>HayBale01 behind each target.</summary>
+    public string Backstop { get; init; } = "0005B198:Skyrim.esm";
+
+    public float BackstopDistance { get; init; } = 140f;
+
+    public float BackstopZ { get; init; } = 40f;
+
+    public short Level { get; init; } = 10;
+
+    public List<VendorLook> Looks { get; init; } = new();
+
+    public List<ArcheryLane> Lanes { get; init; } = new();
+}
+
+internal sealed record ArcheryLane
+{
+    public float[] Archer { get; init; } = Array.Empty<float>();
+
+    public float[] Target { get; init; } = Array.Empty<float>();
 }
