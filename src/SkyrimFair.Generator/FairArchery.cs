@@ -10,7 +10,8 @@ namespace SkyrimFair.Generator;
 /// one <c>ArcheryTarget</c> by a linked reference with the <c>TrainingTarget</c> keyword,
 /// and runs vanilla <c>GuardSolitudeRangedTrainingPackage</c>, which has no conditions and
 /// shoots at that linked target all day. The archers are ordinary townsfolk rather than
-/// soldiers. As in Castle Dour, the targets are persistent references, which is what
+/// soldiers. As in Castle Dour, each archer also has an unkeyed linked reference to a
+/// persistent PatrolIdleMarker it shoots from, and the targets are persistent references, which is what
 /// lets the linked reference resolve across cells. Their looks come, as the stall-keepers' do, from a Traits template on
 /// vanilla commoner leveled lists, with hunter clothes, a hunting bow and arrows.
 /// </summary>
@@ -74,6 +75,7 @@ internal static class FairArchery
         var targetBase = FormKeyHelper.Parse(config.Target);
         var backstopBase = FormKeyHelper.Parse(config.Backstop);
         var keyword = FormKeyHelper.Parse(config.TargetKeyword);
+        var standBase = FormKeyHelper.Parse(config.StandMarker);
         var lanes = 0;
         for (var i = 0; i < config.Lanes.Count; i++)
         {
@@ -110,6 +112,19 @@ internal static class FairArchery
                 },
             });
 
+            // The spot the package walks the archer to (within 32) and shoots from.
+            var stand = new PlacedObject(mod)
+            {
+                EditorID = $"{config.EditorIdPrefix}Stand{i + 1:00}",
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(standBase),
+                Placement = new Placement
+                {
+                    Position = new P3Float(ax, ay, ground(ax, ay)),
+                    Rotation = new P3Float(0f, 0f, shotHeading * Deg),
+                },
+            };
+            putPersistent(stand);
+
             var archer = new PlacedNpc(mod)
             {
                 Base = new FormLinkNullable<INpcGetter>(archers[i % archers.Count].FormKey),
@@ -123,6 +138,11 @@ internal static class FairArchery
             {
                 KeywordOrReference = new FormLink<IKeywordLinkedReferenceGetter>(keyword),
                 Reference = new FormLink<IPlacedGetter>(target.FormKey),
+            });
+            archer.LinkedReferences.Add(new LinkedReferences
+            {
+                KeywordOrReference = new FormLink<IKeywordLinkedReferenceGetter>(FormKey.Null),
+                Reference = new FormLink<IPlacedGetter>(stand.FormKey),
             });
             putNpc(archer);
             lanes++;

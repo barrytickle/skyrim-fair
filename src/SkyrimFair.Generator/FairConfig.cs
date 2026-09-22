@@ -2013,6 +2013,13 @@ internal sealed record ArcheryConfig
     /// <summary>ArcheryTarget: its face is its local -X, turned toward the archer.</summary>
     public string Target { get; init; } = "00066AF6:Skyrim.esm";
 
+    /// <summary>
+    /// PatrolIdleMarker: where the archer stands to shoot. The package's "Use Weapon
+    /// Location" is the archer's linked reference with no keyword, within 32; without
+    /// it the package never starts and the archer stands idle.
+    /// </summary>
+    public string StandMarker { get; init; } = "000140BD:Skyrim.esm";
+
     /// <summary>HayBale01 behind each target.</summary>
     public string Backstop { get; init; } = "0005B198:Skyrim.esm";
 
