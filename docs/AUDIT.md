@@ -2,7 +2,54 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: archery range on the west field (2026-09-22, night)
+## Current pass: props to bring the market to life (2026-09-22, night)
+
+Barry: "audit some more props... the east side and the center looks a bit bare". The
+audit of vanilla civilian props (Skyrim.esm, ranked by how often vanilla places them) led
+to four groups, all approved.
+
+| Group | Vanilla pieces | Where | Placed |
+| --- | --- | --- | --- |
+| **Lit braziers** | `WHfirebrazier01` + `FXfireWithEmbersHeavy` + **`LightCampFire01`** (`0AF8BA`, r 512, flickering) | down the East Lane's centre between the picnic islands; along the avenue's west edge | 5 + 2 |
+| **Cook fires** | `Campfire01LandOff` + `FXfireWithEmbers01_lite` + `Spit01` roasting spit + `LightCampFire01`, two `TreePineForestCutLog01` log seats, hay scatter, firewood | on the field side of the avenue's eating row | 3 |
+| **Whiterun banners** | `CivilWarBanner01` pole with `CityBannerWhiterun01` at +395 (the vanilla pairing) | the avenue's west edge | 3 |
+| **Rival colours** | the same pole with `CivilWarBannerImp01` / `CivilWarBannerStorm01` | beside the Imperial and Stormcloak stalls (new `market.themeDressing`) | 2 |
+| **Traders' camps** | `NorTentSmall`, `HandCart01`, firewood, hay bale | the market's north-east and south-east corners | 3 |
+| **Gate clusters** | `HandCart02`, `HayBale01` + `HayMound01`, crate stacks | either side just inside the gate | 5 |
+| **Field fence** | `FenceWoven01` wattle panels | between the avenue and the archery field, x of about 850-1,000, with a gap mid-way to walk through | 14 |
+| **Gate sign** | `RoadSignPost` + `RoadSignWhiterun01` (board 230 up on the post, as vanilla mounts them) | inside the gate | 1 |
+
+**10 real lights** (7 braziers, 3 cook fires), kept low for performance.
+
+**How it's placed** (all config, `fairWorld.market`):
+- `seating` runs now take several modules at random, a placement chance, and a wall
+  margin of their own.
+- `dressing` accepts whole modules that **spiral out up to 600 from their point until
+  they fit**.
+- `themeDressing` adds pieces to every stall of a theme.
+
+Everything uses the stalls' collision rules (lanes, keep-outs, sightline, other pieces).
+The archery keep-out now starts at x 700 (behind the archers), which opens the eating
+row. **Dropped**: clutter along the stall lines, because the rows are packed too tight
+for it (gaps of 20-45); and two camps, which found no room near the wall.
+
+**Verification**:
+- Generator run twice: identical SHA256 `cdb73a8a...` (419,242 bytes). **Deployed
+  byte-identical.**
+- All market and dressing meshes: 0 outside the compound (nearest 107 from the wall
+  line); 0 in the crowd square, the stage zone and the gate-to-stage sightline band.
+- **0 in the archery lines of fire**. The only pieces in the archery field are the
+  range's own hay-bale backstops.
+- Previews: `docs/images/market_plan.png`, and `market_views.png` (down the East Lane,
+  and across the eating row).
+
+**Test**:
+- Do the braziers and cook fires glow at night?
+- Do the rival banners and the Whiterun banners hang right?
+- Can you walk through the fence gap to the archery field?
+- Frame rate with the 10 lights.
+
+## Archery range on the west field (previous pass; now deployed)
 
 Barry: "use the archery practise from solitude... replace the soldiers with standard
 npc's. Have about 3-4 targets". Built as a copy of how **Castle Dour's practice yard**
@@ -1053,9 +1100,9 @@ generator's plugin lands on the same design.
 | --- | --- |
 | Branch | `feat/bootstrap-generator` |
 | Output | `dist/SkyrimFair.esp` |
-| Size | about 413 KB (with the archery range) |
-| SHA256 | `3535cd989a7f215beafdb9dc15c41f1c922a3af55e854938e10493586e129dfc` |
-| Deployed | **pending**: the file was locked by the running game; the deployed copy is the aligned-rows build (`24dbe3a2...`) |
+| Size | 419,242 bytes (with dressing) |
+| SHA256 | `cdb73a8a7140f6568807158f1b2c51e122fb69227764b1c156ddcd7db3b29fdf` |
+| Deployed | byte-identical at `E:\Modlists\Still In Skyrim\mods\Skyrim Fair\SkyrimFair.esp` (2026-09-22, night) |
 | Sandbox cell | `SkyrimFairSandbox` (`0009E1:SkyrimFair.esp`), interior, 5 x 5 kit tiles, `coc SkyrimFairSandbox` in, `cow Tamriel -2 -4` out |
 | Isolated worldspace | `SkyrimFairWorld` (`000A16:SkyrimFair.esp`), 121 cells, `cow SkyrimFairWorld 0 0` in; palisade, gate and forest per the palisade pass, mountains per the mountain pass, main stage per the current pass |
 | Palisade assets | `meshes\barry_palisades\` (2 NIF) and `textures\barry_palisades\` (50 DDS), deployed byte-identical to `assets/` |

@@ -169,7 +169,19 @@ try
             Console.WriteLine(
                 $"  market: {market.Stalls.Count} stalls, {market.Pieces} pieces, " +
                 $"{market.Refused} placements refused for crowding a lane, a keep-out or another stall; " +
-                $"{market.Seating} picnic sets");
+                $"{market.Seating} dressing groups");
+            foreach (var (run, count) in market.DressingRuns)
+            {
+                Console.WriteLine($"    dressing {count,3} x {run}");
+            }
+
+            if (Environment.GetEnvironmentVariable("SKYRIMFAIR_TRACE") is { Length: > 0 })
+            {
+                foreach (var (reason, count) in market.DressingRefusals)
+                {
+                    Console.WriteLine($"      dressing refused {count,3} x {reason}");
+                }
+            }
             foreach (var lane in market.Stalls.GroupBy(x => x.Lane))
             {
                 Console.WriteLine(

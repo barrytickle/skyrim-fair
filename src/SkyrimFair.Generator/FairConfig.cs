@@ -1753,6 +1753,9 @@ internal sealed record MarketConfig
     /// </summary>
     public List<MarketSeating> Seating { get; init; } = new();
 
+    /// <summary>Extra pieces placed with every stall of a theme, in the stall's frame (the rival banners).</summary>
+    public List<MarketThemeDressing> ThemeDressing { get; init; } = new();
+
     /// <summary>Hand-placed dressing that marks the lane structure, such as banner posts at the crossing.</summary>
     public List<MarketDressing> Dressing { get; init; } = new();
 
@@ -1877,6 +1880,12 @@ internal sealed record MarketMix
 
 internal sealed record MarketDressing
 {
+    /// <summary>A whole module (a camp, a cart cluster) instead of one piece; placed only if it fits.</summary>
+    public string Module { get; init; } = string.Empty;
+
+    /// <summary>For a module: how far from its point to search for a spot that fits.</summary>
+    public float SearchRadius { get; init; }
+
     public string Piece { get; init; } = string.Empty;
 
     public string Name { get; init; } = string.Empty;
@@ -1936,6 +1945,15 @@ internal sealed record MarketSeating
     public string Lane { get; init; } = string.Empty;
 
     public string Module { get; init; } = string.Empty;
+
+    /// <summary>Several modules to pick from at random, instead of <see cref="Module"/>.</summary>
+    public List<string> Modules { get; init; } = new();
+
+    /// <summary>Chance of trying a placement at each station, so runs do not read as a grid.</summary>
+    public float Chance { get; init; } = 1f;
+
+    /// <summary>Overrides the market's wall margin, for dressing that belongs against the wall.</summary>
+    public float? WallMargin { get; init; }
 
     /// <summary>Sideways from the lane centre, positive to the left of travel; 0 is down the middle.</summary>
     public float Offset { get; init; }
@@ -2005,4 +2023,11 @@ internal sealed record ArcheryLane
     public float[] Archer { get; init; } = Array.Empty<float>();
 
     public float[] Target { get; init; } = Array.Empty<float>();
+}
+
+internal sealed record MarketThemeDressing
+{
+    public string Theme { get; init; } = string.Empty;
+
+    public List<MarketPiece> Pieces { get; init; } = new();
 }

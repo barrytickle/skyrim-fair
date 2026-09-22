@@ -50,7 +50,7 @@ internal static class FairMarket
         var markerBase = FormKeyHelper.Parse(market.ShellMarker);
 
         // Null when the stall fits; otherwise what it collides with.
-        string? WhyNot(MarketModule m, float x, float y, float yaw, Lane? ignore = null)
+        string? WhyNot(MarketModule m, float x, float y, float yaw, Lane? ignore = null, float? wallMargin = null)
         {
             var (hw, hd) = (m.Width / 2f, m.Depth / 2f);
             var (rx, ry) = (MathF.Cos(yaw * Deg), -MathF.Sin(yaw * Deg));
@@ -63,7 +63,7 @@ internal static class FairMarket
                     var v = -hd + j * hd;
                     var px = x + u * rx + v * fx;
                     var py = y + u * ry + v * fy;
-                    if (outside(px, py) > -market.WallMargin) return $"the wall at ({px:0}, {py:0})";
+                    if (outside(px, py) > -(wallMargin ?? market.WallMargin)) return $"the wall at ({px:0}, {py:0})";
                     for (var k = 0; k < keepOut.Count; k++)
                     {
                         if (FairGeometry.Inside(keepOut[k], px, py)) return $"keep-out area {k} at ({px:0}, {py:0})";
@@ -119,6 +119,22 @@ internal static class FairMarket
                     {
                         Position = new P3Float(px, py, ground(px, py) + piece.Z),
                         Rotation = new P3Float(0f, 0f, pieceYaw * Deg),
+                    },
+                });
+                pieceCount++;
+            }
+
+            foreach (var extra in market.ThemeDressing.Where(t => t.Theme == theme).SelectMany(t => t.Pieces))
+            {
+                var px = x + mirror * extra.X * rx + extra.Y * fx;
+                var py = y + mirror * extra.X * ry + extra.Y * fy;
+                put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(extra.Piece)),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(px, py, ground(px, py) + extra.Z),
+                        Rotation = new P3Float(0f, 0f, (yaw + extra.Yaw) * Deg),
                     },
                 });
                 pieceCount++;
@@ -313,31 +329,82 @@ internal static class FairMarket
 
         // ---- seating: picnic sets along lanes ---------------------------------------
         var seats = 0;
+        var dressingRuns = new SortedDictionary<string, int>(StringComparer.Ordinal);
+        var dressingRefusals = new SortedDictionary<string, int>(StringComparer.Ordinal);
         for (var i = 0; i < market.Seating.Count; i++)
         {
             var seating = market.Seating[i];
             var lane = lanes.First(l => l.Config.Name == seating.Lane);
-            var m = modules[seating.Module];
+            var choices = (seating.Modules.Count > 0 ? seating.Modules : new List<string> { seating.Module })
+                .Select(n => modules[n]).ToList();
             var k = 0;
             for (var s = seating.From; s <= MathF.Min(seating.To, lane.Length); s += seating.Spacing)
             {
                 k++;
+                if (FairHash.Hash3(500 + i, k, 76) >= seating.Chance)
+                {
+                    continue;
+                }
+
+                var m = choices[(int)(FairHash.Hash3(500 + i, k, 77) * choices.Count) % choices.Count];
                 var (cx, cy, tx, ty, _) = Station(lane, s);
                 var x = cx - ty * seating.Offset;
                 var y = cy + tx * seating.Offset;
                 // The module's long side (its local X) runs along the lane.
                 var yaw = MathF.Atan2(tx, ty) / Deg - 90f + FairHash.Signed(500 + i, k, 75) * seating.AngleJitter;
-                if (WhyNot(m, x, y, yaw, ignore: lane) is null)
+                var why = WhyNot(m, x, y, yaw, ignore: seating.Offset == 0f ? lane : null, wallMargin: seating.WallMargin);
+                var runName = $"{seating.Lane} {(seating.Modules.Count > 0 ? string.Join("/", seating.Modules) : seating.Module)} @{seating.Offset:0}";
+                if (why is null)
                 {
                     CommitDressing(m, x, y, yaw, 500 + i, k);
                     seats++;
+                    dressingRuns[runName] = dressingRuns.GetValueOrDefault(runName) + 1;
+                }
+                else
+                {
+                    var reason = $"{runName}: {why.Split(" at ")[0]}";
+                    dressingRefusals[reason] = dressingRefusals.GetValueOrDefault(reason) + 1;
                 }
             }
         }
 
         // ---- hand-placed dressing that marks the lane structure ---------------------
-        foreach (var d in market.Dressing)
+        for (var di = 0; di < market.Dressing.Count; di++)
         {
+            var d = market.Dressing[di];
+            if (d.Module.Length > 0)
+            {
+                var group = modules[d.Module];
+                var (gx, gy) = (d.X, d.Y);
+                var why = WhyNot(group, gx, gy, d.Yaw, wallMargin: 60f);
+
+                // Spiral out from the requested point until the group fits.
+                for (var r = 60f; why is not null && r <= d.SearchRadius; r += 60f)
+                {
+                    for (var a = 0; a < 360 && why is not null; a += 30)
+                    {
+                        var (tx, ty) = (d.X + r * MathF.Sin(a * Deg), d.Y + r * MathF.Cos(a * Deg));
+                        if (WhyNot(group, tx, ty, d.Yaw, wallMargin: 60f) is null)
+                        {
+                            (gx, gy, why) = (tx, ty, null);
+                        }
+                    }
+                }
+
+                if (why is null)
+                {
+                    CommitDressing(group, gx, gy, d.Yaw, 800 + di, 1);
+                    seats++;
+                    dressingRuns[$"group {d.Module}"] = dressingRuns.GetValueOrDefault($"group {d.Module}") + 1;
+                }
+                else
+                {
+                    dressingRefusals[$"group {d.Module} at ({d.X:0}, {d.Y:0}): {why.Split(" at ")[0]}"] = 1;
+                }
+
+                continue;
+            }
+
             put(new PlacedObject(mod)
             {
                 Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(d.Piece)),
@@ -388,7 +455,7 @@ internal static class FairMarket
             }
         }
 
-        return new MarketResult(stalls, pieceCount, refused, reasons, seats);
+        return new MarketResult(stalls, pieceCount, refused, reasons, seats, dressingRuns, dressingRefusals);
     }
 
     private static Lane BuildLane(MarketLane c, int index, FairWorldConfig world)
@@ -494,4 +561,5 @@ internal sealed record MarketStall(
     IReadOnlyList<(float X, float Y)> Vendors);
 
 internal sealed record MarketResult(
-    IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons, int Seating);
+    IReadOnlyList<MarketStall> Stalls, int Pieces, int Refused, IReadOnlyDictionary<string, int> Reasons, int Seating,
+    IReadOnlyDictionary<string, int> DressingRuns, IReadOnlyDictionary<string, int> DressingRefusals);

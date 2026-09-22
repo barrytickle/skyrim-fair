@@ -194,7 +194,7 @@
         {
           "name": "ArcheryRange",
           "polygon": [
-            [-1100, -900], [1350, -900], [1350, 3900], [-1100, 3900]
+            [-1100, -900], [700, -900], [700, 3900], [-1100, 3900]
           ]
         },
         {
@@ -327,6 +327,95 @@
             {"name": "Lantern", "piece": "0009151C:Skyrim.esm", "x": 25, "y": 8, "z": 70, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 155, "y": 0, "optional": true}
           ]
+        },
+        {
+          "name": "brazier_lit",
+          "width": 140,
+          "depth": 140,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "WHfirebrazier01", "piece": "00093A89:Skyrim.esm", "x": 0, "y": 0, "z": 33},
+            {"name": "FXfireWithEmbersHeavy", "piece": "00033DA4:Skyrim.esm", "x": -6, "y": -2, "z": 125},
+            {"name": "LightCampFire01", "piece": "000AF8BA:Skyrim.esm", "x": 0, "y": 0, "z": 170}
+          ]
+        },
+        {
+          "name": "cookfire",
+          "width": 440,
+          "depth": 490,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "Campfire01LandOff", "piece": "00035F4B:Skyrim.esm", "x": 0, "y": 0},
+            {"name": "FXfireWithEmbers01_lite", "piece": "000CD823:Skyrim.esm", "x": 0, "y": 0, "z": 10},
+            {"name": "Spit01", "piece": "00035F50:Skyrim.esm", "x": 0, "y": 0},
+            {"name": "LightCampFire01", "piece": "000AF8BA:Skyrim.esm", "x": 0, "y": 0, "z": 90},
+            {"name": "TreePineForestCutLog01", "piece": "000173FE:Skyrim.esm", "x": 0, "y": 190, "z": -8, "yaw": 90},
+            {"name": "TreePineForestCutLog01", "piece": "000173FE:Skyrim.esm", "x": 0, "y": -190, "z": -8, "yaw": 90},
+            {"name": "HayScatter05", "piece": "00019B19:Skyrim.esm", "x": 0, "y": 0, "optional": true},
+            {"name": "FirewoodPileSmall01", "piece": "000185B6:Skyrim.esm", "x": 180, "y": 0, "yaw": 20, "optional": true}
+          ]
+        },
+        {
+          "name": "camp",
+          "width": 420,
+          "depth": 320,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "NorTentSmall", "piece": "000800E2:Skyrim.esm", "x": 0, "y": -10},
+            {"name": "HandCart01", "piece": "0001C0C0:Skyrim.esm", "x": 175, "y": 70, "z": 32, "yaw": 30, "optional": true},
+            {"name": "FirewoodPileMedium01", "piece": "000185B5:Skyrim.esm", "x": -175, "y": 50, "optional": true},
+            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": -165, "y": -90, "z": 40, "yaw": 90, "optional": true}
+          ]
+        },
+        {
+          "name": "cart",
+          "width": 180,
+          "depth": 200,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "HandCart02", "piece": "0001C0C5:Skyrim.esm", "x": 0, "y": 0, "z": 32, "yaw": 15},
+            {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 65, "y": -70, "z": 24, "yaw": 10, "optional": true}
+          ]
+        },
+        {
+          "name": "haystack",
+          "width": 190,
+          "depth": 140,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "HayBale01", "piece": "0005B198:Skyrim.esm", "x": 0, "y": 0, "z": 40},
+            {"name": "HayMound01", "piece": "00019B13:Skyrim.esm", "x": 0, "y": 55, "optional": true}
+          ]
+        },
+        {
+          "name": "crates",
+          "width": 170,
+          "depth": 120,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "CrateSmallLong02", "piece": "0007A60B:Skyrim.esm", "x": 0, "y": 0, "z": 20, "yaw": 90},
+            {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 10, "y": 5, "z": 64, "yaw": 20, "optional": true},
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": -75, "y": 0, "optional": true}
+          ]
+        },
+        {
+          "name": "fence",
+          "width": 260,
+          "depth": 24,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "FenceWoven01", "piece": "000008A6:Skyrim.esm", "x": 0, "y": 0}
+          ]
+        },
+        {
+          "name": "banner_whiterun",
+          "width": 170,
+          "depth": 170,
+          "vendorSpots": [],
+          "pieces": [
+            {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 0, "y": 0},
+            {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 0, "y": 3, "z": 395}
+          ]
         }
       ],
       "fixed": [
@@ -427,10 +516,45 @@
       ],
       "backFill": [],
       "backFillThemes": ["books", "scrolls", "curios", "candles", "pottery", "toys", "herbs", "rugs", "weaver", "tanner", "carver", "cooper", "bone", "timber"],
-      "dressing": [],
+      "dressing": [
+        {"name": "RoadSignPost", "piece": "0003AF9D:Skyrim.esm", "x": 2360, "y": -1650},
+        {"name": "RoadSignWhiterun01", "piece": "0003AF9A:Skyrim.esm", "x": 2360, "y": -1650, "z": 230, "yaw": 180},
+        {"module": "camp", "x": 4300, "y": -880, "yaw": 200, "searchRadius": 600},
+        {"module": "camp", "x": 4800, "y": -700, "yaw": 215, "searchRadius": 600},
+        {"module": "camp", "x": 4450, "y": 3760, "yaw": 0, "searchRadius": 600},
+        {"module": "camp", "x": 4950, "y": 3720, "yaw": 10, "searchRadius": 600},
+        {"module": "camp", "x": 5400, "y": 3560, "yaw": 25, "searchRadius": 600},
+        {"module": "cart", "x": 1700, "y": -1500, "yaw": 60, "searchRadius": 600},
+        {"module": "haystack", "x": 1520, "y": -1330, "yaw": 20, "searchRadius": 600},
+        {"module": "crates", "x": 1720, "y": -1220, "yaw": 100, "searchRadius": 600},
+        {"module": "haystack", "x": 2650, "y": -1250, "yaw": -30, "searchRadius": 600},
+        {"module": "cart", "x": 2800, "y": -1450, "yaw": -70, "searchRadius": 600}
+      ],
       "seating": [
         {"lane": "EastLane", "module": "picnic", "offset": 0, "from": 300, "to": 4300, "spacing": 800},
-        {"lane": "Avenue", "module": "picnic", "offset": 480, "from": 1200, "to": 5600, "spacing": 900}
+        {"lane": "Avenue", "module": "picnic", "offset": 480, "from": 1200, "to": 5600, "spacing": 900},
+        {"lane": "EastLane", "module": "brazier_lit", "offset": 0, "from": 700, "to": 4300, "spacing": 800},
+        {"lane": "Avenue", "module": "brazier_lit", "offset": 430, "from": 800, "to": 5600, "spacing": 1300},
+        {"lane": "Avenue", "module": "banner_whiterun", "offset": 430, "from": 1450, "to": 5600, "spacing": 1300},
+        {"lane": "Avenue", "module": "cookfire", "offset": 820, "from": 1650, "to": 5600, "spacing": 1800},
+        {"lane": "Avenue", "module": "fence", "offset": 1150, "from": 900, "to": 2800, "spacing": 285, "angleJitter": 2},
+        {"lane": "Avenue", "module": "fence", "offset": 1150, "from": 3300, "to": 5300, "spacing": 285, "angleJitter": 2}
+      ],
+      "themeDressing": [
+        {
+          "theme": "imperial",
+          "pieces": [
+            {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": -330, "y": 170},
+            {"name": "CivilWarBannerImp01", "piece": "00097ED9:Skyrim.esm", "x": -330, "y": 173, "z": 395}
+          ]
+        },
+        {
+          "theme": "stormcloak",
+          "pieces": [
+            {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": -330, "y": 170},
+            {"name": "CivilWarBannerStorm01", "piece": "0002BEBB:Skyrim.esm", "x": -330, "y": 173, "z": 395}
+          ]
+        }
       ]
     },
     "vendors": {
