@@ -237,7 +237,7 @@ try
 
         if (world.Audio is { } audio)
         {
-            Console.WriteLine($"  stage set: {string.Join(", ", audio.Songs.Select(s => $"{s.Name} {s.Seconds:0.0}s"))}; cheer {string.Join(", ", audio.Cheers.Select(c => $"{c:0.0}s"))}");
+            Console.WriteLine($"  stage set: {string.Join(", ", audio.Songs.Select(s => $"{s.Name} {s.Seconds:0.0}s"))}; cheer {string.Join(", ", audio.Cheers.Select(c => $"{c:0.0}s"))}; band {string.Join(", ", audio.Band)}");
             Console.WriteLine($"  crowd ambience: {audio.Emitters.Count} emitters ({string.Join(", ", audio.Emitters.Select(e => e.Name))}) from {audio.AmbienceMarkers} sound markers, loop {audio.LoopSeconds:0.0}s");
         }
 

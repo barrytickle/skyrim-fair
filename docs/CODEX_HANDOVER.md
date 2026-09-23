@@ -572,6 +572,7 @@ Project-owned mesh work is code-first and reproducible.
 - `exact: true` on a market piece skips the random nudge (signs, their posts and bars must meet); modules and vignettes both honour `rotX`/`rotY`
 - **audio**: see `docs/AUDIO.md`. Build order: `tools/build_audio.py`, then `tools/build_papyrus.py --ck <CK folder>`, then the generator (it reads the built sound files' lengths), then `tools/deploy.py --to <mod folder>`. `assets/sound/`, `assets/scripts/` and `build/` are git-ignored build output; `music/` and `sound-effects/` are Barry's untracked sources
 - Mutagen omits some subrecords vanilla always has unless they're set explicitly. `SNDR` without `CNAM` crashes the game on boot. Set `Type`, the sound category's `Name`/`Flags`, the quest's `NextAliasID`/`QuestFormVersion`, and the alias's `Flags`/`VoiceTypes`, and compare a new record type's subrecords with vanilla's before shipping it
+- a Papyrus `Sound` property must point at a sound marker (`SOUN`), never a descriptor (`SNDR`); it loads as None otherwise
 - the stage set is `SkyrimFairAudioQuest` / `SkyrimFairAudioScript` (Papyrus in `src/Papyrus/`); its properties are all generator-written from `fairWorld.audio`. Keep the global names (`SkyrimFairAudio*`) stable for the MCM
 - invisible walls are `fairWorld.collisionWalls` segments, built as vanilla `CollisionMarker` box primitives (half-extents, default layer)
 - the cobbles use the Whiterun Mossy Wet Stonefloor textures copied to `textures\SkyrimFair\Ground\Cobble01*.dds` (git-ignored; restore from `external/` before deploying)

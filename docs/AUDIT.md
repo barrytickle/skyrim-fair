@@ -2,6 +2,31 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
+## Current pass: no stage music, no band, quiet crowd (2026-09-23)
+
+Barry: the crowd ambience plays but is very quiet; there is no music from the stage, and
+no bards on the stage.
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| No stage music | Papyrus's `Sound` is the **sound marker** (`SOUN`), not the descriptor (`SNDR`). The script's `Songs` and `Cheers` pointed at descriptors, so they loaded as None and `Play` did nothing | a sound marker for each song and the cheer (`SkyrimFairAudioSong<Name>Marker`, `SkyrimFairAudioCheerCheerMarker`); the properties point at them (read back: all 5 are `SoundMarker`) |
+| No bards | performers were never built | **the band**: three bards on the deck facing the square, lute (1840, 5380), drum (2048, 5480), flute (2256, 5380). Each stands at a vanilla instrument idle marker (`PlayLuteMarker`, `PlayDrumMarker`, `PlayFluteMarker`; the idle brings the instrument). Each has a copy of Candlehearth Hall's bard package (`UseIdleMarker` at its own marker, persistent). Bard and fine clothes; "Fair Bard" when looked at. `fairWorld.audio.stage.band` |
+| Ambience very quiet | 10 dB static attenuation | 4 dB (about twice as loud) |
+
+The stage script now writes `Debug.Trace` lines (started, loaded, each song and its
+sound instance) for the Papyrus log.
+
+- Generator run twice: identical SHA256 `9c65b621fa3e5af5...`.
+- Deployed with the rebuilt scripts.
+
+**Test**:
+- Does the music start at the stage about 4 s after arriving?
+- Do the bards play their instruments?
+- Is the murmur at a good level now?
+
+The bards play all the time; stopping them between songs is the performance cue step
+(`docs/MUSIC.md` step 3).
+
 ## Hotfix: crash on boot from the sound descriptors (2026-09-23)
 
 Barry's crash log: an access violation while the game loaded forms, on

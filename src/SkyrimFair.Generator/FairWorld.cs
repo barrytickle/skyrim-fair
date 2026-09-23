@@ -336,7 +336,11 @@ internal static class FairWorld
             {
                 placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
                 topCell.Persistent.Add(placed);
-            }, Put);
+            }, Put, npc =>
+            {
+                var pos = npc.Placement!.Position;
+                cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
+            }, config.Vendors, FaceList);
         }
 
         // ---- the worn festival ground ------------------------------------------------------

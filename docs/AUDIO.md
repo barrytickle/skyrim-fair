@@ -42,7 +42,7 @@ from grouping the placed NPCs:
   copy. Copies heard together are 15 to 45 s apart, so the loop never lines up with itself.
 - Each is full volume within 500 and silent by 3,000, so moving round the fair crosses
   from one to the next. There's no single recording following the player.
-- The ambience plays 10 dB down (`staticAttenuation`) in its own category,
+- The ambience plays 4 dB down (`staticAttenuation`) in its own category,
   `SkyrimFairAudioAmbienceCategory`. That category sits under vanilla's ambient category,
   so the player's Effects slider applies.
 - **Lifecycle:** the engine runs placed markers itself. They play while their cell is
@@ -78,6 +78,15 @@ runs `SkyrimFairAudioScript` (`src/Papyrus/`). The generator writes every proper
   tracked, and each is stopped before the next starts, so nothing accumulates.
 - The world's music type is `MUSTavernSILENCE`, the silent type vanilla uses while bards
   play, so Skyrim's exploration music stays out of the fair.
+
+## The band
+
+Three bards on the deck, each at a vanilla instrument idle marker (lute, drum, flute) with
+a copy of Candlehearth Hall's bard package: `UseIdleMarker` at that one marker, which is
+persistent. The idle brings the instrument. They play continuously for now.
+
+**Papyrus's `Sound` type is the sound marker (`SOUN`)**, so each song and the cheer has
+one for the script; the descriptors (`SNDR`) behind them hold the files.
 
 ## Settings (for a later MCM)
 
@@ -123,7 +132,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 8. `set SkyrimFairAudioMusicEnabled to 0`: the set stops within 2 s. Set it back to 1
    and it restarts.
 
-To tune: `fairWorld.audio.ambience.staticAttenuation` (10) for the murmur's level;
+To tune: `fairWorld.audio.ambience.staticAttenuation` (4) for the murmur's level;
 `stage.minDistance` and `maxDistance` (1,500 and 7,500) for how far the band carries;
 `stage.duckAmbience` (0.75).
 

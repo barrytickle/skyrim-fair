@@ -55,11 +55,13 @@ Float phaseEnds = 0.0
 Float ambienceLevel = -1.0
 
 Event OnInit()
+	Debug.Trace("SkyrimFairAudio: started, " + Songs.Length + " songs")
 	RegisterForSingleUpdate(3.0)
 EndEvent
 
 ; Called by the player alias on every game load. Whatever was playing is gone.
 Function Recover()
+	Debug.Trace("SkyrimFairAudio: game loaded, the set starts over")
 	songInstance = 0
 	cheerInstance = 0
 	phase = 0
@@ -115,6 +117,7 @@ Function Advance(Float now)
 			track = 0
 		EndIf
 		songInstance = Songs[track].Play(StageSpeaker)
+		Debug.Trace("SkyrimFairAudio: song " + track + " playing, instance " + songInstance)
 		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
 		Enter(2, SongLengths[track], now)
 	ElseIf phase == 2

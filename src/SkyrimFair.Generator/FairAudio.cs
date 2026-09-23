@@ -34,9 +34,13 @@ internal static class FairAudio
     // SOMMono06000_dry: a plain mono 3D output model, copied and given the fair's distances.
     private static readonly FormKey MonoOutputModel = FormKey.Factory("10C2ED:Skyrim.esm");
 
+    // WindhelmCandlehearthBardPackage: UseIdleMarker at one specific idle marker, all day.
+    private static readonly FormKey BardPackage = FormKey.Factory("047CB0:Skyrim.esm");
+
     public static AudioResult Build(
         SkyrimMod mod, AudioConfig config, ISkyrimModGetter master, Worldspace world,
-        Action<PlacedObject> putPersistent, Action<PlacedObject> put)
+        Action<PlacedObject> putPersistent, Action<PlacedObject> put, Action<PlacedNpc> putNpc,
+        VendorsConfig looksFrom, Func<string, FormKey> faceList)
     {
         var p = config.EditorIdPrefix;
         var root = Path.IsPathRooted(config.SoundRoot) ? config.SoundRoot : Path.Combine(FairPaths.ConfigDirectory, config.SoundRoot);
@@ -114,6 +118,23 @@ internal static class FairAudio
         var cheers = config.Stage.Cheers
             .Select(c => Descriptor($"Cheer{char.ToUpperInvariant(c.Name[0])}{c.Name[1..]}", c.File, stageCategory, stageOutput, false, config.Stage.CheerStaticAttenuation))
             .ToList();
+        // Papyrus's Sound is the sound marker (SOUN), not the descriptor: a Sound property
+        // pointed at an SNDR loads as None, and nothing plays. Each song and cheer gets one.
+        SoundMarker Marker(string name, SoundDescriptor sound)
+        {
+            var s = new SoundMarker(mod)
+            {
+                EditorID = $"{p}{name}Marker",
+                SoundDescriptor = new FormLinkNullable<ISoundDescriptorGetter>(sound.FormKey),
+                ObjectBounds = new ObjectBounds { First = new P3Int16(-16, -16, -16), Second = new P3Int16(16, 16, 16) },
+            };
+            mod.SoundMarkers.Add(s);
+            return s;
+        }
+
+        var songMarkers = config.Stage.Songs.Select((s, i) => Marker($"Song{s.Name}", songs[i].Sound)).ToList();
+        var cheerMarkers = config.Stage.Cheers.Select((c, i) => Marker($"Cheer{char.ToUpperInvariant(c.Name[0])}{c.Name[1..]}", cheers[i].Sound)).ToList();
+
         var songCheers = config.Stage.Songs.Select(s =>
         {
             if (s.Cheer.Length == 0) return -1;
@@ -158,10 +179,10 @@ internal static class FairAudio
         {
             Obj("FairWorld", world.FormKey),
             Obj("StageSpeaker", speaker.FormKey),
-            new ScriptObjectListProperty { Name = "Songs", Objects = songs.Select(s => Obj("", s.Sound.FormKey)).ToExtendedList() },
+            new ScriptObjectListProperty { Name = "Songs", Objects = songMarkers.Select(s => Obj("", s.FormKey)).ToExtendedList() },
             new ScriptFloatListProperty { Name = "SongLengths", Data = songs.Select(s => s.Seconds).ToExtendedList() },
             new ScriptIntListProperty { Name = "SongCheers", Data = songCheers.ToExtendedList() },
-            new ScriptObjectListProperty { Name = "Cheers", Objects = cheers.Select(c => Obj("", c.Sound.FormKey)).ToExtendedList() },
+            new ScriptObjectListProperty { Name = "Cheers", Objects = cheerMarkers.Select(c => Obj("", c.FormKey)).ToExtendedList() },
             new ScriptFloatListProperty { Name = "CheerLengths", Data = cheers.Select(c => c.Seconds).ToExtendedList() },
             Float("FirstSongDelay", config.Stage.FirstSongDelay),
             Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
@@ -181,6 +202,74 @@ internal static class FairAudio
         adapter.Aliases.Add(alias);
         quest.VirtualMachineAdapter = adapter;
         mod.Quests.Add(quest);
+
+        // ---- the band ------------------------------------------------------------------------
+        // Bards playing on the stage, as vanilla's inn bards do: each stands at a vanilla
+        // instrument idle marker (lute, drum, flute; the marker's idle brings the
+        // instrument) with a copy of Candlehearth Hall's bard package, which is
+        // UseIdleMarker at one specific marker. The markers are persistent, since a
+        // package names them.
+        var bards = new List<string>();
+        var packageSource = master.Packages.First(x => x.FormKey == BardPackage);
+        foreach (var member in config.Stage.Band)
+        {
+            var at = member.At;
+            var idle = new PlacedObject(mod)
+            {
+                EditorID = $"{p}Band{member.Name}Marker",
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(member.Marker)),
+                Placement = new Placement { Position = new P3Float(at[0], at[1], at[2]), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
+            };
+            putPersistent(idle);
+
+            var package = packageSource.Duplicate(mod.GetNextFormKey());
+            package.EditorID = $"{p}Band{member.Name}Package";
+            var target = (PackageDataTarget)package.Data[1];
+            ((PackageTargetSpecificReference)target.Target).Reference.SetTo(idle.FormKey);
+            mod.Packages.Add(package);
+
+            var look = looksFrom.Looks.First(l => l.Name == member.Look);
+            var npc = new Npc(mod)
+            {
+                EditorID = $"{p}Band{member.Name}",
+                Name = member.Title,
+                Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(looksFrom.Race)),
+                Template = new FormLinkNullable<INpcSpawnGetter>(faceList(look.Template)),
+                Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(looksFrom.Class)),
+                DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(member.Outfit)),
+                Configuration = new NpcConfiguration
+                {
+                    Flags = NpcConfiguration.Flag.AutoCalcStats | NpcConfiguration.Flag.Protected
+                        | (look.Female ? NpcConfiguration.Flag.Female : 0),
+                    TemplateFlags = NpcConfiguration.TemplateFlag.Traits,
+                    Level = new NpcLevel { Level = looksFrom.Level },
+                    CalcMinLevel = looksFrom.Level,
+                    CalcMaxLevel = looksFrom.Level,
+                    SpeedMultiplier = 100,
+                },
+                AIData = new AIData
+                {
+                    Aggression = Aggression.Unaggressive,
+                    Confidence = Confidence.Cowardly,
+                    Responsibility = Responsibility.NoCrime,
+                    Assistance = Assistance.HelpsNobody,
+                    Mood = Mood.Happy,
+                    EnergyLevel = 50,
+                },
+                ObjectBounds = new ObjectBounds { First = new P3Int16(-22, -14, 0), Second = new P3Int16(22, 14, 128) },
+                Height = 1f,
+                Weight = 50f,
+            };
+            npc.Packages.Add(new FormLink<IPackageGetter>(package.FormKey));
+            mod.Npcs.Add(npc);
+
+            putNpc(new PlacedNpc(mod)
+            {
+                Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
+                Placement = new Placement { Position = new P3Float(at[0], at[1], at[2] + 2f), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
+            });
+            bards.Add(member.Name);
+        }
 
         // ---- the crowd ambience -----------------------------------------------------------
         var markers = new Dictionary<(string Loop, int Copy, float Extra), SoundMarker>();
@@ -233,7 +322,8 @@ internal static class FairAudio
             cheers.Select(c => c.Seconds).ToList(),
             emitters,
             markers.Count,
-            loopSeconds);
+            loopSeconds,
+            bards);
     }
 
     /// <summary>Length of a PCM WAV from its header: data bytes over bytes a second.</summary>
@@ -286,4 +376,5 @@ internal sealed record AudioResult(
     IReadOnlyList<float> Cheers,
     IReadOnlyList<(string Name, float X, float Y)> Emitters,
     int AmbienceMarkers,
-    float LoopSeconds);
+    float LoopSeconds,
+    IReadOnlyList<string> Band);

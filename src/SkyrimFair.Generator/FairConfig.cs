@@ -2140,6 +2140,28 @@ internal sealed record StageAudioConfig
     public List<StageSong> Songs { get; init; } = new();
 
     public List<StageCheer> Cheers { get; init; } = new();
+
+    /// <summary>The bards playing on the stage.</summary>
+    public List<BandMember> Band { get; init; } = new();
+}
+
+internal sealed record BandMember
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>What looking at them says.</summary>
+    public string Title { get; init; } = "Fair Bard";
+
+    /// <summary>The vanilla instrument idle marker (PlayLuteMarker, PlayDrumMarker, PlayFluteMarker).</summary>
+    public string Marker { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, z, heading]</c> on the stage.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    /// <summary>A <see cref="VendorLook.Name"/>: the face list they are drawn from.</summary>
+    public string Look { get; init; } = "Male";
+
+    public string Outfit { get; init; } = string.Empty;
 }
 
 internal sealed record StageSong

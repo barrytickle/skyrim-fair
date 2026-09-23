@@ -3107,12 +3107,24 @@
             "fadeOut": 3.5,
             "threshold": 600
           }
+        ],
+        "band": [
+          {"name": "Lute", "title": "Fair Bard", "marker": "00097536:Skyrim.esm", "at": [1840, 5380, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+          {"name": "Drum", "title": "Fair Bard", "marker": "00097538:Skyrim.esm", "at": [2048, 5480, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+          {
+            "name": "Flute",
+            "title": "Fair Bard",
+            "marker": "00097537:Skyrim.esm",
+            "at": [2256, 5380, 134, 180],
+            "look": "Female",
+            "outfit": "00037C50:Skyrim.esm"
+          }
         ]
       },
       "ambience": {
         "minDistance": 500,
         "maxDistance": 3000,
-        "staticAttenuation": 10,
+        "staticAttenuation": 4,
         "loops": [
           {
             "name": "Crowd",
