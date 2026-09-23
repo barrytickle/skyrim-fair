@@ -2,7 +2,24 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the crowd library placed (51 figures), and the guard fixed (2026-09-23)
+## Current pass: rebuilt crowd meshes redeployed; the guard can't win against the flood (2026-09-23)
+
+- The other agent rebuilt the crowd NIFs, fixing the white hands, blue faces and streaky
+  hair (`docs/CROWD.md`). All 38 are redeployed and match byte for byte.
+- LookFar02 gained boots: its STAT bounds come from `tools/crowd/figures.json`, and it's
+  136 tall (was 135), collision box too. Footprints were regenerated. Plugin
+  `7c5233ab55d0204d...`, deterministic. No placement changed.
+- **Barry's test of the guard build:** no bard music (one bard played the flute
+  animation), and the game froze again.
+  - `Papyrus.0.log` (382 MB): the dump shows `MD_DeathEffectsHumanoidMagicScript.OnMagicEffectApply`
+    at a frequency of 2,072,452, about 66 s after the load, as the first time.
+  - Not one `SkyrimFairGuard:` line. The guard's `OnLoad` events run in the same queue,
+    and the flood starts the moment the save loads, so they never get their turn.
+  - A Papyrus fix can't win that race. The SPID exclusion (`-SkyrimFair.esp` in the two
+    `_DISTR.ini` lines) acts when the game starts, before any script runs. That's the
+    fix, pending Barry's go-ahead to edit his mods' files.
+
+## Previous pass: the crowd library placed (51 figures), and the guard fixed (2026-09-23)
 
 Barry's test of the folk-dance build: "the game stays, but ... the bards don't play, and
 nobody does even a vanilla dance anymore". Then his brief: place the library

@@ -198,7 +198,7 @@
       {"editorId": "SkyrimFairCrowdClapping02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Clapping02.nif", "width": 48, "depth": 71, "height": 133, "collision": [-18, -14, 18, 14, 133]},
       {"editorId": "SkyrimFairCrowdCheering01", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Cheering01.nif", "width": 63, "depth": 85, "height": 133, "collision": [-18, -14, 18, 14, 133]},
       {"editorId": "SkyrimFairCrowdArmsCrossed01", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_ArmsCrossed01.nif", "width": 50, "depth": 46, "height": 134, "collision": [-18, -14, 18, 14, 134]},
-      {"editorId": "SkyrimFairCrowdLookFar02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_LookFar02.nif", "width": 51, "depth": 52, "height": 135, "collision": [-18, -14, 18, 14, 135]},
+      {"editorId": "SkyrimFairCrowdLookFar02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_LookFar02.nif", "width": 51, "depth": 52, "height": 136, "collision": [-18, -14, 18, 14, 136]},
       {"editorId": "SkyrimFairCrowdClapping03", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Clapping03.nif", "width": 52, "depth": 70, "height": 135, "collision": [-18, -14, 18, 14, 135]},
       {"editorId": "SkyrimFairCrowdPointing02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Pointing02.nif", "width": 47, "depth": 86, "height": 135, "collision": [-18, -14, 18, 14, 135]},
       {"editorId": "SkyrimFairCrowdCheering02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Cheering02.nif", "width": 61, "depth": 85, "height": 132, "collision": [-18, -14, 18, 14, 132]},
