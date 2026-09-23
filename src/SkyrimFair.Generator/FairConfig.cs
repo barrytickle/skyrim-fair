@@ -123,6 +123,9 @@ internal sealed record FairWorldConfig
     /// </summary>
     public ForestConfig Treeline { get; init; } = new() { Enabled = false };
 
+    /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
+    public NavmeshConfig Navmesh { get; init; } = new();
+
     /// <summary>Distant vanilla mountains, always drawn.</summary>
     public MountainsConfig Mountains { get; init; } = new();
 
@@ -506,6 +509,52 @@ internal sealed record PinnedMountain
     public float Scale { get; init; } = 1f;
 
     public float Yaw { get; init; }
+}
+
+/// <summary>The fair's generated navmesh (FairNavmesh.cs, docs/NAVMESH.md).</summary>
+internal sealed record NavmeshConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>Raster size; it must divide the cell size (4,096).</summary>
+    public float Resolution { get; init; } = 32f;
+
+    /// <summary>How far inside the palisade the mesh stops.</summary>
+    public float WallMargin { get; init; } = 48f;
+
+    /// <summary>Padding round every obstacle: an actor's radius.</summary>
+    public float ActorRadius { get; init; } = 32f;
+
+    /// <summary>An obstacle's top must be this far above the ground, and its bottom below head height.</summary>
+    public float MinObstacleHeight { get; init; } = 12f;
+
+    public float HeadHeight { get; init; } = 160f;
+
+    /// <summary>Smaller things (clutter) don't block.</summary>
+    public float MinFootprint { get; init; } = 12f;
+
+    /// <summary>Largest rectangle side, in raster cells.</summary>
+    public int MaxRectangle { get; init; } = 16;
+
+    /// <summary>Plugins whose bases' bounds are needed (Holidays.esp); missing files are skipped.</summary>
+    public List<string> ExtraMasters { get; init; } = new();
+
+    /// <summary>Footprint for a base whose bounds can't be read.</summary>
+    public float UnknownHalfWidth { get; init; } = 30f;
+
+    public float UnknownHeight { get; init; } = 120f;
+
+    /// <summary>Bases that never block (FormKeys).</summary>
+    public List<string> IgnoreBases { get; init; } = new();
+
+    /// <summary>Vanilla's navmesh info map, overridden with the fair's entries.</summary>
+    public string InfoMap { get; init; } = "00012FB4:Skyrim.esm";
+
+    /// <summary>
+    /// The vanilla entries every navmesh plugin in the load order copies into its override
+    /// (Holidays and Fertility Adventures carry the same ten).
+    /// </summary>
+    public List<string> InfoMapSeeds { get; init; } = new();
 }
 
 internal sealed record MountainPiece

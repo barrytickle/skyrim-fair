@@ -2,7 +2,89 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the archers, read from the game (2026-09-23)
+## Current pass: navmesh, phase 1 (the ground) (2026-09-23)
+
+Barry: "let's navmesh it", after the archers turned out to be stalled in a step that needs
+a path. The plan and the record research are in `docs/NAVMESH.md`. This pass is its
+phase 1: a generated ground navmesh for the whole compound, and the navmesh info map
+entries.
+
+### What was built
+
+`src/SkyrimFair.Generator/FairNavmesh.cs` (`fairWorld.navmesh`), run as the very last step:
+
+- **Walkable area:** a 32-unit raster of the ground inside the palisade, 48 in from it.
+- **Obstacles cut:** 1,637 placed objects whose world bounds (turned and scaled) stand
+  between 12 above the ground and head height (160), with a footprint over 12, each
+  padded by an actor's radius (32). Statics, moveable statics, furniture, containers,
+  activators, doors and the invisible collision walls block. Lights, sounds, markers,
+  plants and overhead or on-table pieces don't.
+- Bounds come from Skyrim.esm, the fair's own statics and **Holidays.esp**
+  (`navmesh.extraMasters`, read from the MO2 mods folder). A base whose bounds can't be
+  read gets a 60 x 60 x 120 footprint and is listed in the build output (none this time).
+- **The largest connected area kept** (35 areas before, the rest being pockets inside
+  stalls and under tables).
+- **Rectangles** (up to 16 x 16 raster cells) that never cross a cell line. Each one's edge
+  is split at every other rectangle's corner on it, so no edge has a T-junction. Then it's
+  triangulated counter-clockwise: two triangles, or a fan from its centre.
+- **Records:** 9 `NAVM` (cells -1..1), each with internal links, links across the cell
+  lines (472), the lookup grid (row by row, as vanilla's are read), bounds, version 12,
+  the constant CRC, compressed, and form version 44. A **NAVI override** of vanilla's
+  `012FB4` carries the 9 new entries plus the 10 vanilla entries and the preferred-pathing
+  block that Holidays and Fertility Adventures copy. Form version 44.
+
+| Cell | Vertices | Triangles | Links out |
+| --- | --- | --- | --- |
+| -1, -1 | 241 | 334 | 17 |
+| -1, 0 | 512 | 794 | 42 |
+| -1, 1 | 184 | 255 | 32 |
+| 0, -1 | 976 | 1,370 | 37 |
+| 0, 0 | 1,955 | 2,945 | 127 |
+| 0, 1 | 631 | 817 | 101 |
+| 1, -1 | 310 | 395 | 17 |
+| 1, 0 | 587 | 834 | 56 |
+| 1, 1 | 236 | 322 | 43 |
+
+### Verification
+
+- **Validator** (scratchpad Mutagen program, reading the built plugin): 8,066 triangles.
+  None degenerate or clockwise. Every internal and cross-cell link is reciprocal (the
+  neighbour holds the same edge reversed and links back). Every triangle is in its
+  mesh's lookup grid, and **every triangle is reachable from one start**: one island.
+  **0 errors.** NAVI: 19 entries, all 9 of ours.
+- **Record layout** compared byte-level with Fertility Adventures and Holidays:
+  - NAVM is one compressed `NVNM`, flags `0x40000`, form version 44, as theirs
+  - NAVI is `NVER`, the `NVMI` entries, then `NVPP` (25,696 bytes, the same as
+    Holidays'), form version 44 (vanilla's own record is 40; corrected)
+- Plan: `docs/images/navmesh_plan.png`. The mesh is green, and the dots are actors:
+  - archers (red) are on the mesh
+  - bards (purple) are on the stage and off it (phase 3)
+  - pen horses (white) are off it
+  - vendors (orange) stand inside the stall blocks, which the stall frames' bounds cut
+    whole
+  - most visitors (blue) are on it; 56 of 126 actors in all
+- Generator run twice: identical SHA256 `9e29fb2fb6495056...` (733,223 bytes). Read back
+  against the deployed plugin: 9 records added (the navmeshes), none removed or
+  renumbered. Deployed.
+
+### Known limits (phase 2)
+
+- Vendors stand off the mesh inside the stall blocks. They hold still, as before. For
+  them to walk in and out, the stall's area behind the counter needs to stay open (cut
+  by the stall's pieces, not the whole frame).
+- The perimeter edge is a raster staircase with thin triangles, and cell 0, 0 has 2,945
+  triangles. A coarser raster in open ground, or merging, would cut both.
+- No navmesh on the stage, in the pen or through the gate yet.
+
+### Test
+
+1. Load a save by the range: **do the archers shoot?** Then load one made away from it.
+2. Watch the visitors and anyone walking. Anyone stuck, sliding or walking into things?
+3. Optional: `tcai` twice to reset AI and watch. Or open `SkyrimFair.esp` in the Creation
+   Kit read-only and look at the navmesh view. **Don't save it there.**
+4. Any crash on loading the fair, or near a cell line?
+
+## Previous pass: the archers, read from the game (2026-09-23)
 
 Barry: the archers still don't shoot. His Papyrus log (today, fair profile) settles what
 the earlier two fixes guessed at:

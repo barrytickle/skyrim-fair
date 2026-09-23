@@ -136,6 +136,22 @@
         {"name": "RockCliff07PineForest03", "formKey": "000D1EC7:Skyrim.esm", "weight": 0.4, "minScale": 0.6, "maxScale": 1.0, "minDistance": 600, "sink": 140}
       ]
     },
+    "navmesh": {
+      "enabled": true,
+      "resolution": 32,
+      "wallMargin": 48,
+      "actorRadius": 32,
+      "minObstacleHeight": 12,
+      "headHeight": 160,
+      "minFootprint": 12,
+      "maxRectangle": 16,
+      "extraMasters": ["E:/Modlists/Still In Skyrim/mods/Holidays/Holidays.esp"],
+      "infoMap": "00012FB4:Skyrim.esm",
+      "infoMapSeeds": [
+        "000A3F44:Skyrim.esm", "0010377B:Skyrim.esm", "00098776:Skyrim.esm", "00100F4B:Skyrim.esm", "00105E9A:Skyrim.esm",
+        "000B87DF:Skyrim.esm", "001030CB:Skyrim.esm", "00079BBF:Skyrim.esm", "00103120:Skyrim.esm", "000E88CC:Skyrim.esm"
+      ]
+    },
     "mountains": {
       "enabled": true,
       "baseZ": -1000,

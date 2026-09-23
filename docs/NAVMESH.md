@@ -1,6 +1,6 @@
 # Navmesh for SkyrimFairWorld: the plan
 
-Status: **plan only, nothing built** (2026-09-23). Written after the archers proved the
+Status: **phase 1 built** (2026-09-23): the ground navmesh and NAVI entries, `FairNavmesh.cs`; see `docs/AUDIT.md`. Phases 2 and 3 to come. Written after the archers proved the
 need: their training package runs after a load but stalls in a step that needs a path,
 and there is no navmesh anywhere in the fair's world. Every NPC plan after this (vendors
 walking to stalls, the crowd, dancers, quests) needs it too.

@@ -110,7 +110,11 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
-**Navmesh: planned, Barry said go (2026-09-23).** The plan is `docs/NAVMESH.md`: a generated `FairNavmesh.cs` stage (raster, obstacle cut-out, T-junction-free rectangles, cross-cell links, NAVI entries as Fertility Adventures and Holidays write them). Phase 1 is the ground navmesh plus a validator. Awaiting Barry's OK on the plan before building.
+**Navmesh phase 1: built and deployed, awaiting Barry's test** (plugin `9e29fb2fb6495056...`).
+The generated ground navmesh is 9 meshes, 8,066 triangles and one island; the validator
+passes, and the layout matches Fertility Adventures and Holidays. The main question is
+whether the archers now shoot after a reload. Phase 2: vendors inside stalls, a lighter
+mesh, the pen. Phase 3: the stage and the gate. See `docs/NAVMESH.md`.
 
 **Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
 

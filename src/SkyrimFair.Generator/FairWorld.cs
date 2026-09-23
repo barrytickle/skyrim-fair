@@ -591,6 +591,23 @@ internal static class FairWorld
             }
         }
 
+        // ---- the navmesh, last of all ------------------------------------------------------------
+        if (config.Navmesh.Enabled && master is not null)
+        {
+            var nav = FairNavmesh.Build(mod, config.Navmesh, worldspace, cells, topCell, plan.Bounds, plan.Outside, plan.Height, master);
+            Console.WriteLine($"  navmesh: {nav.Meshes} meshes, {nav.Triangles} triangles, {nav.ExternalLinks} links across cell lines; " +
+                $"{nav.Obstacles} obstacles cut; {nav.Islands} areas before keeping the largest; actors on the mesh {nav.ActorsOnMesh} of {nav.Actors}");
+            foreach (var c in nav.Cells)
+            {
+                Console.WriteLine($"    cell {c.X,2}, {c.Y,2}: {c.Vertices,5} vertices, {c.Triangles,5} triangles, {c.Links,4} links out");
+            }
+
+            if (nav.UnknownBases.Count > 0)
+            {
+                Console.WriteLine($"    bases without readable bounds (default footprint): {string.Join(", ", nav.UnknownBases)}");
+            }
+        }
+
         mod.Worldspaces.Add(worldspace);
 
         return new FairWorldResult(
