@@ -2,7 +2,52 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: no stage music, no band, quiet crowd (2026-09-23)
+## Current pass: concert-loud stage, bards that play, archers after a load, the archery sign (2026-09-23)
+
+Barry's test of `c8c652a`: the stage music, cheer and running order all work, and the
+pen horses are right. To fix: the music far too quiet ("like 100x"); the bards stand
+without playing; the crowd a little louder; the archery sign still wrong; the archers
+stop after a reload.
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Stage music far too quiet | Barry's masters are about -19 LUFS; the speaker was full volume only within 1,500 on vanilla's steep curve (100, 50, 20, 5, 0); and `staticAttenuation` can't go below 0 (`SNDR` BNAM is unsigned) | three levers. (1) `build_audio.py` gains the songs and cheer to `stage.loudness` -7 under a look-ahead peak limiter at -1 dBFS: **-19 to about -11 LUFS, 8 dB up** (EBU R128 by ffmpeg), crest about 10 dB. (2) Full volume within **3,000**, silent at **12,000**. (3) A straight falloff, `stage.curve` 100, 75, 50, 25, 0. Together about 12 dB more in the square, more further out. 100x (40 dB) isn't reachable without clipping; this is as loud as the files go cleanly |
+| Bards don't play | the copied Candlehearth package is `UseIdleMarker` at a *heading* marker for Luaffyn. It plays nothing. Vanilla's inn bards play from the `BardSongs` scene fragments: `Bard.GetActorRef().PlayIdle(IdleLuteStart)`, then `PlayIdle(IdleStop)` (read in `SF_BardSongsInstrumentalFlute_00095889.psc`) | the same method. The bards hold their spot with `DefaultStayAtEditorLocation`, and the stage script plays `IdleLuteStart` / `IdleDrumStart` / `IdleFluteStart` on each when a song starts and `IdleStop` when it ends (`Band`, `BandIdles`, `BandStop` properties; `fairWorld.audio.stage.band[].idle`). The bards are now persistent refs. The idle markers and package copies are gone; their 6 FormIDs are left unused, so every later record keeps its FormID |
+| Crowd a bit quiet | 4 dB down | **1 dB** (Barry asked for 0 to 2) |
+| Archery sign wrong | two faults. (1) The booth is placed as a *dressing group*, and `CommitDressing` ignored `exact`, so its posts, bar and sign each got a ±6-unit nudge and a ±4° twist: read back, the posts sat 3 and 9 off the sign's line. (2) The wreath on the north post pokes through the board's end | `CommitDressing` honours `exact`. The south post moves from y 60 to **20**, the bar to y **85** at scale **1.05** (it spans both posts), the sign to y **122.5**, so the board hangs from y 32.5 to 107.5: 3.5 clear of the south post and 12.5 clear of the wreath. Read back, all exact |
+| Archers stop after a reload | the training package doesn't restart by itself after a load in a world with no navmesh. Castle Dour's archers have nothing extra (no script; one is persistent), but Solitude has navmesh | the archers are persistent refs, and the stage script, the fair's only controller, sets each back on their stand on every arrival and load: `MoveTo` the unkeyed linked ref (the `PatrolIdleMarker`), then `EvaluatePackage`. One not yet 3D-loaded is caught on a later update. Papyrus traces "archer N set on their stand" |
+
+**A bounds gotcha found on the way:** `SignSFletcher`'s OBND says its board runs from
++15 to +90 along Y, but the SE mesh's root node is turned 180°, so it really hangs from
+-90 to -15 (and down to z -100, not -81). Measure hanging signs with `tools/nif_preview.py`,
+not the OBND.
+
+**Verification:**
+- Generator run twice: identical SHA256 `de58878c28d93ab1...` (576,330 bytes).
+  `build_audio.py` run twice: identical files. All 3 scripts compile.
+- Deployed with `deploy.py`: the plugin, 5 sound files and 3 scripts, byte-identical.
+- Read back against the previous deployed plugin (`9c65b621...`): 6 records removed (the
+  band's 3 idle markers and 3 packages), none added, every other FormID unchanged.
+- The quest script's properties: the 17 old ones unchanged, plus `Band` (3 persistent
+  refs), `BandIdles`, `BandStop` (`IdleStop` `0E4242`) and `Archers` (4 persistent refs).
+- The stage output model is 3,000 / 12,000 with curve 100, 75, 50, 25, 0; the murmur's
+  descriptors are at 1 dB, and the west field's quieter one at 6.
+- Nothing band or archer is left in a temporary cell. No instrument marker is placed.
+
+**Not verified:** anything in game.
+
+**Test:**
+- Is the stage loud enough now across the square? Does it carry, without distortion?
+- Do the bards take up their instruments when a song starts, and put them away at the
+  cheer?
+- Save by the range, reload: do the archers start shooting again within a few seconds?
+- Does the archery sign hang between the posts, clear of the wreath?
+- Is the murmur about right at 1 dB?
+
+If the bards still stand still, send `Papyrus.0.log` (with `bEnableLogging=1`): the
+script traces "bard N plays: True/False" for each.
+
+## Previous pass: no stage music, no band, quiet crowd (2026-09-23)
 
 Barry: the crowd ambience plays but is very quiet; there is no music from the stage, and
 no bards on the stage.
@@ -44,7 +89,7 @@ Barry's crash log: an access violation while the game loaded forms, on
 - The output models, sound markers and globals already matched.
 - Generator run twice: identical SHA256 `8bd235c4c39e5a41...`. Deployed byte-identical.
 
-## Current pass: festival audio, and the cobbles, sign bar and horses again (2026-09-23)
+## Previous pass: festival audio, and the cobbles, sign bar and horses again (2026-09-23)
 
 Barry's review of the last pass: the cobbles had gone completely; the sign bar didn't line
 up with the posts; the horses stay in the pen but can be ridden; the worn ground now
@@ -374,7 +419,7 @@ solid, immovable collision.
 
 **Test**: enter the fair again; goods should stay put when bumped.
 
-## Current pass: festival liveliness and density, worn ground (2026-09-23)
+## Previous pass: festival liveliness and density, worn ground (2026-09-23)
 
 Barry's brief: "THE STRUCTURE IS GOOD, BUT THE FAIR STILL FEELS TOO BARE... MORE LIFE, NOT
 MORE LAND", then "i have a mod called 'Holidays' can we try and use some of the

@@ -2120,8 +2120,23 @@ internal sealed record StageAudioConfig
 
     public float MaxDistance { get; init; } = 7500f;
 
-    /// <summary>Decibels taken off the songs and the cheer.</summary>
+    /// <summary>
+    /// The output model's falloff: five volumes (percent) from the minimum distance to the
+    /// maximum. Empty keeps the copied vanilla curve (100, 50, 20, 5, 0).
+    /// </summary>
+    public int[] Curve { get; init; } = Array.Empty<int>();
+
+    /// <summary>
+    /// Decibels taken off the songs and the cheer. It can't go below 0 (the record stores an
+    /// unsigned value), so loudness comes from the files: see <see cref="Loudness"/>.
+    /// </summary>
     public float StaticAttenuation { get; init; }
+
+    /// <summary>For tools/build_audio.py: the gated level (dBFS) songs and cheers are brought to.</summary>
+    public float? Loudness { get; init; }
+
+    /// <summary>For tools/build_audio.py: the limiter's ceiling, dBFS.</summary>
+    public float Ceiling { get; init; } = -1f;
 
     public float CheerStaticAttenuation { get; init; }
 
@@ -2141,6 +2156,15 @@ internal sealed record StageAudioConfig
 
     public List<StageCheer> Cheers { get; init; } = new();
 
+    /// <summary>
+    /// What keeps the bards on their spots: DefaultStayAtEditorLocation, as vanilla's bards
+    /// hold still (DefaultStayAtCurrentLocation) while their scene plays the instrument.
+    /// </summary>
+    public string BandPackage { get; init; } = "00025BFC:Skyrim.esm";
+
+    /// <summary>The idle that puts an instrument away (vanilla <c>IdleStop</c>).</summary>
+    public string BandStop { get; init; } = "000E4242:Skyrim.esm";
+
     /// <summary>The bards playing on the stage.</summary>
     public List<BandMember> Band { get; init; } = new();
 }
@@ -2152,8 +2176,12 @@ internal sealed record BandMember
     /// <summary>What looking at them says.</summary>
     public string Title { get; init; } = "Fair Bard";
 
-    /// <summary>The vanilla instrument idle marker (PlayLuteMarker, PlayDrumMarker, PlayFluteMarker).</summary>
-    public string Marker { get; init; } = string.Empty;
+    /// <summary>
+    /// The idle the stage script plays on them when a song starts (IdleLuteStart,
+    /// IdleDrumStart, IdleFluteStart): it brings out the instrument and plays it, as
+    /// vanilla's bard scenes do with <c>PlayIdle</c>.
+    /// </summary>
+    public string Idle { get; init; } = string.Empty;
 
     /// <summary><c>[x, y, z, heading]</c> on the stage.</summary>
     public float[] At { get; init; } = Array.Empty<float>();

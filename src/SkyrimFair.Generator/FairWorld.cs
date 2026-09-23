@@ -279,8 +279,8 @@ internal static class FairWorld
 
             archery = FairArchery.Build(mod, config.Archery, plan.Height, Put, PutPersistent, npc =>
             {
-                var pos = npc.Placement!.Position;
-                cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
+                npc.MajorRecordFlagsRaw |= PersistentRecordFlag;
+                topCell.Persistent.Add(npc);
             }, FaceList);
         }
 
@@ -332,15 +332,16 @@ internal static class FairWorld
         AudioResult? audio = null;
         if (config.Audio.Enabled)
         {
+            // The bards are persistent, as the script plays their instruments.
             audio = FairAudio.Build(mod, config.Audio, master!, worldspace, placed =>
             {
                 placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
                 topCell.Persistent.Add(placed);
             }, Put, npc =>
             {
-                var pos = npc.Placement!.Position;
-                cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
-            }, config.Vendors, FaceList);
+                npc.MajorRecordFlagsRaw |= PersistentRecordFlag;
+                topCell.Persistent.Add(npc);
+            }, config.Vendors, FaceList, archery?.Archers ?? Array.Empty<FormKey>());
         }
 
         // ---- the worn festival ground ------------------------------------------------------

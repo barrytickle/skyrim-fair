@@ -81,42 +81,44 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
 
-## Where we are (2026-09-23, end of session)
+## Where we are (2026-09-23, bug-fix pass)
 
-Last commit `c8c652a`, deployed; plugin SHA256 `9c65b621fa3e5af5...`. **Barry has not yet
-tested this build.** He's done for the night.
+The bug-fix pass is committed and deployed; plugin SHA256 `de58878c28d93ab1...`.
+**Barry has not yet tested it.** Details in `docs/AUDIT.md` ("Current pass").
 
-**Barry's test of this build (end of 2026-09-23). Do these first next session:**
+**Confirmed working in game** (Barry's test of `c8c652a`):
+- the stage music plays, the cheer follows each song, and the next song starts on its own
+- the pen horses show the ride prompt but can't be ridden, which is how Barry wants it
 
-- ✅ **Working in game:**
-  - the stage music plays
-  - the cheer follows each song
-  - the next song starts on its own
-  - the pen horses show the ride prompt but can't be ridden, which is how Barry wants it
-- **Stage music far too quiet:** Barry wants "like 100x", so it sounds like a concert.
-  Levers:
-  - `stage.staticAttenuation` is 0 dB. Is a negative value allowed? Check the
-    `SNDR` BNAM limits.
-  - raise `stage.minDistance` and `maxDistance` (1500 / 7500)
-  - the stage category's `StaticVolumeMultiplier`
-  - `SetInstanceVolume` is capped at 1
-  - boost the WAVs themselves in `build_audio.py`: normalise or apply gain with a
-    limiter, since the songs peak around -3 dBFS and average far lower
-  - a second speaker, or a stage output model with a flatter curve
-- **The bards don't play instruments.** They stand without playing. Check:
-  - whether the copied Candlehearth package really runs
-  - whether the idle marker needs to be linked or reserved
-  - how vanilla's `BardSongs` quest starts the playing: `IdleLuteStart` etc. may need
-    the anim event from a script, or the instrument item
-  - Compare with a vanilla inn bard's reference and package setup
-- **Crowd ambience:** still wants a bit more volume. It's now 4 dB down; try 0 to 2.
-- **Archery sign still wrong:** move it south, or hang it on the left post rather than the
-  one with the wreath. That's the `archery_booth` module in `fair.config.json`: posts at
-  y 60 and 150, sign `000F0A22` at y 157.5, bar `000533D3` at y 105.
+**Fixed this pass, awaiting Barry's test:**
+- **Stage loudness:** songs and cheer 8 dB louder in the files (`stage.loudness` -7, a
+  limiter in `build_audio.py`), full volume within 3,000 (was 1,500), silent at 12,000,
+  on a straight falloff curve. Negative `staticAttenuation` isn't possible (unsigned).
+  If still too quiet: a second speaker, or reparent the stage category.
+- **Bards:** they now play the vanilla way, `PlayIdle(IdleLuteStart...)` from the stage
+  script at each song's start and `IdleStop` at its end. A package only holds them on
+  their spot. The Candlehearth package never played anything.
+- **Crowd ambience:** 1 dB down (was 4).
+- **Archery sign:** the booth is a dressing group, and dressing groups ignored `exact`.
+  Now fixed; the south post moved to y 20 so the board hangs clear of the wreath.
+- **Archers after a reload** (morning list item 1): the stage script puts each archer
+  back on their stand and re-evaluates their package on every arrival and load.
+  Navmesh is the real fix.
+- If the bards or archers misbehave, get `Papyrus.0.log` (`bEnableLogging=1` under
+  `[Papyrus]` in `profiles\Still in Skyrim Plus\Skyrim.ini`); the script traces
+  "SkyrimFairAudio: bard N plays" and "archer N set on their stand".
 
-**Barry's morning list (added 2026-09-23 late; nothing started):**
+**Still to confirm from earlier builds:** the cobbles along the avenue; the booth's arrow
+bundles, leaning target, pitchfork and broom tilting as authored; whether the music fades
+walking away and nothing plays after leaving or a save and load.
 
-1. **Bug: the archers stop their animation after a reload.** The Solitude training package
+**Open question for Barry:** the Solitude-sign vignettes (fletcher, clothes, curios) have
+the same snowberry wreath on the post by the board's end, and it may poke through there
+too. Not changed yet.
+
+**Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
+
+1. ✅ *(done this pass, untested)* **Bug: the archers stop their animation after a reload.** The Solitude training package
    (`GuardSolitudeRangedTrainingPackage`) doesn't resume after a load. Check:
    - how Castle Dour's archers survive a reload (package conditions, persistence, linked
      refs, `EvaluatePackage`)
@@ -166,8 +168,8 @@ tested this build.** He's done for the night.
 
 **Next likely work:**
 - Tune the audio balance.
-- Performer cues: bards and dancers stop at a song's end and resume about 5 s in
-  (`docs/MUSIC.md` step 3). Professional Dancer is the planned dance system; see
+- Performer cues: the bards now start and stop with each song; dancers still to come,
+  and the "resume about 5 s in" timing (`docs/MUSIC.md` step 3). Professional Dancer is the planned dance system; see
   `CREDITS.md`.
 - The music heard outside the Tamriel gate (step 4).
 - The MCM (`docs/MCM.md`): the `SkyrimFairAudio*` globals are ready for it.

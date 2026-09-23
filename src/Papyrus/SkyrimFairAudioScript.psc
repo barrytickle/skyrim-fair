@@ -3,6 +3,11 @@ Scriptname SkyrimFairAudioScript extends Quest
 playlist, while the player is at the fair. It also sets the level of the fair's crowd
 ambience, which plays by itself from placed sound markers, and ducks it under a song.
 
+It also leads the band: the bards take up their instruments when a song starts and put
+them away when it ends, as vanilla's bard scenes do (PlayIdle IdleLuteStart, IdleStop).
+And as the fair's only controller, it sets the archers back on their stands on every
+arrival and load: without navmesh their training package doesn't pick up again by itself.
+
 Every property is written by the generator from fair.config.json (fairWorld.audio);
 see docs/AUDIO.md. Sounds do not survive a save or a load, so the player alias calls
 Recover() on every load and the set starts over cleanly: nothing is left playing twice.}
@@ -40,6 +45,16 @@ GlobalVariable Property CheerVolume Auto
 GlobalVariable Property TimeScale Auto
 {Vanilla's TimeScale, to turn game time into seconds.}
 
+Actor[] Property Band Auto
+{The bards on the stage (persistent references).}
+Idle[] Property BandIdles Auto
+{For each bard, the idle that brings out their instrument and plays it.}
+Idle Property BandStop Auto
+{Puts an instrument away.}
+
+Actor[] Property Archers Auto
+{The archery range's archers, each linked (unkeyed) to the stand it shoots from.}
+
 Float Property ActivePoll = 2.0 Auto
 {Most seconds between checks at the fair (volumes, leaving).}
 Float Property IdlePoll = 5.0 Auto
@@ -53,6 +68,11 @@ Int songInstance = 0
 Int cheerInstance = 0
 Float phaseEnds = 0.0
 Float ambienceLevel = -1.0
+; Which bards are playing, and which archers still wait to be set on their stands (an
+; actor whose 3D hasn't loaded yet is caught on a later update).
+Bool[] bandPlaying
+Bool bandOn = False
+Bool[] archerPending
 
 Event OnInit()
 	Debug.Trace("SkyrimFairAudio: started, " + Songs.Length + " songs")
@@ -66,6 +86,8 @@ Function Recover()
 	cheerInstance = 0
 	phase = 0
 	ambienceLevel = -1.0
+	bandOn = False
+	bandPlaying = new Bool[16]
 	RegisterForSingleUpdate(1.0)
 EndFunction
 
@@ -81,8 +103,12 @@ Event OnUpdate()
 
 	Float now = Utility.GetCurrentGameTime()
 	If phase == 0
+		; Arrived, or loaded at the fair.
 		Enter(1, FirstSongDelay, now)
+		StopBand(True)
+		QueueArchers()
 	EndIf
+	ResetArchers()
 
 	If MusicEnabled.GetValue() < 0.5 || Songs.Length == 0
 		; Switched off: hold, and start afresh when switched back on.
@@ -98,6 +124,11 @@ Event OnUpdate()
 		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
 	EndIf
 	SetAmbience(phase == 2)
+	If phase == 2
+		PlayBand()
+	ElseIf bandOn
+		StopBand(False)
+	EndIf
 
 	Float left = Seconds(phaseEnds - now)
 	If left > ActivePoll
@@ -158,6 +189,69 @@ Function StopAll()
 		cheerInstance = 0
 	EndIf
 	SetAmbience(False)
+	StopBand(False)
+EndFunction
+
+; Each bard not yet playing takes up their instrument, once their 3D is there to play it.
+Function PlayBand()
+	If bandPlaying.Length < Band.Length
+		bandPlaying = new Bool[16]
+	EndIf
+	bandOn = True
+	Int i = 0
+	While i < Band.Length && i < bandPlaying.Length
+		If !bandPlaying[i] && Band[i] && Band[i].Is3DLoaded()
+			bandPlaying[i] = Band[i].PlayIdle(BandIdles[i])
+			Debug.Trace("SkyrimFairAudio: bard " + i + " plays: " + bandPlaying[i])
+		EndIf
+		i += 1
+	EndWhile
+EndFunction
+
+; Instruments away. With force, every loaded bard is told, playing or not (after a load
+; nothing is known about what they hold).
+Function StopBand(Bool force)
+	If bandPlaying.Length < Band.Length
+		bandPlaying = new Bool[16]
+	EndIf
+	Int i = 0
+	While i < Band.Length && i < bandPlaying.Length
+		If (force || bandPlaying[i]) && Band[i] && Band[i].Is3DLoaded()
+			Band[i].PlayIdle(BandStop)
+		EndIf
+		bandPlaying[i] = False
+		i += 1
+	EndWhile
+	bandOn = False
+EndFunction
+
+Function QueueArchers()
+	If archerPending.Length < Archers.Length
+		archerPending = new Bool[32]
+	EndIf
+	Int i = 0
+	While i < Archers.Length && i < archerPending.Length
+		archerPending[i] = True
+		i += 1
+	EndWhile
+EndFunction
+
+; Each waiting archer whose 3D is loaded goes back onto their stand, facing the target,
+; and re-evaluates the training package, which then starts shooting again.
+Function ResetArchers()
+	Int i = 0
+	While i < Archers.Length && i < archerPending.Length
+		If archerPending[i] && Archers[i] && Archers[i].Is3DLoaded()
+			ObjectReference stand = Archers[i].GetLinkedRef()
+			If stand
+				Archers[i].MoveTo(stand)
+			EndIf
+			Archers[i].EvaluatePackage()
+			archerPending[i] = False
+			Debug.Trace("SkyrimFairAudio: archer " + i + " set on their stand")
+		EndIf
+		i += 1
+	EndWhile
 EndFunction
 
 Function SetAmbience(Bool duck)

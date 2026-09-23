@@ -24,6 +24,14 @@ archery, horse or fire audio yet. None was invented. `music/original/` and
 The files the build writes are plain WAVs: only a `fmt` and a `data` chunk, without the
 LIST tag ffmpeg adds. They are git-ignored, like the sources.
 
+**Loudness.** Barry's masters sit near -19 LUFS, far quieter than a stage should be, and
+a sound descriptor can only take level *off* (its static attenuation is stored unsigned).
+So the build raises the songs and the cheer itself: a gain to `stage.loudness` (-7, gated
+dBFS) under a look-ahead peak limiter at `stage.ceiling` (-1 dBFS). Measured with ffmpeg's
+EBU R128 meter afterwards: songs -19 to about **-11 LUFS** (8 dB up), peaks held, crest
+about 10 dB. Pushing the target further mostly squashes: -10 gave -12, -7 gives -11. The
+murmur isn't processed.
+
 ## Crowd ambience
 
 **Six positional emitters**, placed where the visitors actually cluster. The spots come
@@ -42,7 +50,7 @@ from grouping the placed NPCs:
   copy. Copies heard together are 15 to 45 s apart, so the loop never lines up with itself.
 - Each is full volume within 500 and silent by 3,000, so moving round the fair crosses
   from one to the next. There's no single recording following the player.
-- The ambience plays 4 dB down (`staticAttenuation`) in its own category,
+- The ambience plays 1 dB down (`staticAttenuation`) in its own category,
   `SkyrimFairAudioAmbienceCategory`. That category sits under vanilla's ambient category,
   so the player's Effects slider applies.
 - **Lifecycle:** the engine runs placed markers itself. They play while their cell is
@@ -56,8 +64,10 @@ runs `SkyrimFairAudioScript` (`src/Papyrus/`). The generator writes every proper
 `fairWorld.audio`, including each song's length, measured from the built files.
 
 - The songs and the cheer play from `SkyrimFairAudioStageSpeaker`, a persistent marker
-  above the stage (2048, 5450, 320). They're full volume within 1,500, which covers the
-  whole square, and fade to nothing at 7,500, about the gate.
+  above the stage (2048, 5450, 320). They're full volume within 3,000, the whole square
+  and more, and fall off along a straight line (`stage.curve` 100, 75, 50, 25, 0; the
+  copied vanilla curve was 100, 50, 20, 5, 0) to nothing at 12,000, so the music carries
+  over the whole fair like a concert.
 - The sequence is: 4 s after arriving, **song**, then the **cheer** (one-shot, 11 s),
   then a **2 s pause**, then the **next song**. It goes round the playlist in config order.
 - Each song names its cheer (`"cheer": "cheer"`). New cheers (small applause, a big
@@ -81,9 +91,16 @@ runs `SkyrimFairAudioScript` (`src/Papyrus/`). The generator writes every proper
 
 ## The band
 
-Three bards on the deck, each at a vanilla instrument idle marker (lute, drum, flute) with
-a copy of Candlehearth Hall's bard package: `UseIdleMarker` at that one marker, which is
-persistent. The idle brings the instrument. They play continuously for now.
+Three bards on the deck, lute (1840, 5380), drum (2048, 5480) and flute (2256, 5380), all
+persistent. They play **the way vanilla's inn bards do**: a package only holds them on
+their spot (`DefaultStayAtEditorLocation`), and the stage script plays the instrument idle
+on each when a song starts (`IdleLuteStart`, `IdleDrumStart`, `IdleFluteStart`) and
+`IdleStop` when it ends, as the `BardSongs` scene fragments do with `PlayIdle`. A bard
+whose 3D hasn't loaded yet is caught on the next update.
+
+The first build used a copy of Candlehearth Hall's "bard package" at instrument idle
+markers. That package is only `UseIdleMarker` at a heading marker for Luaffyn; it never
+plays anything, and no vanilla inn bard plays from a package.
 
 **Papyrus's `Sound` type is the sound marker (`SOUN`)**, so each song and the cheer has
 one for the script; the descriptors (`SNDR`) behind them hold the files.
@@ -132,9 +149,9 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 8. `set SkyrimFairAudioMusicEnabled to 0`: the set stops within 2 s. Set it back to 1
    and it restarts.
 
-To tune: `fairWorld.audio.ambience.staticAttenuation` (4) for the murmur's level;
-`stage.minDistance` and `maxDistance` (1,500 and 7,500) for how far the band carries;
-`stage.duckAmbience` (0.75).
+To tune: `fairWorld.audio.ambience.staticAttenuation` (1) for the murmur's level;
+`stage.loudness` (-7) for the songs' level; `stage.minDistance`, `maxDistance` (3,000 and
+12,000) and `curve` for how far the band carries; `stage.duckAmbience` (0.75).
 
 ## Rights
 

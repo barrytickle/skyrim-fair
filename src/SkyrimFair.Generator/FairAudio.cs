@@ -34,13 +34,10 @@ internal static class FairAudio
     // SOMMono06000_dry: a plain mono 3D output model, copied and given the fair's distances.
     private static readonly FormKey MonoOutputModel = FormKey.Factory("10C2ED:Skyrim.esm");
 
-    // WindhelmCandlehearthBardPackage: UseIdleMarker at one specific idle marker, all day.
-    private static readonly FormKey BardPackage = FormKey.Factory("047CB0:Skyrim.esm");
-
     public static AudioResult Build(
         SkyrimMod mod, AudioConfig config, ISkyrimModGetter master, Worldspace world,
         Action<PlacedObject> putPersistent, Action<PlacedObject> put, Action<PlacedNpc> putNpc,
-        VendorsConfig looksFrom, Func<string, FormKey> faceList)
+        VendorsConfig looksFrom, Func<string, FormKey> faceList, IReadOnlyList<FormKey> archers)
     {
         var p = config.EditorIdPrefix;
         var root = Path.IsPathRooted(config.SoundRoot) ? config.SoundRoot : Path.Combine(FairPaths.ConfigDirectory, config.SoundRoot);
@@ -63,19 +60,29 @@ internal static class FairAudio
         var stageCategory = Category("Stage", PausedDuringMenuFade);
         var ambienceCategory = Category("Ambience", AmbientCategory);
 
-        SoundOutputModel Output(string name, float min, float max)
+        SoundOutputModel Output(string name, float min, float max, int[] curve)
         {
             var source = master.SoundOutputModels.First(o => o.FormKey == MonoOutputModel);
             var o = source.Duplicate(mod.GetNextFormKey());
             o.EditorID = $"{p}{name}Output";
             o.Attenuation!.MinDistance = (ushort)min;
             o.Attenuation.MaxDistance = (ushort)max;
+            if (curve.Length > 0)
+            {
+                if (curve.Length != o.Attenuation.Curve.Length)
+                {
+                    throw new InvalidOperationException($"fairWorld.audio: an output curve has {o.Attenuation.Curve.Length} points, not {curve.Length}.");
+                }
+
+                o.Attenuation.Curve = new MemorySlice<byte>(curve.Select(v => (byte)v).ToArray());
+            }
+
             mod.SoundOutputModels.Add(o);
             return o;
         }
 
-        var stageOutput = Output("Stage", config.Stage.MinDistance, config.Stage.MaxDistance);
-        var ambienceOutput = Output("Ambience", config.Ambience.MinDistance, config.Ambience.MaxDistance);
+        var stageOutput = Output("Stage", config.Stage.MinDistance, config.Stage.MaxDistance, config.Stage.Curve);
+        var ambienceOutput = Output("Ambience", config.Ambience.MinDistance, config.Ambience.MaxDistance, Array.Empty<int>());
 
         (SoundDescriptor Sound, float Seconds) Descriptor(string name, string file, SoundCategory category, SoundOutputModel output, bool loop, float attenuation)
         {
@@ -172,62 +179,22 @@ internal static class FairAudio
             VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
         });
 
-        ScriptObjectProperty Obj(string name, FormKey key) => new() { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
-        ScriptFloatProperty Float(string name, float value) => new() { Name = name, Data = value };
-        var script = new ScriptEntry { Name = "SkyrimFairAudioScript" };
-        script.Properties.AddRange(new ScriptProperty[]
-        {
-            Obj("FairWorld", world.FormKey),
-            Obj("StageSpeaker", speaker.FormKey),
-            new ScriptObjectListProperty { Name = "Songs", Objects = songMarkers.Select(s => Obj("", s.FormKey)).ToExtendedList() },
-            new ScriptFloatListProperty { Name = "SongLengths", Data = songs.Select(s => s.Seconds).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SongCheers", Data = songCheers.ToExtendedList() },
-            new ScriptObjectListProperty { Name = "Cheers", Objects = cheerMarkers.Select(c => Obj("", c.FormKey)).ToExtendedList() },
-            new ScriptFloatListProperty { Name = "CheerLengths", Data = cheers.Select(c => c.Seconds).ToExtendedList() },
-            Float("FirstSongDelay", config.Stage.FirstSongDelay),
-            Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
-            Float("DuckDuringSong", config.Stage.DuckAmbience),
-            Obj("AmbienceCategory", ambienceCategory.FormKey),
-            Obj("AmbienceEnabled", ambienceEnabled.FormKey),
-            Obj("AmbienceVolume", ambienceVolume.FormKey),
-            Obj("MusicEnabled", musicEnabled.FormKey),
-            Obj("MusicVolume", musicVolume.FormKey),
-            Obj("CheerVolume", cheerVolume.FormKey),
-            Obj("TimeScale", FormKeyHelper.Parse(config.TimeScaleGlobal)),
-        });
-        var adapter = new QuestAdapter();
-        adapter.Scripts.Add(script);
-        var alias = new QuestFragmentAlias { Property = new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 0 } };
-        alias.Scripts.Add(new ScriptEntry { Name = "SkyrimFairAudioPlayerAlias" });
-        adapter.Aliases.Add(alias);
-        quest.VirtualMachineAdapter = adapter;
-        mod.Quests.Add(quest);
 
         // ---- the band ------------------------------------------------------------------------
-        // Bards playing on the stage, as vanilla's inn bards do: each stands at a vanilla
-        // instrument idle marker (lute, drum, flute; the marker's idle brings the
-        // instrument) with a copy of Candlehearth Hall's bard package, which is
-        // UseIdleMarker at one specific marker. The markers are persistent, since a
-        // package names them.
-        var bards = new List<string>();
-        var packageSource = master.Packages.First(x => x.FormKey == BardPackage);
+        // Bards playing on the stage, as vanilla's inn bards do: a package holds each one on
+        // their spot, and the stage script plays the instrument idle on them when a song
+        // starts (PlayIdle(IdleLuteStart), as the BardSongs scenes do) and IdleStop when it
+        // ends. They're persistent references, so the script's properties can name them.
+        var bandPlaced = new List<FormKey>();
+        var bandIdles = new List<FormKey>();
         foreach (var member in config.Stage.Band)
         {
+            // Two FormIDs the band's first build used (an idle marker and a package copy),
+            // kept unused so the records after it keep theirs in existing saves.
+            mod.GetNextFormKey();
+            mod.GetNextFormKey();
+
             var at = member.At;
-            var idle = new PlacedObject(mod)
-            {
-                EditorID = $"{p}Band{member.Name}Marker",
-                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(member.Marker)),
-                Placement = new Placement { Position = new P3Float(at[0], at[1], at[2]), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
-            };
-            putPersistent(idle);
-
-            var package = packageSource.Duplicate(mod.GetNextFormKey());
-            package.EditorID = $"{p}Band{member.Name}Package";
-            var target = (PackageDataTarget)package.Data[1];
-            ((PackageTargetSpecificReference)target.Target).Reference.SetTo(idle.FormKey);
-            mod.Packages.Add(package);
-
             var look = looksFrom.Looks.First(l => l.Name == member.Look);
             var npc = new Npc(mod)
             {
@@ -260,16 +227,55 @@ internal static class FairAudio
                 Height = 1f,
                 Weight = 50f,
             };
-            npc.Packages.Add(new FormLink<IPackageGetter>(package.FormKey));
+            npc.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(config.Stage.BandPackage)));
             mod.Npcs.Add(npc);
 
-            putNpc(new PlacedNpc(mod)
+            var placed = new PlacedNpc(mod)
             {
+                EditorID = $"{p}Band{member.Name}Ref",
                 Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
                 Placement = new Placement { Position = new P3Float(at[0], at[1], at[2] + 2f), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
-            });
-            bards.Add(member.Name);
+            };
+            putNpc(placed);
+            bandPlaced.Add(placed.FormKey);
+            bandIdles.Add(FormKeyHelper.Parse(member.Idle));
         }
+
+        // ---- the stage script ------------------------------------------------------------
+        ScriptObjectProperty Obj(string name, FormKey key) => new() { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
+        ScriptFloatProperty Float(string name, float value) => new() { Name = name, Data = value };
+        var script = new ScriptEntry { Name = "SkyrimFairAudioScript" };
+        script.Properties.AddRange(new ScriptProperty[]
+        {
+            Obj("FairWorld", world.FormKey),
+            Obj("StageSpeaker", speaker.FormKey),
+            new ScriptObjectListProperty { Name = "Songs", Objects = songMarkers.Select(s => Obj("", s.FormKey)).ToExtendedList() },
+            new ScriptFloatListProperty { Name = "SongLengths", Data = songs.Select(s => s.Seconds).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongCheers", Data = songCheers.ToExtendedList() },
+            new ScriptObjectListProperty { Name = "Cheers", Objects = cheerMarkers.Select(c => Obj("", c.FormKey)).ToExtendedList() },
+            new ScriptFloatListProperty { Name = "CheerLengths", Data = cheers.Select(c => c.Seconds).ToExtendedList() },
+            Float("FirstSongDelay", config.Stage.FirstSongDelay),
+            Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
+            Float("DuckDuringSong", config.Stage.DuckAmbience),
+            Obj("AmbienceCategory", ambienceCategory.FormKey),
+            Obj("AmbienceEnabled", ambienceEnabled.FormKey),
+            Obj("AmbienceVolume", ambienceVolume.FormKey),
+            Obj("MusicEnabled", musicEnabled.FormKey),
+            Obj("MusicVolume", musicVolume.FormKey),
+            Obj("CheerVolume", cheerVolume.FormKey),
+            Obj("TimeScale", FormKeyHelper.Parse(config.TimeScaleGlobal)),
+            new ScriptObjectListProperty { Name = "Band", Objects = bandPlaced.Select(b => Obj("", b)).ToExtendedList() },
+            new ScriptObjectListProperty { Name = "BandIdles", Objects = bandIdles.Select(i => Obj("", i)).ToExtendedList() },
+            Obj("BandStop", FormKeyHelper.Parse(config.Stage.BandStop)),
+            new ScriptObjectListProperty { Name = "Archers", Objects = archers.Select(a => Obj("", a)).ToExtendedList() },
+        });
+        var adapter = new QuestAdapter();
+        adapter.Scripts.Add(script);
+        var alias = new QuestFragmentAlias { Property = new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 0 } };
+        alias.Scripts.Add(new ScriptEntry { Name = "SkyrimFairAudioPlayerAlias" });
+        adapter.Aliases.Add(alias);
+        quest.VirtualMachineAdapter = adapter;
+        mod.Quests.Add(quest);
 
         // ---- the crowd ambience -----------------------------------------------------------
         var markers = new Dictionary<(string Loop, int Copy, float Extra), SoundMarker>();
@@ -323,7 +329,7 @@ internal static class FairAudio
             emitters,
             markers.Count,
             loopSeconds,
-            bards);
+            config.Stage.Band.Select(b => b.Name).ToList());
     }
 
     /// <summary>Length of a PCM WAV from its header: data bytes over bytes a second.</summary>

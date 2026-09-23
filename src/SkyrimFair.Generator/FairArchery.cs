@@ -14,6 +14,9 @@ namespace SkyrimFair.Generator;
 /// persistent PatrolIdleMarker it shoots from, and the targets are persistent references, which is what
 /// lets the linked reference resolve across cells. Their looks come, as the stall-keepers' do, from a Traits template on
 /// vanilla commoner leveled lists, with hunter clothes, a hunting bow and arrows.
+/// The archers themselves are persistent too, so the stage script can reach them: without
+/// navmesh the package does not pick up again after a load, and the script sets each one
+/// back on its stand (see SkyrimFairAudioScript.ResetArchers).
 /// </summary>
 internal static class FairArchery
 {
@@ -76,7 +79,7 @@ internal static class FairArchery
         var backstopBase = FormKeyHelper.Parse(config.Backstop);
         var keyword = FormKeyHelper.Parse(config.TargetKeyword);
         var standBase = FormKeyHelper.Parse(config.StandMarker);
-        var lanes = 0;
+        var placed = new List<FormKey>();
         for (var i = 0; i < config.Lanes.Count; i++)
         {
             var lane = config.Lanes[i];
@@ -145,14 +148,14 @@ internal static class FairArchery
                 Reference = new FormLink<IPlacedGetter>(stand.FormKey),
             });
             putNpc(archer);
-            lanes++;
+            placed.Add(archer.FormKey);
         }
 
-        return new ArcheryResult(archers.Count, lanes);
+        return new ArcheryResult(archers.Count, placed.Count, placed);
     }
 
     private static float Distance(float ax, float ay, float bx, float by)
         => MathF.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
 }
 
-internal sealed record ArcheryResult(int Records, int Lanes);
+internal sealed record ArcheryResult(int Records, int Lanes, IReadOnlyList<FormKey> Archers);

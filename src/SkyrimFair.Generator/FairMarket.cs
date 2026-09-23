@@ -339,11 +339,14 @@ internal static class FairMarket
                     continue;
                 }
 
-                var u = piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 6f;
-                var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 6f;
+                // Exact pieces (a sign, its posts and bar, which must meet) skip the nudge here
+                // too: the archery booth is a dressing group, and its sign drifted off its bar.
+                var wobble = piece.Exact ? 0f : 1f;
+                var u = piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 6f * wobble;
+                var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 6f * wobble;
                 var px = x + u * rx + v * fx;
                 var py = y + u * ry + v * fy;
-                var pieceYaw = (yaw + piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 4f) * Deg;
+                var pieceYaw = (yaw + piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 4f * wobble) * Deg;
                 var (a, t) = (piece.RotX * Deg, piece.RotY * Deg);
                 put(new PlacedObject(mod)
                 {
