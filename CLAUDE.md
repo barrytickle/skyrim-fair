@@ -110,6 +110,8 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Navmesh: planned, Barry said go (2026-09-23).** The plan is `docs/NAVMESH.md`: a generated `FairNavmesh.cs` stage (raster, obstacle cut-out, T-junction-free rectangles, cross-cell links, NAVI entries as Fertility Adventures and Holidays write them). Phase 1 is the ground navmesh plus a validator. Awaiting Barry's OK on the plan before building.
+
 **Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
 
 1. ✅ *(done this pass, untested)* **Bug: the archers stop their animation after a reload.** The Solitude training package
