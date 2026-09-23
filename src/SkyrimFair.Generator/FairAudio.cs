@@ -31,7 +31,8 @@ internal static class FairAudio
     private static readonly FormKey PausedDuringMenuFade = FormKey.Factory("09F254:Skyrim.esm");
     private static readonly FormKey AmbientCategory = FormKey.Factory("07F80B:Skyrim.esm");
 
-    // SOMMono06000_dry: a plain mono 3D output model, copied and given the fair's distances.
+    // SOMMono06000_dry: a plain mono 3D output model, copied and given the fair's distances,
+    // unless a config names another (the stage's is StereoRad, both speakers at full).
     private static readonly FormKey MonoOutputModel = FormKey.Factory("10C2ED:Skyrim.esm");
 
     public static AudioResult Build(
@@ -60,9 +61,10 @@ internal static class FairAudio
         var stageCategory = Category("Stage", PausedDuringMenuFade);
         var ambienceCategory = Category("Ambience", AmbientCategory);
 
-        SoundOutputModel Output(string name, float min, float max, int[] curve)
+        SoundOutputModel Output(string name, float min, float max, int[] curve, string model)
         {
-            var source = master.SoundOutputModels.First(o => o.FormKey == MonoOutputModel);
+            var sourceKey = model.Length > 0 ? FormKeyHelper.Parse(model) : MonoOutputModel;
+            var source = master.SoundOutputModels.First(o => o.FormKey == sourceKey);
             var o = source.Duplicate(mod.GetNextFormKey());
             o.EditorID = $"{p}{name}Output";
             o.Attenuation!.MinDistance = (ushort)min;
@@ -81,8 +83,8 @@ internal static class FairAudio
             return o;
         }
 
-        var stageOutput = Output("Stage", config.Stage.MinDistance, config.Stage.MaxDistance, config.Stage.Curve);
-        var ambienceOutput = Output("Ambience", config.Ambience.MinDistance, config.Ambience.MaxDistance, Array.Empty<int>());
+        var stageOutput = Output("Stage", config.Stage.MinDistance, config.Stage.MaxDistance, config.Stage.Curve, config.Stage.OutputModel);
+        var ambienceOutput = Output("Ambience", config.Ambience.MinDistance, config.Ambience.MaxDistance, Array.Empty<int>(), string.Empty);
 
         (SoundDescriptor Sound, float Seconds) Descriptor(string name, string file, SoundCategory category, SoundOutputModel output, bool loop, float attenuation)
         {

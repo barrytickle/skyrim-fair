@@ -2,7 +2,44 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: concert-loud stage, bards that play, archers after a load, the archery sign (2026-09-23)
+## Current pass: louder again, archers' trigger radius, the signs from the honey example (2026-09-23)
+
+Barry's test of `2d03ba5`: the bards play. He wants the stage and the cheer "another
+100%" and the murmur a little louder. The archers are still idle. The signs: the honey
+vendor's is right. The Dwemer and mage signs hang at the wrong angle. The herbalist and
+Elven Goods signs, and the archery sign, have no bar they visibly hang from.
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Stage wants more | the files were already near their clean limit (-11 LUFS) | three more steps. (1) The stage output is now a copy of vanilla's **`SOMStereoRad10000`**, which plays the mono song at 100% in both front speakers (channel 0: L 100, R 100), where the HRTF model panned it. It still fades with distance, as vanilla's distant river loop does (up to +3 dB). (2) The limiter target goes to -4: the songs reach **-10 LUFS** (+0.8 dB), crest 9 dB. (3) The cheer's attenuation goes from 2 to 0 (+2 dB). About +4 dB on the songs and +6 on the cheer. The cost: the stage is no longer directional; it sounds like a PA |
+| Murmur | 1 dB down | 0 dB, and the loop gets a plain +3 dB gain in the files (`loops[].gain`; it peaked at -5.5, now -2.5). The west field's quieter emitter stays 5 dB under the rest |
+| Archers idle | **found in the package**: the `UseWeapon` template's shooting branch carries `GetWithinDistance` on its trigger ref (self) at the **trigger radius, 1,250**. Outside that, the tree drops into `Wait` with "max time 0 = forever". Load a save, or arrive, further than 1,250 from them and they wait for good. The last pass's `MoveTo` and `EvaluatePackage` didn't change that | **`SkyrimFairArcherTrainingPackage`**, a copy of `GuardSolitudeRangedTrainingPackage` with trigger radius **20,000** (`archery.triggerRadius`), which covers the whole world. It's created last, so no other FormID moves. The load-time reset stays, and now traces the archer's current package |
+| Dwemer (pawn) and mage (alchemy) signs at the wrong angle | the working honey sign (`SignRTBeeandBarb01`) is the one Riften/Whiterun sign whose mesh is turned 180° at its root node. The others hang the other way round | every unturned Riften, Whiterun and generic sign is placed **turned 180° with its offset mirrored** (+49, the trader +64), so each has the honey sign's net transform exactly: pawn, alchemy, general goods (both), both blacksmiths, trader, and the centred hunter, mead and fishery signs |
+| Solitude signs (herbalist, Elven Goods, archery) with no bar to hang from | the stockade bar was at z 178, 10 above the hooks' tops (168): the board hung in the air under it | the bar comes down through the hooks and rings: z **162** (scale 0.8) on the four Solitude vignettes, **160** (1.05) on the archery booth |
+
+How the signs were checked: every sign mesh was measured with `nif_preview.py` (root
+rotation and extents), and each group was composed from the real meshes at its config
+transforms and rendered from both sides (a throwaway compositor in the session
+scratchpad). The honey sign is the reference Barry confirmed.
+
+**Verification:**
+- Generator run twice: identical SHA256 `25bf700aee9b730c...`. Audio build deterministic.
+- Deployed: the plugin, 9 sound files and 3 scripts, byte-identical.
+- Read back against `2d03ba5`'s plugin: 1 record added (the archers' package, `001555`,
+  radius 20,000, on both archer NPCs), none removed or renumbered.
+- The stage output model: `DefinedSpeakerOutput`, 3,000 / 12,000, curve 100, 75, 50, 25, 0.
+  Songs and cheer at 0 dB, murmur 0 (the west field 5).
+- Placed sign groups read back as designed.
+
+**Test:**
+- Stage and cheer loud enough now? (Walk around the stage too: it no longer pans.)
+- The murmur a touch louder?
+- Archers: shooting after a reload, and after loading a save made far from the range?
+- Signs: Dwemer and mage now hang like the honey sign? Herbalist, Elven Goods and archery
+  hang from their bars? Also check the other stalls with signs (general goods, blacksmith,
+  trader, hunter, mead, fish), which were turned the same way.
+
+## Previous pass: concert-loud stage, bards that play, archers after a load, the archery sign (2026-09-23)
 
 Barry's test of `c8c652a`: the stage music, cheer and running order all work, and the
 pen horses are right. To fix: the music far too quiet ("like 100x"); the bards stand

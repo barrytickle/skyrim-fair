@@ -10,8 +10,9 @@ assets/sound/, at the Data-relative paths the plugin's sound descriptors name:
 - songs and cheers are brought up to the stage's loudness (`stage.loudness`, gated
   dBFS) under a look-ahead peak limiter (`stage.ceiling`): Barry's masters sit near
   -19, far quieter than a live stage should be
-- ambience loops: a seamless loop (the end crossfaded into the start), and rotated
-  copies starting at different points, so emitters playing at once never line up
+- ambience loops: a seamless loop (the end crossfaded into the start), an optional plain
+  `gain` in dB, and rotated copies starting at different points, so emitters playing at
+  once never line up
 
 Deterministic: the same sources give byte-identical files.
 
@@ -187,6 +188,10 @@ def main() -> None:
     amb = audio["ambience"]
     for loop in amb["loops"]:
         base = seamless(read(loop["source"]), loop.get("crossfade", 3.0))
+        # An optional plain gain in dB (the murmur has headroom: it peaks near -5.5 dBFS).
+        g = 10 ** (loop.get("gain", 0) / 20)
+        if g != 1:
+            base = array.array("h", (clip(v * g) for v in base))
         for k, file in enumerate(loop["files"]):
             # Each copy starts a share further round the loop.
             r = int(len(base) * k / len(loop["files"]))

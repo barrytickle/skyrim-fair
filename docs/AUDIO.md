@@ -26,11 +26,11 @@ LIST tag ffmpeg adds. They are git-ignored, like the sources.
 
 **Loudness.** Barry's masters sit near -19 LUFS, far quieter than a stage should be, and
 a sound descriptor can only take level *off* (its static attenuation is stored unsigned).
-So the build raises the songs and the cheer itself: a gain to `stage.loudness` (-7, gated
+So the build raises the songs and the cheer itself: a gain to `stage.loudness` (-4, gated
 dBFS) under a look-ahead peak limiter at `stage.ceiling` (-1 dBFS). Measured with ffmpeg's
-EBU R128 meter afterwards: songs -19 to about **-11 LUFS** (8 dB up), peaks held, crest
-about 10 dB. Pushing the target further mostly squashes: -10 gave -12, -7 gives -11. The
-murmur isn't processed.
+EBU R128 meter afterwards: songs -19 to about **-10 LUFS** (9 dB up), peaks held, crest
+about 9 dB. Pushing the target further mostly squashes: -10 gave -12, -7 gave -11, -4
+gives -10. The murmur gets only a plain +3 dB (`loops[].gain`).
 
 ## Crowd ambience
 
@@ -50,7 +50,7 @@ from grouping the placed NPCs:
   copy. Copies heard together are 15 to 45 s apart, so the loop never lines up with itself.
 - Each is full volume within 500 and silent by 3,000, so moving round the fair crosses
   from one to the next. There's no single recording following the player.
-- The ambience plays 1 dB down (`staticAttenuation`) in its own category,
+- The ambience plays at 0 dB (`staticAttenuation`), +3 dB in the files, in its own category,
   `SkyrimFairAudioAmbienceCategory`. That category sits under vanilla's ambient category,
   so the player's Effects slider applies.
 - **Lifecycle:** the engine runs placed markers itself. They play while their cell is
@@ -64,7 +64,9 @@ runs `SkyrimFairAudioScript` (`src/Papyrus/`). The generator writes every proper
 `fairWorld.audio`, including each song's length, measured from the built files.
 
 - The songs and the cheer play from `SkyrimFairAudioStageSpeaker`, a persistent marker
-  above the stage (2048, 5450, 320). They're full volume within 3,000, the whole square
+  above the stage (2048, 5450, 320), through a copy of vanilla's `SOMStereoRad10000`
+  output: the mono file at full level in both front speakers, like a PA, rather than
+  HRTF-panned. They're full volume within 3,000, the whole square
   and more, and fall off along a straight line (`stage.curve` 100, 75, 50, 25, 0; the
   copied vanilla curve was 100, 50, 20, 5, 0) to nothing at 12,000, so the music carries
   over the whole fair like a concert.
@@ -149,8 +151,8 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 8. `set SkyrimFairAudioMusicEnabled to 0`: the set stops within 2 s. Set it back to 1
    and it restarts.
 
-To tune: `fairWorld.audio.ambience.staticAttenuation` (1) for the murmur's level;
-`stage.loudness` (-7) for the songs' level; `stage.minDistance`, `maxDistance` (3,000 and
+To tune: `fairWorld.audio.ambience.staticAttenuation` (0) and `loops[].gain` (3) for the
+murmur's level; `stage.loudness` (-4) for the songs' level; `stage.minDistance`, `maxDistance` (3,000 and
 12,000) and `curve` for how far the band carries; `stage.duckAmbience` (0.75).
 
 ## Rights

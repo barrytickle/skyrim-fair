@@ -431,6 +431,26 @@ internal static class FairWorld
             Put(placed);
         }
 
+        // ---- the archers' own training package ---------------------------------------------
+        // Vanilla's shoots only while the player is within its trigger radius (1,250) of the
+        // archer; otherwise it drops into a Wait that never ends, so an archer loaded with
+        // the player further off stands idle for good. The fair's copy covers the whole
+        // world. Made last so no other record's FormID moves.
+        if (archery is not null && config.Archery.TriggerRadius > 0)
+        {
+            var source = master?.Packages.FirstOrDefault(x => x.FormKey == FormKeyHelper.Parse(config.Archery.Package))
+                ?? throw new InvalidOperationException("fairWorld.archery.triggerRadius needs Skyrim.esm to copy the training package from.");
+            var package = source.Duplicate(mod.GetNextFormKey());
+            package.EditorID = $"{config.Archery.EditorIdPrefix}TrainingPackage";
+            ((PackageDataInt)package.Data[config.Archery.TriggerRadiusInput]).Data = (uint)config.Archery.TriggerRadius;
+            mod.Packages.Add(package);
+            foreach (var npc in archery.ArcherRecords)
+            {
+                npc.Packages.Clear();
+                npc.Packages.Add(new FormLink<IPackageGetter>(package.FormKey));
+            }
+        }
+
         mod.Worldspaces.Add(worldspace);
 
         return new FairWorldResult(

@@ -2127,6 +2127,13 @@ internal sealed record StageAudioConfig
     public int[] Curve { get; init; } = Array.Empty<int>();
 
     /// <summary>
+    /// The vanilla output model the stage's is copied from; empty for SOMMono06000_dry.
+    /// SOMStereoRad10000 plays the mono songs at full level in both front speakers (the
+    /// HRTF model pans them), still fading with distance, as vanilla's distant river does.
+    /// </summary>
+    public string OutputModel { get; init; } = string.Empty;
+
+    /// <summary>
     /// Decibels taken off the songs and the cheer. It can't go below 0 (the record stores an
     /// unsigned value), so loudness comes from the files: see <see cref="Loudness"/>.
     /// </summary>
@@ -2243,6 +2250,9 @@ internal sealed record AmbienceLoop
 
     public float Crossfade { get; init; } = 3f;
 
+    /// <summary>For tools/build_audio.py: a plain gain in dB applied to the loop.</summary>
+    public float Gain { get; init; }
+
     /// <summary>Copies of the loop, each rotated to start further in, for emitters heard together.</summary>
     public List<string> Files { get; init; } = new();
 }
@@ -2285,6 +2295,15 @@ internal sealed record ArcheryConfig
     public string Arrows { get; init; } = "0001397D:Skyrim.esm";
 
     public int ArrowCount { get; init; } = 100;
+
+    /// <summary>
+    /// The trigger radius of the fair's copy of the training package: the archers shoot
+    /// only while the player is this close. Vanilla's is 1,250; 0 uses vanilla's package.
+    /// </summary>
+    public int TriggerRadius { get; init; }
+
+    /// <summary>The package data input holding the trigger radius (UseWeapon's "Trigger Radius").</summary>
+    public sbyte TriggerRadiusInput { get; init; } = 30;
 
     /// <summary>GuardSolitudeRangedTrainingPackage: shoot at the TrainingTarget linked ref, all day.</summary>
     public string Package { get; init; } = "000B4C54:Skyrim.esm";

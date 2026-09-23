@@ -81,40 +81,32 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
 
-## Where we are (2026-09-23, bug-fix pass)
+## Where we are (2026-09-23, second bug-fix pass)
 
-The bug-fix pass is committed and deployed; plugin SHA256 `de58878c28d93ab1...`.
-**Barry has not yet tested it.** Details in `docs/AUDIT.md` ("Current pass").
+Committed and deployed; plugin SHA256 `25bf700aee9b730c...`. **Barry has not yet tested
+it.** Details in `docs/AUDIT.md` ("Current pass").
 
-**Confirmed working in game** (Barry's test of `c8c652a`):
-- the stage music plays, the cheer follows each song, and the next song starts on its own
-- the pen horses show the ride prompt but can't be ridden, which is how Barry wants it
+**Confirmed working in game:** the stage set (songs, cheer, next song), the pen horses,
+and **the bards playing** (from the stage script's `PlayIdle`).
 
 **Fixed this pass, awaiting Barry's test:**
-- **Stage loudness:** songs and cheer 8 dB louder in the files (`stage.loudness` -7, a
-  limiter in `build_audio.py`), full volume within 3,000 (was 1,500), silent at 12,000,
-  on a straight falloff curve. Negative `staticAttenuation` isn't possible (unsigned).
-  If still too quiet: a second speaker, or reparent the stage category.
-- **Bards:** they now play the vanilla way, `PlayIdle(IdleLuteStart...)` from the stage
-  script at each song's start and `IdleStop` at its end. A package only holds them on
-  their spot. The Candlehearth package never played anything.
-- **Crowd ambience:** 1 dB down (was 4).
-- **Archery sign:** the booth is a dressing group, and dressing groups ignored `exact`.
-  Now fixed; the south post moved to y 20 so the board hangs clear of the wreath.
-- **Archers after a reload** (morning list item 1): the stage script puts each archer
-  back on their stand and re-evaluates their package on every arrival and load.
-  Navmesh is the real fix.
-- If the bards or archers misbehave, get `Papyrus.0.log` (`bEnableLogging=1` under
-  `[Papyrus]` in `profiles\Still in Skyrim Plus\Skyrim.ini`); the script traces
-  "SkyrimFairAudio: bard N plays" and "archer N set on their stand".
+- **Louder stage and cheer** ("another 100%"): a stereo PA output model (`SOMStereoRad10000`
+  copy), limiter target -4 (-10 LUFS), cheer attenuation 0. About +4 dB songs, +6 cheer.
+  The files are at their clean limit now; beyond this, more speakers or reparenting the
+  category (it follows the Effects slider).
+- **Murmur:** 0 dB and +3 dB in the files.
+- **Archers idle after a reload:** the vanilla package only shoots within 1,250 of the
+  player, and otherwise waits forever. Now a fair copy with radius 20,000.
+- **Signs:** the honey vendor's is the reference Barry confirmed. The unturned signs
+  (Dwemer/pawn, mage/alchemy and all other Riften, Whiterun and generic ones) are turned
+  180 degrees with the offset mirrored to match it. The Solitude signs' bar (herbalist,
+  Elven Goods, archery) comes down through their hooks.
+- If the archers still idle: get `Papyrus.0.log`; the script traces each archer's
+  current package on arrival.
 
-**Still to confirm from earlier builds:** the cobbles along the avenue; the booth's arrow
-bundles, leaning target, pitchfork and broom tilting as authored; whether the music fades
-walking away and nothing plays after leaving or a save and load.
-
-**Open question for Barry:** the Solitude-sign vignettes (fletcher, clothes, curios) have
-the same snowberry wreath on the post by the board's end, and it may poke through there
-too. Not changed yet.
+**Still to confirm from earlier builds:** the cobbles along the avenue; the booth's
+props tilting as authored; the music fading walking away, and nothing playing after
+leaving or a save and load.
 
 **Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
 

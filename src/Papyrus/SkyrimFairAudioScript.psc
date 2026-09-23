@@ -248,7 +248,7 @@ Function ResetArchers()
 			EndIf
 			Archers[i].EvaluatePackage()
 			archerPending[i] = False
-			Debug.Trace("SkyrimFairAudio: archer " + i + " set on their stand")
+			Debug.Trace("SkyrimFairAudio: archer " + i + " set on their stand, package " + Archers[i].GetCurrentPackage())
 		EndIf
 		i += 1
 	EndWhile

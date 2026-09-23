@@ -151,11 +151,11 @@ internal static class FairArchery
             placed.Add(archer.FormKey);
         }
 
-        return new ArcheryResult(archers.Count, placed.Count, placed);
+        return new ArcheryResult(archers.Count, placed.Count, placed, archers);
     }
 
     private static float Distance(float ax, float ay, float bx, float by)
         => MathF.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
 }
 
-internal sealed record ArcheryResult(int Records, int Lanes, IReadOnlyList<FormKey> Archers);
+internal sealed record ArcheryResult(int Records, int Lanes, IReadOnlyList<FormKey> Archers, IReadOnlyList<Npc> ArcherRecords);
