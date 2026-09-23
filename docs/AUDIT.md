@@ -2,7 +2,19 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the static crowd figures switched off (2026-09-23)
+## Current pass: why Astra's folk dance never played (fix built, not deployed) (2026-09-23)
+
+- OAR's condition was `IsActorBase` on the folk dancers' records. They're templated, so in
+  game they run on runtime copies (`FF0021C1`, `FF0012B0` in SPID's log), and OAR never
+  matched.
+- Now each dancer has its own keyword (`SkyrimFairFolkDancerMale`/`Female`), built last:
+  against the deployed plugin, only those 2 records are added, plus the navmeshes. OAR's
+  condition is `HasKeyword`, in EVG Conditional Idles' format.
+- Plugin `e166ad798013ffe2...`, deterministic. **Not deployed:** `SkyrimFair.esp` was locked
+  (the game or MO2), and Barry is out of time. Deploy first thing tomorrow. Barry's other
+  requests (a dance-mod audit, crowd timing) are in `CLAUDE.md`'s plan.
+
+## Previous pass: the static crowd figures switched off (2026-09-23)
 
 Barry: reloading from an earlier save fixed the crashing. He wants the object NPCs gone:
 "there's glowing issues with them which i'm just struggling to resolve".

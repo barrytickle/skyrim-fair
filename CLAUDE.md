@@ -215,7 +215,36 @@ repo.
        OAR for the fair's bards, on a global the script sets from the intensity. Re-send
        the idle when the level changes, so OAR re-evaluates (`docs/BARDS.md`, "Animation
        side").
-7. **Afterwards, from the backlog, as Barry chooses:**
+7. **Dancing (Barry, last thing on 2026-09-23):**
+   - **Astra's folk dance never played; fix built, not yet deployed.**
+     - OAR's condition was `IsActorBase` on our records, but the folk dancers are
+       templated. In game they run on runtime copies: SPID's log shows their bases as
+       `FF0021C1` and `FF0012B0`. So OAR never matched, and they did Cicero's dance.
+     - Now each has its own keyword (`SkyrimFairFolkDancerMale`/`Female`, the last
+       records, so nothing renumbers). OAR's condition is `HasKeyword`, in the same
+       format as EVG Conditional Idles.
+     - Built (`e166ad798013ffe2...`), committed, but **not deployed**: `deploy.py` hit
+       "Permission denied" on `SkyrimFair.esp`, with the game or MO2 holding it. Deploy
+       first thing; nothing was copied, so the mod folder is consistent.
+     - Then check OAR's in-game menu lists "Skyrim Fair folk dance", and that the pair
+       turn together.
+     - **Same trap elsewhere:** anything conditioned on a fair NPC's base record fails
+       for templated NPCs. Use keywords.
+   - **Audit the dance mod for variety:** `external/Professional Dancer 124608 1.5.0
+     ....7z` (CC BY-NC 4.0, to use as a dependency, not bundle; `CREDITS.md`).
+     - How does it make an NPC dance: spell, package, keyword, script API, OAR or
+       behaviour?
+     - What dances does it have?
+     - Can the stage script start and stop them per dancer, with the songs?
+     - Or can its clips feed our existing replay-at-clip-end scheme through OAR, on a
+       keyword, as the folk dance does?
+   - **The crowd in the instrument timing:** some songs, or sections, have the crowd
+     cheering and clapping instead of dancing.
+     - Drive it from the same per-song schedule as the instruments (`cues.json`
+       `intensity`, or a per-song "crowd mode" in the config).
+     - The script switches the dancers' idles (dance / cheer / clap) at section changes,
+       timed from the song's start.
+8. **Afterwards, from the backlog, as Barry chooses:**
    - vendor inventories at festival prices (`docs/STALLS.md`)
    - the MCM (`docs/MCM.md`)
    - the 6 trades not yet placed

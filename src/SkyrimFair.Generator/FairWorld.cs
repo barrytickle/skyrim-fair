@@ -693,6 +693,8 @@ internal static class FairWorld
             return clear;
         }
 
+        var folkOar = new List<(Npc Npc, string Submod, string Folder)>();
+
         // ---- Astra's folk dance: a pair, each with its own clip through OAR ---------------------
         // Made before the guard, which then covers them like every other fair NPC.
         if (config.FolkDance.Enabled && audio is not null)
@@ -732,28 +734,8 @@ internal static class FairWorld
                 PutPersistentNpc(placed);
                 folkDancers.Add(placed.FormKey);
 
-                // OAR: this dancer's clip replaces the idle's animation for this NPC only.
-                var sub = Path.Combine(oar, dancer.Submod);
-                Directory.CreateDirectory(sub);
-                File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
-                {
-                    ["name"] = $"Folk dancer ({dancer.Submod})",
-                    ["description"] = $"{npc.EditorID}: Astra's folk dance in place of the Cicero dance.",
-                    ["priority"] = 1900000000,
-                    ["conditions"] = new object[]
-                    {
-                        new Dictionary<string, object>
-                        {
-                            ["condition"] = "IsActorBase",
-                            ["requiredVersion"] = "1.0.0.0",
-                            ["Actor base"] = new Dictionary<string, string>
-                            {
-                                ["pluginName"] = mod.ModKey.FileName,
-                                ["formID"] = npc.FormKey.ID.ToString("X"),
-                            },
-                        },
-                    },
-                }, json));
+                // OAR's condition is written at the end, with this dancer's own keyword.
+                folkOar.Add((npc, dancer.Submod, oar));
             }
 
             var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
@@ -978,6 +960,43 @@ internal static class FairWorld
             mod.Globals.Add(first);
             var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
             script.Properties.Add(new ScriptObjectProperty { Name = "FirstTrack", Object = new FormLink<ISkyrimMajorRecordGetter>(first.FormKey) });
+        }
+
+        // ---- the folk dancers' OAR conditions, on a keyword each ------------------------------
+        // Not IsActorBase: the folk dancers are templated, so in game they run on runtime
+        // copies (FF...) of their records, and a base-record condition never matched (SPID's
+        // log shows their bases as FF0021C1 and FF0012B0). The copies keep their record's
+        // keywords. Built last, so nothing renumbers.
+        foreach (var (npc, submod, folder) in folkOar)
+        {
+            var keyword = new Keyword(mod) { EditorID = $"{npc.EditorID}" };
+            mod.Keywords.Add(keyword);
+            npc.Keywords ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+            npc.Keywords.Add(new FormLink<IKeywordGetter>(keyword.FormKey));
+            var sub = Path.Combine(folder, submod);
+            Directory.CreateDirectory(sub);
+            File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+            {
+                ["name"] = $"Folk dancer ({submod})",
+                ["description"] = $"{npc.EditorID}: Astra's folk dance in place of the Cicero dance.",
+                ["priority"] = 1900000000,
+                ["conditions"] = new object[]
+                {
+                    new Dictionary<string, object>
+                    {
+                        ["condition"] = "HasKeyword",
+                        ["requiredVersion"] = "1.0.0.0",
+                        ["Keyword"] = new Dictionary<string, object>
+                        {
+                            ["form"] = new Dictionary<string, string>
+                            {
+                                ["pluginName"] = mod.ModKey.FileName,
+                                ["formID"] = keyword.FormKey.ID.ToString("X"),
+                            },
+                        },
+                    },
+                },
+            }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         }
 
         // The mod's own counter must stay below the crowd figures' range.
