@@ -2,7 +2,18 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the freeze needs SPID exclusions; the compatibility patches can't do it (2026-09-23)
+## Current pass: crowd NIFs, third rebuild, redeployed (2026-09-23)
+
+- The other agent rebuilt the crowd NIFs: heads are now written without vertex normals,
+  as vanilla's are, fixing the white heads and the camera-following flare
+  (`docs/CROWD.md`, "Third test").
+- All 38 are in the mod folder and match byte for byte; 24 had changed.
+- `figures.json`: no figure's bounds changed. Footprints regenerated, also unchanged.
+- The plugin is unchanged: `f8781aeca5637ad5...`, deterministic.
+- The SPID exclusion edits for Maximum Destruction and Stealth Detection Fixes still wait
+  on Barry's go-ahead (previous pass).
+
+## Previous pass: the freeze needs SPID exclusions; the compatibility patches can't do it (2026-09-23)
 
 Barry: "it will crash out again". There's no new crash log after the 18:55 one: that
 launch loaded a save and ran, so **the startup crash is fixed**. But `Papyrus.0.log`
