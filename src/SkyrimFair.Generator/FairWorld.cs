@@ -820,7 +820,7 @@ internal static class FairWorld
         var nextFigureId = config.CrowdFormIdBase;
         FormKey FigureKey() => new(mod.ModKey, nextFigureId++);
         var legacy = config.CrowdFigures.SelectMany(f => f.Places.Select(at => new CrowdPlacement { Figure = f.EditorId, At = at }));
-        foreach (var placement in legacy.Concat(config.CrowdPlacements))
+        foreach (var placement in config.CrowdFiguresEnabled ? legacy.Concat(config.CrowdPlacements) : Enumerable.Empty<CrowdPlacement>())
         {
             var figure = figureDefs.TryGetValue(placement.Figure, out var def)
                 ? def

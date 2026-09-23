@@ -163,6 +163,13 @@ internal sealed record FairWorldConfig
     /// </summary>
     public List<CrowdPlacement> CrowdPlacements { get; init; } = new();
 
+    /// <summary>
+    /// False leaves every crowd figure out (their FormIDs are their own range, so nothing
+    /// else moves) and the benches they'd sit on stay sittable. The definitions and
+    /// placements stay in the config for later.
+    /// </summary>
+    public bool CrowdFiguresEnabled { get; init; } = true;
+
     /// <summary>Seat markers of each furniture base (from their NIFs), for seated figures.</summary>
     public List<SeatMarkers> SeatMarkers { get; init; } = new();
 

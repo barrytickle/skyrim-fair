@@ -2,7 +2,22 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: crowd NIFs, fifth rebuild, redeployed (2026-09-23)
+## Current pass: the static crowd figures switched off (2026-09-23)
+
+Barry: reloading from an earlier save fixed the crashing. He wants the object NPCs gone:
+"there's glowing issues with them which i'm just struggling to resolve".
+
+- `fairWorld.crowdFiguresEnabled: false`: no figure is placed, and the benches they'd sit
+  on stay sittable. The definitions, placements, library and tools all stay, for later.
+- Against the deployed plugin: exactly the figures' 131 records are gone (36 STATs, 51
+  figures, 44 collision boxes), all in their own FormID range. **Nothing else changed or
+  renumbered.**
+- Navmesh: 9 meshes, 7,325 triangles, 0 errors; it opens the ground the figures stood
+  on.
+- Plugin `497f5fd2d8ad0198...`, deterministic. Deployed. The NIFs stay in the mod folder,
+  unused.
+
+## Previous pass: crowd NIFs, fifth rebuild, redeployed (2026-09-23)
 
 - The other agent rebuilt the crowd NIFs: hair is coloured through vertex colours
   instead of the hair-tint shader, which doesn't work on statics (`docs/CROWD.md`,

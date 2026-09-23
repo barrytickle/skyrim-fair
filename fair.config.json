@@ -139,6 +139,7 @@
     },
     "crowdSitesDump": "build/crowd_sites.json",
     "seatMarkers": [{"furniture": "000A4AD6:Skyrim.esm", "staticTwin": "00041EC7:Skyrim.esm", "markers": [[30, 0, 180], [-30, 0, 180]]}, {"furniture": "0002E6CF:Skyrim.esm", "staticTwin": "00038642:Skyrim.esm", "markers": [[0, 0, 180], [-46, 0, 180], [46, 0, 180]]}, {"furniture": "00074EC6:Skyrim.esm", "staticTwin": "0002BCD5:Skyrim.esm", "markers": [[0, 4.8, 0]]}],
+    "crowdFiguresEnabled": false,
     "crowdPlacements": [
       {"figure": "SkyrimFairCrowdClapping01", "at": [580, 1640, 270]},
       {"figure": "SkyrimFairCrowdLookFar01", "at": [546, 1782, 242]},
