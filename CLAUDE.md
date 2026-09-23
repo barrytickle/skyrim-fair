@@ -146,7 +146,37 @@ repo.
    - Do the singers' lips move with Fiddle?
    - Do the children look right?
    - Do the seated NPCs sit?
-5. **Afterwards, from the backlog, as Barry chooses:**
+5. **Immersion (Barry, added at the end of the day):**
+   - **A taller palisade, to hide the hills beyond.**
+     - It's `fairWorld.palisade.scale` 2.5 now: 350 units tall.
+     - **Don't just raise `scale`:** pieces are spaced by width × scale, so their number
+       would change and every later FormID would move.
+     - Add a visual scale (for example 3.5–4) and keep the spacing on 2.5. The pieces
+       overlap more, their count stays the same, and nothing renumbers.
+     - Check the corners, the gate tuck, and the navmesh wall margin (the thicker
+       collision).
+     - Then check what still shows above it: the RNAM mountains should, the near hills
+       shouldn't. Use Barry's screenshots.
+   - **A bigger gate:** `fairWorld.gatePiece.scale` 2.5. The same caution: keep the gap and
+     tuck on the old width, and check how it meets the palisade.
+   - **Packing-up gear by the archery range:** crates, chests, sacks, bundled arrows and
+     bedrolls beside `range_storage` (-900, 1400).
+   - **Travellers' kit:** empty carts and wagons with no horses, parked by the camps, the
+     gate forecourt and the stables.
+     - Find vanilla carriage and wagon statics (the Helgen-style cart, farm wagons) with
+       Mutagen.
+     - Build on the existing `cart` and `camp` modules.
+     - Place them as new dressing entries **built last** (the late section), or with
+       `reserve`, so no FormID moves.
+   - **An audit: how to add more life.**
+     - Shrubs and flowers inside the walls and along the paths (vanilla shrub statics,
+       non-harvestable flora).
+     - Grass on the ground textures, and more props: laundry lines, lanterns, hay,
+       bunting, tools, food.
+     - Small animals: chickens, dogs, goats. Mind the AI cost.
+     - Smoke from the cook fires, and the fair's sounds.
+     - Report options and cost before building.
+6. **Afterwards, from the backlog, as Barry chooses:**
    - vendor inventories at festival prices (`docs/STALLS.md`)
    - the MCM (`docs/MCM.md`)
    - the 6 trades not yet placed
