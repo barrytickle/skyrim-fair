@@ -45,12 +45,21 @@ the music stops, and the performers freeze.
       `Spell = 0x817~StealthKillDetectionFix.esp|-SkyrimFairNPC|NONE|NONE|NONE|NONE|NONE`
     - `MaximumDestruction_DISTR.ini`, the "MD_Gore Human Magic" line:
       `Spell = 0x8E6289~MaximumDestruction.esp|ActorTypeNPC,Charmed Vigilant,Spellsword,Arch-Curate Vyrthur,Estormo,-SkyrimFairNPC|NONE|NONE|NONE|NONE|100`
-- **For a release, choose one:**
-  - Ship optional **replacement `_DISTR.ini` files** for those two mods, with the
-    exclusion added, installed to overwrite theirs. This needs their authors'
-    permission, and a rebuild whenever they change their inis.
-  - Document the one-line edit for each mod.
-  - Ask both authors to add `-SkyrimFairNPC` upstream: it's harmless to them.
+- **The patch (built):**
+  - The generator writes copies of those two `_DISTR.ini` files, each regenerated from
+    the mod's current file with the exclusion added (`spidPatches`, `dist/spid/`).
+  - Installed above the mods, they override the mods' own files, which are never
+    edited.
+  - After a mod update, rebuild. If the line has changed shape, the build fails instead
+    of shipping a stale copy.
+- **For a release:**
+  - Ship each copy as an optional file for users of that mod ("Skyrim Fair – Maximum
+    Destruction SPID patch", "… Stealth Detection Fixes SPID patch"), installed with a
+    higher priority than the mod.
+  - The copies carry the mods' other lines too, so ask the authors' permission.
+  - Rebuild the patches whenever either mod changes its ini. Or ask both authors to add
+    `-SkyrimFairNPC` upstream, which is harmless to them and makes the patches
+    unnecessary.
 - **Other mods like these:** any mod whose SPID line gives *every* NPC a cloak or a
   per-effect script. Add `-SkyrimFairNPC` the same way, and list the mod here.
 
@@ -76,7 +85,8 @@ Files and packaging:
       its `config.json` files, the singers' FaceGen heads), `textures\` (their FaceGen
       tints), `Sound\` (including `Voice\SkyrimFair.esp\`, the singers' lip files),
       `Scripts\`. `tools/deploy.py` copies exactly this set.
-- [ ] The per-NPC spell mods' SPID exclusions (above), shipped or documented.
+- [ ] The SPID exclusion patches (`dist/spid/`), shipped as optional files, rebuilt
+      against the mods' current versions.
 - [ ] Remove the retired `SkyrimFairNpcGuard.pex` from the package; nothing uses it now.
 
 Performance (`CLAUDE.md`):

@@ -318,13 +318,9 @@ internal static class FairPluginGenerator
             .WithNoDataFolder()
             .Write();
 
-        var fairWorldKey = mod.Worldspaces.FirstOrDefault(w => w.EditorID == config.FairWorld.EditorId)?.FormKey;
-        if (fairWorldKey is { } fw)
+        foreach (var (file, lines) in FairSpidPatches.Build(config, outputDirectory))
         {
-            foreach (var (plugin, spells, effects) in FairPatches.Build(config, outputDirectory, fw, FairWorld.AtFairGlobal))
-            {
-                Console.WriteLine($"  compatibility patch {plugin}: {spells} spell(s), {effects} effect(s) off inside the fair");
-            }
+            Console.WriteLine($"  SPID patch {file}: {lines} line(s) exclude -{config.FairWorld.NpcKeyword}");
         }
 
         return new FairBuildResult(

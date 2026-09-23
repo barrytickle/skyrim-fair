@@ -2,7 +2,40 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: crowd NIFs, third rebuild, redeployed (2026-09-23)
+## Current pass: the SPID exclusion as a generated patch (2026-09-23)
+
+Barry: "is it possible to make it a patch instead? Just incase the mods need updating in
+future".
+
+- **`FairSpidPatches.cs`, `spidPatches`:** on every build the generator reads each mod's
+  *current* `_DISTR.ini`, adds `-SkyrimFairNPC` to the named spells' lines, and writes a
+  copy under the same filename to `dist/spid/`.
+  - `NONE` becomes the exclusion; an existing filter list gets `,-SkyrimFairNPC`.
+  - It keeps the byte-order mark and the line endings.
+  - Both copies are byte for byte the mod's file apart from the exclusion.
+  - If a named line is missing, the build fails, so a mod update can't leave a stale
+    copy.
+- **Deployed to the root of the Skyrim Fair mod folder.** In Barry's `modlist.txt`, Skyrim
+  Fair is line 2, above Maximum Destruction (42) and Stealth Detection Fixes (594), so
+  its copies win the conflict. **The mods' own files are never edited.**
+- **After a mod update:** rebuild and deploy; the patch is regenerated from the new file.
+- **Lines patched:**
+  - `StealthKillDetectionFix_Attack_DISTR.ini`, `0x817` (`madDetectionCloak`)
+  - `MaximumDestruction_DISTR.ini`, `0x8E6289` (`MD_GoreHumanoidMagic`)
+- **The no-op ESP condition patches are gone** (`FairPatches.cs`, `compatPatches`).
+- Plugin unchanged: `f8781aeca5637ad5...`. Patches deterministic.
+
+### Test
+
+1. Load at the fair. Does the game stay up past two minutes, with no "Suspended stack
+   count" in `Papyrus.0.log`?
+2. `SKSE/po3_SpellPerkItemDistributor.log`:
+   - "Fair Visitor", "Fair Bard", "Singer" and the other fair NPCs should list neither
+     `madDetectionCloak` nor `MD_GoreHumanoidMagic`.
+   - NPCs elsewhere should still get both.
+3. MO2 shows Skyrim Fair overriding those two ini files. That's intended.
+
+## Previous pass: crowd NIFs, third rebuild, redeployed (2026-09-23)
 
 - The other agent rebuilt the crowd NIFs: heads are now written without vertex normals,
   as vanilla's are, fixing the white heads and the camera-following flare
