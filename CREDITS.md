@@ -225,6 +225,13 @@ Like `Props/`, the built NIFs are kept out of git.
 **PyNifly** (by Bad Dog, GPL-3.0: the licence is vendored with the folk-dance tools as `character-actors/folk-dance/vendor/LICENSE-PyNifly`) is used as a **build tool only**, to write the NIFs
 from the command line. None of its code is bundled with the mod.
 
+## Stage singers' faces (vanilla)
+
+The three singers copy vanilla face-template NPCs' faces (`039CF6`, `039CFF`, `039D17`).
+Their FaceGen head meshes and tint textures are vanilla files, copied under the singers'
+FormIDs. The singers' voice files are built from Barry's song stems (see the music's
+provenance above).
+
 ## Compatibility patches (Maximum Destruction, Stealth Detection Fixes)
 
 `SkyrimFair - Maximum Destruction Patch.esp` and `SkyrimFair - Stealth Detection Fixes Patch.esp`
