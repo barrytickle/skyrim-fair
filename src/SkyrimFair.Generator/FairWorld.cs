@@ -21,6 +21,9 @@ namespace SkyrimFair.Generator;
 /// </summary>
 internal static class FairWorld
 {
+    /// <summary>The SkyrimFairAtFair global built last run, for the compatibility patches.</summary>
+    public static FormKey? AtFairGlobal { get; private set; }
+
     private const int CellSize = 4096;
 
     /// <summary>LAND vertices per side. Adjacent cells share their edge row.</summary>
@@ -924,6 +927,18 @@ internal static class FairWorld
             var path = Path.IsPathRooted(config.CrowdSitesDump) ? config.CrowdSitesDump : Path.Combine(FairPaths.ConfigDirectory, config.CrowdSitesDump);
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(new { seats = seatsOut, rails, actors }));
+        }
+
+        // ---- SkyrimFairAtFair: 1 while the player is at the fair ----------------------------------
+        // The stage script keeps it; the compatibility patches switch other mods' per-NPC
+        // spells off while it's 1. It's saved, so a save loaded at the fair starts with it on.
+        if (audio is not null && config.AtFairGlobal.Length > 0)
+        {
+            var atFair = new GlobalFloat(mod) { EditorID = config.AtFairGlobal, Data = 0f };
+            mod.Globals.Add(atFair);
+            AtFairGlobal = atFair.FormKey;
+            var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            script.Properties.Add(new ScriptObjectProperty { Name = "AtFair", Object = new FormLink<ISkyrimMajorRecordGetter>(atFair.FormKey) });
         }
 
         // ---- the navmesh, last of all ------------------------------------------------------------

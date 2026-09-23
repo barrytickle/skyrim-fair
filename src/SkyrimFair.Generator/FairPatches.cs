@@ -19,7 +19,7 @@ namespace SkyrimFair.Generator;
 /// </summary>
 internal static class FairPatches
 {
-    public static List<(string Plugin, int Spells, int Effects)> Build(FairConfig config, string outputDirectory, FormKey fairWorld)
+    public static List<(string Plugin, int Spells, int Effects)> Build(FairConfig config, string outputDirectory, FormKey fairWorld, FormKey? atFair)
     {
         var built = new List<(string, int, int)>();
         foreach (var patch in config.CompatPatches)
@@ -45,9 +45,19 @@ internal static class FairPatches
                 var copy = spell.DeepCopy();
                 foreach (var effect in copy.Effects)
                 {
+                    // Both first, ANDed: the effect runs only while neither says "at the fair".
+                    // The global is the dependable one (GetInWorldspace didn't hold in game,
+                    // possibly because the fair's worldspace has Tamriel as its parent).
                     var outside = new GetInWorldspaceConditionData { RunOnType = Condition.RunOnType.Subject };
                     outside.WorldspaceOrList.Link.SetTo(fairWorld);
                     effect.Conditions.Insert(0, new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = outside });
+                    if (atFair is { } global)
+                    {
+                        var away = new GetGlobalValueConditionData();
+                        away.Global.Link.SetTo(global);
+                        effect.Conditions.Insert(0, new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = away });
+                    }
+
                     effects++;
                 }
 

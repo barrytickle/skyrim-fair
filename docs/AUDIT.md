@@ -2,7 +2,46 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: compatibility patches for Maximum Destruction and Stealth Detection Fixes (2026-09-23)
+## Current pass: the patches get a dependable condition; dances loop (2026-09-23)
+
+Barry: "we get the bards back now", but "Can we have the people dancing just loop? ... it
+looks a bit janky", and "I still get the freeze".
+
+- **The freeze, still: the patches loaded but the cloak kept pulsing.**
+  - The dump: `MD_DeathEffectsHumanoidMagicScript.OnMagicEffectApply` at 545,625,
+    down from 2 million.
+  - The effect is still `FE0B3811`, Stealth Detection Fixes' dummy, cast by the fair's
+    NPCs and by the player, all inside SkyrimFairWorld.
+  - Both patches are enabled and load last. Only spell `0x817` carries the cloak, and
+    it's the patched one. So `GetInWorldspace SkyrimFairWorld == 0` didn't hold in game.
+    A likely reason: the fair's worldspace has Tamriel as its parent (`UseMapData`).
+- **Fix: a global, the condition vanilla and Stealth Detection Fixes use for exactly
+  this.**
+  - `SkyrimFairAtFair` is built last before the navmesh. The stage script sets it to 1
+    in the fair and 0 outside, on every update.
+  - It's saved, so a load at the fair starts with it on.
+  - Both patches now put `GetGlobalValue SkyrimFairAtFair == 0` first on every effect,
+    then the worldspace test, then the mod's own conditions, all ANDed.
+- **Dances loop.**
+  - Each dancer starts one dance when a song starts and keeps it looping until the cheer.
+    They used to get a new dance every 2 updates, which restarted it mid-loop.
+  - Each song gives each dancer the next dance, so the floor still varies.
+  - The folk pair start together once a song, and aren't restarted every 9.6 s.
+  - If a vanilla dance state doesn't loop, its dancers will stop after one pass: that
+    would show in the test.
+- Checked: the patches carry both conditions first, with the original conditions and
+  flags kept. One record added (the global). Plugins deterministic: `SkyrimFair.esp`
+  `9a3606b0c7a81caa...`, patches `744ef98b...` (MD) and `7a7b28fb...` (Stealth).
+  Deployed.
+
+### Test
+
+1. Load at the fair and wait a few seconds: the first update sets the global. Does the
+   game stay up past two minutes? No "Suspended stack count" in `Papyrus.0.log`?
+2. Dancers: do they dance smoothly through the whole song, or stop after one pass?
+3. The folk pair: do they keep turning through the song?
+
+## Previous pass: compatibility patches for Maximum Destruction and Stealth Detection Fixes (2026-09-23)
 
 Barry: "is there a way we can make it compatible with that mod? Or do we need to disable
 it?" Then: "let's do the proper fix".

@@ -30,8 +30,8 @@ starts, and the bards and dancers stand still.
 
 | Patch (built by the generator, `compatPatches`) | For | What it does |
 | --- | --- | --- |
-| `SkyrimFair - Maximum Destruction Patch.esp` | Maximum Destruction | Switches off `MD_GoreHumanoidMagic` (`8E6289`, a script on every human NPC that runs on every magic effect) inside the fair's worldspace only |
-| `SkyrimFair - Stealth Detection Fixes Patch.esp` | Stealth Detection Fixes (Nexus SE 145336) | Switches off `madDetectionCloak` (`0x817`, a detection cloak SPID puts on every NPC) inside the fair's worldspace only |
+| `SkyrimFair - Maximum Destruction Patch.esp` | Maximum Destruction | While `SkyrimFairAtFair` is 1 (the player is at the fair), switches off `MD_GoreHumanoidMagic` (`8E6289`, a script on every human NPC that runs on every magic effect) inside the fair's worldspace only |
+| `SkyrimFair - Stealth Detection Fixes Patch.esp` | Stealth Detection Fixes (Nexus SE 145336) | While `SkyrimFairAtFair` is 1, switches off `madDetectionCloak` (`0x817`, a detection cloak SPID puts on every NPC) inside the fair's worldspace only |
 
 - **Why both matter:** at the fair's crowd density, the cloak on every NPC hits every
   other NPC, and Maximum Destruction's script reacts to each hit. That's about 190² events

@@ -129,6 +129,9 @@ internal sealed record FairWorldConfig
     /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
     public NavmeshConfig Navmesh { get; init; } = new();
 
+    /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
+    public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
+
     /// <summary>
     /// Static crowd figures (docs/CROWD.md): posed people baked into STATs. These are the
     /// definitions; <see cref="CrowdPlacements"/> places them. A figure's STAT is made at its
