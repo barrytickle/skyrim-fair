@@ -112,6 +112,15 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Compatibility patches: built and deployed, awaiting Barry's test** (plugin `6da22e995f0ee016...`).
+- The Papyrus guard could never run before the flood (Barry's log: 2 million queued, no
+  guard line). It's replaced by two light patches that switch the clashing spells off
+  inside the fair only: Maximum Destruction `8E6289` and Stealth Detection Fixes `0x817`.
+- Barry must enable both patch plugins in MO2, at the bottom of the plugin list.
+- Next, per Barry: many more statics in the archery range, market and tables, only 5–10
+  real wanderers besides vendors, bards and archers, and blending the statics in (placed
+  beyond real NPCs, calm poses near, size variation).
+
 **Crowd library placed, and the guard fixed: built and deployed, awaiting Barry's test** (plugin `145abe7b16945a82...`).
 - Barry's folk-dance test: the game stays up, but no song, bard or dance. The guard hadn't
   removed a spell, because SPID spells sit on the NPC record. The flood still ran and

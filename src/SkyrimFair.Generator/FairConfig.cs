@@ -4,6 +4,9 @@ internal sealed record FairConfig
 {
     public string PluginName { get; init; } = "SkyrimFair.esp";
 
+    /// <summary>Compatibility patches written beside the plugin (see <see cref="FairPatches"/>).</summary>
+    public List<CompatPatch> CompatPatches { get; init; } = new();
+
     public string OutputDirectory { get; init; } = "dist";
 
     public FairIdentity Identity { get; init; } = new();
@@ -381,6 +384,18 @@ internal sealed record CrowdFigure : ProjectStaticConfig
 /// other mods' spells off them as they load. Some mods give every NPC a cloak or a
 /// per-effect script; at the fair's density that floods Papyrus (docs/CODEX_HANDOVER.md).
 /// </summary>
+/// <summary>A light patch plugin that switches another mod's spells off inside the fair's worldspace.</summary>
+internal sealed record CompatPatch
+{
+    public string Plugin { get; init; } = string.Empty;
+
+    /// <summary>The other mod's plugin, read for its spells (skipped when it isn't there).</summary>
+    public string Source { get; init; } = string.Empty;
+
+    /// <summary>Its spells whose effects are switched off at the fair.</summary>
+    public List<string> Spells { get; init; } = new();
+}
+
 internal sealed record NpcGuardConfig
 {
     public bool Enabled { get; init; }

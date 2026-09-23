@@ -776,6 +776,11 @@ internal static class FairWorld
                     npc.Configuration.Flags |= NpcConfiguration.Flag.Invulnerable;
                 }
 
+                if (config.NpcGuard.Script.Length == 0)
+                {
+                    continue;
+                }
+
                 npc.VirtualMachineAdapter ??= new VirtualMachineAdapter();
                 npc.VirtualMachineAdapter.Scripts.Add(new ScriptEntry
                 {

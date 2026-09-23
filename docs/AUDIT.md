@@ -2,7 +2,51 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: rebuilt crowd meshes redeployed; the guard can't win against the flood (2026-09-23)
+## Current pass: compatibility patches for Maximum Destruction and Stealth Detection Fixes (2026-09-23)
+
+Barry: "is there a way we can make it compatible with that mod? Or do we need to disable
+it?" Then: "let's do the proper fix".
+
+- **Two light patch plugins**, written by the generator beside the plugin
+  (`compatPatches`, `FairPatches.cs`), and deployed with it:
+  - `SkyrimFair - Maximum Destruction Patch.esp` overrides `MD_GoreHumanoidMagic`
+    (`8E6289`): the ability SPID gives every human, whose `OnMagicEffectApply` script
+    was the flood.
+  - `SkyrimFair - Stealth Detection Fixes Patch.esp` overrides `madDetectionCloak`
+    (`0x817`, 3 effects): the detection cloak on every NPC that fed it.
+  - Every effect gets **`GetInWorldspace SkyrimFairWorld == 0` first** in its
+    conditions. First, because OR binds tighter than AND, and appending after an OR'd
+    condition could change the original logic.
+  - The engine keeps these effects inactive inside the fair and nowhere else. No script
+    has to run, so nothing has to win a race with the Papyrus queue.
+  - Both mods work as before everywhere else in Skyrim.
+- **The Papyrus guard is retired.** It could never run before the flood.
+  - No NPC carries `SkyrimFairNpcGuard` any more (`npcGuard.script` is empty), and the
+    spell list is empty.
+  - Invulnerability stays.
+  - The guard's FormList record stays, so no later FormID moves.
+- **Checked** by reading the patches back beside the originals:
+  - light-flagged, one override each, no new records
+  - masters: Skyrim.esm, the mod, SkyrimFair.esp
+  - form version 44, as the originals
+  - every original condition, magnitude, area, duration and spell field unchanged
+  - the new condition points at SkyrimFairWorld
+- Plugins deterministic: `SkyrimFair.esp` `6da22e995f0ee016...`, patches `c99b3224...`
+  (MD) and `43af7fab...` (Stealth).
+- `deploy.py` copies `dist/SkyrimFair - * Patch.esp` too. A patch whose source mod isn't
+  found is skipped, not built.
+
+### Test
+
+1. **Enable the two new plugins in MO2's plugin list**, at the bottom, after
+   `MaximumDestruction.esp`.
+2. At the fair:
+   - the game stays up
+   - the first song starts about 4 s after arriving, and the bards play
+   - the dancers dance, and the folk pair turns
+   - `Papyrus.0.log` has no "Suspended stack count" dump, and is small
+
+## Previous pass: rebuilt crowd meshes redeployed; the guard can't win against the flood (2026-09-23)
 
 - The other agent rebuilt the crowd NIFs, fixing the white hands, blue faces and streaky
   hair (`docs/CROWD.md`). All 38 are redeployed and match byte for byte.

@@ -225,12 +225,15 @@ Like `Props/`, the built NIFs are kept out of git.
 **PyNifly** (by Bad Dog, GPL-3.0: the licence is vendored with the folk-dance tools as `character-actors/folk-dance/vendor/LICENSE-PyNifly`) is used as a **build tool only**, to write the NIFs
 from the command line. None of its code is bundled with the mod.
 
-## Papyrus Extender (optional, used if installed)
+## Compatibility patches (Maximum Destruction, Stealth Detection Fixes)
 
-The NPC guard calls powerofthree's **Papyrus Extender** (`RemoveBaseSpell`) to take other
-mods' SPID spells off the fair's NPCs. None of its files are bundled. The fair compiles
-against a one-line declaration of that function, and without Papyrus Extender the call
-does nothing.
+`SkyrimFair - Maximum Destruction Patch.esp` and `SkyrimFair - Stealth Detection Fixes Patch.esp`
+each override one spell from their mod, adding a single condition, so it's inactive
+inside the fair's worldspace. They master those mods and copy no files from them.
+- Maximum Destruction: Nexus Mods, Skyrim SE
+- Stealth Detection Fixes: Nexus Mods, Skyrim SE, mod 145336
+
+Credit both mods' authors on release, and check they allow patches (most do).
 
 ## Paired folk dance (Astra)
 

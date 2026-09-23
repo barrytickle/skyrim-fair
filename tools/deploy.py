@@ -42,6 +42,8 @@ def main() -> None:
         sys.exit(f"no mod folder {dest}")
 
     files = [(ROOT / "dist" / "SkyrimFair.esp", dest / "SkyrimFair.esp")]
+    # The compatibility patches the generator writes beside it (fairWorld compatPatches).
+    files += [(f, dest / f.name) for f in sorted((ROOT / "dist").glob("SkyrimFair - * Patch.esp"))]
     for src, dst, skip in TREES:
         base = ROOT / src
         if not base.is_dir():
