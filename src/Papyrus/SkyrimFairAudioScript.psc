@@ -54,6 +54,10 @@ Idle Property BandStop Auto
 
 Actor[] Property Archers Auto
 {The archery range's archers, each linked (unkeyed) to the stand it shoots from.}
+GlobalVariable Property ArcherHold Auto
+{1 switches the archers to their hold package; back to 0, their training package starts
+again from the top (EvaluatePackage alone keeps a package that is already running).}
+Float Property ArcherHoldSeconds = 1.5 Auto
 
 Float Property ActivePoll = 2.0 Auto
 {Most seconds between checks at the fair (volumes, leaving).}
@@ -73,6 +77,9 @@ Float ambienceLevel = -1.0
 Bool[] bandPlaying
 Bool bandOn = False
 Bool[] archerPending
+Bool[] archerHeld
+Bool holding = False
+Float holdEnds = 0.0
 
 Event OnInit()
 	Debug.Trace("SkyrimFairAudio: started, " + Songs.Length + " songs")
@@ -93,6 +100,7 @@ EndFunction
 
 Event OnUpdate()
 	If Game.GetPlayer().GetWorldSpace() != FairWorld
+		ReleaseArchers()
 		If phase != 0
 			StopAll()
 			phase = 0
@@ -237,8 +245,16 @@ Function QueueArchers()
 EndFunction
 
 ; Each waiting archer whose 3D is loaded goes back onto their stand, facing the target,
-; and re-evaluates the training package, which then starts shooting again.
+; and is switched to the hold package; ArcherHoldSeconds later they're released, and the
+; training package starts afresh and shoots.
 Function ResetArchers()
+	If holding && Utility.GetCurrentGameTime() >= holdEnds
+		ReleaseArchers()
+	EndIf
+	If archerHeld.Length < archerPending.Length
+		archerHeld = new Bool[32]
+	EndIf
+	Bool newly = False
 	Int i = 0
 	While i < Archers.Length && i < archerPending.Length
 		If archerPending[i] && Archers[i] && Archers[i].Is3DLoaded()
@@ -246,12 +262,42 @@ Function ResetArchers()
 			If stand
 				Archers[i].MoveTo(stand)
 			EndIf
-			Archers[i].EvaluatePackage()
 			archerPending[i] = False
-			Debug.Trace("SkyrimFairAudio: archer " + i + " set on their stand, package " + Archers[i].GetCurrentPackage())
+			archerHeld[i] = True
+			newly = True
+			Debug.Trace("SkyrimFairAudio: archer " + i + " on their stand, was running " + Archers[i].GetCurrentPackage())
 		EndIf
 		i += 1
 	EndWhile
+	If newly && ArcherHold
+		ArcherHold.SetValue(1.0)
+		i = 0
+		While i < Archers.Length && i < archerHeld.Length
+			If archerHeld[i]
+				Archers[i].EvaluatePackage()
+			EndIf
+			i += 1
+		EndWhile
+		holding = True
+		holdEnds = Utility.GetCurrentGameTime() + ArcherHoldSeconds * TimeScale.GetValue() / 86400.0
+	EndIf
+EndFunction
+
+Function ReleaseArchers()
+	If !holding
+		Return
+	EndIf
+	ArcherHold.SetValue(0.0)
+	Int i = 0
+	While i < Archers.Length && i < archerHeld.Length
+		If archerHeld[i]
+			Archers[i].EvaluatePackage()
+			archerHeld[i] = False
+			Debug.Trace("SkyrimFairAudio: archer " + i + " released, now running " + Archers[i].GetCurrentPackage())
+		EndIf
+		i += 1
+	EndWhile
+	holding = False
 EndFunction
 
 Function SetAmbience(Bool duck)

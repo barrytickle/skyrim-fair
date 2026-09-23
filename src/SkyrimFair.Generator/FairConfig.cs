@@ -1898,6 +1898,12 @@ internal sealed record MarketPiece
     /// (a sign, its posts and the bar it hangs from).
     /// </summary>
     public bool Exact { get; init; }
+
+    /// <summary>
+    /// Places nothing, but takes the FormID a removed piece had, so every record after it
+    /// keeps its FormID in existing saves (the stage quest, the actors).
+    /// </summary>
+    public bool Reserve { get; init; }
 }
 
 internal sealed record MarketLane
@@ -2301,6 +2307,9 @@ internal sealed record ArcheryConfig
     /// only while the player is this close. Vanilla's is 1,250; 0 uses vanilla's package.
     /// </summary>
     public int TriggerRadius { get; init; }
+
+    /// <summary>What the archers hold with while their training package restarts: DefaultStayAtEditorLocation.</summary>
+    public string HoldPackage { get; init; } = "00025BFC:Skyrim.esm";
 
     /// <summary>The package data input holding the trigger radius (UseWeapon's "Trigger Radius").</summary>
     public sbyte TriggerRadiusInput { get; init; } = 30;

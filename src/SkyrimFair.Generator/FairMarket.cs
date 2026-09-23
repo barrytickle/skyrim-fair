@@ -112,6 +112,12 @@ internal static class FairMarket
         // Skyrim applies after Z (as the Dragonsreach banners showed).
         void PutPiece(MarketPiece piece, float ox, float oy, float oz, float frameYaw, float mirror, float jitter, int seed)
         {
+            if (piece.Reserve)
+            {
+                mod.GetNextFormKey();
+                return;
+            }
+
             var (rx, ry) = (MathF.Cos(frameYaw * Deg), -MathF.Sin(frameYaw * Deg));
             var (fx, fy) = (MathF.Sin(frameYaw * Deg), MathF.Cos(frameYaw * Deg));
             jitter = piece.Exact ? 0f : jitter;
@@ -254,6 +260,12 @@ internal static class FairMarket
                     continue;
                 }
 
+                if (piece.Reserve)
+                {
+                    mod.GetNextFormKey();
+                    continue;
+                }
+
                 var wobble = piece.Exact ? 0f : 1f;
                 var u = mirror * piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 5f * wobble;
                 var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 5f * wobble;
@@ -336,6 +348,12 @@ internal static class FairMarket
                 k++;
                 if (piece.Optional && FairHash.Hash3(seedA * 31 + k, seedB, 62) < 0.4f)
                 {
+                    continue;
+                }
+
+                if (piece.Reserve)
+                {
+                    mod.GetNextFormKey();
                     continue;
                 }
 

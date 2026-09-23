@@ -2,7 +2,43 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: louder again, archers' trigger radius, the signs from the honey example (2026-09-23)
+## Current pass: honey-style signs for Elven Goods, woodworker and archery; the archers' package restart (2026-09-23)
+
+Barry's test of `6f0917f`: **the volume is right now, for all the audio.** The signs are
+better, but the Elven Goods sign and the woodworker's still don't hang from their post,
+nor does the archery sign. His ask: "duplicate the honey one and replace the sign". The
+archers still don't shoot.
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Elven Goods (the `sign_curios` group: elven, books, curios, fortune, religious) | a Solitude board hung from a separate stockade bar | **the honey group, another board**: Riften's `SignRTAlchemyShop01` (`0EA620`), which carries its own bar like the honey sign, placed as the other unturned signs are (turned 180, +49) |
+| Woodworker (the `sign_trader` group: produce, woodworker, bard, cartographer, imports) | the Riverwood Trader board's own bar is 128 long, wider than the honey posts (92 apart) | the honey group with the generic `SignGeneralGoods01` (98, like honey's) |
+| Archery sign | a Solitude board and a separate bar | the honey layout: posts 92 apart round y 105 (59 and 151), the Drunken Huntsman board (`096267`, hunter) turned 180 at the middle, no separate bar |
+| Archers still idle | most likely the package resumes after a load where it stood (a `Travel` to the stand, which can't finish without navmesh), and `EvaluatePackage` keeps a package that's already running | a **hold package** above the training package: `SkyrimFairArcherHoldPackage`, a copy of `DefaultStayAtEditorLocation` live only while the new global `SkyrimFairArcherHold` is 1. On every arrival and load, the stage script sets each archer on their stand, sets the global and re-evaluates, so they switch to holding; 1.5 s later it clears the global and re-evaluates, so the training package starts from the top. It works in existing saves (an NPC's packages come from the plugin). Traces: "archer N on their stand, was running ..." and "archer N released, now running ..." |
+
+**FormIDs:** removing the two bars would have moved every later record down by one,
+the stage quest and all the actors included (caught in the read-back). New market piece
+option **`"reserve": true`** takes a removed piece's FormID and places nothing; both
+removed bars are reserves now.
+
+**Verification:**
+- Generator run twice: identical SHA256 `fbdc66277b56f95a...`. Scripts compile.
+- Deployed: the plugin and 3 scripts, byte-identical.
+- Read back against `6f0917f`'s plugin: the two bar references removed, the global
+  (`001556`) and hold package (`001557`) added at the end, nothing else renumbered.
+- The hold package's condition is `GetGlobalValue SkyrimFairArcherHold == 1`; both archer
+  NPCs list the hold package, then the training package; the script has `ArcherHold`.
+- The new sign groups read back with the honey sign's post layout; composed from the
+  real meshes they hang as the honey one does.
+
+**Test:**
+- Elven Goods, woodworker and archery signs: hanging like the honey one?
+- Archers: shooting within a few seconds of arriving, and after a reload?
+- If not: `Papyrus.0.log` (the archer lines), and a quick console test: click an archer,
+  type `resetai`. If that makes them shoot, the restart is the fix and needs to be
+  stronger; if not, the problem is elsewhere.
+
+## Previous pass: louder again, archers' trigger radius, the signs from the honey example (2026-09-23)
 
 Barry's test of `2d03ba5`: the bards play. He wants the stage and the cheer "another
 100%" and the murmur a little louder. The archers are still idle. The signs: the honey

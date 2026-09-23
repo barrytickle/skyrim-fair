@@ -444,10 +444,33 @@ internal static class FairWorld
             package.EditorID = $"{config.Archery.EditorIdPrefix}TrainingPackage";
             ((PackageDataInt)package.Data[config.Archery.TriggerRadiusInput]).Data = (uint)config.Archery.TriggerRadius;
             mod.Packages.Add(package);
+
+            // A hold package above it, live only while SkyrimFairArcherHold is 1. After a
+            // load the training package resumes wherever it stood (a Travel the archer
+            // can't finish without navmesh), and EvaluatePackage keeps a package that is
+            // already running. So the stage script sets the global, lets the archers switch
+            // to holding, then clears it: the training package starts again from the top.
+            var hold = new GlobalFloat(mod) { EditorID = $"{config.Archery.EditorIdPrefix}Hold", Data = 0f };
+            mod.Globals.Add(hold);
+            var holdSource = master!.Packages.First(x => x.FormKey == FormKeyHelper.Parse(config.Archery.HoldPackage));
+            var holdPackage = holdSource.Duplicate(mod.GetNextFormKey());
+            holdPackage.EditorID = $"{config.Archery.EditorIdPrefix}HoldPackage";
+            var onHold = new GetGlobalValueConditionData();
+            onHold.Global.Link.SetTo(hold.FormKey);
+            holdPackage.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = onHold });
+            mod.Packages.Add(holdPackage);
+
             foreach (var npc in archery.ArcherRecords)
             {
                 npc.Packages.Clear();
+                npc.Packages.Add(new FormLink<IPackageGetter>(holdPackage.FormKey));
                 npc.Packages.Add(new FormLink<IPackageGetter>(package.FormKey));
+            }
+
+            if (audio is not null)
+            {
+                var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+                script.Properties.Add(new ScriptObjectProperty { Name = "ArcherHold", Object = new FormLink<ISkyrimMajorRecordGetter>(hold.FormKey) });
             }
         }
 

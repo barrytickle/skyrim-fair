@@ -81,28 +81,20 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
 
-## Where we are (2026-09-23, second bug-fix pass)
+## Where we are (2026-09-23, third bug-fix pass)
 
-Committed and deployed; plugin SHA256 `25bf700aee9b730c...`. **Barry has not yet tested
+Committed and deployed; plugin SHA256 `fbdc66277b56f95a...`. **Barry has not yet tested
 it.** Details in `docs/AUDIT.md` ("Current pass").
 
-**Confirmed working in game:** the stage set (songs, cheer, next song), the pen horses,
-and **the bards playing** (from the stage script's `PlayIdle`).
+**Confirmed working in game:** the stage set, the pen horses, the bards playing, and
+**the audio levels** (stage, cheer and murmur all right now: don't change them).
 
 **Fixed this pass, awaiting Barry's test:**
-- **Louder stage and cheer** ("another 100%"): a stereo PA output model (`SOMStereoRad10000`
-  copy), limiter target -4 (-10 LUFS), cheer attenuation 0. About +4 dB songs, +6 cheer.
-  The files are at their clean limit now; beyond this, more speakers or reparenting the
-  category (it follows the Effects slider).
-- **Murmur:** 0 dB and +3 dB in the files.
-- **Archers idle after a reload:** the vanilla package only shoots within 1,250 of the
-  player, and otherwise waits forever. Now a fair copy with radius 20,000.
-- **Signs:** the honey vendor's is the reference Barry confirmed. The unturned signs
-  (Dwemer/pawn, mage/alchemy and all other Riften, Whiterun and generic ones) are turned
-  180 degrees with the offset mirrored to match it. The Solitude signs' bar (herbalist,
-  Elven Goods, archery) comes down through their hooks.
-- If the archers still idle: get `Papyrus.0.log`; the script traces each archer's
-  current package on arrival.
+- **Signs:** Elven Goods (curios group), woodworker (trader group) and the archery booth
+  now use the honey sign's layout with boards that carry their own bar.
+- **Archers:** a hold package gated by `SkyrimFairArcherHold`, flipped on and off by the
+  stage script on arrival and load, restarts their training package. If they still
+  don't shoot: `Papyrus.0.log`, and ask Barry to try `resetai` on one in the console.
 
 **Still to confirm from earlier builds:** the cobbles along the avenue; the booth's
 props tilting as authored; the music fading walking away, and nothing playing after

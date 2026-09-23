@@ -659,11 +659,11 @@
             {"piece": "@PropIronArrow", "x": -134, "y": -44, "z": 52, "yaw": 80, "rotX": 90},
             {"piece": "0007A617:Skyrim.esm", "x": 130, "y": -50, "z": 24, "yaw": 10},
             {"piece": "@PropTowerLantern", "x": 90, "y": 30, "z": 62, "yaw": 20},
-            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 20, "exact": true},
-            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 150, "yaw": 180, "exact": true},
-            {"piece": "000533D3:Skyrim.esm", "x": 150, "y": 85.0, "z": 160, "scale": 1.05, "exact": true},
-            {"piece": "000F0A22:Skyrim.esm", "x": 150, "y": 122.5, "z": 168, "exact": true},
-            {"piece": "00034D23:Skyrim.esm", "x": 159, "y": 150, "z": 120, "yaw": 90, "exact": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 59, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 151, "yaw": 180, "exact": true},
+            {"reserve": true},
+            {"piece": "00096267:Skyrim.esm", "x": 150, "y": 105, "z": 168, "yaw": 180, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 159, "y": 151, "z": 120, "yaw": 90, "exact": true}
           ]
         },
         {
@@ -1973,8 +1973,8 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
-            {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 162, "scale": 0.8, "exact": true},
-            {"piece": "000F0A1C:Skyrim.esm", "x": 0, "y": 52.5, "z": 168, "exact": true},
+            {"reserve": true},
+            {"piece": "000EA620:Skyrim.esm", "x": 0, "y": 49.0, "z": 168, "yaw": 180, "exact": true},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
@@ -2024,7 +2024,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
-            {"piece": "00038229:Skyrim.esm", "x": 0, "y": 64.0, "z": 168, "yaw": 180, "exact": true},
+            {"piece": "0010704F:Skyrim.esm", "x": 0, "y": 49.0, "z": 168, "yaw": 180, "exact": true},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
