@@ -50,6 +50,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--src", default=str(SRC))
     ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--repeat", type=int, default=6, help="loops chained into one clip (fairWorld.folkDance.length = 9.6 x this)")
     args = ap.parse_args()
     src, out = pathlib.Path(args.src), pathlib.Path(args.out)
     sys.path.insert(0, str(src / "vendor" / "hkx"))
@@ -75,6 +76,19 @@ def main():
         for i, bone in enumerate(anim.bone_names[1:3], start=1):
             moved = max(abs(a - b) for t in anim.tracks[i].translations for a, b in zip(t, anim.tracks[i].translations[0]))
             assert moved < 0.01, f"{bone} carries motion ({moved:.3f}); only the root is re-based"
+
+        # Chain the loop REPEAT times into one clip: the dance is authored as a seamless loop
+        # (its last sample equals its first), and a vanilla idle plays its clip once, so the
+        # script restarts it only every REPEAT loops instead of every one.
+        if args.repeat > 1:
+            loop = anim.num_frames - 1
+            for t in anim.tracks:
+                t.translations = t.translations[:loop] * args.repeat + t.translations[:1]
+                t.rotations = t.rotations[:loop] * args.repeat + t.rotations[:1]
+                t.scales = t.scales[:loop] * args.repeat + t.scales[:1]
+            anim.num_frames = loop * args.repeat + 1
+            anim.duration = loop * args.repeat * anim.frame_duration
+            root = anim.tracks[0]
 
         target = out / sub / TARGET
         target.parent.mkdir(parents=True, exist_ok=True)

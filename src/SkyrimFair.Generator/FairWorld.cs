@@ -615,6 +615,7 @@ internal static class FairWorld
                 Name = "DanceIdles",
                 Objects = config.Crowds.DanceIdles.Select(i => Obj(FormKeyHelper.Parse(i))).ToExtendedList(),
             });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "DanceLengths", Data = config.Crowds.DanceLengths.ToExtendedList() });
             script.Properties.Add(new ScriptObjectListProperty
             {
                 Name = "CheerIdles",
@@ -762,7 +763,7 @@ internal static class FairWorld
                 Objects = folkDancers.Select(k => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) }).ToExtendedList(),
             });
             script.Properties.Add(new ScriptObjectProperty { Name = "FolkIdle", Object = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse(folk.Idle)) });
-            script.Properties.Add(new ScriptFloatProperty { Name = "FolkLength", Data = folk.Length });
+            script.Properties.Add(new ScriptFloatProperty { Name = "FolkClipLength", Data = folk.Length });
             Console.WriteLine($"  folk dance: {folkDancers.Count} dancers at ({folk.Centre[0]}, {folk.Centre[1]}); OAR conditions in {folk.OarFolder}");
         }
 
@@ -968,6 +969,15 @@ internal static class FairWorld
             }
 
             Console.WriteLine($"  keyword {config.NpcKeyword} on {mod.Npcs.Count} NPC records");
+        }
+
+        // ---- SkyrimFairAudioFirstTrack: a test switch for the song to start with -------------
+        if (audio is not null)
+        {
+            var first = new GlobalFloat(mod) { EditorID = "SkyrimFairAudioFirstTrack", Data = -1f };
+            mod.Globals.Add(first);
+            var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            script.Properties.Add(new ScriptObjectProperty { Name = "FirstTrack", Object = new FormLink<ISkyrimMajorRecordGetter>(first.FormKey) });
         }
 
         // The mod's own counter must stay below the crowd figures' range.

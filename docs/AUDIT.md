@@ -2,7 +2,54 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: crowd NIFs, fourth rebuild, redeployed (2026-09-23)
+## Current pass: the freeze is the save's; dances replay at their end; a first-song switch (2026-09-23)
+
+Barry: (1) still crashing; (2) "the npc's do one dance loop then stop"; (3) the lip sync
+doesn't work; (4) the static bodies don't work.
+
+### 1. The freeze: the exclusion works, the save carries the old spells
+
+- **SPID's log for this session:** no fair NPC got `madDetectionCloak` or
+  `MD_GoreHumanoidMagic`. Only the three pen horses got the cloak. So the patched inis
+  are read, and `-SkyrimFairNPC` matches.
+- **The dump still floods** (755,395). The actors running the Maximum Destruction script,
+  and casting the cloak, are the same fair NPCs as before (`250013C9`, `25001427`, ...).
+  - The spells SPID gave them in earlier sessions are **kept in the save**, most likely
+    on the templated NPCs' runtime `FF` records, which saves store.
+  - SPID only adds; it never removes.
+- **Test with a clean world:** from the main menu, `cow SkyrimFairWorld 0 0`, or a save
+  from before the first visit to the fair.
+- A save that has already visited keeps the spells until the fair's cells reset.
+
+### 2. Dances play once: now replayed as each ends
+
+- The clips' lengths, read from the vanilla archive: `special_cicerodance1` 6.667 s,
+  `2` 6.0 s, `3` 2.333 s. The third is dropped: too short to repeat without twitching.
+- The stage script gives each dancer the next dance the moment the last one ends
+  (`DanceLengths`), and wakes exactly then. No clip is ever re-sent mid-way, which was
+  the earlier jank.
+- **The folk pair:** `rebase_folk.py --repeat 6` chains Astra's seamless loop six times
+  into one 57.6 s clip, restarted together as it ends. That's once a minute instead of
+  every 9.6 s. Round trip 0.0005; deterministic.
+  - The length is a new property, `FolkClipLength`: a save keeps `FolkLength`'s old 9.6.
+
+### 3. Lip sync: never reached
+
+- Only **song 0** has ever played in any log (19:01, 19:20, 19:30), and it's Round the
+  Green, with no singer lines.
+- Fiddle and Dragonborn-Approved are songs 2 and 3, about six minutes in. The flood froze
+  things first.
+- **New test switch:** `SkyrimFairAudioFirstTrack` (default −1).
+  `set SkyrimFairAudioFirstTrack to 2` starts with Fiddle on the next arrival or load.
+
+### 4. Static figures
+
+- The deployed plugin has all 51 references of 36 figures, with the right models and
+  bounds. What "not working" looks like in game is still to hear from Barry.
+
+- Plugin `536becda924886e6...`, deterministic. Four scripts compile. Deployed.
+
+## Previous pass: crowd NIFs, fourth rebuild, redeployed (2026-09-23)
 
 - The other agent rebuilt the crowd NIFs: hair shine and the dynamic-decal flags are off,
   for the white hair streaks (`docs/CROWD.md`, "Fourth test").

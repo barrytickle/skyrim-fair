@@ -3025,6 +3025,9 @@ internal sealed record CrowdsConfig
 
     public List<string> CheerIdles { get; init; } = new();
 
+    /// <summary>Each dance idle's clip length in seconds (vanilla idles play once; the script replays them).</summary>
+    public List<float> DanceLengths { get; init; } = new();
+
     public ChildrenConfig Children { get; init; } = new();
 }
 

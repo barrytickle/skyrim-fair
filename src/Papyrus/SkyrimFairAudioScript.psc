@@ -64,6 +64,9 @@ GlobalVariable Property CrowdLayer Auto
 Actor[] Property Dancers Auto
 {The dance floor (persistent references): they dance through each song and cheer at its end.}
 Idle[] Property DanceIdles Auto
+Float[] Property DanceLengths Auto
+{Each dance's clip length in seconds. A vanilla idle plays its clip once, so each dancer
+is given the next dance the moment the last one ends.}
 Idle[] Property CheerIdles Auto
 Int Property DanceEvery = 2 Auto
 {Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
@@ -88,7 +91,13 @@ Actor[] Property FolkDancers Auto
 (Open Animation Replacer), so both are started together and restarted every FolkLength.}
 Idle Property FolkIdle Auto
 Float Property FolkLength = 9.6 Auto
-{The clip's length (no longer used to restart it: the dance loops by itself).}
+{Retired: a save keeps this property's old value, so the length is FolkClipLength now.}
+Float Property FolkClipLength = 57.6 Auto
+{The folk clip's length in seconds: the pair start it again together as it ends.}
+
+GlobalVariable Property FirstTrack Auto
+{For testing: the song to start with on arrival or load (0 = the first), or -1 to carry
+on round the playlist. set SkyrimFairAudioFirstTrack to 2 starts with Fiddle.}
 
 FormList Property StripSpells Auto
 {The NPC guard's list (SkyrimFairNpcGuard): filled here from StripPlugins/StripIds.}
@@ -125,6 +134,9 @@ Int danceTick = 0
 Float folkNext = 0.0
 ; Which dancers have started this song's dance (a dance plays once and loops until stopped).
 Bool[] dancing
+Float[] danceEnds
+Int[] dancePlays
+Float danceWake = 0.0
 Bool folkOn = False
 Int songsPlayed = 0
 ; The song's sung lines: the next one to say, and the end of this song's run.
@@ -198,6 +210,9 @@ Event OnUpdate()
 	Float now = Utility.GetCurrentGameTime()
 	If phase == 0
 		; Arrived, or loaded at the fair.
+		If FirstTrack && FirstTrack.GetValue() >= 0.0 && (FirstTrack.GetValue() as Int) < Songs.Length
+			track = FirstTrack.GetValue() as Int
+		EndIf
 		Enter(1, FirstSongDelay, now)
 		StopBand(True)
 		QueueArchers()
@@ -229,6 +244,12 @@ Event OnUpdate()
 	EndIf
 
 	Float left = Seconds(phaseEnds - now)
+	If phase == 2 && danceWake > now && Seconds(danceWake - now) < left
+		left = Seconds(danceWake - now)
+	EndIf
+	If phase == 2 && folkOn && folkNext > now && Seconds(folkNext - now) < left
+		left = Seconds(folkNext - now)
+	EndIf
 	If phase == 2 && nextLine >= 0 && nextLine < endLine
 		; Wake for the next sung line.
 		Float toLine = SingerStarts[nextLine] - Seconds(now - songStarted)
@@ -256,7 +277,10 @@ Function Advance(Float now)
 		Debug.Trace("SkyrimFairAudio: song " + track + " playing, instance " + songInstance)
 		songsPlayed += 1
 		dancing = new Bool[128]
+		danceEnds = new Float[128]
+		dancePlays = new Int[128]
 		folkOn = False
+		folkNext = 0.0
 		songStarted = now
 		nextLine = -1
 		endLine = -1
@@ -381,20 +405,37 @@ Function ApplyCrowdLayers()
 	Debug.Trace("SkyrimFairAudio: crowd layers on: " + want)
 EndFunction
 
-; Each dancer starts one dance when the song starts (as soon as their 3D is there) and
-; keeps it looping until the cheer: re-triggering a dance mid-loop looked janky. Each song
-; gives each dancer the next dance, so the floor varies from song to song.
+; Each dancer starts a dance when the song starts (as soon as their 3D is there), and the
+; next as each one ends: a vanilla idle plays its clip once, and re-sending one mid-clip
+; restarts it visibly. Dancers take the dances in turn, offset, so the floor varies.
 Function Dance()
 	If DanceIdles.Length == 0
 		Return
 	EndIf
 	If dancing.Length < Dancers.Length
 		dancing = new Bool[128]
+		danceEnds = new Float[128]
+		dancePlays = new Int[128]
 	EndIf
+	Float now = Utility.GetCurrentGameTime()
+	Float perSecond = TimeScale.GetValue() / 86400.0
+	danceWake = 0.0
 	Int i = 0
 	While i < Dancers.Length && i < dancing.Length
-		If !dancing[i] && Dancers[i] && Dancers[i].Is3DLoaded()
-			dancing[i] = Dancers[i].PlayIdle(DanceIdles[(i + songsPlayed) % DanceIdles.Length])
+		If (!dancing[i] || now >= danceEnds[i]) && Dancers[i] && Dancers[i].Is3DLoaded()
+			Int which = (i + dancePlays[i]) % DanceIdles.Length
+			If Dancers[i].PlayIdle(DanceIdles[which])
+				dancing[i] = True
+				dancePlays[i] = dancePlays[i] + 1
+				Float clipSeconds = 6.0
+				If which < DanceLengths.Length
+					clipSeconds = DanceLengths[which]
+				EndIf
+				danceEnds[i] = now + clipSeconds * perSecond
+			EndIf
+		EndIf
+		If dancing[i] && (danceWake == 0.0 || danceEnds[i] < danceWake)
+			danceWake = danceEnds[i]
 		EndIf
 		i += 1
 	EndWhile
@@ -419,9 +460,10 @@ Function Sing(Float now)
 	EndWhile
 EndFunction
 
-; The folk pair: both start together once both are loaded, once a song, and loop.
+; The folk pair: both start together once both are loaded, and again together as the
+; clip ends (it's six loops of Astra's dance, so that's once a minute).
 Function FolkDance(Float now)
-	If !FolkIdle || FolkDancers.Length == 0 || folkOn
+	If !FolkIdle || FolkDancers.Length == 0 || (folkOn && now < folkNext)
 		Return
 	EndIf
 	Int i = 0
@@ -437,6 +479,7 @@ Function FolkDance(Float now)
 		i += 1
 	EndWhile
 	folkOn = True
+	folkNext = now + FolkClipLength * TimeScale.GetValue() / 86400.0
 EndFunction
 
 ; The song's end: the floor claps and cheers with the crowd.

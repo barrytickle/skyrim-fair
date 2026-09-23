@@ -112,6 +112,13 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Latest (plugin `536becda924886e6...`), awaiting Barry's test from a clean world**
+(`cow SkyrimFairWorld 0 0` at the main menu, since old saves keep SPID's spells):
+- The SPID exclusion patch works: SPID's log shows no fair NPC getting either spell.
+- Dances replay as each ends. The folk clip is 57.6 s (six loops).
+- `set SkyrimFairAudioFirstTrack to 2` starts with Fiddle, to test the singers.
+- The static figures "not working": what Barry sees is still to hear.
+
 **Stage singers: built and deployed, awaiting Barry's test** (plugin `06618bba7143ad4e...`).
 - Three singers with their own voice types, 49 sung lines (Fiddle, Dragonborn-Approved),
   and 147 lip-only voice files named by the rule checked against BardSongs.
