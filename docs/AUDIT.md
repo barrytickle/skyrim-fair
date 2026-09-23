@@ -2,7 +2,32 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: stage crowd area and stable corner (2026-09-23)
+## Current pass: ground wear, cobbles, archery sign, horses (2026-09-23)
+
+Barry's review of the crowd and stable pass: vary the ground's wear (more worn in the
+middle, less toward the palisade); the cobbles "don't pull through"; the archery sign
+floats; no horses in the stable pen.
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Cobbles break off in hard-edged wedges | two causes. (1) The game draws six textures a quadrant, the base and five alpha layers; the build allowed six alpha layers, so where the palisade's strip joined the four fair textures (the gate quadrants, the one by the stage), the sixth, the cobbles, was never drawn. (2) The cobbles faded out over 110 units, under the 128 between terrain vertices, and their edge wandered quickly, so the strip broke into the terrain's hard triangles | at most **five alpha layers** a quadrant: over the limit the faintest goes (3 wisps of tundra outside the gate). The cobbles' edge now fades over 300 (`ground.cobbleFeather`), wanders slowly (`cobbleRagged` 45, half-width 300), and the sunk patches are milder (`cobbleSunk` 0.35). Read back: one unbroken strip from the gate to the dance floor |
+| Wear the same everywhere | wear depended only on what stood nearby | wear now fades from the middle of the fair (`centreDepth` 2000 inside the palisade) to 45% at the palisade (`edgeWear`), plus 0.2 all over the middle (`centreWear`); the patchy dirt-grass follows the same gradient, so the outskirts stay greener |
+| Archery sign floats | the Solitude fletcher's sign hangs from rings at its top, and nothing ran between the posts to hang it from (the Whiterun signs carry their own bar) | a thin log crossbar (`WHIntWoodLogVerticalThinShort01` laid flat) between the posts, the rings hung from it. The same bar goes on the four Solitude-sign vignettes (fletcher, clothes, aromatics, curios) |
+| No horses | the pen was left for later | three vanilla unsaddled horses (brown, grey, palomino: `EncHorse*`) stand in the pen, from the new `fairWorld.crowds.animals`, placed in the pen's own frame |
+
+Verification: generator run twice, identical SHA256 `158de1d65cec1163...` (569,247 bytes),
+deployed byte-identical; nothing new to deploy besides the ESP (all vanilla records).
+Plan in `docs/images/lively_plan.png`.
+
+**Test**:
+- Do the cobbles run unbroken from the gate to the stage, with a soft edge?
+- Does the ground look more trodden in the middle and greener at the edges?
+- Does the archery sign hang from its bar? Check the bar doesn't sit backwards or tilted
+  (it relies on the lay-flat rotation the arrow bundles use).
+- Do the horses stay in the pen? Can the player ride them? They're vanilla horses with no
+  owner, so riding one may take it for free.
+
+## Previous pass: stage crowd area and stable corner (2026-09-23)
 
 Barry's brief: "block out and dress the stage crowd area" (a dance area, a standing /
 watching area, and a seating / social edge), and "the horse pens / stable corner" on the

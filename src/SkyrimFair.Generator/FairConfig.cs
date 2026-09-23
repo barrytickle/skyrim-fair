@@ -2286,6 +2286,26 @@ internal sealed record GroundConfig
 
     public float CobbleTo { get; init; } = float.MaxValue;
 
+    /// <summary>
+    /// How far the cobbles' edge takes to fade out. Keep it well over the 128 between
+    /// terrain vertices, or the edge breaks up into the terrain's hard triangles.
+    /// </summary>
+    public float CobbleFeather { get; init; } = 300f;
+
+    /// <summary>How much of the cobbled core is sunk under trodden dirt here and there (0..1).</summary>
+    public float CobbleSunk { get; init; } = 0.35f;
+
+    /// <summary>
+    /// How deep inside the palisade the ground is fully trodden. Wear fades from the middle
+    /// of the fair to <see cref="EdgeWear"/> of itself at the palisade.
+    /// </summary>
+    public float CentreDepth { get; init; } = 2000f;
+
+    public float EdgeWear { get; init; } = 0.45f;
+
+    /// <summary>Wear added all over the middle of the fair, fading to none at the palisade.</summary>
+    public float CentreWear { get; init; } = 0.2f;
+
     public float NoisePeriod { get; init; } = 520f;
 
     /// <summary>Wear radius and strength round each kind of source.</summary>
@@ -2377,6 +2397,23 @@ internal sealed record CrowdsConfig
     public string Name { get; init; } = "Fair Visitor";
 
     public List<CrowdGroup> Groups { get; init; } = new();
+
+    /// <summary>Animals placed as they are (the horses in the stable pen).</summary>
+    public List<CrowdAnimal> Animals { get; init; } = new();
+}
+
+internal sealed record CrowdAnimal
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>A vanilla actor base, placed as it is.</summary>
+    public string Base { get; init; } = string.Empty;
+
+    /// <summary>The market dressing module it stands in (the first placed one).</summary>
+    public string Near { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, yaw]</c> in that module's frame.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
 }
 
 internal sealed record CrowdGroup

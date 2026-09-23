@@ -661,6 +661,7 @@
             {"piece": "@PropTowerLantern", "x": 90, "y": 30, "z": 62, "yaw": 20},
             {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 60},
             {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 150, "yaw": 180},
+            {"piece": "0007EE65:Skyrim.esm", "x": 150, "y": 41.5, "z": 176, "rotX": 90},
             {"piece": "000F0A22:Skyrim.esm", "x": 150, "y": 157.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 159, "y": 150, "z": 120, "yaw": 90}
           ]
@@ -1939,6 +1940,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
+            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
             {"piece": "000F0A22:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
@@ -1949,6 +1951,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
+            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
             {"piece": "000F0A1A:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
@@ -1959,6 +1962,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
+            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
             {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 52.0, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
@@ -1969,6 +1973,7 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
+            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
             {"piece": "000F0A1C:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
           ]
@@ -3013,6 +3018,11 @@
         {"name": "barrel drinkers", "near": "social_barrels", "count": 2, "radius": 150, "arc": 180, "chance": 0.8},
         {"name": "hay bale sitters", "near": "social_hay", "count": 1, "radius": 150, "arc": 180, "chance": 0.6},
         {"name": "stable hand", "near": "stable_shelter", "count": 1, "radius": 150, "arc": 90}
+      ],
+      "animals": [
+        {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80]},
+        {"name": "grey horse", "base": "00068D6D:Skyrim.esm", "near": "horse_pen", "at": [60, -120, -100]},
+        {"name": "palomino", "base": "00068D6E:Skyrim.esm", "near": "horse_pen", "at": [120, 110, 160]}
       ]
     },
     "propManifest": "tools/static_props.json",
@@ -3032,8 +3042,8 @@
           "height": "SkyrimFair\\Ground\\Cobble01_p.dds"
         }
       ],
-      "cobbleHalfWidth": 250,
-      "cobbleRagged": 110,
+      "cobbleHalfWidth": 300,
+      "cobbleRagged": 45,
       "cobbleFrom": 120,
       "cobbleTo": 6150,
       "noisePeriod": 520,
@@ -3041,7 +3051,12 @@
       "npcRadius": 150,
       "dressingRadius": 220,
       "laneWear": 0.6,
-      "wornZones": ["Crowd", "Dance", "Entrance", "Stables"]
+      "wornZones": ["Crowd", "Dance", "Entrance", "Stables"],
+      "cobbleFeather": 300,
+      "cobbleSunk": 0.35,
+      "centreDepth": 2000,
+      "edgeWear": 0.45,
+      "centreWear": 0.2
     },
     "collisionWalls": [
       {"name": "stage steps foot", "from": [1661, 4523], "to": [2435, 4523]},

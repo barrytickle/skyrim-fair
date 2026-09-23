@@ -144,8 +144,29 @@ internal static class FairCrowds
             groups.Add((group.Name, placedHere));
         }
 
-        return new CrowdsResult(looks.Count, stood, groups);
+        // Animals stand where they are put, in their module's frame.
+        var animals = 0;
+        foreach (var animal in config.Animals)
+        {
+            var home = blocked.FirstOrDefault(b => b.Kind == animal.Near)
+                ?? throw new InvalidOperationException($"fairWorld.crowds.animals {animal.Name}: no '{animal.Near}' was placed.");
+            var (u, v) = (animal.At[0], animal.At[1]);
+            var (c, s) = (MathF.Cos(home.Yaw * Deg), MathF.Sin(home.Yaw * Deg));
+            var (x, y) = (home.X + u * c + v * s, home.Y - u * s + v * c);
+            put(new PlacedNpc(mod)
+            {
+                Base = new FormLinkNullable<INpcGetter>(FormKeyHelper.Parse(animal.Base)),
+                Placement = new Placement
+                {
+                    Position = new P3Float(x, y, ground(x, y) + 2f),
+                    Rotation = new P3Float(0f, 0f, (home.Yaw + (animal.At.Length > 2 ? animal.At[2] : 0f)) * Deg),
+                },
+            });
+            animals++;
+        }
+
+        return new CrowdsResult(looks.Count, stood, groups, animals);
     }
 }
 
-internal sealed record CrowdsResult(int Records, IReadOnlyList<(float X, float Y)> Positions, IReadOnlyList<(string Name, int Placed)> Groups);
+internal sealed record CrowdsResult(int Records, IReadOnlyList<(float X, float Y)> Positions, IReadOnlyList<(string Name, int Placed)> Groups, int Animals);

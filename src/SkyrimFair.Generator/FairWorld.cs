@@ -54,8 +54,17 @@ internal static class FairWorld
     /// <summary>BTXT's layer field is always -1.</summary>
     private const ushort BaseLayerNumber = 0xFFFF;
 
-    /// <summary>Most alpha layers any one quadrant may carry; vanilla quadrants use up to five.</summary>
-    private const int MaxAlphaLayers = 6;
+    /// <summary>
+    /// Most alpha layers one quadrant may carry. The game draws six textures a quadrant, the
+    /// base and five alpha layers (vanilla never uses more); a sixth alpha layer is simply
+    /// not drawn, which cut the cobbles off at a quadrant edge.
+    /// </summary>
+    private const int MaxAlphaLayers = 5;
+
+    /// <summary>Faint layers left out of quadrants over the limit, in the last build.</summary>
+    public static int DroppedLayers => droppedLayers;
+
+    private static int droppedLayers;
 
     /// <summary>Water is switched off in every cell; this is belt and braces for the defaults.</summary>
     private const float NoWaterHeight = -50000f;
@@ -130,6 +139,7 @@ internal static class FairWorld
 
         var textures = groundTextures is null ? plan.PaintTextures() : null;
         var maxLayers = 0;
+        droppedLayers = 0;
 
         for (var cy = -config.CellRadius; cy <= config.CellRadius; cy++)
         {
@@ -590,7 +600,7 @@ internal static class FairWorld
                 },
             });
 
-            var layerNumber = 0;
+            var painted = new List<(FormKey Texture, ExtendedList<AlphaLayerData> Data, float Weight)>();
             foreach (var texture in textures)
             {
                 var data = new ExtendedList<AlphaLayerData>();
@@ -612,28 +622,34 @@ internal static class FairWorld
                     }
                 }
 
-                if (data.Count == 0)
+                if (data.Count > 0)
                 {
-                    continue;
+                    painted.Add((texture.Texture, data, data.Sum(d => d.Opacity)));
                 }
+            }
 
+            // Over the limit, the faintest layers go (a wisp of grass-dirt at a palisade
+            // corner), never the order of the rest.
+            while (painted.Count > MaxAlphaLayers)
+            {
+                var faintest = painted.Select((l, i) => (l.Weight, i)).Min().i;
+                painted.RemoveAt(faintest);
+                droppedLayers++;
+            }
+
+            var layerNumber = 0;
+            foreach (var (texture, data, _) in painted)
+            {
                 land.Layers.Add(new AlphaLayer
                 {
                     Header = new LayerHeader
                     {
-                        Texture = new FormLink<ILandscapeTextureGetter>(texture.Texture),
+                        Texture = new FormLink<ILandscapeTextureGetter>(texture),
                         Quadrant = quadrant,
-                        LayerNumber = (ushort)layerNumber,
+                        LayerNumber = (ushort)layerNumber++,
                     },
                     AlphaLayerData = data,
                 });
-                layerNumber++;
-            }
-
-            if (layerNumber > MaxAlphaLayers)
-            {
-                throw new InvalidOperationException(
-                    $"FairWorld cell {cx},{cy} {quadrant} needs {layerNumber} texture layers; the limit is {MaxAlphaLayers}.");
             }
 
             maxLayers = Math.Max(maxLayers, layerNumber);
@@ -829,7 +845,11 @@ internal static class FairWorld
             // The cobbles' fringe is scuffed to bare dirt by the traffic on and off them.
             var edge = MathF.Abs(PolylineDistance(avenue, x, y) - config.Ground.CobbleHalfWidth);
             w = MathF.Max(w, 0.8f * Fill(edge - 90f, 140f));
-            return w;
+
+            // Trodden hardest in the middle of the fair, less out toward the palisade.
+            var gc = config.Ground;
+            var middle = Smooth(-Outside(x, y) / gc.CentreDepth);
+            return w * (gc.EdgeWear + (1f - gc.EdgeWear) * middle) + gc.CentreWear * middle;
         }
 
         /// <summary>Distance along the avenue of the point on it nearest (x, y).</summary>
@@ -872,8 +892,8 @@ internal static class FairWorld
                     (x, y) => Fill(MathF.Abs(Outside(x, y)) - config.PerimeterStripWidth / 2f, StripFeather)
                         * (1f - Fill(GateDistance(x, y) - config.GateWidth / 2f, StripFeather))),
 
-                // Grass giving way: patchy dirt-grass nearly everywhere, more where it is walked.
-                new(ground!["dirtGrass"], (x, y) => Inside(x, y) * Smooth((0.34f + 0.8f * Wear(x, y) + (N1(x, y) - 0.5f) * 1.3f - 0.3f) / 0.35f)),
+                // Grass giving way: patchy dirt-grass, most in the middle of the fair and where it is walked.
+                new(ground!["dirtGrass"], (x, y) => Inside(x, y) * Smooth((0.16f + 0.24f * Smooth(-Outside(x, y) / gc.CentreDepth) + 0.8f * Wear(x, y) + (N1(x, y) - 0.5f) * 1.3f - 0.3f) / 0.35f)),
 
                 // Bare dirt in patches, following the wear but broken by noise at two scales.
                 new(ground["dirt"], (x, y) => Inside(x, y) * Smooth((0.1f + Wear(x, y) * 1.05f + (N2(x, y) - 0.5f) * 1.0f + (N3(x, y) - 0.5f) * 0.4f - 0.5f) / 0.25f)),
@@ -886,12 +906,13 @@ internal static class FairWorld
                 {
                     var along = AvenueStation(x, y);
                     if (along < gc.CobbleFrom - 200f || along > MathF.Min(gc.CobbleTo, length) + 200f) return 0f;
-                    var half = gc.CobbleHalfWidth + gc.CobbleRagged * (N3(x, y) * 2f - 1f) + gc.CobbleRagged * 0.6f * (N1(x, y) * 2f - 1f);
-                    var ends = Fill(gc.CobbleFrom - along, 160f) * Fill(along - MathF.Min(gc.CobbleTo, length), 160f);
+                    // The edge wanders slowly: a quick wander at this terrain resolution breaks it up.
+                    var half = gc.CobbleHalfWidth + gc.CobbleRagged * (N1(x, y) * 2f - 1f);
+                    var ends = Fill(gc.CobbleFrom - along, 300f) * Fill(along - MathF.Min(gc.CobbleTo, length), 300f);
 
                     // Here and there the stones are sunk under trodden dirt.
-                    var sunk = 1f - 0.75f * Smooth((N2(x, y) - 0.66f) / 0.1f);
-                    return Fill(PolylineDistance(avenue, x, y) - half, 110f) * ends * sunk;
+                    var sunk = 1f - gc.CobbleSunk * Smooth((N2(x, y) - 0.62f) / 0.2f);
+                    return Fill(PolylineDistance(avenue, x, y) - half, gc.CobbleFeather) * ends * sunk;
                 }),
             };
         }

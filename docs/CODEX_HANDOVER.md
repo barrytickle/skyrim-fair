@@ -564,6 +564,10 @@ Project-owned mesh work is code-first and reproducible.
 - the performance square has three sub-zones: `Dance` (keep-outs `DanceFloor` + `StageFront`, worn ground, left open for dancers), `Watching` (keep-outs `WatchingSouth/West/East`, watcher groups face the stage) and a social edge of `social_*` clusters placed with `dressing.exemptKeepOut: ["Crowd"]` (only that keep-out is waived; the avenue corridor and sightline band still apply)
 - the stable corner is the `Stables` zone (marker for horses later) in the south of the west field: a `horse_pen` of vanilla `WRFenceStr01` rails laid on Whiterun's 256 grid (origin 15 off the rail's middle, +53 up) with a gate gap facing the fair, a lean-to shelter, feed store, hitching rail and tack stand
 - crowd groups `near` a dressing module now spread from the module's edge, not its middle
+- the game draws only the base and **five alpha layers** a landscape quadrant; `FairWorld.PaintLayers` drops the faintest over that. Keep terrain-texture edges fading over well more than 128 (the vertex spacing), or they break into hard triangles
+- ground wear has a middle-to-palisade gradient (`ground.centreDepth`, `edgeWear`, `centreWear`)
+- signs hung by rings (the Solitude ones) need the thin-log crossbar between their posts; Whiterun signs carry their own bar
+- `fairWorld.crowds.animals` places vanilla actors as they are, in a dressing module's frame (the pen's horses)
 - invisible walls are `fairWorld.collisionWalls` segments, built as vanilla `CollisionMarker` box primitives (half-extents, default layer)
 - the cobbles use the Whiterun Mossy Wet Stonefloor textures copied to `textures\SkyrimFair\Ground\Cobble01*.dds` (git-ignored; restore from `external/` before deploying)
 - `fairWorld.overhead` swags festival lines across lanes (poles inside the corridor edge, two mirrored `SRopefestivalLine01` halves, lanterns along the curve); `fairWorld.crowds` places visitor groups by theme, point or dressing module; `fairWorld.ground` paints the worn ground after everything is placed (fair-owned LTEX/TXST copies with parallax height slots, cobbled avenue), keeping LAND FormIDs by allocating LAND with the cells

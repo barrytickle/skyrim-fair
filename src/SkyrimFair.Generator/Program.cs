@@ -124,7 +124,7 @@ try
         Console.WriteLine(
             $"  planned compound {maxX - minX:0} x {maxY - minY:0} units, " +
             $"X {minX:0}..{maxX:0}, Y {minY:0}..{maxY:0}; " +
-            $"at most {world.MaxAlphaLayers} texture layers in a quadrant");
+            $"at most {world.MaxAlphaLayers} texture layers in a quadrant ({FairWorld.DroppedLayers} faint ones left out)");
         var wall = world.Wall;
         Console.WriteLine(
             $"  palisade: {wall.PanelCount} panels of STAT {wall.PanelStatic}, " +
@@ -237,7 +237,7 @@ try
 
         if (world.Crowds is { } crowds)
         {
-            Console.WriteLine($"  visitors: {crowds.Positions.Count} from {crowds.Records} records: {string.Join(", ", crowds.Groups.Select(g => $"{g.Name} {g.Placed}"))}");
+            Console.WriteLine($"  visitors: {crowds.Positions.Count} from {crowds.Records} records: {string.Join(", ", crowds.Groups.Select(g => $"{g.Name} {g.Placed}"))}; animals {crowds.Animals}");
         }
 
         if (world.Towers is { } towers)
