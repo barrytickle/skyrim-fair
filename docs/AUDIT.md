@@ -2,7 +2,101 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: archery touch-ups (2026-09-23)
+## Current pass: stage crowd area and stable corner (2026-09-23)
+
+Barry's brief: "block out and dress the stage crowd area" (a dance area, a standing /
+watching area, and a seating / social edge), and "the horse pens / stable corner" on the
+west, support side. It stays an environment pass: no navmesh, inventories, band systems,
+quests or MCM. The market and the approved layout are unchanged.
+
+Stage geometry for reference: the deck is x 1173-2923, y 5088-6000, facing south; its steps
+come down to a foot at y 4538 (x 1676-2420) and are walled; the avenue arrives at
+(2048, 4308).
+
+### A. Dance area
+
+- New zone **`Dance`** (marker `SkyrimFairWorldDanceMarker`, at (2048, 4400)). It runs from
+  y 4150 up to the deck, flanking the steps, 1,600 to 1,750 wide.
+- It is a **market keep-out** (`DanceFloor`, plus `StageFront` over the deck and steps), so
+  no dressing, seating or visitors can land on it. Read back: nothing on it but the stage's
+  own steps and skirt.
+- It is painted as **worn** ground (`ground.wornZones`), trodden dirt where the dancing
+  will be.
+- The old "stage approach" visitor group, which stood here, was removed. The floor is left
+  open for dancers later.
+
+### B. Standing / watching area
+
+- New zone **`Watching`** (marker `SkyrimFairWorldWatchingMarker`, at (2048, 4060)). It is
+  a U round the dance floor: a band across the south (y 3990-4150) and the two flanks
+  (x 720-1173 and 2923-3380, up to y 5300).
+- Its three parts are keep-outs (`WatchingSouth`, `WatchingWest`, `WatchingEast`), so the
+  standing space stays readable. Only the existing light towers stand in the flanks.
+- 11 watchers face the stage: **4 from the south, 4 from the west, 3 from the east.**
+
+### C. Seating / social edge
+
+Ten informal clusters round the outer edge of the square, asymmetric (more on the field
+side). Each is placed by the collision-checked fitter, exempt only from the Crowd zone's
+keep-out (new `dressing.exemptKeepOut`):
+
+| Cluster | Pieces | Where |
+| --- | --- | --- |
+| `social_table` ×2 | rough table, bench, stool, crate for a seat, tankards, bread, cheese, jug, lantern | west (430, 4450); east (3720, 4880) |
+| `social_hay` ×2 | three hay bales dragged round a crate, tankards, bread, basket | west (360, 4860); north-west corner (700, 5520) |
+| `social_benches` ×2 | an L of two benches, stool, barrel table with tankards and a lantern | south-west (1000, 4020); east (3650, 4450) |
+| `social_fire` ×2 | small campfire (**real light**), log seat, hay bale, stool with a tankard, firewood | west flank (520, 5250); east flank (3560, 5320) |
+| `social_barrels` ×2 | two standing barrel tables with tankards, a drinking horn, mead | south-east (3130, 4000); north-east corner (3450, 5550) |
+| `brazier_lit` ×2 | the fair's lit brazier (**real light**) | the square's back corners, beside the stage (900, 5600) and (3180, 5560) |
+
+- 12 visitors round the clusters: 4 at the tables, 3 at the fires, 3 at the barrels, 2 on
+  the hay.
+- **The route from the avenue to the stage stays clear.** The avenue's corridor and the
+  gate-to-stage sightline band are still keep-outs; only one festival pole stands at the
+  corridor edge.
+
+### Horse pens / stable corner
+
+In the empty south of the west field, between the archery (y 700 up) and the gate, clear
+of the avenue's wattle fence (x about 870) and the west wall. It is a new zone,
+**`Stables`** (marker `SkyrimFairWorldStablesMarker`, at (300, 150), for horses later),
+with worn ground.
+
+| Piece | Contents | Where |
+| --- | --- | --- |
+| `horse_pen` | 768 × 512 pen of the **vanilla Whiterun farm fence** (`WRFenceStr01`, 9 rails on Whiterun stables' 256 grid), **a gate gap on the east side toward the fair**; hay scatter and mound, a hay bale, a water barrel with buckets (the watering corner; vanilla has no trough), a feed sack | centred (300, 150); interior left open for horses |
+| `stable_shelter` | `StockadeLeanTo01` lean-to, stacked hay, feed sacks, a crate with leather strips, a bear pelt on a long crate (saddle blanket), a **pitchfork** (new prop) and a broom leant on it, a lantern | west of the pen |
+| `feed_store` | stacked hay bales, sacks, a barrel | south-west |
+| `hitching_rail` | three vanilla hitch posts in a row, a bucket, hay, a sack | south of the pen, on the gate side, where arrivals tie up |
+| `stable_tack` | a saw horse carrying a pelt (tack stand), leather strips, a bucket, a stool | south |
+| `micro_storage` | crate, sack, basket | north-west |
+
+One stable hand stands by the shelter. The corner is modest: about 1,300 × 900 including
+its support pieces.
+
+**Numbers**: 86 dressing groups (from 68), 1,728 pieces, 57 visitors (59 keepers, 4
+archers: 120 actors), 22 real lights. One new prop (`Pitchfork`, 174 in all).
+
+**Verification**:
+- Generator run twice: identical SHA256 `ea911c81e988c234...`. **Deployed byte-identical**,
+  with the pitchfork.
+- Read back from the ESP: dance floor clear of dressing and visitors; watching areas hold
+  only watchers and the existing towers; no NPC inside the stage walls; avenue route clear.
+- Renders in `docs/images/crowd_and_stables.png`: the pen closes with its gate gap, the
+  shelter, hay and hitch posts round it; the square open in the middle.
+
+**Visual review needed**:
+- The **fence**: rails should meet at the corners (they overlap about 14 at each end by
+  design), and the gate gap should read as a gate.
+- The lean-to, pitchfork and saw horse sit at their measured heights; check nothing
+  floats.
+- Is the **dance floor** broad enough, and does the square feel open in the middle and
+  social round the edges? The social edge is uneven on purpose; say if a side feels bare
+  or crowded.
+- **Performance** with 120 actors and 22 lights near the stage at night. Visitor groups
+  are one number each in `fairWorld.crowds`.
+
+## Previous pass: archery touch-ups (2026-09-23)
 
 Barry: "you just nailed it", archers working, and two small things at the archery booth:
 - **Fletcher sign hanging off one post**: every vanilla shop sign is modelled across its

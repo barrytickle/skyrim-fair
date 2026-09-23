@@ -70,7 +70,7 @@ internal static class FairCrowds
         for (var gi = 0; gi < config.Groups.Count; gi++)
         {
             var group = config.Groups[gi];
-            var focus = new List<(float X, float Y, float Facing)>();
+            var focus = new List<(float X, float Y, float Facing, float Inner)>();
             if (group.Theme.Length > 0)
             {
                 // In front of every stall of the theme, facing its counter.
@@ -78,25 +78,26 @@ internal static class FairCrowds
                 {
                     var (fx, fy) = (MathF.Sin(stall.Yaw * Deg), MathF.Cos(stall.Yaw * Deg));
                     var reach = stall.Depth / 2f + group.FrontOffset;
-                    focus.Add((stall.X + fx * reach, stall.Y + fy * reach, stall.Yaw + 180f));
+                    focus.Add((stall.X + fx * reach, stall.Y + fy * reach, stall.Yaw + 180f, 0f));
                 }
             }
             else if (group.Near.Length > 0)
             {
                 // Round each dressing group of the module, seen from all sides.
+                // Measured from the group's edge, not its middle, so people stand round it.
                 foreach (var f in blocked.Where(b => b.Kind == group.Near))
                 {
-                    focus.Add((f.X, f.Y, f.Yaw));
+                    focus.Add((f.X, f.Y, f.Yaw, MathF.Max(f.HalfW, f.HalfD)));
                 }
             }
             else if (group.At.Length >= 2)
             {
-                focus.Add((group.At[0], group.At[1], group.At.Length > 2 ? group.At[2] : 0f));
+                focus.Add((group.At[0], group.At[1], group.At.Length > 2 ? group.At[2] : 0f, 0f));
             }
 
             var placedHere = 0;
             var fi = 0;
-            foreach (var (cx, cy, facing) in focus)
+            foreach (var (cx, cy, facing, inner) in focus)
             {
                 fi++;
                 if (FairHash.Hash3(gi * 31 + fi, 5, 41) >= group.Chance)
@@ -114,7 +115,7 @@ internal static class FairCrowds
                         var seed = gi * 1000 + fi * 97 + k * 17 + attempt;
                         var t = count == 1 ? 0.5f : (k + 0.5f + FairHash.Signed(seed, 1, 40) * 0.35f) / count;
                         var angle = (facing + 180f + (t - 0.5f) * 2f * group.Arc) * Deg;
-                        var r = group.Radius * (0.45f + 0.55f * FairHash.Hash3(seed, 2, 40));
+                        var r = inner + group.Radius * (0.45f + 0.55f * FairHash.Hash3(seed, 2, 40));
                         var (x, y) = (cx + MathF.Sin(angle) * r, cy + MathF.Cos(angle) * r);
                         if (blocked.Any(b => b.Contains(x, y, 25f)) || stood.Any(s => (s.X - x) * (s.X - x) + (s.Y - y) * (s.Y - y) < 55f * 55f))
                         {

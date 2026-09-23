@@ -520,6 +520,9 @@
     },
     "Shovel": {
       "source": "meshes/clutter/common/shovel01.nif"
+    },
+    "Pitchfork": {
+      "source": "meshes/clutter/common/pitchfork01.nif"
     }
   }
 }

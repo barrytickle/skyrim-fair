@@ -1723,6 +1723,20 @@
    ],
    "model": "SkyrimFair\\Props\\Pie.nif"
   },
+  "Pitchfork": {
+   "max": [
+    3,
+    15,
+    50
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -15,
+    -48
+   ],
+   "model": "SkyrimFair\\Props\\Pitchfork.nif"
+  },
   "Plate": {
    "max": [
     16,

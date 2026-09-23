@@ -42,6 +42,11 @@ internal static class FairMarket
             .Concat(market.KeepOut.Select(a => a.Polygon.Select(p => (p[0], p[1])).ToArray()))
             .Concat(extraKeepOut)
             .ToList();
+        var keepOutNames = world.Zones.Where(z => market.KeepOutZones.Contains(z.Name)).Select(z => z.Name)
+            .Concat(market.KeepOut.Select(a => a.Name))
+            .Concat(extraKeepOut.Select(_ => "tower"))
+            .ToList();
+        IReadOnlyCollection<string> exempt = Array.Empty<string>();
 
         var placed = new List<Placed>();
         var frontages = new List<Placed>();
@@ -70,7 +75,7 @@ internal static class FairMarket
                     if (outside(px, py) > -(wallMargin ?? market.WallMargin)) return $"the wall at ({px:0}, {py:0})";
                     for (var k = 0; k < keepOut.Count; k++)
                     {
-                        if (FairGeometry.Inside(keepOut[k], px, py)) return $"keep-out area {k} at ({px:0}, {py:0})";
+                        if (!exempt.Contains(keepOutNames[k]) && FairGeometry.Inside(keepOut[k], px, py)) return $"keep-out area {keepOutNames[k]} at ({px:0}, {py:0})";
                     }
                     foreach (var lane in lanes)
                     {
@@ -529,6 +534,7 @@ internal static class FairMarket
             var d = market.Dressing[di];
             if (d.Module.Length > 0)
             {
+                exempt = d.ExemptKeepOut;
                 var group = modules[d.Module];
                 var (gx, gy) = (d.X, d.Y);
                 var why = WhyNot(group, gx, gy, d.Yaw, wallMargin: 60f, keepFrontages: true);
@@ -556,6 +562,8 @@ internal static class FairMarket
                 {
                     dressingRefusals[$"group {d.Module} at ({d.X:0}, {d.Y:0}): {why.Split(" at ")[0]}"] = 1;
                 }
+
+                exempt = Array.Empty<string>();
 
                 continue;
             }

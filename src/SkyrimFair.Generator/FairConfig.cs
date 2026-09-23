@@ -1966,6 +1966,12 @@ internal sealed record MarketDressing
     /// <summary>For a module: how far from its point to search for a spot that fits.</summary>
     public float SearchRadius { get; init; }
 
+    /// <summary>
+    /// Keep-out zones this group may stand in (the performance square's social edge sits in
+    /// the Crowd zone, which keeps stalls out); every other keep-out still applies.
+    /// </summary>
+    public List<string> ExemptKeepOut { get; init; } = new();
+
     public string Piece { get; init; } = string.Empty;
 
     public string Name { get; init; } = string.Empty;
