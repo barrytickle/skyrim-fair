@@ -378,7 +378,7 @@
             {"name": "WHMarketStall02", "piece": "000F3C73:Skyrim.esm", "x": 95, "y": -10},
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": -40, "y": -135},
             {"name": "MeadBarrel01", "piece": "0001E3A3:Skyrim.esm", "x": 10, "y": -128, "yaw": 40, "optional": true},
-            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 70, "y": 150},
+            {"name": "FarmBench01F", "piece": "000A4AD6:Skyrim.esm", "x": 70, "y": 150},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 205, "y": -120, "optional": true}
           ],
           "vendorSpots": [[95, -40]],
@@ -417,10 +417,10 @@
           "vendorSpots": [],
           "pieces": [
             {"name": "ExteriorWoodenTable01", "piece": "0003DE44:Skyrim.esm", "x": 0, "y": 0},
-            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": -55, "y": 95},
-            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 58, "y": 97},
-            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": -57, "y": -95},
-            {"name": "FarmBench01Static", "piece": "00041EC7:Skyrim.esm", "x": 55, "y": -97},
+            {"name": "FarmBench01F", "piece": "000A4AD6:Skyrim.esm", "x": -55, "y": 95},
+            {"name": "FarmBench01F", "piece": "000A4AD6:Skyrim.esm", "x": 58, "y": 97},
+            {"name": "FarmBench01F", "piece": "000A4AD6:Skyrim.esm", "x": -57, "y": -95},
+            {"name": "FarmBench01F", "piece": "000A4AD6:Skyrim.esm", "x": 55, "y": -97},
             {"name": "Lantern", "piece": "@PropTowerLantern", "x": 25, "y": 8, "z": 63, "optional": true},
             {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 155, "y": 0, "optional": true}
           ]
@@ -534,9 +534,9 @@
           "depth": 290,
           "pieces": [
             {"piece": "0003DE44:Skyrim.esm", "x": 0, "y": 0},
-            {"piece": "00041EC7:Skyrim.esm", "x": -55, "y": 95},
-            {"piece": "00041EC7:Skyrim.esm", "x": 58, "y": 97},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -70, "y": -90, "yaw": 20},
+            {"piece": "000A4AD6:Skyrim.esm", "x": -55, "y": 95},
+            {"piece": "000A4AD6:Skyrim.esm", "x": 58, "y": 97},
+            {"piece": "00074EC6:Skyrim.esm", "x": -70, "y": -90, "yaw": 20},
             {"piece": "0005B198:Skyrim.esm", "x": 60, "y": -110, "yaw": 90, "optional": true},
             {"piece": "@PropTankard", "x": -40, "y": 20, "z": 61, "yaw": 30},
             {"piece": "@PropTankard", "x": 30, "y": 36, "z": 61, "yaw": 140},
@@ -555,10 +555,10 @@
           "depth": 260,
           "pieces": [
             {"piece": "0002EC1F:Skyrim.esm", "x": 0, "y": 0},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -60, "y": 20, "yaw": 20},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 55, "y": 30, "yaw": 70},
+            {"piece": "00074EC6:Skyrim.esm", "x": -60, "y": 20, "yaw": 20},
+            {"piece": "00074EC6:Skyrim.esm", "x": 55, "y": 30, "yaw": 70},
             {"piece": "0007A617:Skyrim.esm", "x": 10, "y": -70, "z": 24, "yaw": 15},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -30, "y": 70, "yaw": 40, "optional": true},
+            {"piece": "00074EC6:Skyrim.esm", "x": -30, "y": 70, "yaw": 40, "optional": true},
             {"piece": "@PropTankard", "x": -12, "y": 8, "z": 62, "yaw": 40},
             {"piece": "@PropTankard", "x": 14, "y": -6, "z": 62, "yaw": 120},
             {"piece": "@PropWoodenBowl", "x": 4, "y": 14, "z": 62},
@@ -590,8 +590,8 @@
             {"piece": "0010C0E3:Skyrim.esm", "x": 0, "y": 0},
             {"piece": "@PropTankard", "x": -8, "y": 4, "z": 80, "yaw": 20},
             {"piece": "@PropTankard", "x": 9, "y": -6, "z": 80, "yaw": 150},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 50, "y": 10, "yaw": 30},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -46, "y": -14, "yaw": 70, "optional": true},
+            {"piece": "00074EC6:Skyrim.esm", "x": 50, "y": 10, "yaw": 30},
+            {"piece": "00074EC6:Skyrim.esm", "x": -46, "y": -14, "yaw": 70, "optional": true},
             {"piece": "@PropMead", "x": 14, "y": 12, "z": 80, "optional": true},
             {"piece": "@PropMead", "x": 30, "y": -40, "optional": true}
           ]
@@ -644,7 +644,7 @@
           "width": 200,
           "depth": 90,
           "pieces": [
-            {"piece": "00038642:Skyrim.esm", "x": 0, "y": 0},
+            {"piece": "0002E6CF:Skyrim.esm", "x": 0, "y": 0},
             {"piece": "@PropTowerLantern", "x": 95, "y": 10, "yaw": 30},
             {"piece": "@PropTankard", "x": 30, "y": 3, "z": 30, "yaw": 40},
             {"piece": "@PropTankard", "x": -40, "y": -4, "z": 30, "yaw": 100, "optional": true}
@@ -759,7 +759,7 @@
             {"piece": "@PropWolfPelt", "x": 0, "y": -70, "z": 1, "yaw": 90, "scale": 0.9},
             {"piece": "01B3C0:Holidays.esp", "x": 120, "y": 60, "yaw": -20},
             {"piece": "@PropTowerLantern", "x": -85, "y": 20, "z": 62, "yaw": 40},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 0, "y": -30}
+            {"piece": "00074EC6:Skyrim.esm", "x": 0, "y": -30}
           ]
         },
         {
@@ -767,9 +767,9 @@
           "width": 520,
           "depth": 160,
           "pieces": [
-            {"piece": "00038642:Skyrim.esm", "x": -170, "y": 0},
-            {"piece": "00038642:Skyrim.esm", "x": 20, "y": 0},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 150, "y": 10, "yaw": 20},
+            {"piece": "0002E6CF:Skyrim.esm", "x": -170, "y": 0},
+            {"piece": "0002E6CF:Skyrim.esm", "x": 20, "y": 0},
+            {"piece": "00074EC6:Skyrim.esm", "x": 150, "y": 10, "yaw": 20},
             {"piece": "0005B198:Skyrim.esm", "x": 220, "y": -20, "yaw": 90, "optional": true},
             {"piece": "0010C0E3:Skyrim.esm", "x": -250, "y": 20},
             {"piece": "@PropTankard", "x": -255, "y": 25, "z": 80},
@@ -796,7 +796,7 @@
           "depth": 80,
           "pieces": [
             {"piece": "01B3C0:Holidays.esp", "x": 0, "y": 0},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 40, "y": -30, "yaw": 30},
+            {"piece": "00074EC6:Skyrim.esm", "x": 40, "y": -30, "yaw": 30},
             {"piece": "@PropParchment", "x": 40, "y": -30, "z": 47, "yaw": 20}
           ]
         },
@@ -815,9 +815,9 @@
           "width": 330,
           "depth": 230,
           "pieces": [
-            {"piece": "00038642:Skyrim.esm", "x": -60, "y": 40, "yaw": 8},
-            {"piece": "00041EC7:Skyrim.esm", "x": 95, "y": -30, "yaw": 78},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -120, "y": -50, "yaw": 30},
+            {"piece": "0002E6CF:Skyrim.esm", "x": -60, "y": 40, "yaw": 8},
+            {"piece": "000A4AD6:Skyrim.esm", "x": 95, "y": -30, "yaw": 78},
+            {"piece": "00074EC6:Skyrim.esm", "x": -120, "y": -50, "yaw": 30},
             {"piece": "0010C0E3:Skyrim.esm", "x": 20, "y": -60},
             {"piece": "@PropTankard", "x": 12, "y": -54, "z": 80, "yaw": 40},
             {"piece": "@PropTankard", "x": 30, "y": -66, "z": 80, "yaw": 150},
@@ -848,8 +848,8 @@
           "depth": 300,
           "pieces": [
             {"piece": "0003DE44:Skyrim.esm", "x": 0, "y": 0, "yaw": 4},
-            {"piece": "00038642:Skyrim.esm", "x": 0, "y": 85, "yaw": 180},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -70, "y": -80, "yaw": 20},
+            {"piece": "0002E6CF:Skyrim.esm", "x": 0, "y": 85, "yaw": 180},
+            {"piece": "00074EC6:Skyrim.esm", "x": -70, "y": -80, "yaw": 20},
             {"piece": "0007A617:Skyrim.esm", "x": 50, "y": -85, "z": 24, "yaw": 12},
             {"piece": "@PropTankard", "x": -50, "y": 10, "z": 61, "yaw": 20},
             {"piece": "@PropTankard", "x": 30, "y": -20, "z": 61, "yaw": 140},
@@ -870,7 +870,7 @@
             {"piece": "000AF8BA:Skyrim.esm", "x": 0, "y": 0, "z": 90},
             {"piece": "000173FE:Skyrim.esm", "x": 0, "y": 140, "z": -8, "yaw": 90},
             {"piece": "0005B198:Skyrim.esm", "x": -140, "y": -40, "yaw": 70},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 120, "y": -70, "yaw": 20},
+            {"piece": "00074EC6:Skyrim.esm", "x": 120, "y": -70, "yaw": 20},
             {"piece": "@PropTankard", "x": 118, "y": -70, "z": 47, "yaw": 40},
             {"piece": "000185B6:Skyrim.esm", "x": 150, "y": 60, "yaw": 30}
           ]
@@ -886,7 +886,7 @@
             {"piece": "@PropTankard", "x": -52, "y": -6, "z": 80, "yaw": 150},
             {"piece": "@PropDrinkingHorn", "x": 56, "y": 14, "z": 81, "yaw": 40},
             {"piece": "@PropMead", "x": 70, "y": 2, "z": 80},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 0, "y": 70, "yaw": 20, "optional": true}
+            {"piece": "00074EC6:Skyrim.esm", "x": 0, "y": 70, "yaw": 20, "optional": true}
           ]
         },
         {
@@ -968,7 +968,7 @@
             {"piece": "@PropBearPelt", "x": 0, "y": 0, "z": 100, "yaw": 90},
             {"piece": "@PropLeatherStrips", "x": 60, "y": 40, "yaw": 30},
             {"piece": "@PropBucket", "x": -70, "y": 40},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 70, "y": -40, "yaw": 20}
+            {"piece": "00074EC6:Skyrim.esm", "x": 70, "y": -40, "yaw": 20}
           ]
         }
       ],
@@ -1789,8 +1789,8 @@
             {"piece": "0010C0E3:Skyrim.esm", "x": 0, "y": 0},
             {"piece": "@PropTankard", "x": -8, "y": 4, "z": 80, "yaw": 20},
             {"piece": "@PropTankard", "x": 8, "y": -6, "z": 80, "yaw": 150},
-            {"piece": "0002BCD5:Skyrim.esm", "x": 48, "y": 6, "yaw": 30},
-            {"piece": "0002BCD5:Skyrim.esm", "x": -44, "y": -10, "yaw": 70, "optional": true},
+            {"piece": "00074EC6:Skyrim.esm", "x": 48, "y": 6, "yaw": 30},
+            {"piece": "00074EC6:Skyrim.esm", "x": -44, "y": -10, "yaw": 70, "optional": true},
             {"piece": "@PropMead", "x": 12, "y": 10, "z": 80, "optional": true}
           ]
         },
@@ -3069,325 +3069,46 @@
       "name": "Fair Visitor",
       "groups": [
         {"name": "sweetroll queue", "theme": "sweetroll", "count": 6, "radius": 240, "arc": 70, "frontOffset": 90},
-        {"name": "mead", "theme": "mead", "count": 3, "radius": 200, "arc": 80},
-        {"name": "hot drinks", "theme": "hotdrinks", "count": 3, "radius": 200, "arc": 70},
-        {"name": "roast", "theme": "roast", "count": 2, "radius": 180, "arc": 60},
-        {"name": "bakery", "theme": "bakery", "count": 1, "radius": 150, "arc": 40},
-        {"name": "cheese", "theme": "cheese", "count": 1, "radius": 150, "arc": 40},
-        {"name": "pies", "theme": "pies", "count": 1, "radius": 150, "arc": 40},
-        {"name": "imperial onlookers", "theme": "imperial", "count": 2, "radius": 180, "arc": 60},
-        {"name": "stormcloak onlookers", "theme": "stormcloak", "count": 1, "radius": 160, "arc": 40},
-        {"name": "lonely dwemer browser", "theme": "dwemer", "count": 1, "radius": 110, "arc": 20},
-        {"name": "jewellery", "theme": "jeweller", "count": 1, "radius": 130, "arc": 30},
-        {"name": "smith", "theme": "smith", "count": 1, "radius": 150, "arc": 40},
+        {"name": "mead", "theme": "mead", "count": 3, "radius": 200, "arc": 80, "retired": true},
+        {"name": "hot drinks", "theme": "hotdrinks", "count": 3, "radius": 200, "arc": 70, "retired": true},
+        {"name": "roast", "theme": "roast", "count": 2, "radius": 180, "arc": 60, "retired": true},
+        {"name": "bakery", "theme": "bakery", "count": 1, "radius": 150, "arc": 40, "retired": true},
+        {"name": "cheese", "theme": "cheese", "count": 1, "radius": 150, "arc": 40, "retired": true},
+        {"name": "pies", "theme": "pies", "count": 1, "radius": 150, "arc": 40, "retired": true},
+        {"name": "imperial onlookers", "theme": "imperial", "count": 2, "radius": 180, "arc": 60, "retired": true},
+        {"name": "stormcloak onlookers", "theme": "stormcloak", "count": 1, "radius": 160, "arc": 40, "retired": true},
+        {"name": "lonely dwemer browser", "theme": "dwemer", "count": 1, "radius": 110, "arc": 20, "retired": true},
+        {"name": "jewellery", "theme": "jeweller", "count": 1, "radius": 130, "arc": 30, "retired": true},
+        {"name": "smith", "theme": "smith", "count": 1, "radius": 150, "arc": 40, "retired": true},
         {"name": "archery spectators", "at": [240, 1400, 270], "count": 3, "radius": 260, "arc": 55},
-        {"name": "traders' crossing", "at": [3780, 1000, 0], "count": 3, "radius": 360, "arc": 180},
-        {"name": "picnic", "near": "picnic_busy", "count": 2, "radius": 200, "arc": 180, "chance": 0.45},
-        {"name": "picnic hay", "near": "picnic_hay", "count": 2, "radius": 190, "arc": 180, "chance": 0.45},
-        {"name": "round a brazier", "near": "brazier_lit", "count": 1, "radius": 150, "arc": 180, "chance": 0.4},
-        {"name": "by the cook fires", "near": "cookfire", "count": 1, "radius": 260, "arc": 180, "chance": 0.7},
+        {"name": "traders' crossing", "at": [3780, 1000, 0], "count": 3, "radius": 360, "arc": 180, "retired": true},
+        {"name": "picnic", "near": "picnic_busy", "count": 2, "radius": 200, "arc": 180, "chance": 0.45, "retired": true},
+        {"name": "picnic hay", "near": "picnic_hay", "count": 2, "radius": 190, "arc": 180, "chance": 0.45, "retired": true},
+        {"name": "round a brazier", "near": "brazier_lit", "count": 1, "radius": 150, "arc": 180, "chance": 0.4, "retired": true},
+        {"name": "by the cook fires", "near": "cookfire", "count": 1, "radius": 260, "arc": 180, "chance": 0.7, "retired": true},
         {"name": "watching from the south", "at": [2048, 4060, 0], "count": 5, "radius": 300, "arc": 70},
         {"name": "watching from the west", "at": [960, 4700, 60], "count": 3, "radius": 200, "arc": 40},
         {"name": "watching from the east", "at": [3150, 4760, 300], "count": 3, "radius": 200, "arc": 40},
-        {"name": "social edge", "near": "social_table", "count": 2, "radius": 150, "arc": 180, "chance": 0.8},
+        {"name": "social edge", "near": "social_table", "count": 2, "radius": 150, "arc": 180, "chance": 0.8, "retired": true},
         {"name": "round the crowd fires", "near": "social_fire", "count": 2, "radius": 150, "arc": 180},
-        {"name": "barrel drinkers", "near": "social_barrels", "count": 2, "radius": 150, "arc": 180, "chance": 0.8},
-        {"name": "hay bale sitters", "near": "social_hay", "count": 1, "radius": 150, "arc": 180, "chance": 0.6},
+        {"name": "barrel drinkers", "near": "social_barrels", "count": 2, "radius": 150, "arc": 180, "chance": 0.8, "retired": true},
+        {"name": "hay bale sitters", "near": "social_hay", "count": 1, "radius": 150, "arc": 180, "chance": 0.6, "retired": true},
         {"name": "stable hand", "near": "stable_shelter", "count": 1, "radius": 150, "arc": 90}
       ],
       "tiers": [
-        {
-          "name": "stage audience",
-          "groups": [
-            {
-              "name": "audience centre",
-              "at": [
-                2048,
-                4140,
-                0
-              ],
-              "count": 16,
-              "radius": 520,
-              "arc": 55
-            },
-            {
-              "name": "audience west",
-              "at": [
-                1500,
-                4150,
-                20
-              ],
-              "count": 8,
-              "radius": 420,
-              "arc": 45
-            },
-            {
-              "name": "audience east",
-              "at": [
-                2600,
-                4150,
-                340
-              ],
-              "count": 8,
-              "radius": 420,
-              "arc": 45
-            },
-            {
-              "name": "audience west side",
-              "at": [
-                1173,
-                4620,
-                90
-              ],
-              "count": 6,
-              "radius": 380,
-              "arc": 40
-            },
-            {
-              "name": "audience east side",
-              "at": [
-                2923,
-                4620,
-                270
-              ],
-              "count": 6,
-              "radius": 380,
-              "arc": 40
-            }
-          ]
-        },
-        {
-          "name": "wanderers",
-          "package": "0001B217:Skyrim.esm",
-          "suffix": "Wanderer",
-          "groups": [
-            {
-              "name": "wanderers 1",
-              "at": [
-                2048,
-                -800,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 2",
-              "at": [
-                2048,
-                600,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 3",
-              "at": [
-                2048,
-                2000,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 4",
-              "at": [
-                2048,
-                3200,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 5",
-              "at": [
-                3780,
-                300,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 6",
-              "at": [
-                3780,
-                1700,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 7",
-              "at": [
-                3780,
-                3000,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 8",
-              "at": [
-                900,
-                2600,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            },
-            {
-              "name": "wanderers 9",
-              "at": [
-                700,
-                500,
-                0
-              ],
-              "count": 4,
-              "radius": 260,
-              "arc": 180
-            }
-          ]
-        },
-        {
-          "name": "busier stalls",
-          "groups": [
-            {
-              "name": "more sweetroll",
-              "theme": "sweetroll",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more mead",
-              "theme": "mead",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more roast",
-              "theme": "roast",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more bakery",
-              "theme": "bakery",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more hotdrinks",
-              "theme": "hotdrinks",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more pies",
-              "theme": "pies",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more smith",
-              "theme": "smith",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more jeweller",
-              "theme": "jeweller",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more clothing",
-              "theme": "clothing",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more furs",
-              "theme": "furs",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more alchemy",
-              "theme": "alchemy",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more curios",
-              "theme": "curios",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more toys",
-              "theme": "toys",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more honey",
-              "theme": "honey",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            },
-            {
-              "name": "more fletcher",
-              "theme": "fletcher",
-              "count": 2,
-              "radius": 200,
-              "arc": 70,
-              "chance": 0.8
-            }
-          ]
-        }
+        {"name": "dance floor, front", "role": "dancer", "groups": [{"name": "dancers front west", "at": [1480, 4300, 0], "count": 7, "radius": 200, "arc": 180}, {"name": "dancers front left", "at": [1860, 4240, 0], "count": 7, "radius": 190, "arc": 180}, {"name": "dancers front right", "at": [2240, 4240, 0], "count": 7, "radius": 190, "arc": 180}, {"name": "dancers front east", "at": [2620, 4300, 0], "count": 7, "radius": 200, "arc": 180}]},
+        {"name": "dance floor, back", "role": "dancer", "groups": [{"name": "dancers back west", "at": [1420, 4720, 0], "count": 9, "radius": 220, "arc": 180}, {"name": "dancers back east", "at": [2680, 4720, 0], "count": 9, "radius": 220, "arc": 180}]},
+        {"name": "seated in the market", "seats": [{"near": "picnic", "perModule": 3}, {"near": "picnic_busy", "perModule": 3}, {"near": "picnic_mixed", "perModule": 2}, {"near": "social_table", "perModule": 2}, {"near": "social_benches", "perModule": 2}, {"near": "micro_bench", "perModule": 1, "chance": 0.6}]},
+        {"name": "archery spectators", "seats": [{"near": "spectator_benches", "perModule": 4}]},
+        {"name": "wanderers", "package": "0010F587:Skyrim.esm", "suffix": "Wanderer", "groups": [{"name": "wanderers avenue", "at": [2048, 1400, 0], "count": 2, "radius": 260, "arc": 180}, {"name": "wanderers east lane", "at": [3780, 2200, 0], "count": 2, "radius": 260, "arc": 180}]},
+        {"name": "children", "children": true, "package": "0010F587:Skyrim.esm", "suffix": "Wander", "groups": [{"name": "children by the dance floor", "at": [1250, 4300, 90], "count": 2, "radius": 160, "arc": 90}, {"name": "children by the sweetrolls", "at": [2048, 2600, 0], "count": 2, "radius": 260, "arc": 180}, {"name": "children at the pen", "at": [300, 500, 180], "count": 2, "radius": 180, "arc": 70}]}
       ],
+      "quietPackage": "00025BFC:Skyrim.esm",
+      "sitPackage": "000ECEEB:Skyrim.esm",
+      "seats": {"000A4AD6:Skyrim.esm": 2, "0002E6CF:Skyrim.esm": 2, "00074EC6:Skyrim.esm": 1},
+      "danceIdles": ["000F7C8A:Skyrim.esm", "000F7C8B:Skyrim.esm", "00103653:Skyrim.esm"],
+      "cheerIdles": ["000D8730:Skyrim.esm", "000F7C8C:Skyrim.esm", "000D8731:Skyrim.esm"],
+      "children": {"name": "Fair Child", "race": "0002C65B:Skyrim.esm", "templates": ["000B94A3:Skyrim.esm", "000B94A9:Skyrim.esm", "0009F839:Skyrim.esm", "000274A5:Skyrim.esm", "00013385:Skyrim.esm", "00013668:Skyrim.esm"], "outfits": ["0006D92E:Skyrim.esm", "000958AC:Skyrim.esm", "000958C1:Skyrim.esm"]},
       "animals": [
         {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80], "script": "SkyrimFairPenHorse"},
         {"name": "grey horse", "base": "00068D6D:Skyrim.esm", "near": "horse_pen", "at": [60, -120, -100], "script": "SkyrimFairPenHorse"},

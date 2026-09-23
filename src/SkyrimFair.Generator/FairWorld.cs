@@ -563,21 +563,62 @@ internal static class FairWorld
         if (crowds is not null && config.Crowds.Tiers.Count > 0 && audio is not null)
         {
             var crowdMarker = config.Zones.First(z => z.Name == "Crowd").Marker;
+
+            // The seats: every placed bench and stool the crowds may use, by the dressing
+            // module it stands in (the first footprint of a seated kind containing it).
+            var seatBases = config.Crowds.Seats.ToDictionary(kv => FormKeyHelper.Parse(kv.Key), kv => kv.Value);
+            var seatKinds = config.Crowds.Tiers.SelectMany(t => t.Seats).Select(g => g.Near).ToHashSet(StringComparer.Ordinal);
+            var seats = new List<CrowdSeat>();
+            foreach (var cell in cells.OrderBy(c => c.Key.X).ThenBy(c => c.Key.Y))
+            {
+                foreach (var seat in cell.Value.Temporary.OfType<PlacedObject>())
+                {
+                    if (!seatBases.TryGetValue(seat.Base.FormKey, out var n))
+                    {
+                        continue;
+                    }
+
+                    var sp = seat.Placement!.Position;
+                    for (var fi = 0; fi < crowds.Blocked.Count; fi++)
+                    {
+                        var f = crowds.Blocked[fi];
+                        if (seatKinds.Contains(f.Kind) && f.Contains(sp.X, sp.Y, 10f))
+                        {
+                            seats.Add(new CrowdSeat(seat, n, fi, f));
+                            break;
+                        }
+                    }
+                }
+            }
+
+            var quietSource = config.Crowds.QuietPackage.Length > 0
+                ? master?.Packages.FirstOrDefault(x => x.FormKey == FormKeyHelper.Parse(config.Crowds.QuietPackage))
+                : null;
             var tiers = FairCrowds.BuildTiers(mod, config.Crowds, config.Vendors, crowds, plan.Height, placed =>
             {
                 placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
                 topCell.Persistent.Add(placed);
-            }, PutTemporaryNpc, FaceList, (crowdMarker[0], crowdMarker[1], plan.Height(crowdMarker[0], crowdMarker[1]) - 200f));
+            }, PutTemporaryNpc, PutPersistentNpc, (crowdMarker[0], crowdMarker[1], plan.Height(crowdMarker[0], crowdMarker[1]) - 200f),
+                seats, quietSource);
             var tierGlobal = new GlobalFloat(mod) { EditorID = config.Crowds.TierGlobal, Data = config.Crowds.Tiers.Count };
             mod.Globals.Add(tierGlobal);
             var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
+            script.Properties.Add(new ScriptObjectListProperty { Name = "CrowdLayers", Objects = tiers.Markers.Select(Obj).ToExtendedList() });
+            script.Properties.Add(new ScriptObjectProperty { Name = "CrowdLayer", Object = new FormLink<ISkyrimMajorRecordGetter>(tierGlobal.FormKey) });
+            script.Properties.Add(new ScriptObjectListProperty { Name = "Dancers", Objects = tiers.Dancers.Select(Obj).ToExtendedList() });
             script.Properties.Add(new ScriptObjectListProperty
             {
-                Name = "CrowdTiers",
-                Objects = tiers.Markers.Select(m => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(m) }).ToExtendedList(),
+                Name = "DanceIdles",
+                Objects = config.Crowds.DanceIdles.Select(i => Obj(FormKeyHelper.Parse(i))).ToExtendedList(),
             });
-            script.Properties.Add(new ScriptObjectProperty { Name = "CrowdTier", Object = new FormLink<ISkyrimMajorRecordGetter>(tierGlobal.FormKey) });
-            Console.WriteLine($"  crowd tiers ({config.Crowds.TierGlobal}, all on): " + string.Join(", ", tiers.Tiers.Select(t => $"{t.Tier} {t.Count}")));
+            script.Properties.Add(new ScriptObjectListProperty
+            {
+                Name = "CheerIdles",
+                Objects = config.Crowds.CheerIdles.Select(i => Obj(FormKeyHelper.Parse(i))).ToExtendedList(),
+            });
+            Console.WriteLine($"  crowd layers ({config.Crowds.TierGlobal}, all on; {seats.Count} seats, {tiers.Dancers.Count} dancers): "
+                + string.Join(", ", tiers.Tiers.Select(t => $"{t.Tier} {t.Count}")));
         }
 
         // ---- the large-reference table (RNAM) -------------------------------------------------

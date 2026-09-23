@@ -56,10 +56,17 @@ Actor[] Property Orchestra Auto
 {The rest of the orchestra (added after the first band, so a save picks them up).}
 Idle[] Property OrchestraIdles Auto
 
-ObjectReference[] Property CrowdTiers Auto
-{Each crowd tier's enable-parent marker.}
-GlobalVariable Property CrowdTier Auto
-{How many crowd tiers are on: set SkyrimFairCrowdTier to 0..n in the console.}
+ObjectReference[] Property CrowdLayers Auto
+{Each crowd layer's enable-parent marker, the most wanted first.}
+GlobalVariable Property CrowdLayer Auto
+{How many crowd layers are on: set SkyrimFairCrowdLayers to 0..n in the console.}
+
+Actor[] Property Dancers Auto
+{The dance floor (persistent references): they dance through each song and cheer at its end.}
+Idle[] Property DanceIdles Auto
+Idle[] Property CheerIdles Auto
+Int Property DanceEvery = 2 Auto
+{Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
 
 Actor[] Property Archers Auto
 {The archery range's archers, each linked (unkeyed) to the stand it shoots from.}
@@ -87,6 +94,7 @@ Bool[] bandPlaying
 Bool[] orchestraPlaying
 Bool bandOn = False
 Int appliedTier = -1
+Int danceTick = 0
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -130,7 +138,7 @@ Event OnUpdate()
 		QueueArchers()
 	EndIf
 	ResetArchers()
-	ApplyCrowdTier()
+	ApplyCrowdLayers()
 
 	If MusicEnabled.GetValue() < 0.5 || Songs.Length == 0
 		; Switched off: hold, and start afresh when switched back on.
@@ -148,6 +156,7 @@ Event OnUpdate()
 	SetAmbience(phase == 2)
 	If phase == 2
 		PlayBand()
+		Dance()
 	ElseIf bandOn
 		StopBand(False)
 	EndIf
@@ -182,6 +191,7 @@ Function Advance(Float now)
 			cheerInstance = Cheers[cheer].Play(StageSpeaker)
 			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue())
 			Enter(3, CheerLengths[cheer], now)
+			Cheer()
 		Else
 			Enter(4, PauseAfterCheer, now)
 		EndIf
@@ -262,28 +272,62 @@ Function StopAllOf(Actor[] players, Bool[] playing, Bool force)
 	EndWhile
 EndFunction
 
-; The crowd tiers on: the first CrowdTier tiers' markers enabled, the rest disabled.
-Function ApplyCrowdTier()
-	If !CrowdTier
+; The crowd layers on: the first CrowdLayer layers' markers enabled, the rest disabled.
+Function ApplyCrowdLayers()
+	If !CrowdLayer
 		Return
 	EndIf
-	Int want = CrowdTier.GetValue() as Int
+	Int want = CrowdLayer.GetValue() as Int
 	If want == appliedTier
 		Return
 	EndIf
 	Int i = 0
-	While i < CrowdTiers.Length
-		If CrowdTiers[i]
+	While i < CrowdLayers.Length
+		If CrowdLayers[i]
 			If i < want
-				CrowdTiers[i].Enable()
+				CrowdLayers[i].Enable()
 			Else
-				CrowdTiers[i].Disable()
+				CrowdLayers[i].Disable()
 			EndIf
 		EndIf
 		i += 1
 	EndWhile
 	appliedTier = want
-	Debug.Trace("SkyrimFairAudio: crowd tiers on: " + want)
+	Debug.Trace("SkyrimFairAudio: crowd layers on: " + want)
+EndFunction
+
+; A share of the dancers takes up a new dance each update, so the floor never moves in
+; step, and each dancer moves on through the dances song by song.
+Function Dance()
+	If DanceIdles.Length == 0
+		Return
+	EndIf
+	danceTick += 1
+	Int every = DanceEvery
+	If every < 1
+		every = 1
+	EndIf
+	Int i = 0
+	While i < Dancers.Length
+		If (i + danceTick) % every == 0 && Dancers[i] && Dancers[i].Is3DLoaded()
+			Dancers[i].PlayIdle(DanceIdles[(i + danceTick / every) % DanceIdles.Length])
+		EndIf
+		i += 1
+	EndWhile
+EndFunction
+
+; The song's end: the floor claps and cheers with the crowd.
+Function Cheer()
+	If CheerIdles.Length == 0
+		Return
+	EndIf
+	Int i = 0
+	While i < Dancers.Length
+		If Dancers[i] && Dancers[i].Is3DLoaded()
+			Dancers[i].PlayIdle(CheerIdles[i % CheerIdles.Length])
+		EndIf
+		i += 1
+	EndWhile
 EndFunction
 
 Function QueueArchers()

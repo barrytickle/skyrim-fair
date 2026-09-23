@@ -2,7 +2,84 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: bigger crowds (after the Crowded Streets audit) and a bard orchestra (2026-09-23)
+## Current pass: the crowd redistributed: a dance floor, people seated at the tables, children (2026-09-23)
+
+Barry: about 60% of the crowd in the centre dancing, 30% in the market and 10% by the
+archery and horses. Fewer standing NPCs in the market, replaced by people sitting at the
+picnic tables, at least two a table. Some wanderers and a few children. Object people
+come later. His `tai` test (30 to 110 fps) showed AI is the bottleneck.
+
+### What changed
+
+- **Seats:** the benches and stools became their sittable vanilla twins, with the same
+  meshes, so the footprints didn't change:
+  - `FarmBench01Static` → `FarmBench01F` (2 seats)
+  - `CommonBench01STATIC` → `CommonBench01` (3 markers, counted as 2)
+  - `WoodenBarStool01Static` → `WoodenBarStool`
+
+  The player can sit on them too.
+- **19 market groups retired**, placed as before but **initially disabled**
+  (`crowds.groups[].retired`), so no FormID moved. Retired: mead, hot drinks, roast,
+  bakery, cheese, pies, the onlookers, the dwemer browser, jewellery, smith, traders'
+  crossing, picnic, picnic hay, braziers, cook fires, social edge, barrel drinkers and
+  hay bale sitters. Kept: the sweetroll queue, the three stage-watching groups, the
+  archery spectators and the stable hand.
+- **Quiet visitors:** the visitor looks run a copy of `DefaultStayAtEditorLocation` that
+  only greets the player (`SkyrimFairVisitorQuietStayPackage`: no chatter between
+  visitors, no world interactions), so there are fewer AI checks.
+- **Six crowd layers**, replacing the three tiers. Each is on its own enable-parent
+  marker and switched live by the new global **`SkyrimFairCrowdLayers`** (default 6).
+  The script properties are new (`CrowdLayers`, `CrowdLayer`).
+
+  | Layer | Who | Placed |
+  | --- | --- | --- |
+  | 1 | **dance floor, front**: 4 rings across the square, below the stage ramp | 26 |
+  | 2 | **dance floor, back**: 2 rings either side of the ramp | 17 |
+  | 3 | **seated in the market**: `defaultSitLinkedRefNoConv`, each linked (unkeyed) to its bench or stool. Up to 3 at each picnic and busy picnic table, 2 at the mixed tables, social tables and benches, 1 at some micro benches | 31 |
+  | 4 | **archery spectators**, seated on the two spectator benches | 8 |
+  | 5 | **wanderers**, `DefaultSandboxEditorLocation1024NoConv` | 5 |
+  | 6 | **children** ("Fair Child", faces and voices from 6 vanilla children as Traits templates, vanilla child clothes), sandboxing by the dance floor, the sweetrolls and the pen | 6 |
+
+- **Dancers:** persistent, and given to the stage script as `Dancers`. During a song, each
+  gets one of the Cicero dances (`IdleCiceroDance1-3`) every 2 updates (`DanceEvery`),
+  staggered so the floor doesn't move in step. At the cheer, they applaud or cheer
+  (`IdleApplaud2`, `IdleApplaud3`, `IdleCivilWarCheer`).
+- **Split:**
+  - centre: 11 watching + 43 dancers + 4 at the social tables, about 58
+  - market: 4 queueing + 27 seated + 5 wanderers + 4 children, about 40
+  - archery and pen: 2 + 1 + 8 seated + 2 children, about 13
+
+  That's roughly 55/36/12.
+- **Active actors: 192**, down from 227. There are 228 placed, 36 of them disabled.
+
+### Verification
+
+- Against the deployed plugin: no record removed. Only records built last were
+  renumbered: the tier and layer records and the navmeshes. Tier 1's marker kept its
+  FormID.
+- Seats: 29 furniture refs used, 1 or 2 sitters each, every sitter within reach of its
+  seat. Nobody stands on the stage ramp (the first layout had a ring on it; caught on the
+  plan).
+- Navmesh validator: 9 meshes, 7,325 triangles, 58 islands, **0 errors**. Actors on the
+  mesh: 228 of 228.
+- Generator run twice: identical SHA256 `93a50609179b1067...` (744,867 bytes).
+  Footprints regenerated (unchanged). Scripts compile. Deployed.
+
+### Test
+
+Best from a save made **outside the fair**: the renumbered late records can pick up
+state an older save holds for their old FormIDs.
+
+1. Frame rate at the square, compared with last time's 30. If it's still low, try
+   `set SkyrimFairCrowdLayers to 4`, then `3` or `2`, which drops the children, the
+   wanderers, the archery seats and the market seats in turn.
+2. The dance floor: do they dance through a song? Is there a gap between dances? If so,
+   `DanceEvery` goes to 1. Do they clap and cheer at the song's end?
+3. The picnic tables: do people walk to the benches and sit, two or more a table?
+4. Children: do they look right (faces, clothes, size) and wander?
+5. The market: quieter now, with only the sweetroll queue standing?
+
+## Previous pass: bigger crowds (after the Crowded Streets audit) and a bard orchestra (2026-09-23)
 
 Barry: audit Crowded Streets and "see how far we can push the crowds"; more bards on the
 stage, "a bard orchestra", all men "because the songs are male singers".

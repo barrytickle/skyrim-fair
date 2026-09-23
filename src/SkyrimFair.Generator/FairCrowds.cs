@@ -17,6 +17,8 @@ internal static class FairCrowds
 {
     private const float Deg = MathF.PI / 180f;
 
+    private const int InitiallyDisabledFlag = 0x800;
+
     public static CrowdsResult Build(
         SkyrimMod mod, CrowdsConfig config, VendorsConfig looksFrom, MarketResult? market,
         Func<float, float, float> ground, Action<PlacedNpc> put, Func<string, FormKey> faceList)
@@ -169,7 +171,7 @@ internal static class FairCrowds
                         // Face the focus, give or take, as people in a loose crowd do.
                         var yaw = MathF.Atan2(cx - x, cy - y) / Deg + FairHash.Signed(seed, 3, 40) * 25f;
                         var npc = looks[(int)(FairHash.Hash3(seed, 4, 40) * looks.Count) % looks.Count];
-                        put(new PlacedNpc(mod)
+                        var placedNpc = new PlacedNpc(mod)
                         {
                             Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
                             Placement = new Placement
@@ -177,7 +179,13 @@ internal static class FairCrowds
                                 Position = new P3Float(x, y, ground(x, y) + 2f),
                                 Rotation = new P3Float(0f, 0f, yaw * Deg),
                             },
-                        });
+                        };
+                        if (group.Retired)
+                        {
+                            placedNpc.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+                        }
+
+                        put(placedNpc);
                         stood.Add((x, y));
                         placedHere++;
                         break;
@@ -192,23 +200,21 @@ internal static class FairCrowds
     }
 
     /// <summary>
-    /// Extra crowd tiers (<see cref="CrowdsConfig.Tiers"/>), built after every other record
-    /// so no FormID before them moves. Each tier's visitors hang off one enable-parent marker
-    /// (persistent), which the stage script enables up to <c>SkyrimFairCrowdTier</c>, so the
-    /// crowd can be thinned or thickened live. A tier may give its own package (the
-    /// wanderers' sandbox), in which case it gets its own visitor records.
+    /// The crowd layers (<see cref="CrowdsConfig.Tiers"/>), built after every other record
+    /// so no FormID before them moves. Each layer's people hang off one persistent
+    /// enable-parent marker, which the stage script enables up to the layer global; the
+    /// markers are made first, so theirs don't depend on the layers' sizes. A layer holds
+    /// dancers (persistent, danced by the script), children, wanderers (their own package)
+    /// or people seated on the market's benches and stools.
     /// </summary>
     public static CrowdTiersResult BuildTiers(
         SkyrimMod mod, CrowdsConfig config, VendorsConfig looksFrom, CrowdsResult first,
-        Func<float, float, float> ground, Action<PlacedObject> putMarker, Action<PlacedNpc> put, Func<string, FormKey> faceList,
-        (float X, float Y, float Z) markerAt)
+        Func<float, float, float> ground, Action<PlacedObject> putMarker, Action<PlacedNpc> putTemporary, Action<PlacedNpc> putPersistent,
+        (float X, float Y, float Z) markerAt, IReadOnlyList<CrowdSeat> seats, IPackageGetter? quietSource)
     {
-        var markers = new List<FormKey>();
-        var placed = new List<(string Tier, int Count)>();
-        var stood = first.Positions.ToList();
+        var markers = new List<PlacedObject>();
         for (var ti = 0; ti < config.Tiers.Count; ti++)
         {
-            var tier = config.Tiers[ti];
             var marker = new PlacedObject(mod)
             {
                 EditorID = $"{config.EditorIdPrefix}Tier{ti + 1}Marker",
@@ -216,40 +222,184 @@ internal static class FairCrowds
                 Placement = new Placement { Position = new P3Float(markerAt.X, markerAt.Y, markerAt.Z + 64f * ti), Rotation = new P3Float(0f, 0f, 0f) },
             };
             putMarker(marker);
-            markers.Add(marker.FormKey);
+            markers.Add(marker);
+        }
 
-            IReadOnlyList<Npc> looks = first.Looks;
-            if (tier.Package.Length > 0)
+        // The quiet package: the visitors' own, greeting the player and nothing else.
+        if (quietSource is not null)
+        {
+            var quiet = (Package)quietSource.Duplicate(mod.GetNextFormKey());
+            quiet.EditorID = $"{config.EditorIdPrefix}QuietStayPackage";
+            quiet.InterruptFlags = Package.InterruptFlag.HellosToPlayer;
+            mod.Packages.Add(quiet);
+            foreach (var look in first.Looks)
             {
-                // Their own records, the same looks with the tier's package.
-                looks = first.Looks.Select((l, i) =>
+                look.Packages.Clear();
+                look.Packages.Add(new FormLink<IPackageGetter>(quiet.FormKey));
+            }
+        }
+
+        // The children: vanilla children's faces and voices (Traits), the fair's name and clothes.
+        var children = new List<Npc>();
+        foreach (var template in config.Children.Templates)
+        {
+            var outfit = config.Children.Outfits[children.Count % config.Children.Outfits.Count];
+            var npc = new Npc(mod)
+            {
+                EditorID = $"{config.EditorIdPrefix}Child{children.Count + 1:00}",
+                Name = config.Children.Name,
+                Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(config.Children.Race)),
+                Template = new FormLinkNullable<INpcSpawnGetter>(FormKeyHelper.Parse(template)),
+                Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(looksFrom.Class)),
+                DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(outfit)),
+                Configuration = new NpcConfiguration
+                {
+                    Flags = NpcConfiguration.Flag.AutoCalcStats | NpcConfiguration.Flag.Protected,
+                    TemplateFlags = NpcConfiguration.TemplateFlag.Traits,
+                    Level = new NpcLevel { Level = 1 },
+                    CalcMinLevel = 1,
+                    CalcMaxLevel = 1,
+                    SpeedMultiplier = 100,
+                },
+                AIData = new AIData
+                {
+                    Aggression = Aggression.Unaggressive,
+                    Confidence = Confidence.Cowardly,
+                    Responsibility = Responsibility.NoCrime,
+                    Assistance = Assistance.HelpsNobody,
+                    Mood = Mood.Happy,
+                    EnergyLevel = 80,
+                },
+                ObjectBounds = new ObjectBounds { First = new P3Int16(-16, -10, 0), Second = new P3Int16(16, 10, 90) },
+                Height = 1f,
+                Weight = 50f,
+            };
+            npc.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(looksFrom.Package)));
+            mod.Npcs.Add(npc);
+            children.Add(npc);
+        }
+
+        // The same looks with another package get their own records, one set per package.
+        var copies = new Dictionary<(string Package, bool Children), List<Npc>>();
+        IReadOnlyList<Npc> LooksFor(string package, bool young, string suffix)
+        {
+            var from = young ? children : first.Looks;
+            if (package.Length == 0)
+            {
+                return from;
+            }
+
+            if (!copies.TryGetValue((package, young), out var list))
+            {
+                copies[(package, young)] = list = from.Select(l =>
                 {
                     var copy = l.Duplicate(mod.GetNextFormKey());
-                    copy.EditorID = $"{l.EditorID}{tier.Suffix}";
+                    copy.EditorID = $"{l.EditorID}{suffix}";
                     copy.Packages.Clear();
-                    copy.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(tier.Package)));
+                    copy.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(package)));
                     mod.Npcs.Add(copy);
                     return copy;
                 }).ToList();
             }
 
+            return list;
+        }
+
+        var placed = new List<(string Tier, int Count)>();
+        var dancers = new List<FormKey>();
+        var stood = first.Positions.ToList();
+        var taken = new Dictionary<FormKey, int>();
+        for (var ti = 0; ti < config.Tiers.Count; ti++)
+        {
+            var tier = config.Tiers[ti];
+            var marker = markers[ti];
+            var dancer = tier.Role == "dancer";
             var count = 0;
             void PutChild(PlacedNpc npc)
             {
                 npc.EnableParent = new EnableParent { Reference = new FormLink<IPlacedGetter>(marker.FormKey) };
-                put(npc);
+                if (dancer)
+                {
+                    // The script names each dancer, so they're persistent.
+                    putPersistent(npc);
+                    dancers.Add(npc.FormKey);
+                }
+                else
+                {
+                    putTemporary(npc);
+                }
+
                 count++;
             }
 
+            var looks = LooksFor(tier.Package, tier.Children, tier.Suffix);
             PlaceGroups(mod, tier.Groups, 5000 * (ti + 1), looks, first.Blocked, first.Market, stood, ground, PutChild);
+
+            // Seated: a sit package linked (unkeyed) to the seat, stood just outside it, away
+            // from the middle of its module (the table), so they turn and sit down.
+            if (tier.Seats.Count > 0)
+            {
+                var sitters = LooksFor(config.SitPackage, false, "Sitter");
+                for (var gi = 0; gi < tier.Seats.Count; gi++)
+                {
+                    var group = tier.Seats[gi];
+                    foreach (var module in seats.Where(x => x.Module.Kind == group.Near).GroupBy(x => x.ModuleIndex).OrderBy(m => m.Key))
+                    {
+                        var salt = ti * 7919 + gi * 131 + module.Key;
+                        if (FairHash.Hash3(salt, 1, 90) >= group.Chance)
+                        {
+                            continue;
+                        }
+
+                        var want = group.PerModule;
+                        var k = 0;
+                        foreach (var seat in module.OrderBy(x => FairHash.Hash3(salt, (int)x.Ref.FormKey.ID, 91)))
+                        {
+                            while (want > 0 && taken.GetValueOrDefault(seat.Ref.FormKey) < seat.Seats)
+                            {
+                                var n = taken.GetValueOrDefault(seat.Ref.FormKey);
+                                taken[seat.Ref.FormKey] = n + 1;
+                                var sp = seat.Ref.Placement!.Position;
+                                var (dx, dy) = (sp.X - seat.Module.X, sp.Y - seat.Module.Y);
+                                var len = MathF.Max(1f, MathF.Sqrt(dx * dx + dy * dy));
+                                (dx, dy) = (dx / len, dy / len);
+                                var along = (n - (seat.Seats - 1) / 2f) * 45f;
+                                var (x, y) = (sp.X + dx * 70f - dy * along, sp.Y + dy * 70f + dx * along);
+                                var sitter = new PlacedNpc(mod)
+                                {
+                                    Base = new FormLinkNullable<INpcGetter>(sitters[(int)(FairHash.Hash3(salt, k++, 92) * sitters.Count) % sitters.Count].FormKey),
+                                    Placement = new Placement
+                                    {
+                                        Position = new P3Float(x, y, ground(x, y) + 2f),
+                                        Rotation = new P3Float(0f, 0f, MathF.Atan2(-dx, -dy)),
+                                    },
+                                };
+                                sitter.LinkedReferences.Add(new LinkedReferences
+                                {
+                                    KeywordOrReference = new FormLink<IKeywordLinkedReferenceGetter>(FormKey.Null),
+                                    Reference = new FormLink<IPlacedGetter>(seat.Ref.FormKey),
+                                });
+                                PutChild(sitter);
+                                stood.Add((x, y));
+                                want--;
+                            }
+                        }
+                    }
+                }
+            }
+
             placed.Add((tier.Name, count));
         }
 
-        return new CrowdTiersResult(markers, placed, stood.Skip(first.Positions.Count).ToList());
+        return new CrowdTiersResult(markers.Select(m => m.FormKey).ToList(), placed, stood.Skip(first.Positions.Count).ToList(), dancers);
     }
 }
 
-internal sealed record CrowdTiersResult(IReadOnlyList<FormKey> Markers, IReadOnlyList<(string Tier, int Count)> Tiers, IReadOnlyList<(float X, float Y)> Positions);
+/// <summary>A seat for the crowd layers: a placed furniture reference in a market dressing module.</summary>
+internal sealed record CrowdSeat(PlacedObject Ref, int Seats, int ModuleIndex, MarketFootprint Module);
+
+internal sealed record CrowdTiersResult(IReadOnlyList<FormKey> Markers, IReadOnlyList<(string Tier, int Count)> Tiers, IReadOnlyList<(float X, float Y)> Positions,
+    IReadOnlyList<FormKey> Dancers);
 
 internal sealed record CrowdsResult(int Records, IReadOnlyList<(float X, float Y)> Positions, IReadOnlyList<(string Name, int Placed)> Groups, int Animals,
     IReadOnlyList<Npc> Looks, IReadOnlyList<MarketFootprint> Blocked, MarketResult? Market);

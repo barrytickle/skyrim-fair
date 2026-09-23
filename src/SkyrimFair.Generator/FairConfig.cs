@@ -2795,8 +2795,40 @@ internal sealed record CrowdsConfig
     /// <summary>Extra layers of visitors, built last and switched live (see <see cref="CrowdTier"/>).</summary>
     public List<CrowdTier> Tiers { get; init; } = new();
 
-    /// <summary>The global the stage script reads: how many tiers are on (defaults to all of them).</summary>
-    public string TierGlobal { get; init; } = "SkyrimFairCrowdTier";
+    /// <summary>The global the stage script reads: how many layers are on (defaults to all of them).</summary>
+    public string TierGlobal { get; init; } = "SkyrimFairCrowdLayers";
+
+    /// <summary>
+    /// The visitors' package swapped, late, for a copy of this one that only greets the
+    /// player (no chatter between visitors, no world interactions): fewer AI checks.
+    /// Empty leaves them as they are.
+    /// </summary>
+    public string QuietPackage { get; init; } = string.Empty;
+
+    /// <summary>What seated visitors run: sit in the (unkeyed) linked furniture.</summary>
+    public string SitPackage { get; init; } = "000ECEEB:Skyrim.esm";
+
+    /// <summary>Furniture bases people can be seated on, and how many each seats.</summary>
+    public Dictionary<string, int> Seats { get; init; } = new();
+
+    /// <summary>What the stage script plays on the dancers during a song, and at the cheer.</summary>
+    public List<string> DanceIdles { get; init; } = new();
+
+    public List<string> CheerIdles { get; init; } = new();
+
+    public ChildrenConfig Children { get; init; } = new();
+}
+
+/// <summary>The fair's children: vanilla children's faces (Traits templates) in child clothes.</summary>
+internal sealed record ChildrenConfig
+{
+    public string Name { get; init; } = "Fair Child";
+
+    public string Race { get; init; } = "0002C65B:Skyrim.esm";
+
+    public List<string> Templates { get; init; } = new();
+
+    public List<string> Outfits { get; init; } = new();
 }
 
 internal sealed record CrowdAnimal
@@ -2830,7 +2862,26 @@ internal sealed record CrowdTier
     /// <summary>EditorID suffix for the tier's own visitor records, when it has a package.</summary>
     public string Suffix { get; init; } = string.Empty;
 
+    /// <summary><c>dancer</c>: persistent, and danced by the stage script during songs.</summary>
+    public string Role { get; init; } = string.Empty;
+
+    /// <summary>The groups are the fair's children rather than adult visitors.</summary>
+    public bool Children { get; init; }
+
     public List<CrowdGroup> Groups { get; init; } = new();
+
+    /// <summary>People seated on the furniture of market dressing modules.</summary>
+    public List<SeatGroup> Seats { get; init; } = new();
+}
+
+/// <summary>Seated visitors: up to <see cref="PerModule"/> on the seats of each module of a kind.</summary>
+internal sealed record SeatGroup
+{
+    public string Near { get; init; } = string.Empty;
+
+    public int PerModule { get; init; } = 2;
+
+    public float Chance { get; init; } = 1f;
 }
 
 internal sealed record CrowdGroup
@@ -2858,6 +2909,12 @@ internal sealed record CrowdGroup
 
     /// <summary>Arc they fill, degrees either side of facing the point from the front (360 = all round).</summary>
     public float Arc { get; init; } = 90f;
+
+    /// <summary>
+    /// Placed as before but initially disabled: the group is replaced (by seated people or
+    /// a layer) and keeps its references, so no later FormID moves.
+    /// </summary>
+    public bool Retired { get; init; }
 }
 
 internal sealed record CollisionWall

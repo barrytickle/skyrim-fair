@@ -112,6 +112,19 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Crowd redistributed: built and deployed, awaiting Barry's test** (plugin `93a50609179b1067...`).
+- 6 live layers (`SkyrimFairCrowdLayers`, default 6):
+  - the dance floor, front 26 and back 17. They dance the Cicero dances through songs
+    and cheer at the end
+  - 31 seated at the market tables
+  - 8 seated archery spectators
+  - 5 wanderers
+  - 6 children
+- 19 market standing groups retired (disabled). The visitors run a quiet stay package.
+  Benches and stools are sittable furniture.
+- Active actors 192, down from 227.
+- Next: object (static posed) people for density and the archery, as a proof first.
+
 **Crowds and orchestra: built and deployed, awaiting Barry's test** (plugin `cbbd6c578f889607...`).
 - Crowded Streets audited: it spawns cheap sandbox NPCs by script and deletes them on
   leaving; its cap of 50 is a performance guard. For the fair, placed tiers are better.
