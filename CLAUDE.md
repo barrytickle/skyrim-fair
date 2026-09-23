@@ -86,7 +86,35 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 Last commit `c8c652a`, deployed; plugin SHA256 `9c65b621fa3e5af5...`. **Barry has not yet
 tested this build.** He's done for the night.
 
-**To check with Barry first, from his in-game test:**
+**Barry's test of this build (end of 2026-09-23). Do these first next session:**
+
+- ✅ **Working in game:**
+  - the stage music plays
+  - the cheer follows each song
+  - the next song starts on its own
+  - the pen horses show the ride prompt but can't be ridden, which is how Barry wants it
+- **Stage music far too quiet:** Barry wants "like 100x", so it sounds like a concert.
+  Levers:
+  - `stage.staticAttenuation` is 0 dB. Is a negative value allowed? Check the
+    `SNDR` BNAM limits.
+  - raise `stage.minDistance` and `maxDistance` (1500 / 7500)
+  - the stage category's `StaticVolumeMultiplier`
+  - `SetInstanceVolume` is capped at 1
+  - boost the WAVs themselves in `build_audio.py`: normalise or apply gain with a
+    limiter, since the songs peak around -3 dBFS and average far lower
+  - a second speaker, or a stage output model with a flatter curve
+- **The bards don't play instruments.** They stand without playing. Check:
+  - whether the copied Candlehearth package really runs
+  - whether the idle marker needs to be linked or reserved
+  - how vanilla's `BardSongs` quest starts the playing: `IdleLuteStart` etc. may need
+    the anim event from a script, or the instrument item
+  - Compare with a vanilla inn bard's reference and package setup
+- **Crowd ambience:** still wants a bit more volume. It's now 4 dB down; try 0 to 2.
+- **Archery sign still wrong:** move it south, or hang it on the left post rather than the
+  one with the wreath. That's the `archery_booth` module in `fair.config.json`: posts at
+  y 60 and 150, sign `000F0A22` at y 157.5, bar `000533D3` at y 105.
+
+**From the previous build, still to confirm:**
 
 1. **Stage music.** Fixed by pointing the script at sound markers. Does a song start about
    4 s after arriving? Then cheer, 2 s pause, next song? Does the music fade walking away?
