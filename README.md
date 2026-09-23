@@ -17,7 +17,13 @@ The first milestone is intentionally much less glamorous: prove that the reposit
 
 No Creation Kit is required for this milestone.
 
-## Requirements
+## Playing it
+
+What a player needs: the requirements, the recommended mods, and the **optional
+compatibility patches that must ship with any release** (Maximum Destruction, Stealth
+Detection Fixes). See [`docs/RELEASE.md`](docs/RELEASE.md).
+
+## Requirements (to build)
 
 - .NET 10 SDK
 - Skyrim Special Edition / Anniversary Edition installed on the machine that runs the generator

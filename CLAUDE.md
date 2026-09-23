@@ -247,7 +247,10 @@ unasked).
 - The 6 trades not yet placed (`docs/STALLS.md`).
 - Navmesh, vendor inventories and quests: only when Barry asks.
 
-**Open items before any public release:**
+**Open items before any public release** (the full list, with requirements and optional
+files, is `docs/RELEASE.md`; keep it current):
+- **ship the two compatibility patches** (Maximum Destruction, Stealth Detection Fixes) as
+  optional files. Without them the fair freezes the game for players with those mods
 - permission for the Whiterun stonefloor textures
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance
