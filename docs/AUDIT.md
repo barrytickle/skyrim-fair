@@ -2,7 +2,16 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the freeze is the save's; dances replay at their end; a first-song switch (2026-09-23)
+## Current pass: crowd NIFs, fifth rebuild, redeployed (2026-09-23)
+
+- The other agent rebuilt the crowd NIFs: hair is coloured through vertex colours
+  instead of the hair-tint shader, which doesn't work on statics (`docs/CROWD.md`,
+  "Fifth test").
+- All 38 are in the mod folder and match byte for byte.
+- Bounds confirmed unchanged against `figures.json`, so the plugin is unchanged
+  (`536becda924886e6...`).
+
+## Previous pass: the freeze is the save's; dances replay at their end; a first-song switch (2026-09-23)
 
 Barry: (1) still crashing; (2) "the npc's do one dance loop then stop"; (3) the lip sync
 doesn't work; (4) the static bodies don't work.
