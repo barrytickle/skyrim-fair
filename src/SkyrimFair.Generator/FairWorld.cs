@@ -472,6 +472,17 @@ internal static class FairWorld
             var package = source.Duplicate(mod.GetNextFormKey());
             package.EditorID = $"{config.Archery.EditorIdPrefix}TrainingPackage";
             ((PackageDataInt)package.Data[config.Archery.TriggerRadiusInput]).Data = (uint)config.Archery.TriggerRadius;
+
+            // "Use Weapon Location": vanilla's is near the unkeyed linked ref (the stand),
+            // within 32, and the package's first step is a Travel there. After a load the
+            // package resumes in that Travel, which needs a path; with no navmesh it never
+            // arrives, so the archer never shoots (read in game: the package is running,
+            // nothing happens). Near self, as the package's own weapon search location is,
+            // the archer is always there, so the Travel completes with or without navmesh.
+            var useAt = (PackageDataLocation)package.Data[config.Archery.UseWeaponLocationInput];
+            var nearSelf = ((PackageDataLocation)package.Data[config.Archery.SearchLocationInput]).Location!.DeepCopy();
+            nearSelf.Radius = (uint)config.Archery.UseWeaponRadius;
+            useAt.Location = nearSelf;
             mod.Packages.Add(package);
 
             // A hold package above it, live only while SkyrimFairArcherHold is 1. After a
@@ -489,10 +500,12 @@ internal static class FairWorld
             holdPackage.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = onHold });
             mod.Packages.Add(holdPackage);
 
+            // The hold package is kept (its FormID, and the global's, are in saves) but no
+            // longer given to the archers: switching to it and back didn't restart the
+            // training package (read in game: they stayed on the hold package).
             foreach (var npc in archery.ArcherRecords)
             {
                 npc.Packages.Clear();
-                npc.Packages.Add(new FormLink<IPackageGetter>(holdPackage.FormKey));
                 npc.Packages.Add(new FormLink<IPackageGetter>(package.FormKey));
             }
 

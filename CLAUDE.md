@@ -93,6 +93,13 @@ vanilla-style large references in an RNAM table, plus a midground ridge row and 
 treeline. Clear-weather test: `fw 10a240`. Horizon model:
 `docs/images/backdrop_horizon_before_after.png`.
 
+**Archers (latest, awaiting Barry's test):** his log showed the training package running
+but stuck in its opening Travel (no navmesh after a load). Its "Use Weapon Location" is
+now near self. The hold-package flip is retired. Plugin SHA256 `8cb83cf315ebec13...`.
+Papyrus logging is now on in the "Still in Skyrim Plus" profile, so the log at
+`Documents/My Games/Skyrim Special Edition/Logs/Script/Papyrus.0.log` can be read
+directly (grep `SkyrimFairAudio`).
+
 **Awaiting Barry's test from the last bug-fix pass (`d6605f9`):**
 - Signs: Elven Goods (curios group), woodworker (trader group) and the archery booth now
   use the honey sign's layout with boards that carry their own bar.

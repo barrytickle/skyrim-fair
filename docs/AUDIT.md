@@ -2,7 +2,40 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the backdrop (large-reference mountains, a midground of ridges, a denser treeline) (2026-09-23)
+## Current pass: the archers, read from the game (2026-09-23)
+
+Barry: the archers still don't shoot. His Papyrus log (today, fair profile) settles what
+the earlier two fixes guessed at:
+
+- Straight after the load, before the script touched them, **all four were running the
+  fair's training package** (`SkyrimFairArcherTrainingPackage`). The package isn't lost
+  on a load. It runs and does nothing.
+- The hold-package flip then left them on the hold package ("released, now running
+  ...001557"). It didn't restart anything.
+
+**Cause:** the `UseWeapon` template's tree starts with a **Travel to "Use Weapon Location"**,
+vanilla's being near the unkeyed linked ref (the stand) within 32. On a fresh cell load
+the archer is standing there and the Travel finishes at once, so they shoot (Barry's
+first visits). After a save and load the package resumes inside that Travel, which asks
+for a path. **With no navmesh the path never comes, so the step never finishes and the
+shooting branch is never reached.** `MoveTo` onto the stand doesn't finish a Travel.
+
+**Fix:** the fair's copy sets "Use Weapon Location" to **near self, within 64**, the same
+location type the package already uses for its weapon search. The archer is always
+there, so the Travel completes with or without navmesh. The target is still the
+`TrainingTarget` linked ref, and the trigger radius is still 20,000. The script still
+squares each archer onto their stand and re-evaluates on arrival and load. The hold
+package and its global keep their records (their FormIDs are in saves), but the archers
+no longer carry the package, and the script only resets the global to 0.
+
+Generator run twice: `8cb83cf315ebec13...`; no record added, removed or renumbered;
+both archer NPCs carry only the training package; its inputs read back: 0 near self
+1,000, 3 near self 64, 30 = 20,000. Scripts compile. Deployed.
+
+**Test:** load a save by the range, then one made away from it: do they shoot within a
+few seconds? If not, `getcurrentaiprocedure` on one, and `resetai`.
+
+## Previous pass: the backdrop (large-reference mountains, a midground of ridges, a denser treeline) (2026-09-23)
 
 Barry's brief: from the middle of the fair the horizon is bare. The palisade and nearby
 trees show, but the mountains often don't until he walks up to a wall. Diagnose first,

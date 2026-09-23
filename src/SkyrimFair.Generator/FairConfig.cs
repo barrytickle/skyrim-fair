@@ -2388,6 +2388,14 @@ internal sealed record ArcheryConfig
     /// <summary>What the archers hold with while their training package restarts: DefaultStayAtEditorLocation.</summary>
     public string HoldPackage { get; init; } = "00025BFC:Skyrim.esm";
 
+    /// <summary>UseWeapon's "Use Weapon Location" input, and "Search for Weapon Location" (near self).</summary>
+    public sbyte UseWeaponLocationInput { get; init; } = 3;
+
+    public sbyte SearchLocationInput { get; init; } = 0;
+
+    /// <summary>The use-weapon location's radius, round the archer itself.</summary>
+    public int UseWeaponRadius { get; init; } = 64;
+
     /// <summary>The package data input holding the trigger radius (UseWeapon's "Trigger Radius").</summary>
     public sbyte TriggerRadiusInput { get; init; } = 30;
 
