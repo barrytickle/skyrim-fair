@@ -1,6 +1,15 @@
 # Navmesh for SkyrimFairWorld: the plan
 
-Status: **phase 1 built** (2026-09-23): the ground navmesh and NAVI entries, `FairNavmesh.cs`; see `docs/AUDIT.md`. Phases 2 and 3 to come. Written after the archers proved the
+Status (2026-09-23): **phases 1 to 3 built**, `FairNavmesh.cs`; see `docs/AUDIT.md`:
+- the ground navmesh and the NAVI entries
+- model footprints (`tools/make_footprints.py`), so obstacles block only where their
+  geometry is
+- islands kept for the actors' pockets and the stage
+- the stage deck and steps as raised platforms, walled off from the square as Barry wanted
+- the pen
+
+Still open: joining keepers to the lanes; the gate's door link, which waits for the
+Tamriel gate to become a door; cover. Written after the archers proved the
 need: their training package runs after a load but stalls in a step that needs a path,
 and there is no navmesh anywhere in the fair's world. Every NPC plan after this (vendors
 walking to stalls, the crowd, dancers, quests) needs it too.

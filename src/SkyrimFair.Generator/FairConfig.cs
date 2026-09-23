@@ -533,8 +533,33 @@ internal sealed record NavmeshConfig
     /// <summary>Smaller things (clutter) don't block.</summary>
     public float MinFootprint { get; init; } = 12f;
 
+    /// <summary>Radius opened again under every actor's feet (0: none).</summary>
+    public float ActorClearance { get; init; } = 24f;
+
+    /// <summary>Smallest separate island kept (an actor's pocket, the stage), in raster cells.</summary>
+    public int MinIslandCells { get; init; } = 4;
+
     /// <summary>Largest rectangle side, in raster cells.</summary>
     public int MaxRectangle { get; init; } = 16;
+
+    /// <summary>
+    /// Per-model footprints from tools/make_footprints.py: occupied cells in height bands,
+    /// so an object blocks only where its geometry is (posts, counters, rails), not its
+    /// whole bounding box. Models not in it fall back to their bounds.
+    /// </summary>
+    public string Footprints { get; init; } = "tools/navmesh_footprints.json";
+
+    /// <summary>Optional: a text dump of the raster (region, free, kept), for debugging.</summary>
+    public string DebugRaster { get; init; } = string.Empty;
+
+    /// <summary>Where the build lists the models it cut obstacles for, for make_footprints.py.</summary>
+    public string ModelList { get; init; } = "build/navmesh_models.txt";
+
+    /// <summary>How far in from a platform's edges (the stage deck, its ramp) the mesh stops.</summary>
+    public float PlatformMargin { get; init; } = 32f;
+
+    /// <summary>On the ramp up the steps, how far above it a tread may stand without blocking.</summary>
+    public float StepTolerance { get; init; } = 45f;
 
     /// <summary>Plugins whose bases' bounds are needed (Holidays.esp); missing files are skipped.</summary>
     public List<string> ExtraMasters { get; init; } = new();

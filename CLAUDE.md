@@ -23,6 +23,8 @@ hand-made: a C#/Mutagen generator reads `fair.config.json` and writes `dist/Skyr
 python tools/make_static_props.py --data "E:/Modlists/Still In Skyrim/stock/Data"   # only when props change
 python tools/build_audio.py                                                          # music/, sound-effects/ -> assets/sound/
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
+# after a layout change, for the navmesh's obstacle footprints (then run the generator again):
+python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"
 dotnet run -c Release --project src/SkyrimFair.Generator -- fair.config.json         # run from the repo root
 python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 ```
@@ -110,11 +112,11 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
-**Navmesh phase 1: built and deployed, awaiting Barry's test** (plugin `9e29fb2fb6495056...`).
-The generated ground navmesh is 9 meshes, 8,066 triangles and one island; the validator
-passes, and the layout matches Fertility Adventures and Holidays. The main question is
-whether the archers now shoot after a reload. Phase 2: vendors inside stalls, a lighter
-mesh, the pen. Phase 3: the stage and the gate. See `docs/NAVMESH.md`.
+**Navmesh phases 1 to 3: built and deployed, awaiting Barry's test** (plugin `fbfdf1eb5f5d84e3...`).
+Obstacles use model footprints. All 126 actors stand on the mesh. The stage deck and
+steps are the performers' walled-off island. The pen has its own mesh. 7,253 triangles;
+the validator passes. The archers are lower priority for now (Barry). See
+`docs/NAVMESH.md` and `docs/AUDIT.md`.
 
 **Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
 

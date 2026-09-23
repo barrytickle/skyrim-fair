@@ -594,9 +594,42 @@ internal static class FairWorld
         // ---- the navmesh, last of all ------------------------------------------------------------
         if (config.Navmesh.Enabled && master is not null)
         {
-            var nav = FairNavmesh.Build(mod, config.Navmesh, worldspace, cells, topCell, plan.Bounds, plan.Outside, plan.Height, master);
+            // The stage's deck and the ramp up its steps are raised navmesh; its own deck,
+            // treads, risers and skirt carry them rather than blocking them.
+            var platforms = new List<NavPlatform>();
+            var platformPieces = new HashSet<FormKey>();
+            if (stage is not null)
+            {
+                var (fx, fy) = (stage.DeckFront.X - stage.CentreX, stage.DeckFront.Y - stage.CentreY);
+                var fl = MathF.Sqrt(fx * fx + fy * fy);
+                var f = (X: fx / fl, Y: fy / fl);
+                var r = (X: f.Y, Y: -f.X);
+                var m = config.Navmesh.PlatformMargin;
+                var (hw, hd) = (stage.DeckWidth / 2f, stage.DeckDepth / 2f);
+                var deckTop = stage.GroundZ + stage.DeckHeight;
+                var treads = Math.Max(1, (int)MathF.Round(stage.DeckHeight / stage.Riser) - 1);
+                var ramp = stage.StairRun / treads * (treads + 1);
+                var (scx, scy) = (stage.CentreX, stage.CentreY);
+                platforms.Add(new NavPlatform("deck", scx, scy, r, f, -hw + m, hw - m, -hd + m, hd - m,
+                    (_, _) => deckTop, config.Navmesh.MinObstacleHeight));
+                platforms.Add(new NavPlatform("steps", scx, scy, r, f, -stage.StairWidth / 2f + m, stage.StairWidth / 2f - m, hd - m, hd + ramp,
+                    (x, y) =>
+                    {
+                        var v = (x - scx) * f.X + (y - scy) * f.Y;
+                        return stage.GroundZ + stage.DeckHeight * Math.Clamp(1f - (v - hd) / ramp, 0f, 1f);
+                    },
+                    config.Navmesh.StepTolerance));
+                foreach (var piece in new[] { config.Stage.Deck.Piece, config.Stage.Steps.Piece, config.Stage.Steps.RiserPiece, config.Stage.Skirt.Piece })
+                {
+                    platformPieces.Add(FormKeyHelper.Parse(piece));
+                }
+            }
+
+            var nav = FairNavmesh.Build(mod, config.Navmesh, worldspace, cells, topCell, plan.Bounds, plan.Outside, plan.Height, master,
+                platforms, platformPieces);
+            Console.WriteLine($"  navmesh: {nav.FromFootprints} obstacles cut by their model's footprint, the rest by bounds ({nav.Models} models listed)");
             Console.WriteLine($"  navmesh: {nav.Meshes} meshes, {nav.Triangles} triangles, {nav.ExternalLinks} links across cell lines; " +
-                $"{nav.Obstacles} obstacles cut; {nav.Islands} areas before keeping the largest; actors on the mesh {nav.ActorsOnMesh} of {nav.Actors}");
+                $"{nav.Obstacles} obstacles cut; {nav.Islands} areas, {nav.KeptIslands} kept (the main one, actors' pockets, the stage); actors on the mesh {nav.ActorsOnMesh} of {nav.Actors}");
             foreach (var c in nav.Cells)
             {
                 Console.WriteLine($"    cell {c.X,2}, {c.Y,2}: {c.Vertices,5} vertices, {c.Triangles,5} triangles, {c.Links,4} links out");

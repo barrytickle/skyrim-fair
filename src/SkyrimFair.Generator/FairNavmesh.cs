@@ -41,7 +41,7 @@ internal static class FairNavmesh
         IReadOnlyDictionary<(int X, int Y), Cell> cells, Cell persistentCell,
         (float MinX, float MinY, float MaxX, float MaxY) area,
         Func<float, float, float> outside, Func<float, float, float> height,
-        ISkyrimModGetter master)
+        ISkyrimModGetter master, IReadOnlyList<NavPlatform> platforms, IReadOnlySet<FormKey> platformPieces)
     {
         var res = config.Resolution;
         if (CellSize % res != 0f)
@@ -80,6 +80,58 @@ internal static class FairNavmesh
                     free[i, j] = outside(x, y) <= -config.WallMargin;
                 }
             }
+
+            // ---- platforms: the stage deck and the ramp up its steps -----------------------------
+            // A raster cell on a platform takes the platform's height and region (1 + its index);
+            // later platforms win where they overlap (the ramp over the deck's front strip).
+            int PlatformAt(float x, float y, float slack)
+            {
+                for (var k = platforms.Count - 1; k >= 0; k--)
+                {
+                    if (platforms[k].Contains(x, y, slack))
+                    {
+                        return k;
+                    }
+                }
+
+                return -1;
+            }
+
+            float VertexZ(float x, float y)
+            {
+                var k = PlatformAt(x, y, 0.5f);
+                return k >= 0 ? platforms[k].Z(x, y) : height(x, y);
+            }
+
+            var region = new int[w, h];
+            var cellZ = new float[w, h];
+            for (var j = 0; j < h; j++)
+            {
+                for (var i = 0; i < w; i++)
+                {
+                    var (x, y) = ((ix0 + i + 0.5f) * res, (iy0 + j + 0.5f) * res);
+                    var k = PlatformAt(x, y, 0f);
+                    region[i, j] = k + 1;
+                    cellZ[i, j] = k >= 0 ? platforms[k].Z(x, y) : height(x, y);
+                    if (k >= 0)
+                    {
+                        free[i, j] = true;
+                    }
+                }
+            }
+
+            // The height slab an obstacle must reach into to block a cell.
+            (float Low, float High) Slab(int i, int j)
+            {
+                var k = region[i, j] - 1;
+                var clear = k >= 0 ? platforms[k].StepTolerance : config.MinObstacleHeight;
+                return (cellZ[i, j] + clear, cellZ[i, j] + config.HeadHeight);
+            }
+
+            // ---- per-model footprints (tools/make_footprints.py), else the bounds ------------------
+            var footprints = LoadFootprints(config.Footprints);
+            var models = new SortedSet<string>(StringComparer.Ordinal);
+            var fromFootprints = 0;
 
             var obstacles = 0;
             var unknown = new SortedSet<string>(StringComparer.Ordinal);
@@ -126,28 +178,134 @@ internal static class FairNavmesh
                     }
                 }
 
-                var ground = height(p.X, p.Y);
-                var (bottom, top) = (p.Z + lz0 * scale - ground, p.Z + lz1 * scale - ground);
-                if (top < config.MinObstacleHeight || bottom > config.HeadHeight)
-                {
-                    continue;  // flat on the ground, or overhead
-                }
-
                 if (MathF.Max(lx1 - lx0, ly1 - ly0) * scale < config.MinFootprint)
                 {
                     continue;  // small clutter an actor steps round
                 }
 
-                if (Cut(free, ix0, iy0, res, p.X, p.Y, r.Placement.Rotation.Z,
-                    lx0 * scale - config.ActorRadius, ly0 * scale - config.ActorRadius,
-                    lx1 * scale + config.ActorRadius, ly1 * scale + config.ActorRadius))
+                var structure = r.Primitive is null && platformPieces.Contains(r.Base.FormKey);
+                bool Blocks(int i, int j, float zLow, float zHigh)
+                {
+                    if (structure && region[i, j] > 0)
+                    {
+                        return false;  // the stage's own deck, treads and skirt carry its platforms
+                    }
+
+                    var (low, high) = Slab(i, j);
+                    return zHigh > low && zLow < high;
+                }
+
+                var model = r.Primitive is null && link.TryResolve(r.Base.FormKey, typeof(ISkyrimMajorRecordGetter), out var modeled)
+                    ? ModelKey((modeled as IModeledGetter)?.Model?.File.DataRelativePath.ToString())
+                    : null;
+                if (model is not null)
+                {
+                    models.Add(model);
+                }
+
+                bool cut;
+                if (model is not null && footprints.Cells.TryGetValue(model, out var fp))
+                {
+                    fromFootprints++;
+                    cut = CutFootprint(free, ix0, iy0, res, p.X, p.Y, p.Z, r.Placement.Rotation.Z, scale, fp, footprints, config.ActorRadius, Blocks);
+                }
+                else
+                {
+                    var (zLow, zHigh) = (p.Z + lz0 * scale, p.Z + lz1 * scale);
+                    cut = Cut(free, ix0, iy0, res, p.X, p.Y, r.Placement.Rotation.Z,
+                        lx0 * scale - config.ActorRadius, ly0 * scale - config.ActorRadius,
+                        lx1 * scale + config.ActorRadius, ly1 * scale + config.ActorRadius,
+                        (i, j) => Blocks(i, j, zLow, zHigh));
+                }
+
+                if (cut)
                 {
                     obstacles++;
                 }
             }
 
-            // ---- keep the largest connected area --------------------------------------------
-            var (kept, islands) = KeepLargest(free, w, h);
+            if (config.ModelList.Length > 0)
+            {
+                var list = Path.IsPathRooted(config.ModelList) ? config.ModelList : Path.Combine(FairPaths.ConfigDirectory, config.ModelList);
+                Directory.CreateDirectory(Path.GetDirectoryName(list)!);
+                File.WriteAllLines(list, models);
+            }
+
+            // ---- keep the main area, and the islands with a purpose ---------------------------
+            // Besides the largest area: any pocket where an actor stands (a keeper behind their
+            // counter) or on a platform (the stage, walled off from the square by the invisible
+            // collision boxes so the player can't climb it: the performers' own island).
+            var anchors = new HashSet<(int, int)>();
+            foreach (var a in cells.Values.SelectMany(c => c.Temporary).Concat(persistentCell.Persistent).OfType<PlacedNpc>())
+            {
+                var ap = a.Placement!.Position;
+                var (ai, aj) = ((int)MathF.Floor(ap.X / res) - ix0, (int)MathF.Floor(ap.Y / res) - iy0);
+                if (ai >= 0 && aj >= 0 && ai < w && aj < h)
+                {
+                    anchors.Add((ai, aj));
+                }
+            }
+
+            for (var j = 0; j < h; j++)
+            {
+                for (var i = 0; i < w; i++)
+                {
+                    if (region[i, j] > 0)
+                    {
+                        anchors.Add((i, j));
+                    }
+                }
+            }
+
+            // Every actor already stands on free ground, so the cells under their feet are
+            // opened again (a keeper's spot behind a counter falls inside the counter's padding).
+            if (config.ActorClearance > 0f)
+            {
+                var reachCells = (int)MathF.Ceiling(config.ActorClearance / res);
+                foreach (var a in cells.Values.SelectMany(c => c.Temporary).Concat(persistentCell.Persistent).OfType<PlacedNpc>())
+                {
+                    var ap = a.Placement!.Position;
+                    for (var dj = -reachCells; dj <= reachCells; dj++)
+                    {
+                        for (var di = -reachCells; di <= reachCells; di++)
+                        {
+                            var (ci, cj) = ((int)MathF.Floor(ap.X / res) - ix0 + di, (int)MathF.Floor(ap.Y / res) - iy0 + dj);
+                            if (ci < 0 || cj < 0 || ci >= w || cj >= h)
+                            {
+                                continue;
+                            }
+
+                            var (cx, cy) = ((ix0 + ci + 0.5f) * res - ap.X, (iy0 + cj + 0.5f) * res - ap.Y);
+                            if (cx * cx + cy * cy <= config.ActorClearance * config.ActorClearance
+                                && (region[ci, cj] > 0 || outside((ix0 + ci + 0.5f) * res, (iy0 + cj + 0.5f) * res) <= -config.WallMargin))
+                            {
+                                free[ci, cj] = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            var (kept, islands, keptIslands) = KeepComponents(free, w, h, anchors, config.MinIslandCells);
+
+            if (config.DebugRaster.Length > 0)
+            {
+                // i, j, region, free, kept: for looking at why an area is or isn't walkable.
+                var dbg = Path.IsPathRooted(config.DebugRaster) ? config.DebugRaster : Path.Combine(FairPaths.ConfigDirectory, config.DebugRaster);
+                Directory.CreateDirectory(Path.GetDirectoryName(dbg)!);
+                using var o = new StreamWriter(dbg);
+                o.WriteLine($"{ix0},{iy0},{res},{w},{h}");
+                for (var j = 0; j < h; j++)
+                {
+                    var line = new System.Text.StringBuilder();
+                    for (var i = 0; i < w; i++)
+                    {
+                        line.Append(kept[i, j] ? (char)('a' + region[i, j]) : free[i, j] ? (char)('A' + region[i, j]) : outside((ix0 + i + 0.5f) * res, (iy0 + j + 0.5f) * res) <= -config.WallMargin || region[i, j] > 0 ? (char)('0' + region[i, j]) : '.');
+                    }
+
+                    o.WriteLine(line);
+                }
+            }
 
             // ---- rectangles, never crossing a cell line ------------------------------------------
             var rects = new List<(int X0, int Y0, int X1, int Y1, (int, int) Cell)>();
@@ -167,13 +325,14 @@ internal static class FairNavmesh
                     var cellX1 = (cell.Item1 + 1) * perCell - ix0;
                     var cellY1 = (cell.Item2 + 1) * perCell - iy0;
                     var rw = 1;
-                    while (i + rw < w && i + rw < cellX1 && rw < config.MaxRectangle && kept[i + rw, j] && !used[i + rw, j])
+                    var reg = region[i, j];
+                    while (i + rw < w && i + rw < cellX1 && rw < config.MaxRectangle && kept[i + rw, j] && !used[i + rw, j] && region[i + rw, j] == reg)
                     {
                         rw++;
                     }
 
                     var rh = 1;
-                    while (j + rh < h && j + rh < cellY1 && rh < config.MaxRectangle && Row(kept, used, i, i + rw, j + rh))
+                    while (j + rh < h && j + rh < cellY1 && rh < config.MaxRectangle && Row(kept, used, region, reg, i, i + rw, j + rh))
                     {
                         rh++;
                     }
@@ -269,7 +428,7 @@ internal static class FairNavmesh
                     {
                         var (x, y) = (key.Item1 * res / 2f, key.Item2 * res / 2f);
                         v = (short)vertices.Count;
-                        vertices.Add(new P3Float(x, y, height(x, y)));
+                        vertices.Add(new P3Float(x, y, VertexZ(x, y)));
                         index[key] = v;
                     }
 
@@ -394,7 +553,7 @@ internal static class FairNavmesh
             });
 
             return new NavmeshResult(navmeshes.Count, totalTris, externalLinks, obstacles, islands,
-                actors.Count, onMesh, unknown.ToList(), summary, kept, ix0, iy0, res);
+                actors.Count, onMesh, unknown.ToList(), summary, kept, ix0, iy0, res, fromFootprints, models.Count, keptIslands);
         }
         finally
         {
@@ -407,7 +566,7 @@ internal static class FairNavmesh
 
     /// <summary>Marks the raster cells whose centres fall in a turned rectangle as blocked.</summary>
     private static bool Cut(bool[,] free, int ix0, int iy0, float res, float px, float py, float yaw,
-        float x0, float y0, float x1, float y1)
+        float x0, float y0, float x1, float y1, Func<int, int, bool> blocks)
     {
         var (c, s) = (MathF.Cos(yaw), MathF.Sin(yaw));
         var reach = MathF.Sqrt(MathF.Max(x0 * x0, x1 * x1) + MathF.Max(y0 * y0, y1 * y1));
@@ -422,7 +581,7 @@ internal static class FairNavmesh
                 // World to local: the inverse of local (u, v) -> (u cos + v sin, -u sin + v cos).
                 var u = dx * c - dy * s;
                 var v = dx * s + dy * c;
-                if (u >= x0 && u <= x1 && v >= y0 && v <= y1)
+                if (u >= x0 && u <= x1 && v >= y0 && v <= y1 && blocks(i, j))
                 {
                     free[i, j] = false;
                     any = true;
@@ -433,7 +592,7 @@ internal static class FairNavmesh
         return any;
     }
 
-    private static (bool[,] Kept, int Islands) KeepLargest(bool[,] free, int w, int h)
+    private static (bool[,] Kept, int Islands, int KeptIslands) KeepComponents(bool[,] free, int w, int h, ISet<(int, int)> seeds, int minCells)
     {
         var label = new int[w, h];
         var sizes = new List<int> { 0 };
@@ -476,23 +635,33 @@ internal static class FairNavmesh
             }
         }
 
+        var keep = new HashSet<int> { best };
+        foreach (var (si, sj) in seeds)
+        {
+            var id = label[si, sj];
+            if (id > 0 && sizes[id] >= minCells)
+            {
+                keep.Add(id);
+            }
+        }
+
         var kept = new bool[w, h];
         for (var j = 0; j < h; j++)
         {
             for (var i = 0; i < w; i++)
             {
-                kept[i, j] = sizes.Count > 1 && label[i, j] == best;
+                kept[i, j] = sizes.Count > 1 && keep.Contains(label[i, j]);
             }
         }
 
-        return (kept, sizes.Count - 1);
+        return (kept, sizes.Count - 1, keep.Count);
     }
 
-    private static bool Row(bool[,] kept, bool[,] used, int i0, int i1, int j)
+    private static bool Row(bool[,] kept, bool[,] used, int[,] region, int reg, int i0, int i1, int j)
     {
         for (var i = i0; i < i1; i++)
         {
-            if (!kept[i, j] || used[i, j])
+            if (!kept[i, j] || used[i, j] || region[i, j] != reg)
             {
                 return false;
             }
@@ -510,6 +679,87 @@ internal static class FairNavmesh
     }
 
     private static int FloorDiv(int a, int b) => (int)Math.Floor(a / (double)b);
+
+    /// <summary>A model path as the footprint file keys it: lower case, backslashes, under meshes\.</summary>
+    private static string? ModelKey(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        var k = path.Replace('/', '\\').ToLowerInvariant().TrimStart('\\');
+        return k.StartsWith("meshes\\", StringComparison.Ordinal) ? k : "meshes\\" + k;
+    }
+
+    private sealed record FootprintSet(float CellSize, float BandSize, float BandBase,
+        Dictionary<string, List<(int X, int Y, uint Bands)>> Cells);
+
+    /// <summary>tools/navmesh_footprints.json, from tools/make_footprints.py; empty if absent.</summary>
+    private static FootprintSet LoadFootprints(string path)
+    {
+        var cells = new Dictionary<string, List<(int, int, uint)>>(StringComparer.Ordinal);
+        var full = path.Length == 0 ? "" : Path.IsPathRooted(path) ? path : Path.Combine(FairPaths.ConfigDirectory, path);
+        if (full.Length == 0 || !File.Exists(full))
+        {
+            return new FootprintSet(16f, 16f, -64f, cells);
+        }
+
+        using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(full));
+        var root = doc.RootElement;
+        foreach (var m in root.GetProperty("models").EnumerateObject())
+        {
+            var list = new List<(int, int, uint)>();
+            foreach (var c in m.Value.EnumerateArray())
+            {
+                list.Add((c[0].GetInt32(), c[1].GetInt32(), c[2].GetUInt32()));
+            }
+
+            cells[m.Name] = list;
+        }
+
+        return new FootprintSet(root.GetProperty("cell").GetSingle(), root.GetProperty("band").GetSingle(),
+            root.GetProperty("bandBase").GetSingle(), cells);
+    }
+
+    /// <summary>
+    /// Cuts an object by its model's footprint: every occupied footprint cell, turned and
+    /// scaled into the world, blocks the raster cells within an actor's radius of it whose
+    /// height slab its occupied bands reach into.
+    /// </summary>
+    private static bool CutFootprint(bool[,] free, int ix0, int iy0, float res, float px, float py, float pz, float yaw,
+        float scale, List<(int X, int Y, uint Bands)> cells, FootprintSet set, float pad, Func<int, int, float, float, bool> blocks)
+    {
+        var (c, s) = (MathF.Cos(yaw), MathF.Sin(yaw));
+        var reach = pad + set.CellSize * scale * 0.71f;
+        var any = false;
+        foreach (var (fx, fy, bands) in cells)
+        {
+            // The occupied height, from the lowest band to the highest.
+            var lowBand = System.Numerics.BitOperations.TrailingZeroCount(bands);
+            var highBand = 31 - System.Numerics.BitOperations.LeadingZeroCount(bands);
+            var zLow = pz + (set.BandBase + lowBand * set.BandSize) * scale;
+            var zHigh = pz + (set.BandBase + (highBand + 1) * set.BandSize) * scale;
+            var (lu, lv) = ((fx + 0.5f) * set.CellSize * scale, (fy + 0.5f) * set.CellSize * scale);
+            var (wx, wy) = (px + lu * c + lv * s, py - lu * s + lv * c);
+            var (i0, i1) = ((int)MathF.Floor((wx - reach) / res) - ix0, (int)MathF.Floor((wx + reach) / res) - ix0);
+            var (j0, j1) = ((int)MathF.Floor((wy - reach) / res) - iy0, (int)MathF.Floor((wy + reach) / res) - iy0);
+            for (var j = Math.Max(0, j0); j <= Math.Min(free.GetLength(1) - 1, j1); j++)
+            {
+                for (var i = Math.Max(0, i0); i <= Math.Min(free.GetLength(0) - 1, i1); i++)
+                {
+                    var (dx, dy) = ((ix0 + i + 0.5f) * res - wx, (iy0 + j + 0.5f) * res - wy);
+                    if (dx * dx + dy * dy <= reach * reach && free[i, j] && blocks(i, j, zLow, zHigh))
+                    {
+                        free[i, j] = false;
+                        any = true;
+                    }
+                }
+            }
+        }
+
+        return any;
+    }
 
     /// <summary>
     /// The lookup grid, as vanilla stores it: divisor x divisor cells, row by row
@@ -560,4 +810,22 @@ internal sealed record NavmeshResult(
     int Meshes, int Triangles, int ExternalLinks, int Obstacles, int Islands,
     int Actors, int ActorsOnMesh, IReadOnlyList<string> UnknownBases,
     IReadOnlyList<(int X, int Y, int Vertices, int Triangles, int Links)> Cells,
-    bool[,] Walkable, int OriginX, int OriginY, float Resolution);
+    bool[,] Walkable, int OriginX, int OriginY, float Resolution, int FromFootprints, int Models, int KeptIslands);
+
+/// <summary>
+/// A raised walkable area for the navmesh: a rectangle in a frame (centre, across axis R,
+/// out axis F), with its height as a function of position. The stage's deck is flat; its
+/// ramp falls from the deck's front edge to the ground one tread beyond the steps' foot.
+/// </summary>
+internal sealed record NavPlatform(
+    string Name, float CentreX, float CentreY, (float X, float Y) R, (float X, float Y) F,
+    float U0, float U1, float V0, float V1, Func<float, float, float> Z, float StepTolerance)
+{
+    public bool Contains(float x, float y, float slack)
+    {
+        var (dx, dy) = (x - CentreX, y - CentreY);
+        var u = dx * R.X + dy * R.Y;
+        var v = dx * F.X + dy * F.Y;
+        return u >= U0 - slack && u <= U1 + slack && v >= V0 - slack && v <= V1 + slack;
+    }
+}

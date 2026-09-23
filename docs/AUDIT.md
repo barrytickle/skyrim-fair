@@ -2,7 +2,71 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: navmesh, phase 1 (the ground) (2026-09-23)
+## Current pass: navmesh phases 2 and 3 (real footprints, keepers, the pen, the stage) (2026-09-23)
+
+Barry: "let's do stage two and 3 first, the archers can be a lower priority for now".
+Phase 1's mesh cut whole stall blocks, the pen and the stage out, and left 70 of 126
+actors off it.
+
+### What changed
+
+| Area | Phase 1 | Now |
+| --- | --- | --- |
+| Obstacle shapes | every object's bounding box, padded | **each model's own geometry**: `tools/make_footprints.py` samples every placed model's triangles into 16-unit cells with a bitmask of 16-unit height bands (-64 to 448), written to `tools/navmesh_footprints.json` (195 of the 209 models). An object blocks a raster cell only where its geometry stands between that cell's floor + 20 and head height (160). Posts, counters and rails block; the open ground under a roof, behind a counter or inside a fence doesn't. The other 14 (4 Holidays meshes in the old format, 10 small props the NIF reader can't parse) fall back to their bounds |
+| Padding | 32 | **24** (an actor's radius); obstacles must reach 20 above the floor (was 12, so floor planks in the lowest band stopped blocking) |
+| Stall keepers | off the mesh, their blocks cut solid | every actor's standing spot is opened again (24 radius; they already stand on free ground), and **islands with a purpose are kept**: the main area plus any pocket an actor stands in. Keepers stand on navmesh behind their counters; the long double block's shared aisle joins up where the pieces allow |
+| The pen | cut solid | fence rails block only as rails; the horses stand on the pen's own mesh |
+| The stage (phase 3) | cut solid | **raised platforms**: the deck at its height (134) and a ramp over the treads, from the deck's front edge to the ground one tread beyond the foot. Obstacles are tested against each cell's own floor, so posts and braziers on the deck block and the deck itself doesn't. The stage's own deck, treads, risers and skirt never block its platforms but still wall off the ground beside and under it. **The stage stays walled off from the square**: the invisible collision boxes Barry asked for earlier ("the performers stay inside") are respected, so the deck and steps are the performers' own island. The bards stand on it |
+| Triangles | 8,066 | **7,253** (rectangles up to 32 x 32 raster cells). The busiest cell went from 2,945 to 2,456 |
+| Actors on the mesh | 56 of 126 | **126 of 126** |
+
+**The gate (phase 3):** still a closed static with no door, so there's nothing to link a
+door triangle to. When the Tamriel gate becomes a real door, its triangles and linked
+door go in the NAVI entry. Recorded in `docs/NAVMESH.md`.
+
+### Build order change
+
+`make_footprints.py` reads the model list the generator writes, so after a layout change:
+
+```
+dotnet run -c Release --project src/SkyrimFair.Generator -- fair.config.json   # writes build/navmesh_models.txt
+python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"
+dotnet run -c Release --project src/SkyrimFair.Generator -- fair.config.json   # uses the footprints
+```
+
+`tools/navmesh_footprints.json` is committed (occupancy data, like `static_props.json`).
+A model missing from it falls back to its bounds, so a stale file is never wrong, only
+coarser. `build/navmesh_raster.txt` (`navmesh.debugRaster`) is a text dump of the raster
+for debugging.
+
+### Verification
+
+- Validator: 9 meshes, 7,253 triangles, none degenerate or clockwise, every link
+  reciprocal, every triangle in its grid, **56 islands** (the main area, the stage, the
+  pen, the keepers' pockets), **0 errors**. NAVI: 19 entries, all 9 of ours.
+- NAVM layout unchanged (one compressed `NVNM`, `0x40000`, form version 44).
+- Generator run twice: identical SHA256 `fbfdf1eb5f5d84e3...` (724,451 bytes).
+  `make_footprints.py` run twice: identical. Against phase 1's plugin, no record added,
+  removed or renumbered. Deployed.
+- Plan: `docs/images/navmesh_plan.png` (the mesh, and every actor on it).
+
+### Known limits
+
+- Keepers' pockets aren't joined to the lanes wherever the stall's pieces close them in.
+  They can stand and turn but not walk out. Opening a keeper's gap is a module change.
+- The perimeter edge is still a raster staircase with thin triangles.
+- Islands inside a navmesh are common in vanilla, but 56 is a lot; watch for anything
+  odd.
+
+### Test
+
+1. Load the fair: any crash, or near a cell line?
+2. Do visitors, vendors and the band look normal (nobody sliding, sinking or snapping)?
+3. `tcai` twice (AI off and on) near the stalls and the stage: do people settle back
+   where they were?
+4. The archers, when you get to them.
+
+## Previous pass: navmesh, phase 1 (the ground) (2026-09-23)
 
 Barry: "let's navmesh it", after the archers turned out to be stalled in a step that needs
 a path. The plan and the record research are in `docs/NAVMESH.md`. This pass is its
