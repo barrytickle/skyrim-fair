@@ -2,7 +2,15 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the SPID exclusion as a generated patch (2026-09-23)
+## Current pass: crowd NIFs, fourth rebuild, redeployed (2026-09-23)
+
+- The other agent rebuilt the crowd NIFs: hair shine and the dynamic-decal flags are off,
+  for the white hair streaks (`docs/CROWD.md`, "Fourth test").
+- All 38 were copied to the mod folder and match byte for byte.
+- Bounds confirmed unchanged against `figures.json`. The plugin is unchanged
+  (`f8781aeca5637ad5...`).
+
+## Previous pass: the SPID exclusion as a generated patch (2026-09-23)
 
 Barry: "is it possible to make it a patch instead? Just incase the mods need updating in
 future".
