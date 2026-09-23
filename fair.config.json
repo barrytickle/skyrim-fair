@@ -659,11 +659,11 @@
             {"piece": "@PropIronArrow", "x": -134, "y": -44, "z": 52, "yaw": 80, "rotX": 90},
             {"piece": "0007A617:Skyrim.esm", "x": 130, "y": -50, "z": 24, "yaw": 10},
             {"piece": "@PropTowerLantern", "x": 90, "y": 30, "z": 62, "yaw": 20},
-            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 60},
-            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 150, "yaw": 180},
-            {"piece": "0007EE65:Skyrim.esm", "x": 150, "y": 41.5, "z": 176, "rotX": 90},
-            {"piece": "000F0A22:Skyrim.esm", "x": 150, "y": 157.5, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 159, "y": 150, "z": 120, "yaw": 90}
+            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 60, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 150, "y": 150, "yaw": 180, "exact": true},
+            {"piece": "000533D3:Skyrim.esm", "x": 150, "y": 105.0, "z": 178, "scale": 0.8, "exact": true},
+            {"piece": "000F0A22:Skyrim.esm", "x": 150, "y": 157.5, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 159, "y": 150, "z": 120, "yaw": 90, "exact": true}
           ]
         },
         {
@@ -1878,154 +1878,154 @@
           "name": "sign_general",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0010704F:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "0010704F:Skyrim.esm", "x": 0, "y": -49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_wrgeneral",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0009624D:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "0009624D:Skyrim.esm", "x": 0, "y": -49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_alchemy",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0009625B:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "0009625B:Skyrim.esm", "x": 0, "y": -49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_smith",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0009624C:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "0009624C:Skyrim.esm", "x": 0, "y": -49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_hunter",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "00096267:Skyrim.esm", "x": 0, "y": 0.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "00096267:Skyrim.esm", "x": 0, "y": 0.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_mead",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000BFB0A:Skyrim.esm", "x": 0, "y": 0.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000BFB0A:Skyrim.esm", "x": 0, "y": 0.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_fletcher",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
-            {"piece": "000F0A22:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 178, "scale": 0.8, "exact": true},
+            {"piece": "000F0A22:Skyrim.esm", "x": 0, "y": 52.5, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_clothes",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
-            {"piece": "000F0A1A:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 178, "scale": 0.8, "exact": true},
+            {"piece": "000F0A1A:Skyrim.esm", "x": 0, "y": 52.5, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_aromatics",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
-            {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 52.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 178, "scale": 0.8, "exact": true},
+            {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 52.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_curios",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "0007EE65:Skyrim.esm", "x": 0, "y": -63.5, "z": 176, "rotX": 90},
-            {"piece": "000F0A1C:Skyrim.esm", "x": 0, "y": 52.5, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 178, "scale": 0.8, "exact": true},
+            {"piece": "000F0A1C:Skyrim.esm", "x": 0, "y": 52.5, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_fish",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA62E:Skyrim.esm", "x": 0, "y": 0.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000EA62E:Skyrim.esm", "x": 0, "y": 0.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_honey",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA62B:Skyrim.esm", "x": 0, "y": 49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000EA62B:Skyrim.esm", "x": 0, "y": 49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_pawn",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA629:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000EA629:Skyrim.esm", "x": 0, "y": -49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_rtsmith",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "000EA623:Skyrim.esm", "x": 0, "y": -49.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "000EA623:Skyrim.esm", "x": 0, "y": -49.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
           "name": "sign_trader",
           "width": 30,
           "pieces": [
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46},
-            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180},
-            {"piece": "00038229:Skyrim.esm", "x": 0, "y": -64.0, "z": 168},
-            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true}
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
+            {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
+            {"piece": "00038229:Skyrim.esm", "x": 0, "y": -64.0, "z": 168, "exact": true},
+            {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
         {
@@ -3020,9 +3020,9 @@
         {"name": "stable hand", "near": "stable_shelter", "count": 1, "radius": 150, "arc": 90}
       ],
       "animals": [
-        {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80]},
-        {"name": "grey horse", "base": "00068D6D:Skyrim.esm", "near": "horse_pen", "at": [60, -120, -100]},
-        {"name": "palomino", "base": "00068D6E:Skyrim.esm", "near": "horse_pen", "at": [120, 110, 160]}
+        {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80], "script": "SkyrimFairPenHorse"},
+        {"name": "grey horse", "base": "00068D6D:Skyrim.esm", "near": "horse_pen", "at": [60, -120, -100], "script": "SkyrimFairPenHorse"},
+        {"name": "palomino", "base": "00068D6E:Skyrim.esm", "near": "horse_pen", "at": [120, 110, 160], "script": "SkyrimFairPenHorse"}
       ]
     },
     "propManifest": "tools/static_props.json",
@@ -3068,7 +3068,74 @@
       {"name": "stage east", "from": [2938, 5073], "to": [2938, 6015]},
       {"name": "stage back", "from": [1158, 6015], "to": [2938, 6015]}
     ],
-    "stallDirectory": "docs/STALLS.md"
+    "stallDirectory": "docs/STALLS.md",
+    "audio": {
+      "enabled": true,
+      "editorIdPrefix": "SkyrimFairAudio",
+      "soundRoot": "assets/sound",
+      "worldMusic": "0010486D:Skyrim.esm",
+      "timeScaleGlobal": "0000003A:Skyrim.esm",
+      "globals": {"ambienceEnabled": 1, "ambienceVolume": 1.0, "musicEnabled": 1, "musicVolume": 1.0, "cheerVolume": 1.0},
+      "stage": {
+        "speaker": [2048, 5450, 320],
+        "minDistance": 1500,
+        "maxDistance": 7500,
+        "staticAttenuation": 0,
+        "cheerStaticAttenuation": 2,
+        "firstSongDelay": 4,
+        "pauseAfterCheer": 2,
+        "duckAmbience": 0.75,
+        "hardEndLevel": 300,
+        "hardEndFade": 1.5,
+        "songs": [
+          {"name": "RoundTheGreen", "source": "music/mono/Round the Green.wav", "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav", "cheer": "cheer"},
+          {"name": "HeyHoSkyrim", "source": "music/mono/Hey-Ho, Skyrim.wav", "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav", "cheer": "cheer"},
+          {"name": "Fiddle", "source": "music/mono/Fiddle.wav", "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav", "cheer": "cheer"},
+          {
+            "name": "DragonbornApproved",
+            "source": "music/mono/Dragonborn-Approved.wav",
+            "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
+            "cheer": "cheer"
+          }
+        ],
+        "cheers": [
+          {
+            "name": "cheer",
+            "source": "sound-effects/mono/crowd-cheer.wav",
+            "file": "SkyrimFair\\Effects\\CrowdCheer01.wav",
+            "length": 11,
+            "fadeOut": 3.5,
+            "threshold": 600
+          }
+        ]
+      },
+      "ambience": {
+        "minDistance": 500,
+        "maxDistance": 3000,
+        "staticAttenuation": 10,
+        "loops": [
+          {
+            "name": "Crowd",
+            "source": "sound-effects/mono/crowd.wav",
+            "crossfade": 3.0,
+            "files": [
+              "SkyrimFair\\Ambience\\CrowdMurmur01.wav",
+              "SkyrimFair\\Ambience\\CrowdMurmur02.wav",
+              "SkyrimFair\\Ambience\\CrowdMurmur03.wav",
+              "SkyrimFair\\Ambience\\CrowdMurmur04.wav"
+            ]
+          }
+        ],
+        "emitters": [
+          {"name": "FoodRow", "at": [2200, 2000, 160], "loop": "Crowd", "copy": 0},
+          {"name": "EastLane", "at": [4150, 2650, 160], "loop": "Crowd", "copy": 1},
+          {"name": "EastWallWalk", "at": [4300, 350, 160], "loop": "Crowd", "copy": 2},
+          {"name": "GateFood", "at": [2350, -300, 160], "loop": "Crowd", "copy": 3},
+          {"name": "StageSquare", "at": [1950, 4650, 160], "loop": "Crowd", "copy": 2},
+          {"name": "WestField", "at": [600, 1700, 160], "loop": "Crowd", "copy": 1, "extraAttenuation": 5}
+        ]
+      }
+    }
   },
   "site": {
     "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",

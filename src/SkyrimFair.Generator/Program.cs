@@ -235,6 +235,12 @@ try
             Console.WriteLine($"  stall directory: {directory.Stalls.Count} stalls -> {config.FairWorld.StallDirectory}");
         }
 
+        if (world.Audio is { } audio)
+        {
+            Console.WriteLine($"  stage set: {string.Join(", ", audio.Songs.Select(s => $"{s.Name} {s.Seconds:0.0}s"))}; cheer {string.Join(", ", audio.Cheers.Select(c => $"{c:0.0}s"))}");
+            Console.WriteLine($"  crowd ambience: {audio.Emitters.Count} emitters ({string.Join(", ", audio.Emitters.Select(e => e.Name))}) from {audio.AmbienceMarkers} sound markers, loop {audio.LoopSeconds:0.0}s");
+        }
+
         if (world.Crowds is { } crowds)
         {
             Console.WriteLine($"  visitors: {crowds.Positions.Count} from {crowds.Records} records: {string.Join(", ", crowds.Groups.Select(g => $"{g.Name} {g.Placed}"))}; animals {crowds.Animals}");

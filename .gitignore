@@ -29,3 +29,9 @@ assets/meshes/SkyrimFair/Props/
 # cobbled avenue; redistribution permission unverified, so kept out of git.
 #   unzip wrstonefloor01*.dds from external/ into assets/textures/SkyrimFair/Ground/Cobble01*.dds
 assets/textures/SkyrimFair/Ground/
+
+# Built runtime files: sound from tools/build_audio.py (from Barry's untracked music/ and
+# sound-effects/, provenance still to confirm) and scripts from tools/build_papyrus.py.
+assets/sound/
+assets/scripts/
+build/

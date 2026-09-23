@@ -153,7 +153,7 @@ internal static class FairCrowds
             var (u, v) = (animal.At[0], animal.At[1]);
             var (c, s) = (MathF.Cos(home.Yaw * Deg), MathF.Sin(home.Yaw * Deg));
             var (x, y) = (home.X + u * c + v * s, home.Y - u * s + v * c);
-            put(new PlacedNpc(mod)
+            var placed = new PlacedNpc(mod)
             {
                 Base = new FormLinkNullable<INpcGetter>(FormKeyHelper.Parse(animal.Base)),
                 Placement = new Placement
@@ -161,7 +161,14 @@ internal static class FairCrowds
                     Position = new P3Float(x, y, ground(x, y) + 2f),
                     Rotation = new P3Float(0f, 0f, (home.Yaw + (animal.At.Length > 2 ? animal.At[2] : 0f)) * Deg),
                 },
-            });
+            };
+            if (animal.Script.Length > 0)
+            {
+                placed.VirtualMachineAdapter = new VirtualMachineAdapter();
+                placed.VirtualMachineAdapter.Scripts.Add(new ScriptEntry { Name = animal.Script });
+            }
+
+            put(placed);
             animals++;
         }
 

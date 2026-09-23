@@ -114,6 +114,7 @@ internal static class FairMarket
         {
             var (rx, ry) = (MathF.Cos(frameYaw * Deg), -MathF.Sin(frameYaw * Deg));
             var (fx, fy) = (MathF.Sin(frameYaw * Deg), MathF.Cos(frameYaw * Deg));
+            jitter = piece.Exact ? 0f : jitter;
             var u = mirror * piece.X + FairHash.Signed(seed, 11, 90) * jitter;
             var v = piece.Y + FairHash.Signed(seed, 12, 90) * jitter;
             var px = ox + u * rx + v * fx;
@@ -253,11 +254,13 @@ internal static class FairMarket
                     continue;
                 }
 
-                var u = mirror * piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 5f;
-                var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 5f;
+                var wobble = piece.Exact ? 0f : 1f;
+                var u = mirror * piece.X + FairHash.Signed(seedA * 31 + k, seedB, 63) * 5f * wobble;
+                var v = piece.Y + FairHash.Signed(seedA * 31 + k, seedB, 64) * 5f * wobble;
                 var px = x + u * rx + v * fx;
                 var py = y + u * ry + v * fy;
-                var pieceYaw = yaw + mirror * piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 3f;
+                var pieceYaw = (yaw + mirror * piece.Yaw + FairHash.Signed(seedA * 31 + k, seedB, 65) * 3f * wobble) * Deg;
+                var (a, t) = (piece.RotX * Deg, mirror * piece.RotY * Deg);
                 put(new PlacedObject(mod)
                 {
                     Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece.Piece)),
@@ -265,7 +268,7 @@ internal static class FairMarket
                     Placement = new Placement
                     {
                         Position = new P3Float(px, py, ground(px, py) + piece.Z),
-                        Rotation = new P3Float(0f, 0f, pieceYaw * Deg),
+                        Rotation = new P3Float(a * MathF.Cos(pieceYaw) + t * MathF.Sin(pieceYaw), -a * MathF.Sin(pieceYaw) + t * MathF.Cos(pieceYaw), pieceYaw),
                     },
                 });
                 pieceCount++;

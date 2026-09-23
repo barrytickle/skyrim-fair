@@ -1,0 +1,277 @@
+using Mutagen.Bethesda.Plugins;
+using Mutagen.Bethesda.Plugins.Assets;
+using Mutagen.Bethesda.Skyrim;
+using Mutagen.Bethesda.Skyrim.Assets;
+using Noggog;
+
+namespace SkyrimFair.Generator;
+
+/// <summary>
+/// The fair's sound, from <see cref="AudioConfig"/> (see docs/AUDIO.md):
+/// <list type="bullet">
+/// <item>the crowd ambience: looping murmur from sound markers placed round the fair's
+/// busy places, each playing its own rotated copy of the loop so none line up. Placed
+/// markers play by themselves while their cell is loaded and stop when it unloads, so
+/// the engine keeps them from ever doubling up;</item>
+/// <item>the stage set: a start-game-enabled quest whose script plays the songs from a
+/// speaker marker on the stage, the cheer after each, a breath, then the next, and
+/// ducks the ambience (its own sound category) under a song;</item>
+/// <item>the runtime globals a later MCM can write: ambience and music on/off, volumes.</item>
+/// </list>
+/// The runtime files come from tools/build_audio.py; their lengths are read here, so the
+/// script's timings always match the files deployed.
+/// </summary>
+internal static class FairAudio
+{
+    private static readonly FormKey XMarker = FormKey.Factory("00003B:Skyrim.esm");
+    private static readonly FormKey PlayerRef = FormKey.Factory("000014:Skyrim.esm");
+
+    // Vanilla sound categories the fair's hang under, so the player's sliders apply.
+    // Paused during menus with a fade, as the controller's clock (game time) is.
+    private static readonly FormKey PausedDuringMenuFade = FormKey.Factory("09F254:Skyrim.esm");
+    private static readonly FormKey AmbientCategory = FormKey.Factory("07F80B:Skyrim.esm");
+
+    // SOMMono06000_dry: a plain mono 3D output model, copied and given the fair's distances.
+    private static readonly FormKey MonoOutputModel = FormKey.Factory("10C2ED:Skyrim.esm");
+
+    public static AudioResult Build(
+        SkyrimMod mod, AudioConfig config, ISkyrimModGetter master, Worldspace world,
+        Action<PlacedObject> putPersistent, Action<PlacedObject> put)
+    {
+        var p = config.EditorIdPrefix;
+        var root = Path.IsPathRooted(config.SoundRoot) ? config.SoundRoot : Path.Combine(FairPaths.ConfigDirectory, config.SoundRoot);
+
+        SoundCategory Category(string name, FormKey parent)
+        {
+            var c = new SoundCategory(mod)
+            {
+                EditorID = $"{p}{name}Category",
+                Parent = new FormLinkNullable<ISoundCategoryGetter>(parent),
+                StaticVolumeMultiplier = 1f,
+            };
+            mod.SoundCategories.Add(c);
+            return c;
+        }
+
+        var stageCategory = Category("Stage", PausedDuringMenuFade);
+        var ambienceCategory = Category("Ambience", AmbientCategory);
+
+        SoundOutputModel Output(string name, float min, float max)
+        {
+            var source = master.SoundOutputModels.First(o => o.FormKey == MonoOutputModel);
+            var o = source.Duplicate(mod.GetNextFormKey());
+            o.EditorID = $"{p}{name}Output";
+            o.Attenuation!.MinDistance = (ushort)min;
+            o.Attenuation.MaxDistance = (ushort)max;
+            mod.SoundOutputModels.Add(o);
+            return o;
+        }
+
+        var stageOutput = Output("Stage", config.Stage.MinDistance, config.Stage.MaxDistance);
+        var ambienceOutput = Output("Ambience", config.Ambience.MinDistance, config.Ambience.MaxDistance);
+
+        (SoundDescriptor Sound, float Seconds) Descriptor(string name, string file, SoundCategory category, SoundOutputModel output, bool loop, float attenuation)
+        {
+            var seconds = WavSeconds(Path.Combine(root, file.Replace('\\', Path.DirectorySeparatorChar)));
+            var d = new SoundDescriptor(mod)
+            {
+                EditorID = $"{p}{name}",
+                Category = new FormLinkNullable<ISoundCategoryGetter>(category.FormKey),
+                OutputModel = new FormLinkNullable<ISoundOutputModelGetter>(output.FormKey),
+                LoopAndRumble = new SoundLoopAndRumble { Loop = loop ? SoundDescriptor.LoopType.Loop : SoundDescriptor.LoopType.None },
+                Priority = 128,
+                StaticAttenuation = attenuation,
+            };
+            d.SoundFiles.Add(new AssetLink<SkyrimSoundAssetType>(@"Data\Sound\" + file));
+            mod.SoundDescriptors.Add(d);
+            return (d, seconds);
+        }
+
+        // ---- globals ------------------------------------------------------------------
+        GlobalFloat Global(string name, float value)
+        {
+            var g = new GlobalFloat(mod) { EditorID = $"{p}{name}", Data = value };
+            mod.Globals.Add(g);
+            return g;
+        }
+
+        var ambienceEnabled = Global("AmbienceEnabled", config.Globals.AmbienceEnabled);
+        var ambienceVolume = Global("AmbienceVolume", config.Globals.AmbienceVolume);
+        var musicEnabled = Global("MusicEnabled", config.Globals.MusicEnabled);
+        var musicVolume = Global("MusicVolume", config.Globals.MusicVolume);
+        var cheerVolume = Global("CheerVolume", config.Globals.CheerVolume);
+
+        // ---- the stage set --------------------------------------------------------------
+        var songs = config.Stage.Songs
+            .Select(s => Descriptor($"Song{s.Name}", s.File, stageCategory, stageOutput, false, config.Stage.StaticAttenuation))
+            .ToList();
+        var cheers = config.Stage.Cheers
+            .Select(c => Descriptor($"Cheer{char.ToUpperInvariant(c.Name[0])}{c.Name[1..]}", c.File, stageCategory, stageOutput, false, config.Stage.CheerStaticAttenuation))
+            .ToList();
+        var songCheers = config.Stage.Songs.Select(s =>
+        {
+            if (s.Cheer.Length == 0) return -1;
+            var i = config.Stage.Cheers.FindIndex(c => c.Name == s.Cheer);
+            return i >= 0 ? i : throw new InvalidOperationException($"fairWorld.audio song {s.Name}: no cheer '{s.Cheer}'.");
+        }).ToList();
+
+        var sp = config.Stage.Speaker;
+        var speaker = new PlacedObject(mod)
+        {
+            EditorID = $"{p}StageSpeaker",
+            Base = new FormLinkNullable<IPlaceableObjectGetter>(XMarker),
+            Placement = new Placement { Position = new P3Float(sp[0], sp[1], sp[2]), Rotation = new P3Float(0f, 0f, MathF.PI) },
+        };
+        putPersistent(speaker);
+
+        var quest = new Quest(mod)
+        {
+            EditorID = $"{p}Quest",
+            Name = "Wanderer's Fair Stage",
+            Flags = Quest.Flag.StartGameEnabled,
+            Priority = 10,
+        };
+        quest.Aliases.Add(new QuestAlias
+        {
+            ID = 0,
+            Name = "Player",
+            Type = QuestAlias.TypeEnum.Reference,
+            ForcedReference = new FormLinkNullable<IPlacedGetter>(PlayerRef),
+        });
+
+        ScriptObjectProperty Obj(string name, FormKey key) => new() { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
+        ScriptFloatProperty Float(string name, float value) => new() { Name = name, Data = value };
+        var script = new ScriptEntry { Name = "SkyrimFairAudioScript" };
+        script.Properties.AddRange(new ScriptProperty[]
+        {
+            Obj("FairWorld", world.FormKey),
+            Obj("StageSpeaker", speaker.FormKey),
+            new ScriptObjectListProperty { Name = "Songs", Objects = songs.Select(s => Obj("", s.Sound.FormKey)).ToExtendedList() },
+            new ScriptFloatListProperty { Name = "SongLengths", Data = songs.Select(s => s.Seconds).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongCheers", Data = songCheers.ToExtendedList() },
+            new ScriptObjectListProperty { Name = "Cheers", Objects = cheers.Select(c => Obj("", c.Sound.FormKey)).ToExtendedList() },
+            new ScriptFloatListProperty { Name = "CheerLengths", Data = cheers.Select(c => c.Seconds).ToExtendedList() },
+            Float("FirstSongDelay", config.Stage.FirstSongDelay),
+            Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
+            Float("DuckDuringSong", config.Stage.DuckAmbience),
+            Obj("AmbienceCategory", ambienceCategory.FormKey),
+            Obj("AmbienceEnabled", ambienceEnabled.FormKey),
+            Obj("AmbienceVolume", ambienceVolume.FormKey),
+            Obj("MusicEnabled", musicEnabled.FormKey),
+            Obj("MusicVolume", musicVolume.FormKey),
+            Obj("CheerVolume", cheerVolume.FormKey),
+            Obj("TimeScale", FormKeyHelper.Parse(config.TimeScaleGlobal)),
+        });
+        var adapter = new QuestAdapter();
+        adapter.Scripts.Add(script);
+        var alias = new QuestFragmentAlias { Property = new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 0 } };
+        alias.Scripts.Add(new ScriptEntry { Name = "SkyrimFairAudioPlayerAlias" });
+        adapter.Aliases.Add(alias);
+        quest.VirtualMachineAdapter = adapter;
+        mod.Quests.Add(quest);
+
+        // ---- the crowd ambience -----------------------------------------------------------
+        var markers = new Dictionary<(string Loop, int Copy, float Extra), SoundMarker>();
+        var emitters = new List<(string Name, float X, float Y)>();
+        var loopSeconds = 0f;
+        foreach (var e in config.Ambience.Emitters)
+        {
+            var loop = config.Ambience.Loops.FirstOrDefault(l => l.Name == e.Loop)
+                ?? throw new InvalidOperationException($"fairWorld.audio.ambience emitter {e.Name}: no loop '{e.Loop}'.");
+            if (e.Copy < 0 || e.Copy >= loop.Files.Count)
+            {
+                throw new InvalidOperationException($"fairWorld.audio.ambience emitter {e.Name}: loop '{e.Loop}' has no copy {e.Copy}.");
+            }
+
+            var key = (e.Loop, e.Copy, e.ExtraAttenuation);
+            if (!markers.TryGetValue(key, out var marker))
+            {
+                var name = $"{e.Loop}{e.Copy + 1:00}{(e.ExtraAttenuation > 0 ? $"Quiet{e.ExtraAttenuation:0}" : "")}";
+                var (sound, seconds) = Descriptor($"Ambience{name}", loop.Files[e.Copy], ambienceCategory, ambienceOutput, true,
+                    config.Ambience.StaticAttenuation + e.ExtraAttenuation);
+                loopSeconds = seconds;
+                marker = new SoundMarker(mod)
+                {
+                    EditorID = $"{p}Ambience{name}Marker",
+                    SoundDescriptor = new FormLinkNullable<ISoundDescriptorGetter>(sound.FormKey),
+                    ObjectBounds = new ObjectBounds { First = new P3Int16(-16, -16, -16), Second = new P3Int16(16, 16, 16) },
+                };
+                mod.SoundMarkers.Add(marker);
+                markers[key] = marker;
+            }
+
+            put(new PlacedObject(mod)
+            {
+                EditorID = $"{p}Ambience{e.Name}",
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(marker.FormKey),
+                Placement = new Placement { Position = new P3Float(e.At[0], e.At[1], e.At[2]), Rotation = new P3Float(0f, 0f, 0f) },
+            });
+            emitters.Add((e.Name, e.At[0], e.At[1]));
+        }
+
+        // The game's own music stays out: the tavern "silence" music type bards use.
+        if (config.WorldMusic.Length > 0)
+        {
+            world.Music = new FormLinkNullable<IMusicTypeGetter>(FormKeyHelper.Parse(config.WorldMusic));
+        }
+
+        return new AudioResult(
+            quest.FormKey,
+            config.Stage.Songs.Select((s, i) => (s.Name, songs[i].Seconds)).ToList(),
+            cheers.Select(c => c.Seconds).ToList(),
+            emitters,
+            markers.Count,
+            loopSeconds);
+    }
+
+    /// <summary>Length of a PCM WAV from its header: data bytes over bytes a second.</summary>
+    private static float WavSeconds(string path)
+    {
+        if (!File.Exists(path))
+        {
+            throw new InvalidOperationException($"No {path}: build the sound files first (python tools/build_audio.py).");
+        }
+
+        using var r = new BinaryReader(File.OpenRead(path));
+        if (new string(r.ReadChars(4)) != "RIFF") throw new InvalidOperationException($"{path} is not a WAV.");
+        r.ReadInt32();
+        if (new string(r.ReadChars(4)) != "WAVE") throw new InvalidOperationException($"{path} is not a WAV.");
+        var byteRate = 0;
+        while (r.BaseStream.Position < r.BaseStream.Length)
+        {
+            var id = new string(r.ReadChars(4));
+            var size = r.ReadInt32();
+            if (id == "fmt ")
+            {
+                var format = r.ReadInt16();
+                var channels = r.ReadInt16();
+                var rate = r.ReadInt32();
+                byteRate = r.ReadInt32();
+                if (format != 1 || channels != 1)
+                {
+                    throw new InvalidOperationException($"{path}: format {format}, {channels} channels; positional sound must be mono PCM.");
+                }
+
+                r.BaseStream.Seek(size - 12, SeekOrigin.Current);
+            }
+            else if (id == "data")
+            {
+                return size / (float)byteRate;
+            }
+            else
+            {
+                r.BaseStream.Seek(size + (size & 1), SeekOrigin.Current);
+            }
+        }
+
+        throw new InvalidOperationException($"{path} has no data chunk.");
+    }
+}
+
+internal sealed record AudioResult(
+    FormKey Quest,
+    IReadOnlyList<(string Name, float Seconds)> Songs,
+    IReadOnlyList<float> Cheers,
+    IReadOnlyList<(string Name, float X, float Y)> Emitters,
+    int AmbienceMarkers,
+    float LoopSeconds);

@@ -1,7 +1,9 @@
 # Music and sound: feasibility and plan
 
 Written 2026-09-22 as a reality check on how hard stage music is in Skyrim, before any
-of it is built. Nothing here is implemented yet.
+of it is built. **Update 2026-09-23:** steps 1 (ambience) and 2 (the playlist, with the
+compile step) are built. See `docs/AUDIO.md`. Steps 3 (performer cues) and 4 (the gate)
+are still to do.
 
 ## Summary
 

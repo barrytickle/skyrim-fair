@@ -568,6 +568,10 @@ Project-owned mesh work is code-first and reproducible.
 - ground wear has a middle-to-palisade gradient (`ground.centreDepth`, `edgeWear`, `centreWear`)
 - signs hung by rings (the Solitude ones) need the thin-log crossbar between their posts; Whiterun signs carry their own bar
 - `fairWorld.crowds.animals` places vanilla actors as they are, in a dressing module's frame (the pen's horses)
+- **landscape layer opacities are shares**: at each vertex they add up to 1 at most, as vanilla's do. `PaintLayers` converts each texture's coverage (painted bottom to top) into shares, top layer first. Writing raw coverage blends every layer into mud
+- `exact: true` on a market piece skips the random nudge (signs, their posts and bars must meet); modules and vignettes both honour `rotX`/`rotY`
+- **audio**: see `docs/AUDIO.md`. Build order: `tools/build_audio.py`, then `tools/build_papyrus.py --ck <CK folder>`, then the generator (it reads the built sound files' lengths), then `tools/deploy.py --to <mod folder>`. `assets/sound/`, `assets/scripts/` and `build/` are git-ignored build output; `music/` and `sound-effects/` are Barry's untracked sources
+- the stage set is `SkyrimFairAudioQuest` / `SkyrimFairAudioScript` (Papyrus in `src/Papyrus/`); its properties are all generator-written from `fairWorld.audio`. Keep the global names (`SkyrimFairAudio*`) stable for the MCM
 - invisible walls are `fairWorld.collisionWalls` segments, built as vanilla `CollisionMarker` box primitives (half-extents, default layer)
 - the cobbles use the Whiterun Mossy Wet Stonefloor textures copied to `textures\SkyrimFair\Ground\Cobble01*.dds` (git-ignored; restore from `external/` before deploying)
 - `fairWorld.overhead` swags festival lines across lanes (poles inside the corridor edge, two mirrored `SRopefestivalLine01` halves, lanterns along the curve); `fairWorld.crowds` places visitor groups by theme, point or dressing module; `fairWorld.ground` paints the worn ground after everything is placed (fair-owned LTEX/TXST copies with parallax height slots, cobbled avenue), keeping LAND FormIDs by allocating LAND with the cells

@@ -4,6 +4,20 @@ Skyrim Fair is built with help from the Skyrim modding community. This file reco
 
 This document is intentionally conservative. An asset should not be copied into Skyrim Fair until its original author and redistribution permission have been confirmed.
 
+## Stage music and crowd sounds (Barry's)
+
+**Files:** `music/mono/` (Round the Green; Hey-Ho, Skyrim; Fiddle; Dragonborn-Approved) and
+`sound-effects/mono/` (crowd, crowd-cheer), supplied by Barry and converted to mono 44.1 kHz
+16-bit WAV. `tools/build_audio.py` builds the runtime copies under `Sound\SkyrimFair\`.
+
+**Status:** used in Barry's local build only. The sources and the built files are kept out
+of git. **Provenance and redistribution terms are still to confirm**, for example if the
+songs came from an AI music service or the crowd recordings from a sound library. Record
+the terms here before any public release.
+
+The fair's scripts (`src/Papyrus/`) are the project's own. They compile against the vanilla
+Papyrus sources in the Creation Kit, which are not redistributed.
+
 ## Professional Dancer
 
 **Mod:** Professional Dancer  

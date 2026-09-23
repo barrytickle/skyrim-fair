@@ -164,6 +164,9 @@ internal sealed record FairWorldConfig
     /// <summary>The archery range: townsfolk practising at targets, Solitude-style.</summary>
     public ArcheryConfig Archery { get; init; } = new();
 
+    /// <summary>The fair's sound: the stage set, the cheer and the crowd ambience.</summary>
+    public AudioConfig Audio { get; init; } = new();
+
     /// <summary>Centreline of the central avenue, entrance first.</summary>
     public List<float[]> Avenue { get; init; } = new();
 
@@ -1889,6 +1892,12 @@ internal sealed record MarketPiece
     public float RotY { get; init; }
 
     public float Scale { get; init; } = 1f;
+
+    /// <summary>
+    /// Placed exactly, without the small hand-placed wobble: for pieces that must meet
+    /// (a sign, its posts and the bar it hangs from).
+    /// </summary>
+    public bool Exact { get; init; }
 }
 
 internal sealed record MarketLane
@@ -2065,6 +2074,145 @@ internal sealed record MarketSeating
 /// linked to one target by the <c>TrainingTarget</c> keyword and runs vanilla
 /// <c>GuardSolitudeRangedTrainingPackage</c>. The archers are townsfolk, not soldiers.
 /// </summary>
+internal sealed record AudioConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairAudio";
+
+    /// <summary>Where tools/build_audio.py writes the runtime files, relative to the config.</summary>
+    public string SoundRoot { get; init; } = "assets/sound";
+
+    /// <summary>The world's music type: a silent one, so the game's own music stays out of the fair.</summary>
+    public string WorldMusic { get; init; } = string.Empty;
+
+    /// <summary>Vanilla's TimeScale global, for the controller's clock.</summary>
+    public string TimeScaleGlobal { get; init; } = "0000003A:Skyrim.esm";
+
+    /// <summary>Start values of the runtime globals (a later MCM writes them).</summary>
+    public AudioGlobals Globals { get; init; } = new();
+
+    public StageAudioConfig Stage { get; init; } = new();
+
+    public AmbienceConfig Ambience { get; init; } = new();
+}
+
+internal sealed record AudioGlobals
+{
+    public float AmbienceEnabled { get; init; } = 1f;
+
+    public float AmbienceVolume { get; init; } = 1f;
+
+    public float MusicEnabled { get; init; } = 1f;
+
+    public float MusicVolume { get; init; } = 1f;
+
+    public float CheerVolume { get; init; } = 1f;
+}
+
+internal sealed record StageAudioConfig
+{
+    /// <summary>The stage speaker: <c>[x, y, z]</c>, where the music and the cheer come from.</summary>
+    public float[] Speaker { get; init; } = Array.Empty<float>();
+
+    /// <summary>Full volume within this distance of the speaker, silent beyond the maximum.</summary>
+    public float MinDistance { get; init; } = 1500f;
+
+    public float MaxDistance { get; init; } = 7500f;
+
+    /// <summary>Decibels taken off the songs and the cheer.</summary>
+    public float StaticAttenuation { get; init; }
+
+    public float CheerStaticAttenuation { get; init; }
+
+    public float FirstSongDelay { get; init; } = 4f;
+
+    public float PauseAfterCheer { get; init; } = 2f;
+
+    /// <summary>The ambience's level during a song, as a share of normal.</summary>
+    public float DuckAmbience { get; init; } = 0.75f;
+
+    /// <summary>For tools/build_audio.py: a track louder than this in its last 50 ms gets a fade.</summary>
+    public float HardEndLevel { get; init; } = 300f;
+
+    public float HardEndFade { get; init; } = 1.5f;
+
+    public List<StageSong> Songs { get; init; } = new();
+
+    public List<StageCheer> Cheers { get; init; } = new();
+}
+
+internal sealed record StageSong
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>Barry's converted file, for tools/build_audio.py.</summary>
+    public string Source { get; init; } = string.Empty;
+
+    /// <summary>The runtime file under <c>Sound\</c>.</summary>
+    public string File { get; init; } = string.Empty;
+
+    /// <summary>The cheer after it (a <see cref="StageCheer.Name"/>); empty for none.</summary>
+    public string Cheer { get; init; } = string.Empty;
+}
+
+internal sealed record StageCheer
+{
+    public string Name { get; init; } = string.Empty;
+
+    public string Source { get; init; } = string.Empty;
+
+    public string File { get; init; } = string.Empty;
+
+    /// <summary>For tools/build_audio.py: seconds kept after the leading silence, and the fade.</summary>
+    public float Length { get; init; } = 11f;
+
+    public float FadeOut { get; init; } = 3f;
+
+    public float Threshold { get; init; } = 600f;
+}
+
+internal sealed record AmbienceConfig
+{
+    public float MinDistance { get; init; } = 500f;
+
+    public float MaxDistance { get; init; } = 3000f;
+
+    public float StaticAttenuation { get; init; } = 11f;
+
+    public List<AmbienceLoop> Loops { get; init; } = new();
+
+    public List<AmbienceEmitter> Emitters { get; init; } = new();
+}
+
+internal sealed record AmbienceLoop
+{
+    public string Name { get; init; } = string.Empty;
+
+    public string Source { get; init; } = string.Empty;
+
+    public float Crossfade { get; init; } = 3f;
+
+    /// <summary>Copies of the loop, each rotated to start further in, for emitters heard together.</summary>
+    public List<string> Files { get; init; } = new();
+}
+
+internal sealed record AmbienceEmitter
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, z]</c> in the world.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    public string Loop { get; init; } = string.Empty;
+
+    /// <summary>Which rotated copy of the loop it plays.</summary>
+    public int Copy { get; init; }
+
+    /// <summary>Decibels quieter than the other emitters.</summary>
+    public float ExtraAttenuation { get; init; }
+}
+
 internal sealed record ArcheryConfig
 {
     public bool Enabled { get; init; } = true;
@@ -2414,6 +2562,9 @@ internal sealed record CrowdAnimal
 
     /// <summary><c>[x, y, yaw]</c> in that module's frame.</summary>
     public float[] At { get; init; } = Array.Empty<float>();
+
+    /// <summary>A Papyrus script put on the reference (the pen horses': not to be ridden off).</summary>
+    public string Script { get; init; } = string.Empty;
 }
 
 internal sealed record CrowdGroup

@@ -2,7 +2,72 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: ground wear, cobbles, archery sign, horses (2026-09-23)
+## Current pass: festival audio, and the cobbles, sign bar and horses again (2026-09-23)
+
+Barry's review of the last pass: the cobbles had gone completely; the sign bar didn't line
+up with the posts; the horses stay in the pen but can be ridden; the worn ground now
+varies. Then the big one: the passive festival audio with the stage music (his brief:
+ambience, the stage set, the cheer, lifecycle, settings).
+
+### The fixes
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| Cobbles gone | **the real cause**: the game treats each vertex's layer opacities as shares of the whole, and vanilla's add up to 1 at most (checked over 1.18 million Tamriel vertices: 98% at or under 1.0). The build wrote each layer's own coverage, so dirt, path and cobbles were all near 1 on the avenue and blended into mud. The last pass's extra wear raised the lower layers and buried the cobbles entirely; before that they showed only where the wear was low | the layers are converted to shares, top first: each keeps only what the layers above leave. Read back: the highest sum is 1.0 and no vertex is over it |
+| Sign bar misaligned | module pieces (the archery booth) ignored `rotX`, so the lay-flat log stood upright; the booth's pieces are also nudged a few units at random | the bar is now `StockadeWoodbeamShort01`, a beam that lies flat and is centred as authored (144 long, scaled to 115), so no rotation is needed. New `exact` pieces skip the random nudge: the posts, sign, bar and wreath in every sign group. Modules now also honour `rotX`/`rotY` as vignettes do (the booth's arrow bundles, the leaning target, the pitchfork and broom) |
+| Horses ridden off | vanilla horses with no owner | `SkyrimFairPenHorse` (Papyrus, `BlockActivation` on load) on each pen horse. New `script` on `crowds.animals` |
+
+### Festival audio
+
+Everything is in `docs/AUDIO.md`. In short:
+
+- **Files audited:** 4 songs, one crowd murmur (loop), one cheer (one-shot). All are
+  already mono 44.1 kHz 16-bit PCM. There are no other effects, so none were invented.
+  `tools/build_audio.py` builds clean runtime WAVs:
+  - songs: fades where Fiddle and Dragonborn-Approved stop dead
+  - cheer: the leading silence trimmed, 11 s with a fade
+  - murmur: a seamless 60.9 s loop in four copies, each starting a quarter further in
+- **Ambience:** six positional sound markers, placed where the visitors cluster (food row,
+  east lane, south-east stalls, entrance, crowd square, west field). Each plays its own
+  copy, from full volume within 500 to silent by 3,000, 10 dB down. The engine starts and
+  stops them with their cells, so they can't double up.
+- **Stage set:** `SkyrimFairAudioQuest` (start-game-enabled) runs `SkyrimFairAudioScript`
+  on a persistent speaker above the stage: song, cheer, 2 s, next song. It ducks the
+  ambience to 75% under a song, stops everything when the player leaves the world, and
+  restarts cleanly on every load through the player alias. The clock is game time, which
+  stops in menus as the sounds do. Song lengths are measured from the built files.
+- **Settings:** five globals, `SkyrimFairAudio{Ambience,Music}Enabled`,
+  `{Ambience,Music,Cheer}Volume`, read live for a later MCM.
+- **Game music:** the world's music type is vanilla's `MUSTavernSILENCE`.
+- **Pipeline:**
+  - `tools/build_papyrus.py` compiles `src/Papyrus/*.psc` with the Creation Kit's
+    command-line compiler, against the CK's own sources, unpacked once. All 3 scripts
+    compile.
+  - `tools/deploy.py` copies the plugin, meshes, textures, `Sound\` and `Scripts\`,
+    changed files only, and checks each copy.
+
+**Verification:**
+- Generator run twice: identical SHA256 `6d0cd3f43909e75e...` (574,508 bytes).
+  `build_audio.py` run twice: identical files.
+- Deployed with `deploy.py`: the plugin, 9 sound files and 3 scripts, all byte-identical.
+- Read back from the plugin:
+  - the quest's flags, player alias and alias script, and all 17 script properties
+    (song lengths 149.6, 219.92, 202.76, 256.76; cheer 11)
+  - 2 sound categories, 2 output models, 10 sound descriptors with their paths, 5 sound
+    markers, 6 emitters and the speaker (persistent)
+  - the 5 globals, the world's music type, and the 3 horses' scripts
+  - no ground vertex over 1
+
+**Not verified:** anything in game. The audio has only been checked as records and
+files.
+
+**Test** (the acceptance list is in `docs/AUDIO.md`):
+- Are the cobbles back along the avenue?
+- Does the sign hang from its bar, with the bar lying between the post tops?
+- Can you still ride a horse? You shouldn't be able to.
+- Balance the audio: murmur level, how far the band carries, the cheer's punch.
+
+## Previous pass: ground wear, cobbles, archery sign, horses (2026-09-23)
 
 Barry's review of the crowd and stable pass: vary the ground's wear (more worn in the
 middle, less toward the palisade); the cobbles "don't pull through"; the archery sign

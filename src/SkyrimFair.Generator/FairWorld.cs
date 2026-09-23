@@ -328,6 +328,17 @@ internal static class FairWorld
             }, FaceList);
         }
 
+        // ---- sound: the stage set and the crowd ambience ------------------------------------
+        AudioResult? audio = null;
+        if (config.Audio.Enabled)
+        {
+            audio = FairAudio.Build(mod, config.Audio, master!, worldspace, placed =>
+            {
+                placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
+                topCell.Persistent.Add(placed);
+            }, Put);
+        }
+
         // ---- the worn festival ground ------------------------------------------------------
         // Painted last, from where everything now stands: the LAND records were allocated
         // with the cells (their FormIDs stay put) and only their texture layers are added here.
@@ -445,6 +456,7 @@ internal static class FairWorld
             archery,
             towers,
             crowds,
+            audio,
             wallBoxes,
             props,
             groundTextures?.Count ?? 0,
@@ -600,31 +612,43 @@ internal static class FairWorld
                 },
             });
 
+            // Each texture's own coverage, painted bottom to top, turned into the shares the
+            // game blends: at every vertex the layers' opacities are portions of the whole
+            // and add up to at most 1 (as vanilla's do), the rest showing the base. A layer
+            // covers what lies under it, so each keeps only what the layers above leave.
+            var alphas = new float[textures.Count, QuadPoints * QuadPoints];
+            for (var row = 0; row < QuadPoints; row++)
+            {
+                for (var col = 0; col < QuadPoints; col++)
+                {
+                    var x = originX + (qx * (QuadPoints - 1) + col) * Step;
+                    var y = originY + (qy * (QuadPoints - 1) + row) * Step;
+                    var left = 1f;
+                    for (var i = textures.Count - 1; i >= 0; i--)
+                    {
+                        var alpha = Math.Clamp(textures[i].Alpha(x, y), 0f, 1f);
+                        alphas[i, row * QuadPoints + col] = alpha * left;
+                        left *= 1f - alpha;
+                    }
+                }
+            }
+
             var painted = new List<(FormKey Texture, ExtendedList<AlphaLayerData> Data, float Weight)>();
-            foreach (var texture in textures)
+            for (var i = 0; i < textures.Count; i++)
             {
                 var data = new ExtendedList<AlphaLayerData>();
-                for (var row = 0; row < QuadPoints; row++)
+                for (var pos = 0; pos < QuadPoints * QuadPoints; pos++)
                 {
-                    for (var col = 0; col < QuadPoints; col++)
+                    var share = MathF.Floor(alphas[i, pos] * 255f) / 255f;
+                    if (share >= 1f / 255f)
                     {
-                        var x = originX + (qx * (QuadPoints - 1) + col) * Step;
-                        var y = originY + (qy * (QuadPoints - 1) + row) * Step;
-                        var alpha = texture.Alpha(x, y);
-                        if (alpha >= 1f / 255f)
-                        {
-                            data.Add(new AlphaLayerData
-                            {
-                                Position = (ushort)(row * QuadPoints + col),
-                                Opacity = MathF.Round(alpha * 255f) / 255f,
-                            });
-                        }
+                        data.Add(new AlphaLayerData { Position = (ushort)pos, Opacity = share });
                     }
                 }
 
                 if (data.Count > 0)
                 {
-                    painted.Add((texture.Texture, data, data.Sum(d => d.Opacity)));
+                    painted.Add((textures[i].Texture, data, data.Sum(d => d.Opacity)));
                 }
             }
 
@@ -1369,6 +1393,7 @@ internal sealed record FairWorldResult(
     ArcheryResult? Archery,
     TowersResult? Towers,
     CrowdsResult? Crowds,
+    AudioResult? Audio,
     int WallBoxes,
     int Props,
     int GroundTextures,
