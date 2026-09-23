@@ -2,7 +2,95 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the first static crowd figure, and the NPC guard (2026-09-23)
+## Current pass: Astra's folk dance in game (OAR), the figure's collision, the guard's retry (2026-09-23)
+
+Barry confirmed the first crowd figure in game: "he blended in that well that i had to do
+a double take", the right height and a natural skin colour. The only issue: no
+collision. The colour went odd only with the camera inside him. Then: "i believe Astra
+made a bespoke animation, could we try that".
+
+### Astra's folk dance
+
+`character-actors/folk-dance` (Barry's and Astra's, untracked) holds a paired dance:
+- `folk_turn_A.hkx` for the male skeleton and `folk_turn_B.hkx` for the female
+- 9.6 s, 30 fps, 289 samples, the vanilla 99 bones
+- the two dancers turn arm in arm round a shared centre, 26 units from it (44 when they
+  step apart)
+- it has only been checked by a codec round trip, never in game
+
+- **Re-based per dancer** (`tools/folk/rebase_folk.py`).
+  - As authored, both clips share one origin, so both NPCs would stand on one spot, and
+    the game pushes overlapping actors apart.
+  - Only the root track is rewritten, relative to its own first frame. Every other bone is
+    untouched, and the tool checks that no other bone carries motion.
+  - Each NPC stands where its dancer starts: him at (+26, 0) facing 270, her at (−26, 0)
+    facing 90. They're 52 units apart, and their bodies still meet over the centre.
+  - Root round-trip error 0.0005 units. The output is deterministic and git-ignored, as
+    the source is Astra's.
+- **Played through Open Animation Replacer** (installed in Barry's list).
+  - Each clip replaces vanilla `special_cicerodance1.hkx`, the animation of
+    `IdleCiceroDance1`, **only for its own NPC record** (an OAR `IsActorBase` condition).
+  - The generator writes the OAR `config.json` files next to the clips, from the records'
+    FormIDs, so the conditions can't go stale.
+  - Nobody else in Skyrim is affected, Cicero included.
+- **Two new dancers** (`fairWorld.folkDance`), "Folk Dancer":
+  - copies of visitors Male01 and Female01, persistent, built late (before the guard, so
+    they're invulnerable too)
+  - at the dance floor's centre front, (2048, 4420)
+  - the crowd layers keep about 115 units clear round them (`keepClear`); the nearest
+    dancer is now 106 away
+- **The stage script** (`FolkDancers`, `FolkIdle`, `FolkLength`):
+  - starts both in the same update once both are loaded
+  - restarts them every 9.6 s through a song, waking exactly on time so there's no gap
+  - stops them at the cheer, and starts them afresh with the next song
+- **`deploy.py`** now also copies OAR's `config.json` files; it only took game-file
+  extensions before.
+
+### The figure's collision
+
+- An optional `collision: [minX, minY, maxX, maxY, height]` per figure, in its own frame.
+  It's the kind of invisible collision box the stage walls use, which works in game.
+- The clapper's box is his body, not his reaching hands: [−20, −12, 24, 30, 132], turned
+  and placed with him.
+- The guard's FormList is now built before the figures, so adding figures never
+  renumbers it.
+
+### The NPC guard's retry
+
+- Barry's log showed the list filled (`NPC guard strips 2 spells`), but no NPC traced a
+  removal.
+  - On that first load the NPCs loaded 4 s before the stage quest filled the list, so
+    they found it empty.
+  - The log was also 0.7 MB, against 543 MB before, but it stopped about a minute in, so
+    it doesn't prove the freeze is gone.
+- Now an NPC that finds the list empty tries again every 5 s, up to 3 times.
+
+### Verification
+
+- Against the deployed plugin: no record removed. 5 records were added and only the late
+  ones renumbered (the figure, the guard's list, the folk pair, the navmeshes).
+- The OAR conditions name `SkyrimFair.esp` records `16AB` (male) and `16AD` (female),
+  the folk dancers' own records.
+- 111 of 111 NPC records invulnerable, with the guard script.
+- Navmesh: 9 meshes, 7,344 triangles, 58 islands, **0 errors**. Actors on the mesh: 230
+  of 230.
+- Generator run twice: identical SHA256 `09563660fbab2002...` (752,786 bytes). Four
+  scripts compile. Deployed: the plugin, both clips and the three OAR configs.
+
+### Test
+
+1. **The folk pair**, centre front of the dance floor, when a song plays:
+   - Do they dance, not stand?
+   - Do their forearms meet as they turn?
+   - Does the loop restart cleanly every 9.6 s?
+   - Do they stop at the cheer?
+   - If they only do the Cicero dance, OAR didn't pick up the conditions: check that the
+     OAR menu lists "Skyrim Fair folk dance".
+2. **The clapper:** can you walk into him now?
+3. **The guard:** in `Papyrus.0.log`, `SkyrimFairGuard:` lines should say `removed True,
+   still has it False`. Also: no "Suspended stack count" dump, and the game stays up.
+
+## Previous pass: the first static crowd figure, and the NPC guard (2026-09-23)
 
 Barry: add the static crowd prototype (another agent built it, `docs/CROWD.md`, and wrote
 the brief `docs/CLAUDE_CROWD_TASK.md`), noting what was fixed and why. Also make the fair's

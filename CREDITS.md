@@ -220,8 +220,22 @@ geometry posed with a vanilla animation:
 
 Like `Props/`, the built NIFs are kept out of git.
 
-**PyNifly** (by Bad Dog; GPL according to the crowd brief. The local copy has no licence file, so confirm the version before a release) is used as a **build tool only**, to write the NIFs
+**PyNifly** (by Bad Dog, GPL-3.0: the licence is vendored with the folk-dance tools as `character-actors/folk-dance/vendor/LICENSE-PyNifly`) is used as a **build tool only**, to write the NIFs
 from the command line. None of its code is bundled with the mod.
+
+## Paired folk dance (Astra)
+
+**Animation:** `folk_turn_A.hkx` and `folk_turn_B.hkx` by Astra, made for Skyrim Fair.
+They're authored in Blender 3.6 on the vanilla male and female skeletons (no bones added)
+and encoded with PyNifly's standalone HKX codec (GPL-3.0, a build tool only).
+
+**Skyrim Fair usage:**
+- `tools/folk/rebase_folk.py` rewrites only the root track, so each dancer's clip starts
+  at their own feet.
+- The two clips replace the Cicero dance's animation for the fair's two folk dancers only,
+  through **Open Animation Replacer**. OAR is a dependency and isn't bundled.
+- The sources stay in Barry's untracked `character-actors/`, and the derived clips aren't
+  committed. Confirm with Astra how they want to be credited before any public release.
 
 ## Recommended texture replacers (not bundled)
 

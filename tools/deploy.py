@@ -24,7 +24,8 @@ TREES = [
 ]
 
 
-# Only game files: the asset folders also hold build scripts and PNG sources.
+# Only game files: the asset folders also hold build scripts and PNG sources. Open Animation
+# Replacer's config.json files (conditions, under OpenAnimationReplacer/) are game files too.
 GAME_FILES = {".nif", ".dds", ".wav", ".xwm", ".fuz", ".lip", ".pex", ".hkx", ".tri", ".bgsm", ".bgem"}
 
 
@@ -48,7 +49,8 @@ def main() -> None:
             continue
         for f in sorted(base.rglob("*")):
             rel = f.relative_to(base)
-            if f.is_file() and f.suffix.lower() in GAME_FILES and not (rel.parts and rel.parts[0] in skip):
+            oar = f.name == "config.json" and "OpenAnimationReplacer" in rel.parts
+            if f.is_file() and (f.suffix.lower() in GAME_FILES or oar) and not (rel.parts and rel.parts[0] in skip):
                 files.append((f, dest / dst / rel))
 
     copied = 0

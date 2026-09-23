@@ -137,8 +137,9 @@
       ]
     },
     "crowdFigures": [
-      {"editorId": "SkyrimFairCrowdClapping01", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Clapping01.nif", "width": 51, "depth": 70, "height": 132, "places": [[580, 1640, 270]]}
+      {"editorId": "SkyrimFairCrowdClapping01", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Clapping01.nif", "width": 51, "depth": 70, "height": 132, "places": [[580, 1640, 270]], "collision": [-20, -12, 24, 30, 132]}
     ],
+    "folkDance": {"enabled": true, "centre": [2048, 4420], "heading": 0, "idle": "000F7C8A:Skyrim.esm", "length": 9.6, "name": "Folk Dancer", "oarFolder": "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairFolk", "dancers": [{"submod": "Male", "look": "SkyrimFairVisitorMale01", "at": [26, 0, 270]}, {"submod": "Female", "look": "SkyrimFairVisitorFemale01", "at": [-26, 0, 90]}]},
     "npcGuard": {"enabled": true, "invulnerable": true, "stripSpells": ["StealthKillDetectionFix.esp|817", "MaximumDestruction.esp|8E6289"]},
     "navmesh": {
       "enabled": true,

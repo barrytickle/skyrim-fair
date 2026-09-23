@@ -68,6 +68,12 @@ Idle[] Property CheerIdles Auto
 Int Property DanceEvery = 2 Auto
 {Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
 
+Actor[] Property FolkDancers Auto
+{Astra's paired folk dance: each dancer's clip replaces FolkIdle's animation for that NPC
+(Open Animation Replacer), so both are started together and restarted every FolkLength.}
+Idle Property FolkIdle Auto
+Float Property FolkLength = 9.6 Auto
+
 FormList Property StripSpells Auto
 {The NPC guard's list (SkyrimFairNpcGuard): filled here from StripPlugins/StripIds.}
 String[] Property StripPlugins Auto
@@ -100,6 +106,7 @@ Bool[] orchestraPlaying
 Bool bandOn = False
 Int appliedTier = -1
 Int danceTick = 0
+Float folkNext = 0.0
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -122,6 +129,7 @@ Function Recover()
 	bandPlaying = new Bool[16]
 	orchestraPlaying = new Bool[32]
 	appliedTier = -1
+	folkNext = 0.0
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
 EndFunction
@@ -182,11 +190,16 @@ Event OnUpdate()
 	If phase == 2
 		PlayBand()
 		Dance()
+		FolkDance(now)
 	ElseIf bandOn
 		StopBand(False)
 	EndIf
 
 	Float left = Seconds(phaseEnds - now)
+	If phase == 2 && folkNext > 0.0 && Seconds(folkNext - now) < left
+		; Wake for the folk pair's next restart, so the loop has no gap.
+		left = Seconds(folkNext - now)
+	EndIf
 	If left > ActivePoll
 		left = ActivePoll
 	ElseIf left < 0.1
@@ -341,6 +354,27 @@ Function Dance()
 	EndWhile
 EndFunction
 
+; The folk pair: both start the dance in the same moment, once both are loaded, and
+; start it again every FolkLength while the song lasts.
+Function FolkDance(Float now)
+	If !FolkIdle || FolkDancers.Length == 0 || now < folkNext
+		Return
+	EndIf
+	Int i = 0
+	While i < FolkDancers.Length
+		If !FolkDancers[i] || !FolkDancers[i].Is3DLoaded()
+			Return
+		EndIf
+		i += 1
+	EndWhile
+	i = 0
+	While i < FolkDancers.Length
+		FolkDancers[i].PlayIdle(FolkIdle)
+		i += 1
+	EndWhile
+	folkNext = now + FolkLength * TimeScale.GetValue() / 86400.0
+EndFunction
+
 ; The song's end: the floor claps and cheers with the crowd.
 Function Cheer()
 	If CheerIdles.Length == 0
@@ -353,6 +387,15 @@ Function Cheer()
 		EndIf
 		i += 1
 	EndWhile
+	; The folk pair stops, and starts afresh with the next song.
+	i = 0
+	While i < FolkDancers.Length
+		If FolkDancers[i] && FolkDancers[i].Is3DLoaded()
+			FolkDancers[i].PlayIdle(BandStop)
+		EndIf
+		i += 1
+	EndWhile
+	folkNext = 0.0
 EndFunction
 
 Function QueueArchers()

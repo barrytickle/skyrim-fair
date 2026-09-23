@@ -135,6 +135,9 @@ internal sealed record FairWorldConfig
     /// <summary>What every fair NPC gets: invulnerability, and other mods' spells taken off.</summary>
     public NpcGuardConfig NpcGuard { get; init; } = new();
 
+    /// <summary>Astra's paired folk dance on two dancers, through Open Animation Replacer.</summary>
+    public FolkDanceConfig FolkDance { get; init; } = new();
+
     /// <summary>Distant vanilla mountains, always drawn.</summary>
     public MountainsConfig Mountains { get; init; } = new();
 
@@ -320,6 +323,15 @@ internal sealed record CrowdFigure : ProjectStaticConfig
 {
     /// <summary>Where copies stand: <c>[x, y, yaw]</c> each, on the ground. The figure faces +Y at yaw 0.</summary>
     public List<float[]> Places { get; init; } = new();
+
+    /// <summary>
+    /// An invisible collision box round each copy, in the figure's frame:
+    /// <c>[minX, minY, maxX, maxY, height]</c>. Empty: 80% of the bounds, full height.
+    /// </summary>
+    public float[] Collision { get; init; } = Array.Empty<float>();
+
+    /// <summary>False leaves the figure walk-through (a background figure nobody reaches).</summary>
+    public bool Solid { get; init; } = true;
 }
 
 /// <summary>
@@ -338,6 +350,46 @@ internal sealed record NpcGuardConfig
 
     /// <summary>Spells taken off, as <c>plugin|hex id</c>; a plugin that isn't loaded is skipped.</summary>
     public List<string> StripSpells { get; init; } = new();
+}
+
+/// <summary>
+/// A pair of dancers who play Astra's folk dance (tools/folk/rebase_folk.py). Each clip
+/// replaces vanilla's Cicero dance for that one NPC through an Open Animation Replacer
+/// condition the generator writes, and the stage script starts both together in songs.
+/// </summary>
+internal sealed record FolkDanceConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The pair's centre, <c>[x, y]</c>, and heading (degrees clockwise from +Y).</summary>
+    public float[] Centre { get; init; } = Array.Empty<float>();
+
+    public float Heading { get; init; }
+
+    /// <summary>The idle the clips replace (its animation file is what OAR swaps).</summary>
+    public string Idle { get; init; } = "000F7C8A:Skyrim.esm";
+
+    /// <summary>The clip's length in seconds: the script restarts the pair this often.</summary>
+    public float Length { get; init; } = 9.6f;
+
+    public string Name { get; init; } = "Folk Dancer";
+
+    /// <summary>The OAR mod folder the generator writes the conditions into (the clips are put there by the tool).</summary>
+    public string OarFolder { get; init; } = string.Empty;
+
+    public List<FolkDancer> Dancers { get; init; } = new();
+}
+
+internal sealed record FolkDancer
+{
+    /// <summary>The OAR submod folder holding this dancer's clip.</summary>
+    public string Submod { get; init; } = string.Empty;
+
+    /// <summary>The visitor record whose looks are copied.</summary>
+    public string Look { get; init; } = string.Empty;
+
+    /// <summary>Where the dancer's clip starts, from the pair's centre: <c>[x, y, heading]</c>.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
 }
 
 internal record ProjectStaticConfig

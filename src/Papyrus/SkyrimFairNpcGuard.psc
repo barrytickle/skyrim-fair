@@ -6,8 +6,28 @@ the plugins that are loaded, so the fair needs none of them as masters.}
 
 FormList Property StripSpells Auto
 
+Int retries = 0
+
 Event OnLoad()
+	retries = 0
+	Strip()
+EndEvent
+
+; After a load the NPCs can load before the stage quest has filled the list: try again a
+; few times, 5 s apart.
+Event OnUpdate()
+	Strip()
+EndEvent
+
+Function Strip()
 	If !StripSpells
+		Return
+	EndIf
+	If StripSpells.GetSize() == 0
+		If retries < 3
+			retries += 1
+			RegisterForSingleUpdate(5.0)
+		EndIf
 		Return
 	EndIf
 	Int i = StripSpells.GetSize()
@@ -19,4 +39,4 @@ Event OnLoad()
 			Debug.Trace("SkyrimFairGuard: " + self + " " + s + " removed " + removed + ", still has it " + HasSpell(s))
 		EndIf
 	EndWhile
-EndEvent
+EndFunction

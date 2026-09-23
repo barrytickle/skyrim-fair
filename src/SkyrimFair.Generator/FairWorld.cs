@@ -599,7 +599,7 @@ internal static class FairWorld
                 placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
                 topCell.Persistent.Add(placed);
             }, PutTemporaryNpc, PutPersistentNpc, (crowdMarker[0], crowdMarker[1], plan.Height(crowdMarker[0], crowdMarker[1]) - 200f),
-                seats, quietSource);
+                seats, quietSource, FolkKeepClear());
             var tierGlobal = new GlobalFloat(mod) { EditorID = config.Crowds.TierGlobal, Data = config.Crowds.Tiers.Count };
             mod.Globals.Add(tierGlobal);
             var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
@@ -671,16 +671,96 @@ internal static class FairWorld
             }
         }
 
-        // ---- static crowd figures (docs/CROWD.md), after everything but the navmesh ------------------
-        foreach (var figure in config.CrowdFigures)
+        // The folk pair's circle, kept clear of the crowd layers: its centre and a ring round it
+        // (the placement keeps 55 from anyone standing, so this clears about 115 round the centre).
+        List<(float X, float Y)> FolkKeepClear()
         {
-            var stat = AddStatic(mod, figure);
-            foreach (var at in figure.Places)
+            var clear = new List<(float X, float Y)>();
+            if (config.FolkDance.Enabled && config.FolkDance.Centre.Length >= 2)
             {
-                Put(Place(mod, stat.FormKey, at[0], at[1], plan.Height(at[0], at[1]), at[2]));
+                var (cx, cy) = (config.FolkDance.Centre[0], config.FolkDance.Centre[1]);
+                clear.Add((cx, cy));
+                for (var k = 0; k < 8; k++)
+                {
+                    clear.Add((cx + 60f * MathF.Sin(k * MathF.PI / 4f), cy + 60f * MathF.Cos(k * MathF.PI / 4f)));
+                }
             }
 
-            Console.WriteLine($"  crowd figure {figure.EditorId}: {figure.Places.Count} placed");
+            return clear;
+        }
+
+        // ---- Astra's folk dance: a pair, each with its own clip through OAR ---------------------
+        // Made before the guard, which then covers them like every other fair NPC.
+        if (config.FolkDance.Enabled && audio is not null)
+        {
+            var folk = config.FolkDance;
+            var folkDancers = new List<FormKey>();
+            var oar = Path.IsPathRooted(folk.OarFolder) ? folk.OarFolder : Path.Combine(FairPaths.ConfigDirectory, folk.OarFolder);
+            var json = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+            Directory.CreateDirectory(oar);
+            File.WriteAllText(Path.Combine(oar, "config.json"), System.Text.Json.JsonSerializer.Serialize(new
+            {
+                name = "Skyrim Fair folk dance",
+                author = "Astra (animation), Skyrim Fair",
+                description = "The fair's folk dancers only: each plays its half of the paired dance in place of the Cicero dance.",
+            }, json));
+            var turn = folk.Heading * MathF.PI / 180f;
+            foreach (var dancer in folk.Dancers)
+            {
+                var look = mod.Npcs.First(n => n.EditorID == dancer.Look);
+                var npc = look.Duplicate(mod.GetNextFormKey());
+                npc.EditorID = $"SkyrimFairFolkDancer{dancer.Submod}";
+                npc.Name = folk.Name;
+                mod.Npcs.Add(npc);
+
+                var (u, v) = (dancer.At[0], dancer.At[1]);
+                var (x, y) = (folk.Centre[0] + u * MathF.Cos(turn) + v * MathF.Sin(turn), folk.Centre[1] - u * MathF.Sin(turn) + v * MathF.Cos(turn));
+                var placed = new PlacedNpc(mod)
+                {
+                    EditorID = $"{npc.EditorID}Ref",
+                    Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(x, y, plan.Height(x, y) + 2f),
+                        Rotation = new P3Float(0f, 0f, (folk.Heading + dancer.At[2]) * MathF.PI / 180f),
+                    },
+                };
+                PutPersistentNpc(placed);
+                folkDancers.Add(placed.FormKey);
+
+                // OAR: this dancer's clip replaces the idle's animation for this NPC only.
+                var sub = Path.Combine(oar, dancer.Submod);
+                Directory.CreateDirectory(sub);
+                File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+                {
+                    ["name"] = $"Folk dancer ({dancer.Submod})",
+                    ["description"] = $"{npc.EditorID}: Astra's folk dance in place of the Cicero dance.",
+                    ["priority"] = 1900000000,
+                    ["conditions"] = new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            ["condition"] = "IsActorBase",
+                            ["requiredVersion"] = "1.0.0.0",
+                            ["Actor base"] = new Dictionary<string, string>
+                            {
+                                ["pluginName"] = mod.ModKey.FileName,
+                                ["formID"] = npc.FormKey.ID.ToString("X"),
+                            },
+                        },
+                    },
+                }, json));
+            }
+
+            var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            script.Properties.Add(new ScriptObjectListProperty
+            {
+                Name = "FolkDancers",
+                Objects = folkDancers.Select(k => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) }).ToExtendedList(),
+            });
+            script.Properties.Add(new ScriptObjectProperty { Name = "FolkIdle", Object = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse(folk.Idle)) });
+            script.Properties.Add(new ScriptFloatProperty { Name = "FolkLength", Data = folk.Length });
+            Console.WriteLine($"  folk dance: {folkDancers.Count} dancers at ({folk.Centre[0]}, {folk.Centre[1]}); OAR conditions in {folk.OarFolder}");
         }
 
         // ---- the NPC guard: invulnerable, and other mods' spells taken off ----------------------
@@ -712,6 +792,51 @@ internal static class FairWorld
             script.Properties.Add(new ScriptIntListProperty { Name = "StripIds", Data = guard.Select(g => Convert.ToInt32(g[1], 16)).ToExtendedList() });
             Console.WriteLine($"  NPC guard: {mod.Npcs.Count} NPC records{(config.NpcGuard.Invulnerable ? " invulnerable" : "")}, "
                 + $"{guard.Count} spells stripped when their plugin is loaded");
+        }
+
+        // ---- static crowd figures (docs/CROWD.md), after everything but the navmesh ------------------
+        // Each copy is followed by its invisible collision box (the invisible walls' kind).
+        var figureBoxes = 0;
+        foreach (var figure in config.CrowdFigures)
+        {
+            var stat = AddStatic(mod, figure);
+            var box = figure.Collision.Length == 5
+                ? figure.Collision
+                : new[] { -0.4f * figure.Width, -0.4f * figure.Depth, 0.4f * figure.Width, 0.4f * figure.Depth, figure.Height };
+            foreach (var at in figure.Places)
+            {
+                var ground = plan.Height(at[0], at[1]);
+                Put(Place(mod, stat.FormKey, at[0], at[1], ground, at[2]));
+                if (!figure.Solid)
+                {
+                    continue;
+                }
+
+                // The box's middle, turned into the world as the figure is (yaw clockwise from +Y).
+                var (u, v) = ((box[0] + box[2]) / 2f, (box[1] + box[3]) / 2f);
+                var yaw = at[2] * MathF.PI / 180f;
+                var (x, y) = (at[0] + u * MathF.Cos(yaw) + v * MathF.Sin(yaw), at[1] - u * MathF.Sin(yaw) + v * MathF.Cos(yaw));
+                Put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
+                    Primitive = new PlacedPrimitive
+                    {
+                        // Half-extents: across, along (the figure's +Y), up.
+                        Bounds = new P3Float((box[2] - box[0]) / 2f, (box[3] - box[1]) / 2f, box[4] / 2f),
+                        Color = System.Drawing.Color.FromArgb(0, 255, 255, 0),
+                        Unknown = 0.15f,
+                        Type = PlacedPrimitive.TypeEnum.Box,
+                    },
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(x, y, ground + box[4] / 2f),
+                        Rotation = new P3Float(0f, 0f, yaw),
+                    },
+                });
+                figureBoxes++;
+            }
+
+            Console.WriteLine($"  crowd figure {figure.EditorId}: {figure.Places.Count} placed" + (figure.Solid ? ", each with a collision box" : ", walk-through"));
         }
 
         // ---- the navmesh, last of all ------------------------------------------------------------

@@ -210,7 +210,8 @@ internal static class FairCrowds
     public static CrowdTiersResult BuildTiers(
         SkyrimMod mod, CrowdsConfig config, VendorsConfig looksFrom, CrowdsResult first,
         Func<float, float, float> ground, Action<PlacedObject> putMarker, Action<PlacedNpc> putTemporary, Action<PlacedNpc> putPersistent,
-        (float X, float Y, float Z) markerAt, IReadOnlyList<CrowdSeat> seats, IPackageGetter? quietSource)
+        (float X, float Y, float Z) markerAt, IReadOnlyList<CrowdSeat> seats, IPackageGetter? quietSource,
+        IReadOnlyList<(float X, float Y)>? keepClear = null)
     {
         var markers = new List<PlacedObject>();
         for (var ti = 0; ti < config.Tiers.Count; ti++)
@@ -307,7 +308,8 @@ internal static class FairCrowds
 
         var placed = new List<(string Tier, int Count)>();
         var dancers = new List<FormKey>();
-        var stood = first.Positions.ToList();
+        // Spots nobody is placed near (the folk pair's circle): counted as stood, never placed.
+        var stood = first.Positions.Concat(keepClear ?? Array.Empty<(float X, float Y)>()).ToList();
         var taken = new Dictionary<FormKey, int>();
         for (var ti = 0; ti < config.Tiers.Count; ti++)
         {
@@ -391,7 +393,7 @@ internal static class FairCrowds
             placed.Add((tier.Name, count));
         }
 
-        return new CrowdTiersResult(markers.Select(m => m.FormKey).ToList(), placed, stood.Skip(first.Positions.Count).ToList(), dancers);
+        return new CrowdTiersResult(markers.Select(m => m.FormKey).ToList(), placed, stood.Skip(first.Positions.Count + (keepClear?.Count ?? 0)).ToList(), dancers);
     }
 }
 

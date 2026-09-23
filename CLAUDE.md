@@ -112,6 +112,19 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Astra's folk dance, the figure's collision, the guard retry: built and deployed, awaiting Barry's test** (plugin `09563660fbab2002...`).
+- Barry confirmed the clapping figure in game: the right height, natural colour, "had to
+  do a double take". He asked for collision, now a box per figure (`crowdFigures[].collision`).
+- Astra's paired folk dance plays on two "Folk Dancer" NPCs at (2048, 4420).
+  - Each clip is re-based per dancer (`tools/folk/rebase_folk.py`) and replaces the Cicero
+    dance for that NPC only, through Open Animation Replacer (the conditions are
+    generated).
+  - The stage script starts the pair together and restarts it every 9.6 s through songs.
+- The guard retries while its list is empty: after Barry's first load no NPC had traced
+  a removal.
+- The other agent is making figure variants (poses, outfits, genders, races) in
+  `tools/crowd/`. Their NIFs deploy, but nothing places them yet.
+
 **First static crowd figure and the NPC guard: built and deployed, awaiting Barry's test** (plugin `1c3377521927c995...`).
 - `fairWorld.crowdFigures`: `SkyrimFairCrowdClapping01` at (580, 1640), facing the range.
   It's built late so no FormID moves. Three fixes to the other agent's brief are recorded
