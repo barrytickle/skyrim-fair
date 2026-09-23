@@ -72,8 +72,9 @@ Permissions and provenance (details in `CREDITS.md`):
 
 Files and packaging:
 - [ ] `SkyrimFair.esp`, `meshes\` (props, crowd figures, the OAR folk-dance folder with
-      its `config.json` files), `textures\`, `Sound\`, `Scripts\`. `tools/deploy.py`
-      copies exactly this set.
+      its `config.json` files, the singers' FaceGen heads), `textures\` (their FaceGen
+      tints), `Sound\` (including `Voice\SkyrimFair.esp\`, the singers' lip files),
+      `Scripts\`. `tools/deploy.py` copies exactly this set.
 - [ ] The two compatibility patches, as optional files (above).
 - [ ] Remove the retired `SkyrimFairNpcGuard.pex` from the package; nothing uses it now.
 

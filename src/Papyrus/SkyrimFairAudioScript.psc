@@ -68,6 +68,17 @@ Idle[] Property CheerIdles Auto
 Int Property DanceEvery = 2 Auto
 {Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
 
+Actor[] Property Singers Auto
+{The three singers at the front of the deck (docs/BARDS.md). Their lips follow the song:
+each sung line is a topic whose voice file (silent audio, a lip track) differs per
+singer's voice type.}
+Topic[] Property SingerTopics Auto
+Float[] Property SingerStarts Auto
+{Each line's start, in seconds from its song's start.}
+Int[] Property SongFirstLine Auto
+{For each song, its first line in SingerTopics, or -1 for a song with no singing.}
+Int[] Property SongLineCount Auto
+
 GlobalVariable Property AtFair Auto
 {1 while the player is at the fair: the compatibility patches switch other mods' per-NPC
 spells off while it's on. Saved with the game, so a load at the fair starts with it on.}
@@ -116,6 +127,10 @@ Float folkNext = 0.0
 Bool[] dancing
 Bool folkOn = False
 Int songsPlayed = 0
+; The song's sung lines: the next one to say, and the end of this song's run.
+Float songStarted = 0.0
+Int nextLine = -1
+Int endLine = -1
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -208,11 +223,19 @@ Event OnUpdate()
 		PlayBand()
 		Dance()
 		FolkDance(now)
+		Sing(now)
 	ElseIf bandOn
 		StopBand(False)
 	EndIf
 
 	Float left = Seconds(phaseEnds - now)
+	If phase == 2 && nextLine >= 0 && nextLine < endLine
+		; Wake for the next sung line.
+		Float toLine = SingerStarts[nextLine] - Seconds(now - songStarted)
+		If toLine < left
+			left = toLine
+		EndIf
+	EndIf
 	If left > ActivePoll
 		left = ActivePoll
 	ElseIf left < 0.1
@@ -234,6 +257,13 @@ Function Advance(Float now)
 		songsPlayed += 1
 		dancing = new Bool[128]
 		folkOn = False
+		songStarted = now
+		nextLine = -1
+		endLine = -1
+		If track < SongFirstLine.Length && SongFirstLine[track] >= 0
+			nextLine = SongFirstLine[track]
+			endLine = nextLine + SongLineCount[track]
+		EndIf
 		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
 		Enter(2, SongLengths[track], now)
 	ElseIf phase == 2
@@ -266,6 +296,7 @@ Float Function Seconds(Float days)
 EndFunction
 
 Function StopAll()
+	nextLine = -1
 	If songInstance != 0
 		Sound.StopInstance(songInstance)
 		songInstance = 0
@@ -369,6 +400,25 @@ Function Dance()
 	EndWhile
 EndFunction
 
+; Every line whose start has come is said by all three singers. Each start is measured
+; from the song's own start, so timer error never adds up from line to line.
+Function Sing(Float now)
+	If nextLine < 0 || Singers.Length == 0
+		Return
+	EndIf
+	Float into = Seconds(now - songStarted)
+	While nextLine < endLine && nextLine < SingerStarts.Length && SingerStarts[nextLine] <= into + 0.05
+		Int i = 0
+		While i < Singers.Length
+			If Singers[i] && Singers[i].Is3DLoaded()
+				Singers[i].Say(SingerTopics[nextLine])
+			EndIf
+			i += 1
+		EndWhile
+		nextLine += 1
+	EndWhile
+EndFunction
+
 ; The folk pair: both start together once both are loaded, once a song, and loop.
 Function FolkDance(Float now)
 	If !FolkIdle || FolkDancers.Length == 0 || folkOn
@@ -401,6 +451,7 @@ Function Cheer()
 		EndIf
 		i += 1
 	EndWhile
+	nextLine = -1
 	; The folk pair stops, and starts afresh with the next song.
 	i = 0
 	While i < FolkDancers.Length

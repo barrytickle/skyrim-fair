@@ -604,6 +604,10 @@ Project-owned mesh work is code-first and reproducible.
     (`tools/folk/rebase_folk.py`), or the actors would have to overlap.
   - Astra's sources in `character-actors/` stay uncommitted; the derived clips are
     git-ignored (`assets/meshes/actors/`).
+- **voiced NPCs can't be Traits-templated**: Traits carries the voice type. Singers copy a vanilla NPC's face data, and his FaceGen `facegeom` .nif and `facetint` .dds are copied from the game's archives, renamed to the new FormID (`FairSingers.cs`)
+- **voice file names** (checked against vanilla): `Sound\Voice\<plugin>\<voice type EditorID>\<quest EditorID>_<topic EditorID>_<INFO id 8 hex>_<response>.fuz`, lowercase. When quest plus topic are over 25 characters, the quest is cut to 10 and the topic to 15, so keep them short. The singers' topics are unnamed, as BardSongs' are
+- **Mutagen omits these unless set**: a quest's `ANAM` (`NextAliasID = 0`), an INFO's `CNAM` (`FavorLevel`), and an NPC's `DNAM` (`PlayerSkills`). Every vanilla record has them
+- **crowd figures have their own FormID range** (`crowdFormIdBase`, 0x10000): records built after them never shift when figures are appended
 - **crowd figures are append-only:**
   - Place them only by appending to `fairWorld.crowdPlacements`. A STAT is made at a
     figure's first placement, so the order of `crowdFigures` definitions doesn't matter.

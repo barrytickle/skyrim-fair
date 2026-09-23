@@ -27,6 +27,8 @@ assets/meshes/SkyrimFair/Props/
 assets/meshes/SkyrimFair/Crowd/
 # Astra's folk dance, re-based by tools/folk/rebase_folk.py, and its generated OAR conditions
 assets/meshes/actors/
+# The singers' FaceGen tints, copied from the game's archives by the generator
+assets/textures/actors/
 
 # The Whiterun Mossy Wet Stonefloor textures (Nexus 99294), copied to a fair-only path for the
 # cobbled avenue; redistribution permission unverified, so kept out of git.

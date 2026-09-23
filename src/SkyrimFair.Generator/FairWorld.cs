@@ -816,6 +816,8 @@ internal static class FairWorld
         var figureDefs = config.CrowdFigures.ToDictionary(f => f.EditorId, StringComparer.Ordinal);
         var figureStats = new Dictionary<string, Static>(StringComparer.Ordinal);
         var figureCounts = new SortedDictionary<string, int>(StringComparer.Ordinal);
+        var nextFigureId = config.CrowdFormIdBase;
+        FormKey FigureKey() => new(mod.ModKey, nextFigureId++);
         var legacy = config.CrowdFigures.SelectMany(f => f.Places.Select(at => new CrowdPlacement { Figure = f.EditorId, At = at }));
         foreach (var placement in legacy.Concat(config.CrowdPlacements))
         {
@@ -824,7 +826,7 @@ internal static class FairWorld
                 : throw new InvalidOperationException($"crowdPlacements: no crowdFigures entry {placement.Figure}");
             if (!figureStats.TryGetValue(figure.EditorId, out var stat))
             {
-                figureStats[figure.EditorId] = stat = AddStatic(mod, figure);
+                figureStats[figure.EditorId] = stat = AddStatic(mod, figure, FigureKey());
             }
 
             var at = placement.At;
@@ -834,7 +836,11 @@ internal static class FairWorld
             }
 
             var ground = plan.Height(at[0], at[1]);
-            Put(Place(mod, stat.FormKey, at[0], at[1], ground, at[2]));
+            Put(new PlacedObject(FigureKey(), SkyrimRelease.SkyrimSE)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(stat.FormKey),
+                Placement = new Placement { Position = new P3Float(at[0], at[1], ground), Rotation = new P3Float(0f, 0f, at[2] * MathF.PI / 180f) },
+            });
             figureCounts[figure.EditorId] = figureCounts.GetValueOrDefault(figure.EditorId) + 1;
             if (!figure.Solid)
             {
@@ -848,7 +854,7 @@ internal static class FairWorld
             var (u, v) = ((box[0] + box[2]) / 2f, (box[1] + box[3]) / 2f);
             var yaw = at[2] * MathF.PI / 180f;
             var (x, y) = (at[0] + u * MathF.Cos(yaw) + v * MathF.Sin(yaw), at[1] - u * MathF.Sin(yaw) + v * MathF.Cos(yaw));
-            Put(new PlacedObject(mod)
+            Put(new PlacedObject(FigureKey(), SkyrimRelease.SkyrimSE)
             {
                 Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
                 Primitive = new PlacedPrimitive
@@ -939,6 +945,20 @@ internal static class FairWorld
             AtFairGlobal = atFair.FormKey;
             var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
             script.Properties.Add(new ScriptObjectProperty { Name = "AtFair", Object = new FormLink<ISkyrimMajorRecordGetter>(atFair.FormKey) });
+        }
+
+        // ---- the stage singers (docs/BARDS.md) --------------------------------------------------
+        if (config.Singers.Enabled && audio is not null && master is not null)
+        {
+            var (singers, lines, files) = FairSingers.Build(mod, config.Singers, config.Audio, config.Vendors, master, audio.Quest, PutPersistentNpc);
+            Console.WriteLine($"  singers: {singers} on the deck, {lines} sung lines, {files} voice files");
+        }
+
+        // The mod's own counter must stay below the crowd figures' range.
+        var counter = mod.ModHeader.Stats.NextFormID;
+        if (counter >= config.CrowdFormIdBase)
+        {
+            throw new InvalidOperationException($"FormIDs reached the crowd figures' range (0x{config.CrowdFormIdBase:X}): raise crowdFormIdBase");
         }
 
         // ---- the navmesh, last of all ------------------------------------------------------------
@@ -1034,11 +1054,11 @@ internal static class FairWorld
     /// A STAT for a project mesh, with object bounds taken from its measured size so the
     /// engine culls it correctly.
     /// </summary>
-    private static Static AddStatic(SkyrimMod mod, ProjectStaticConfig piece)
+    private static Static AddStatic(SkyrimMod mod, ProjectStaticConfig piece, FormKey? key = null)
     {
         var halfWidth = (short)MathF.Ceiling(piece.Width / 2f);
         var halfDepth = (short)MathF.Ceiling(piece.Depth / 2f);
-        var record = new Static(mod)
+        var record = new Static(key ?? mod.GetNextFormKey(), SkyrimRelease.SkyrimSE)
         {
             EditorID = piece.EditorId,
             Model = new Model { File = piece.Model },

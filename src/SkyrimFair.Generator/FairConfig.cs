@@ -129,6 +129,16 @@ internal sealed record FairWorldConfig
     /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
     public NavmeshConfig Navmesh { get; init; } = new();
 
+    /// <summary>
+    /// Crowd figures take FormIDs from here up, in placement order, not from the mod's
+    /// counter: appending figures then never renumbers anything built after them (the
+    /// singers, the globals), and nothing built later renumbers them.
+    /// </summary>
+    public uint CrowdFormIdBase { get; init; } = 0x10000;
+
+    /// <summary>The stage singers (docs/BARDS.md, "Generator side").</summary>
+    public SingersConfig Singers { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -340,6 +350,56 @@ internal sealed record FairWorldConfig
 /// lay it by its real size. Width runs along local X, depth along local Y, and the
 /// origin is at the bottom centre.
 /// </summary>
+internal sealed record SingersConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairSinger";
+
+    public string Name { get; init; } = "Singer";
+
+    /// <summary>The singers' quest; short, so voice file names are never truncated.</summary>
+    public string QuestEditorId { get; init; } = "SkyrimFairSingers";
+
+    public string Package { get; init; } = "00025BFC:Skyrim.esm";
+
+    public int EmotionValue { get; init; } = 50;
+
+    /// <summary>tools/bards/build_vocals.py's output, one folder per song.</summary>
+    public string CuesDir { get; init; } = "build/bards";
+
+    /// <summary>Stage song name (audio.stage.songs[].name) to its cues folder.</summary>
+    public Dictionary<string, string> Songs { get; init; } = new();
+
+    /// <summary>Folders searched for the game's archives, for the singers' FaceGen files.</summary>
+    public List<string> FaceArchives { get; init; } = new();
+
+    public string MeshesOut { get; init; } = "assets/meshes";
+
+    public string TexturesOut { get; init; } = "assets/textures";
+
+    /// <summary>Where the voice files go (<c>Sound\Voice</c> in the game).</summary>
+    public string VoiceOut { get; init; } = "assets/sound/Voice";
+
+    public List<SingerMember> Members { get; init; } = new();
+}
+
+internal sealed record SingerMember
+{
+    /// <summary>The singer's id in cues.json (lead, left, right).</summary>
+    public string Id { get; init; } = string.Empty;
+
+    public string VoiceType { get; init; } = string.Empty;
+
+    /// <summary>The vanilla NPC whose face (record data and FaceGen files) he gets.</summary>
+    public string Face { get; init; } = string.Empty;
+
+    public string Outfit { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, z, yaw]</c>.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+}
+
 internal sealed record CrowdPlacement
 {
     public string Figure { get; init; } = string.Empty;

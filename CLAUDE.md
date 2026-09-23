@@ -112,6 +112,13 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Stage singers: built and deployed, awaiting Barry's test** (plugin `06618bba7143ad4e...`).
+- Three singers with their own voice types, 49 sung lines (Fiddle, Dragonborn-Approved),
+  and 147 lip-only voice files named by the rule checked against BardSongs.
+- The stage script says each line at its start, timed from the song's start.
+- The crowd NIFs' second rebuild is redeployed. Crowd figures now take FormIDs from
+  0x10000.
+
 **Compatibility patches: built and deployed, awaiting Barry's test** (plugin `6da22e995f0ee016...`).
 - The Papyrus guard could never run before the flood (Barry's log: 2 million queued, no
   guard line). It's replaced by two light patches that switch the clashing spells off

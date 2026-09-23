@@ -2,7 +2,107 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the patches get a dependable condition; dances loop (2026-09-23)
+## Current pass: the stage singers, and the crowd NIFs' second rebuild (2026-09-23)
+
+Barry: (1) redeploy the rebuilt crowd NIFs (zero-length skin normals fixed; the tankard
+held) and refresh the prop figures' bounds. (2) Implement the singers from
+`docs/BARDS.md`, "Generator side".
+
+### 1. Crowd NIFs
+
+- All 38 redeployed, matching byte for byte.
+- Bounds refreshed from `figures.json`: Tankard01–03 are 75 wide (were 70), Toast01–02
+  are 75 deep (were 76).
+- Footprints regenerated.
+
+### 2. The singers
+
+**The voice-file naming rule, checked against vanilla first** (Mutagen over `Skyrim.esm`,
+against the 61,811 `.fuz` names in `Skyrim - Voices_en0.bsa`):
+- `<quest EditorID>_<topic EditorID>_<INFO FormID, 8 hex, lowercase>_<response number>.fuz`
+  under `Sound\Voice\<plugin>\<voice type EditorID>\`.
+- **Short names:** 2,995 of 3,004 sampled lines are found by exactly that name. The 9
+  misses are lines with no recording.
+- **Long names:** when quest plus topic are over 25 characters, the quest is cut to 10
+  and the topic to 15. That's the best of the rules tried: 3,071 of 4,001, and every
+  other variant scored lower or 0.
+- **BardSongs:** the song lines' topics have no EditorID (`bardsongs__00074773_1`).
+  35 of its 64 responses are found under the rule. The other 29 weren't checked
+  (probably the request-branch lines, which have no recording).
+- **So:** a new quest `SkyrimFairSingers` (17 characters) with **unnamed topics**, as
+  BardSongs has. It's under 25 characters, so it's never truncated. Our files are
+  `skyrimfairsingers__<INFO id>_1.fuz`.
+
+**Built** (`FairSingers.cs`, `fairWorld.singers`, late, before the navmesh):
+- **Three voice types**: `SkyrimFairSingerLead`, `Left` and `Right`, with no flags, so no
+  generic dialogue.
+- **Three singers, "Singer"**, men, at the deck front: lead at (2048, 5140), left at
+  (1848, 5160), right at (2248, 5160), z 134, facing the square.
+  - Persistent, invulnerable, `DefaultStayAtEditorLocation`, in bard's clothes.
+  - **Not Traits-templated.** Traits carries the voice type, so a templated singer would
+    use the template's voice and never find our files.
+  - Each is a new NPC with a vanilla NPC's face copied field by field: `039CF6`,
+    `039CFF` and `039D17`, from the fair's male face list. That's head parts, morphs,
+    face parts, tints, hair colour, head texture and texture lighting.
+  - That NPC's FaceGen head (`Skyrim - Meshes0.bsa`) and tint (`Skyrim - Textures1.bsa`,
+    which is in Barry's Vanilla Remastered mod) are copied under the singer's FormID.
+    They're read with Mutagen's archive reader from `singers.faceArchives`.
+- **One topic per sung line**, 49 in all (Fiddle 19, Dragonborn-Approved 30):
+  - Topic / Custom, priority 50, one INFO each.
+  - One response: Happy 50, "use emotion animation", number 1, **no text** (so no
+    subtitle).
+- **Voice files:** 147 (49 × 3) copied from `build/bards/<song>/voice/<singer>/` to the
+  engine's names under `assets/sound/Voice/SkyrimFair.esp/<voice type>/`. They're
+  deployed to `Sound\Voice`.
+  - The folder is cleared first, so a renumbered INFO leaves no stale file.
+  - All three singers' files are lip-only, with silent audio, as `docs/BARDS.md` says.
+    The speaker keeps the full mix.
+- **Compared subrecord by subrecord with vanilla** (BardSongs' DIAL and INFO, a quest
+  with no aliases, a vanilla NPC):
+  - The DIAL matches.
+  - The INFO needed `CNAM` (the favor level) set.
+  - The quest needed `ANAM` (next alias ID): all 204 vanilla quests without aliases
+    have it.
+  - The NPC needed `DNAM` (skills): all 5,118 vanilla NPCs have it.
+  - All three are now set explicitly. The NPC's face subrecords match the vanilla
+    NPC's.
+- **The stage script:**
+  - On a song start it looks up that song's lines (`SongFirstLine`, `SongLineCount`).
+  - Each update, every line whose start has come (`SingerStarts`, seconds from the
+    song's own start, so timer error never adds up) is said by all three
+    (`Say(SingerTopics[i])`).
+  - It wakes exactly at the next line's start.
+  - It stops at the cheer and when the player leaves.
+  - `Recover()` restarts the song, and with it the schedule.
+
+**Crowd figures get their own FormID range** (`crowdFormIdBase`, 0x10000 up, in
+placement order):
+- Appending figures used to renumber everything built after them, now the singers and
+  the `SkyrimFairAtFair` global, and the singers are held by the stage script in saves.
+- Now figures and later records can't shift each other.
+- The generator refuses to build if its own counter ever reaches the range.
+- The figures were renumbered once, to 0x10000–0x10080. They're plain statics, not in
+  saves.
+
+### Verification
+
+- Plugin deterministic: `06618bba7143ad4e...`. The voice files are too.
+- Navmesh: 9 meshes, **0 errors**. Actors on the mesh: 233 of 233, singers included.
+- 147 of 147 voice files exist under the engine's names, with none extra.
+- The three FaceGen heads and tints are deployed. Four scripts compile.
+
+### Test
+
+1. Fiddle and Dragonborn-Approved:
+   - Do the three singers' mouths move with the singing and stop in the pauses?
+   - How far behind the music are the lips?
+   - No subtitles?
+   - No audible doubling?
+   - In sync over the whole song, and after a save and load mid-song?
+2. The singers' faces: normal, no dark-face bug, and each different?
+3. The other two songs have no singer lines yet, until their stems exist.
+
+## Previous pass: the patches get a dependable condition; dances loop (2026-09-23)
 
 Barry: "we get the bards back now", but "Can we have the people dancing just loop? ... it
 looks a bit janky", and "I still get the freeze".
