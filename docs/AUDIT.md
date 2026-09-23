@@ -2,6 +2,23 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
+## Hotfix: crash on boot from the sound descriptors (2026-09-23)
+
+Barry's crash log: an access violation while the game loaded forms, on
+`BGSSoundDescriptorForm` `SkyrimFair.esp` 0x14B2 (the first song).
+
+- **Cause:** the sound descriptors had no `CNAM`, the descriptor's kind. Every vanilla
+  one carries it (`0x1EEF540A`, standard), and the engine dereferences it at load.
+  Mutagen leaves it out unless it's set.
+- **Fix:** `Type = Standard` on every descriptor.
+- **Also brought into line with vanilla's record layouts** (compared subrecord by
+  subrecord):
+  - the sound categories now carry `FULL` and `FNAM`
+  - the quest carries `ANAM` (next alias ID) and form version 0
+  - the player alias carries `FNAM` and `VTCK`, as vanilla's forced-player aliases do
+- The output models, sound markers and globals already matched.
+- Generator run twice: identical SHA256 `8bd235c4c39e5a41...`. Deployed byte-identical.
+
 ## Current pass: festival audio, and the cobbles, sign bar and horses again (2026-09-23)
 
 Barry's review of the last pass: the cobbles had gone completely; the sign bar didn't line

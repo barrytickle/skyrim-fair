@@ -46,6 +46,9 @@ internal static class FairAudio
             var c = new SoundCategory(mod)
             {
                 EditorID = $"{p}{name}Category",
+                // Vanilla categories all carry a name and flags (FULL, FNAM); so do these.
+                Name = $"SkyrimFair{name}",
+                Flags = SoundCategory.Flag.MuteWhenSubmerged,
                 Parent = new FormLinkNullable<ISoundCategoryGetter>(parent),
                 StaticVolumeMultiplier = 1f,
             };
@@ -76,6 +79,9 @@ internal static class FairAudio
             var d = new SoundDescriptor(mod)
             {
                 EditorID = $"{p}{name}",
+                // CNAM, the descriptor's kind: vanilla's always carry it, and the engine
+                // dereferences it while loading forms (without it the game crashes on boot).
+                Type = SoundDescriptor.DescriptorType.Standard,
                 Category = new FormLinkNullable<ISoundCategoryGetter>(category.FormKey),
                 OutputModel = new FormLinkNullable<ISoundOutputModelGetter>(output.FormKey),
                 LoopAndRumble = new SoundLoopAndRumble { Loop = loop ? SoundDescriptor.LoopType.Loop : SoundDescriptor.LoopType.None },
@@ -130,6 +136,9 @@ internal static class FairAudio
             Name = "Wanderer's Fair Stage",
             Flags = Quest.Flag.StartGameEnabled,
             Priority = 10,
+            // ANAM, as vanilla quests with aliases carry it.
+            NextAliasID = 1,
+            QuestFormVersion = 0,
         };
         quest.Aliases.Add(new QuestAlias
         {
@@ -137,6 +146,9 @@ internal static class FairAudio
             Name = "Player",
             Type = QuestAlias.TypeEnum.Reference,
             ForcedReference = new FormLinkNullable<IPlacedGetter>(PlayerRef),
+            // FNAM and VTCK, written as vanilla's own forced-player aliases have them.
+            Flags = (QuestAlias.Flag)0,
+            VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
         });
 
         ScriptObjectProperty Obj(string name, FormKey key) => new() { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
