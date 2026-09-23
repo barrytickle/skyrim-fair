@@ -136,6 +136,12 @@ internal sealed record FairWorldConfig
     /// </summary>
     public uint CrowdFormIdBase { get; init; } = 0x10000;
 
+    /// <summary>
+    /// A keyword on every fair NPC record, for SPID exclusions in other mods' distribution
+    /// lines (<c>-SkyrimFairNPC</c>): docs/RELEASE.md.
+    /// </summary>
+    public string NpcKeyword { get; init; } = "SkyrimFairNPC";
+
     /// <summary>The stage singers (docs/BARDS.md, "Generator side").</summary>
     public SingersConfig Singers { get; init; } = new();
 

@@ -1,5 +1,5 @@
 {
-  "compatPatches": [{"plugin": "SkyrimFair - Maximum Destruction Patch.esp", "source": "E:/Modlists/Still In Skyrim/mods/Maximum Destruction/MaximumDestruction.esp", "spells": ["8E6289:MaximumDestruction.esp"]}, {"plugin": "SkyrimFair - Stealth Detection Fixes Patch.esp", "source": "E:/Modlists/Still In Skyrim/mods/Stealth Detection Fixes/StealthKillDetectionFix.esp", "spells": ["000817:StealthKillDetectionFix.esp"]}],
+  "compatPatches": [],
   "pluginName": "SkyrimFair.esp",
   "outputDirectory": "dist",
   "identity": {"name": "Skyrim Fair", "workingLocation": "Whiterun tundra", "author": "BarryRim Event Planner"},

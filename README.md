@@ -19,9 +19,8 @@ No Creation Kit is required for this milestone.
 
 ## Playing it
 
-What a player needs: the requirements, the recommended mods, and the **optional
-compatibility patches that must ship with any release** (Maximum Destruction, Stealth
-Detection Fixes). See [`docs/RELEASE.md`](docs/RELEASE.md).
+What a player needs: the requirements, the recommended mods, and the **SPID
+exclusion needed for Maximum Destruction and Stealth Detection Fixes users**. See [`docs/RELEASE.md`](docs/RELEASE.md).
 
 ## Requirements (to build)
 

@@ -21,37 +21,38 @@ Replacer, below.
 | **Open Animation Replacer** (needs SKSE) | Astra's paired folk dance doesn't play. The two folk dancers do the vanilla Cicero dance instead (`fairWorld.folkDance`, `CODEX_HANDOVER.md`) |
 | Terrain Parallax 1.5 – 4K2K (Nexus SE 54860) | The ground loses its parallax. It's a visual replacer only, and nothing of it ships |
 
-## Optional compatibility patches: they must ship with any release
+## Compatibility with per-NPC spell mods: must be solved before any release
 
-**Include these in every release**, as optional files or FOMOD options. Tell players:
-**install the patch for each of these mods you use.** Without the patch, the fair
-**freezes the game** about a minute after arriving: Papyrus is flooded, the music never
-starts, and the bards and dancers stand still.
+**Without this, the fair freezes the game** about a minute after arrival, for anyone using
+**Maximum Destruction** or **Stealth Detection Fixes** (Nexus SE 145336). Papyrus floods,
+the music stops, and the performers freeze.
 
-| Patch (built by the generator, `compatPatches`) | For | What it does |
-| --- | --- | --- |
-| `SkyrimFair - Maximum Destruction Patch.esp` | Maximum Destruction | While `SkyrimFairAtFair` is 1 (the player is at the fair), switches off `MD_GoreHumanoidMagic` (`8E6289`, a script on every human NPC that runs on every magic effect) inside the fair's worldspace only |
-| `SkyrimFair - Stealth Detection Fixes Patch.esp` | Stealth Detection Fixes (Nexus SE 145336) | While `SkyrimFairAtFair` is 1, switches off `madDetectionCloak` (`0x817`, a detection cloak SPID puts on every NPC) inside the fair's worldspace only |
-
-- **Why both matter:** at the fair's crowd density, the cloak on every NPC hits every
-  other NPC, and Maximum Destruction's script reacts to each hit. That's about 190² events
-  a pulse; Barry's log reached 2 million queued. Either patch alone breaks the chain
-  between the two mods, and each also helps on its own:
-  - The Maximum Destruction patch stops its script reacting at the fair, whatever mod
-    applies the effects.
-  - The Stealth Detection Fixes patch stops the cloak pulsing at the fair, whatever
-    reacts to it.
-- **Load order:** each patch after its mod and after `SkyrimFair.esp`. They're
-  light-flagged, so they take no load-order slot.
-- **Each patch masters its mod**, so a player without that mod must not install it: the
-  game won't start with a missing master. Hence optional files, one per mod. A FOMOD can
-  tick each one when it detects the mod's plugin.
-- **Versions:** each patch overrides one spell as that mod's current version has it. If
-  either mod changes that spell, rebuild the patch (`dotnet run` builds it from the mod's
-  plugin, `compatPatches[].source`).
-- **Other mods like these:** any mod that gives *every* NPC a cloak or a per-effect
-  script could do the same at the fair. Add it to `compatPatches` when one turns up, and
-  list it here.
+- **Why:**
+  - Stealth Detection Fixes' SPID gives *every* NPC a detection cloak (`0x817`).
+  - Maximum Destruction's gives every human a script that runs on each effect applied
+    (`8E6289`).
+  - At the fair's crowd density that's about 190² script events a pulse.
+- **What doesn't work** (tried and measured):
+  - Removing the spells in Papyrus: the guard's events wait in the same flooded queue.
+  - ESP patches that add a condition ("not at the fair") to the spells: a Cloak effect
+    keeps casting regardless, and the freeze came at the same rate.
+  - A SPID filter on `SkyrimFair.esp`: most fair NPCs are runtime copies of their
+    templates, which don't belong to the plugin.
+- **What works: a SPID exclusion.**
+  - Every fair NPC carries the keyword **`SkyrimFairNPC`**.
+  - The mods' SPID lines need `-SkyrimFairNPC` in their string-filter field:
+    - `StealthKillDetectionFix_Attack_DISTR.ini`:
+      `Spell = 0x817~StealthKillDetectionFix.esp|-SkyrimFairNPC|NONE|NONE|NONE|NONE|NONE`
+    - `MaximumDestruction_DISTR.ini`, the "MD_Gore Human Magic" line:
+      `Spell = 0x8E6289~MaximumDestruction.esp|ActorTypeNPC,Charmed Vigilant,Spellsword,Arch-Curate Vyrthur,Estormo,-SkyrimFairNPC|NONE|NONE|NONE|NONE|100`
+- **For a release, choose one:**
+  - Ship optional **replacement `_DISTR.ini` files** for those two mods, with the
+    exclusion added, installed to overwrite theirs. This needs their authors'
+    permission, and a rebuild whenever they change their inis.
+  - Document the one-line edit for each mod.
+  - Ask both authors to add `-SkyrimFairNPC` upstream: it's harmless to them.
+- **Other mods like these:** any mod whose SPID line gives *every* NPC a cloak or a
+  per-effect script. Add `-SkyrimFairNPC` the same way, and list the mod here.
 
 ## Before any public release
 
@@ -64,8 +65,8 @@ Permissions and provenance (details in `CREDITS.md`):
       it.
 - [ ] Astra: how they want to be credited for the folk dance, and permission to ship the
       re-based clips.
-- [ ] Maximum Destruction's and Stealth Detection Fixes' authors credited, and their
-      patch policies checked (most allow patches).
+- [ ] Maximum Destruction's and Stealth Detection Fixes' authors: permission for any
+      replacement `_DISTR.ini`, or ask them to add `-SkyrimFairNPC` upstream.
 - [ ] Holidays and Open Animation Replacer credited as requirements.
 - [ ] The static crowd figures and `Props/` are rebuilt from vanilla meshes. Confirm that
       shipping them is fine; modified vanilla meshes are common on Nexus, but check.
@@ -75,7 +76,7 @@ Files and packaging:
       its `config.json` files, the singers' FaceGen heads), `textures\` (their FaceGen
       tints), `Sound\` (including `Voice\SkyrimFair.esp\`, the singers' lip files),
       `Scripts\`. `tools/deploy.py` copies exactly this set.
-- [ ] The two compatibility patches, as optional files (above).
+- [ ] The per-NPC spell mods' SPID exclusions (above), shipped or documented.
 - [ ] Remove the retired `SkyrimFairNpcGuard.pex` from the package; nothing uses it now.
 
 Performance (`CLAUDE.md`):

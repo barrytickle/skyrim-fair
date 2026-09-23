@@ -2,7 +2,42 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: fixing the singers' startup crash (2026-09-23)
+## Current pass: the freeze needs SPID exclusions; the compatibility patches can't do it (2026-09-23)
+
+Barry: "it will crash out again". There's no new crash log after the 18:55 one: that
+launch loaded a save and ran, so **the startup crash is fixed**. But `Papyrus.0.log`
+(214 MB) shows the flood again.
+
+- **The patches have no effect.**
+  - Before them, the load at the fair froze about 66 s in. With them it froze 64 s in
+    (19:01:28 load, 19:02:32 dump).
+  - The flooding effect is still `FE0B3811`, Stealth Detection Fixes' dummy.
+  - Neither the worldspace condition nor the global stops the cloak casting: a Cloak
+    effect keeps applying its spell whatever its ability's conditions say.
+  - The patches are removed from the config, `dist/` and the mod folder. They did
+    nothing, and their docs claimed they would.
+- **What SPID's log shows** (`SKSE/po3_SpellPerkItemDistributor.log`):
+  - It distributes when each actor loads, and names every spell it gives.
+  - Every fair NPC gets `madDetectionCloak` (`817`, from
+    `StealthKillDetectionFix_Attack_DISTR.ini`) and `MD_GoreHumanoidMagic` (`8E6289`).
+  - The pen horses get the cloak too.
+  - Most fair NPCs are **runtime copies** (`NPC_:FF001272` "Fair Visitor"), made from
+    their face template. So a filter on `SkyrimFair.esp` would miss them: my earlier
+    `-SkyrimFair.esp` suggestion was wrong.
+- **Fix, part 1 (built):** a keyword, `SkyrimFairNPC`, on all 114 fair NPC records,
+  built last (only the navmeshes renumbered). Templated NPCs' runtime copies keep their
+  record's keywords.
+- **Fix, part 2 (needs Barry's go-ahead, since it edits other mods' files):** add
+  `-SkyrimFairNPC` to two SPID lines:
+  - `StealthKillDetectionFix_Attack_DISTR.ini`:
+    `Spell = 0x817~StealthKillDetectionFix.esp|-SkyrimFairNPC|NONE|NONE|NONE|NONE|NONE`
+  - `MaximumDestruction_DISTR.ini`:
+    `Spell = 0x8E6289~MaximumDestruction.esp|ActorTypeNPC,Charmed Vigilant,Spellsword,Arch-Curate Vyrthur,Estormo,-SkyrimFairNPC|NONE|NONE|NONE|NONE|100`
+- **Check, after:** SPID's log should list neither spell for "Fair Visitor", "Fair
+  Bard", "Singer" and the others. And a load at the fair should outlast two minutes.
+- Plugin `f8781aeca5637ad5...`, deterministic. Deployed.
+
+## Previous pass: fixing the singers' startup crash (2026-09-23)
 
 Barry: a startup crash, 30 s after launch.
 - CrashLogger: `EXCEPTION_ACCESS_VIOLATION` at `SkyrimSE.exe+03D3E15` during init.

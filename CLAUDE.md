@@ -256,8 +256,9 @@ unasked).
 
 **Open items before any public release** (the full list, with requirements and optional
 files, is `docs/RELEASE.md`; keep it current):
-- **ship the two compatibility patches** (Maximum Destruction, Stealth Detection Fixes) as
-  optional files. Without them the fair freezes the game for players with those mods
+- **solve the per-NPC spell mods** (Maximum Destruction, Stealth Detection Fixes) with the
+  SPID exclusion `-SkyrimFairNPC`. Without it the fair freezes the game for their users.
+  The ESP patches were tried and don't work
 - permission for the Whiterun stonefloor textures
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance

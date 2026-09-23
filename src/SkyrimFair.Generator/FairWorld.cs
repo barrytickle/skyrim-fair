@@ -954,6 +954,22 @@ internal static class FairWorld
             Console.WriteLine($"  singers: {singers} on the deck, {lines} sung lines, {files} voice files");
         }
 
+        // ---- SkyrimFairNPC: a keyword on every fair NPC, for other mods' SPID exclusions ----------
+        // SPID gives spells to the runtime copies of templated NPCs (FF...), which don't belong to
+        // SkyrimFair.esp, so a plugin filter misses them; the keyword is carried over. Built last.
+        if (config.NpcKeyword.Length > 0)
+        {
+            var keyword = new Keyword(mod) { EditorID = config.NpcKeyword };
+            mod.Keywords.Add(keyword);
+            foreach (var npc in mod.Npcs)
+            {
+                npc.Keywords ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                npc.Keywords.Add(new FormLink<IKeywordGetter>(keyword.FormKey));
+            }
+
+            Console.WriteLine($"  keyword {config.NpcKeyword} on {mod.Npcs.Count} NPC records");
+        }
+
         // The mod's own counter must stay below the crowd figures' range.
         var counter = mod.ModHeader.Stats.NextFormID;
         if (counter >= config.CrowdFormIdBase)
