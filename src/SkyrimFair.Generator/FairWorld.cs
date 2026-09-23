@@ -541,6 +541,45 @@ internal static class FairWorld
             trees.AddRange(treeline);
         }
 
+        // ---- the rest of the orchestra and the crowd tiers, after everything else -----------------
+        void PutPersistentNpc(PlacedNpc npc)
+        {
+            npc.MajorRecordFlagsRaw |= PersistentRecordFlag;
+            topCell.Persistent.Add(npc);
+        }
+
+        void PutTemporaryNpc(PlacedNpc npc)
+        {
+            var pos = npc.Placement!.Position;
+            cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
+        }
+
+        if (audio is not null && config.Audio.Stage.Orchestra.Count > 0)
+        {
+            var players = FairAudio.BuildOrchestra(mod, config.Audio, config.Vendors, FaceList, PutPersistentNpc, audio.Quest);
+            Console.WriteLine($"  orchestra: {config.Audio.Stage.Band.Count + players} bards on the deck");
+        }
+
+        if (crowds is not null && config.Crowds.Tiers.Count > 0 && audio is not null)
+        {
+            var crowdMarker = config.Zones.First(z => z.Name == "Crowd").Marker;
+            var tiers = FairCrowds.BuildTiers(mod, config.Crowds, config.Vendors, crowds, plan.Height, placed =>
+            {
+                placed.MajorRecordFlagsRaw |= PersistentRecordFlag;
+                topCell.Persistent.Add(placed);
+            }, PutTemporaryNpc, FaceList, (crowdMarker[0], crowdMarker[1], plan.Height(crowdMarker[0], crowdMarker[1]) - 200f));
+            var tierGlobal = new GlobalFloat(mod) { EditorID = config.Crowds.TierGlobal, Data = config.Crowds.Tiers.Count };
+            mod.Globals.Add(tierGlobal);
+            var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            script.Properties.Add(new ScriptObjectListProperty
+            {
+                Name = "CrowdTiers",
+                Objects = tiers.Markers.Select(m => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(m) }).ToExtendedList(),
+            });
+            script.Properties.Add(new ScriptObjectProperty { Name = "CrowdTier", Object = new FormLink<ISkyrimMajorRecordGetter>(tierGlobal.FormKey) });
+            Console.WriteLine($"  crowd tiers ({config.Crowds.TierGlobal}, all on): " + string.Join(", ", tiers.Tiers.Select(t => $"{t.Tier} {t.Count}")));
+        }
+
         // ---- the large-reference table (RNAM) -------------------------------------------------
         // Laid out as vanilla Tamriel's (read back with Mutagen): each reference is listed
         // under every cell its footprint overlaps, and both the group's key and the entry

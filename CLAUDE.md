@@ -112,6 +112,14 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Crowds and orchestra: built and deployed, awaiting Barry's test** (plugin `cbbd6c578f889607...`).
+- Crowded Streets audited: it spawns cheap sandbox NPCs by script and deletes them on
+  leaving; its cap of 50 is a performance guard. For the fair, placed tiers are better.
+- Three crowd tiers switched live by `SkyrimFairCrowdTier` (default 3): stage audience 42,
+  wanderers (sandbox) 34, busier stalls 16. Actors go from 126 to 227, all on the navmesh.
+- A 12-man orchestra: 5 lutes, 4 flutes, 3 drums.
+- Barry to find his comfortable tier by frame rate.
+
 **Navmesh phases 1 to 3: confirmed in game (2026-09-23)** (plugin `fbfdf1eb5f5d84e3...`).
 Barry: no issues, nothing out of the ordinary. **It fixed the archers**: they shoot after a
 reload. (Their package's opening Travel needed a path. The near-self "Use Weapon

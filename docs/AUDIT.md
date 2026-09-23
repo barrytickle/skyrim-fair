@@ -2,7 +2,89 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: navmesh phases 2 and 3 (real footprints, keepers, the pen, the stage) (2026-09-23)
+## Current pass: bigger crowds (after the Crowded Streets audit) and a bard orchestra (2026-09-23)
+
+Barry: audit Crowded Streets and "see how far we can push the crowds"; more bards on the
+stage, "a bard orchestra", all men "because the songs are male singers".
+
+### Crowded Streets, audited (read-only)
+
+`Crowded Streets.esp` (v1.1.3, master Skyrim.esm), its readme, and its Papyrus sources
+(`Source/`):
+
+- **Cheap NPCs:** 8 archetypes (peasant, beggar, hunter, mage, mercenary, merchant, miner,
+  priest). Each is a Traits + Model/Animation template on one of two leveled lists: 33
+  and 110 face presets. Each has a single sandbox package (`CrStr_Sandbox`), no dialogue,
+  no schedule, no script, and no voice.
+- **Faces:** 110 face-preset NPCs whose FaceGen ships in its BSA (228 files), which is how
+  it avoids dark faces. The fair already gets the same result by copying vanilla's own
+  face lists.
+- **Dynamic, and deleted:** a Story Manager location-change event (`CLOC`) starts a
+  city, town or inn quest.
+  - The script spawns 15–25 NPCs (5–10 in towns and inns; hard cap 50) with `PlaceAtMe`,
+    disabled, at the location's centre marker.
+  - It moves each within 2,500 of a random XMarker, then enables it, which snaps it to the
+    navmesh.
+  - It hides them at night and deletes them when the player leaves, so saves don't bloat.
+- **The limit is performance:** the cap of 50 is there "to prevent players from setting it
+  too high, crashing the game".
+- It needs a Location with the LocTypeTown/City/Inn keyword and a centre marker, and
+  other worldspaces are off by default. **It doesn't run at the fair.**
+
+**What it means here:** the fair is small and always loaded, so placed actors beat
+spawning: deterministic, no scripts, no save bloat. The question is only how many
+actors Barry's machine carries, so the new crowd comes in **switchable tiers**.
+
+### What was built
+
+- **Crowd tiers** (`fairWorld.crowds.tiers`), built after every other record. Each tier's
+  visitors hang off one persistent enable-parent marker, which the stage script enables up
+  to the new global **`SkyrimFairCrowdTier`** (default 3, all on). They're switched live
+  (checked every update at the fair):
+
+  | Tier | Who | Placed |
+  | --- | --- | --- |
+  | 1 | **stage audience**: a fan south of the dance floor and groups along both its sides, facing the stage (the dance floor stays clear for dancers) | 42 |
+  | 2 | **wanderers**: the visitors' looks with vanilla `DefaultSandboxEditorLocation512`, in groups along the avenue, the east lane and the west field. They walk, sit and chat on the new navmesh | 34 |
+  | 3 | **busier stalls**: more customers at 15 popular trades (the stalls were already busy, so fewer fit) | 16 |
+
+  Actors at the fair go from 126 to **227**. All of them stand on the navmesh.
+- **The orchestra:** 12 bards, **all men**, facing the square, as vanilla bards play (the
+  stage script's `PlayIdle`):
+  - 5 lutes in the front row (y 5,250)
+  - 4 flutes in the middle (y 5,440)
+  - 3 drums at the back (y 5,630)
+
+  The first three bards move into the rows, and the flute player becomes male (his record
+  keeps its FormID). The other nine are built last and reach the script as the new
+  properties **`Orchestra`** and **`OrchestraIdles`**. An existing save fills new
+  properties from the plugin; a property it already holds keeps its saved value.
+- **Stage script:** plays and stops the band and the orchestra together (`PlayAll`,
+  `StopAllOf`), and applies the crowd tier (`ApplyCrowdTier`).
+- `FairCrowds.PlaceGroups` is factored out of `Build`, so later tiers share its placement
+  rules and its list of who's standing where.
+
+### Verification
+
+- Against the deployed plugin: 122 records added, none removed. The only FormIDs reused
+  are the 9 navmeshes', which are always allocated last and aren't saved state.
+- Navmesh validator: 9 meshes, 7,251 triangles, 57 islands, **0 errors**. Actors on the
+  mesh: 227 of 227.
+- Plan: `docs/images/navmesh_plan.png` (orchestra purple, visitors blue).
+- Generator run twice: identical SHA256 `cbbd6c578f889607...` (737,294 bytes).
+  Footprints regenerated (unchanged). Scripts compile. Deployed.
+
+### Test
+
+1. Frame rate at the stage square with everything on. Then try
+   `set SkyrimFairCrowdTier to 2`, then `1` and `0`: the tiers vanish within a couple of
+   seconds. Find where it's comfortable.
+2. The orchestra: all 12 take up their instruments with the song and put them away at the
+   cheer? All men?
+3. The audience: facing the stage, and the dance floor clear?
+4. The wanderers: walking about and sitting without getting stuck?
+
+## Previous pass: navmesh phases 2 and 3 (real footprints, keepers, the pen, the stage) (2026-09-23)
 
 **Confirmed in game (Barry):** no crash and nothing out of the ordinary, and **the archers
 now shoot after a reload**. The navmesh was their missing piece.

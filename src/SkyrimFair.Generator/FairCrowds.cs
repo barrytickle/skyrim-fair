@@ -66,10 +66,54 @@ internal static class FairCrowds
 
         var blocked = market?.Footprints ?? Array.Empty<MarketFootprint>();
         var stood = new List<(float X, float Y)>();
-        var groups = new List<(string Name, int Placed)>();
-        for (var gi = 0; gi < config.Groups.Count; gi++)
+        var groups = PlaceGroups(mod, config.Groups, 0, looks, blocked, market, stood, ground, put);
+
+        // Animals stand where they are put, in their module's frame.
+        var animals = 0;
+        foreach (var animal in config.Animals)
         {
-            var group = config.Groups[gi];
+            var home = blocked.FirstOrDefault(b => b.Kind == animal.Near)
+                ?? throw new InvalidOperationException($"fairWorld.crowds.animals {animal.Name}: no '{animal.Near}' was placed.");
+            var (u, v) = (animal.At[0], animal.At[1]);
+            var (c, s) = (MathF.Cos(home.Yaw * Deg), MathF.Sin(home.Yaw * Deg));
+            var (x, y) = (home.X + u * c + v * s, home.Y - u * s + v * c);
+            var placed = new PlacedNpc(mod)
+            {
+                Base = new FormLinkNullable<INpcGetter>(FormKeyHelper.Parse(animal.Base)),
+                Placement = new Placement
+                {
+                    Position = new P3Float(x, y, ground(x, y) + 2f),
+                    Rotation = new P3Float(0f, 0f, (home.Yaw + (animal.At.Length > 2 ? animal.At[2] : 0f)) * Deg),
+                },
+            };
+            if (animal.Script.Length > 0)
+            {
+                placed.VirtualMachineAdapter = new VirtualMachineAdapter();
+                placed.VirtualMachineAdapter.Scripts.Add(new ScriptEntry { Name = animal.Script });
+            }
+
+            put(placed);
+            animals++;
+        }
+
+        return new CrowdsResult(looks.Count, stood, groups, animals, looks, blocked, market);
+    }
+
+    /// <summary>
+    /// Places visitor groups round their focus (a stall theme's front, a dressing group, a
+    /// point), clear of the market's footprints and of everyone already standing.
+    /// <paramref name="salt"/> keeps a later set's hash streams apart from the first's.
+    /// </summary>
+    private static List<(string Name, int Placed)> PlaceGroups(
+        SkyrimMod mod, IReadOnlyList<CrowdGroup> groupsConfig, int salt, IReadOnlyList<Npc> looks,
+        IReadOnlyList<MarketFootprint> blocked, MarketResult? market, List<(float X, float Y)> stood,
+        Func<float, float, float> ground, Action<PlacedNpc> put)
+    {
+        var groups = new List<(string Name, int Placed)>();
+        for (var gi0 = 0; gi0 < groupsConfig.Count; gi0++)
+        {
+            var gi = gi0 + salt;
+            var group = groupsConfig[gi0];
             var focus = new List<(float X, float Y, float Facing, float Inner)>();
             if (group.Theme.Length > 0)
             {
@@ -144,36 +188,68 @@ internal static class FairCrowds
             groups.Add((group.Name, placedHere));
         }
 
-        // Animals stand where they are put, in their module's frame.
-        var animals = 0;
-        foreach (var animal in config.Animals)
+        return groups;
+    }
+
+    /// <summary>
+    /// Extra crowd tiers (<see cref="CrowdsConfig.Tiers"/>), built after every other record
+    /// so no FormID before them moves. Each tier's visitors hang off one enable-parent marker
+    /// (persistent), which the stage script enables up to <c>SkyrimFairCrowdTier</c>, so the
+    /// crowd can be thinned or thickened live. A tier may give its own package (the
+    /// wanderers' sandbox), in which case it gets its own visitor records.
+    /// </summary>
+    public static CrowdTiersResult BuildTiers(
+        SkyrimMod mod, CrowdsConfig config, VendorsConfig looksFrom, CrowdsResult first,
+        Func<float, float, float> ground, Action<PlacedObject> putMarker, Action<PlacedNpc> put, Func<string, FormKey> faceList,
+        (float X, float Y, float Z) markerAt)
+    {
+        var markers = new List<FormKey>();
+        var placed = new List<(string Tier, int Count)>();
+        var stood = first.Positions.ToList();
+        for (var ti = 0; ti < config.Tiers.Count; ti++)
         {
-            var home = blocked.FirstOrDefault(b => b.Kind == animal.Near)
-                ?? throw new InvalidOperationException($"fairWorld.crowds.animals {animal.Name}: no '{animal.Near}' was placed.");
-            var (u, v) = (animal.At[0], animal.At[1]);
-            var (c, s) = (MathF.Cos(home.Yaw * Deg), MathF.Sin(home.Yaw * Deg));
-            var (x, y) = (home.X + u * c + v * s, home.Y - u * s + v * c);
-            var placed = new PlacedNpc(mod)
+            var tier = config.Tiers[ti];
+            var marker = new PlacedObject(mod)
             {
-                Base = new FormLinkNullable<INpcGetter>(FormKeyHelper.Parse(animal.Base)),
-                Placement = new Placement
-                {
-                    Position = new P3Float(x, y, ground(x, y) + 2f),
-                    Rotation = new P3Float(0f, 0f, (home.Yaw + (animal.At.Length > 2 ? animal.At[2] : 0f)) * Deg),
-                },
+                EditorID = $"{config.EditorIdPrefix}Tier{ti + 1}Marker",
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00003B:Skyrim.esm")),
+                Placement = new Placement { Position = new P3Float(markerAt.X, markerAt.Y, markerAt.Z + 64f * ti), Rotation = new P3Float(0f, 0f, 0f) },
             };
-            if (animal.Script.Length > 0)
+            putMarker(marker);
+            markers.Add(marker.FormKey);
+
+            IReadOnlyList<Npc> looks = first.Looks;
+            if (tier.Package.Length > 0)
             {
-                placed.VirtualMachineAdapter = new VirtualMachineAdapter();
-                placed.VirtualMachineAdapter.Scripts.Add(new ScriptEntry { Name = animal.Script });
+                // Their own records, the same looks with the tier's package.
+                looks = first.Looks.Select((l, i) =>
+                {
+                    var copy = l.Duplicate(mod.GetNextFormKey());
+                    copy.EditorID = $"{l.EditorID}{tier.Suffix}";
+                    copy.Packages.Clear();
+                    copy.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(tier.Package)));
+                    mod.Npcs.Add(copy);
+                    return copy;
+                }).ToList();
             }
 
-            put(placed);
-            animals++;
+            var count = 0;
+            void PutChild(PlacedNpc npc)
+            {
+                npc.EnableParent = new EnableParent { Reference = new FormLink<IPlacedGetter>(marker.FormKey) };
+                put(npc);
+                count++;
+            }
+
+            PlaceGroups(mod, tier.Groups, 5000 * (ti + 1), looks, first.Blocked, first.Market, stood, ground, PutChild);
+            placed.Add((tier.Name, count));
         }
 
-        return new CrowdsResult(looks.Count, stood, groups, animals);
+        return new CrowdTiersResult(markers, placed, stood.Skip(first.Positions.Count).ToList());
     }
 }
 
-internal sealed record CrowdsResult(int Records, IReadOnlyList<(float X, float Y)> Positions, IReadOnlyList<(string Name, int Placed)> Groups, int Animals);
+internal sealed record CrowdTiersResult(IReadOnlyList<FormKey> Markers, IReadOnlyList<(string Tier, int Count)> Tiers, IReadOnlyList<(float X, float Y)> Positions);
+
+internal sealed record CrowdsResult(int Records, IReadOnlyList<(float X, float Y)> Positions, IReadOnlyList<(string Name, int Placed)> Groups, int Animals,
+    IReadOnlyList<Npc> Looks, IReadOnlyList<MarketFootprint> Blocked, MarketResult? Market);

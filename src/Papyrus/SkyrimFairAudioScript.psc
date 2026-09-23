@@ -52,6 +52,15 @@ Idle[] Property BandIdles Auto
 Idle Property BandStop Auto
 {Puts an instrument away.}
 
+Actor[] Property Orchestra Auto
+{The rest of the orchestra (added after the first band, so a save picks them up).}
+Idle[] Property OrchestraIdles Auto
+
+ObjectReference[] Property CrowdTiers Auto
+{Each crowd tier's enable-parent marker.}
+GlobalVariable Property CrowdTier Auto
+{How many crowd tiers are on: set SkyrimFairCrowdTier to 0..n in the console.}
+
 Actor[] Property Archers Auto
 {The archery range's archers, each linked (unkeyed) to the stand it shoots from.}
 GlobalVariable Property ArcherHold Auto
@@ -75,7 +84,9 @@ Float ambienceLevel = -1.0
 ; Which bards are playing, and which archers still wait to be set on their stands (an
 ; actor whose 3D hasn't loaded yet is caught on a later update).
 Bool[] bandPlaying
+Bool[] orchestraPlaying
 Bool bandOn = False
+Int appliedTier = -1
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -95,6 +106,8 @@ Function Recover()
 	ambienceLevel = -1.0
 	bandOn = False
 	bandPlaying = new Bool[16]
+	orchestraPlaying = new Bool[32]
+	appliedTier = -1
 	RegisterForSingleUpdate(1.0)
 EndFunction
 
@@ -117,6 +130,7 @@ Event OnUpdate()
 		QueueArchers()
 	EndIf
 	ResetArchers()
+	ApplyCrowdTier()
 
 	If MusicEnabled.GetValue() < 0.5 || Songs.Length == 0
 		; Switched off: hold, and start afresh when switched back on.
@@ -205,12 +219,19 @@ Function PlayBand()
 	If bandPlaying.Length < Band.Length
 		bandPlaying = new Bool[16]
 	EndIf
+	If orchestraPlaying.Length < Orchestra.Length
+		orchestraPlaying = new Bool[32]
+	EndIf
 	bandOn = True
+	PlayAll(Band, BandIdles, bandPlaying)
+	PlayAll(Orchestra, OrchestraIdles, orchestraPlaying)
+EndFunction
+
+Function PlayAll(Actor[] players, Idle[] idles, Bool[] playing)
 	Int i = 0
-	While i < Band.Length && i < bandPlaying.Length
-		If !bandPlaying[i] && Band[i] && Band[i].Is3DLoaded()
-			bandPlaying[i] = Band[i].PlayIdle(BandIdles[i])
-			Debug.Trace("SkyrimFairAudio: bard " + i + " plays: " + bandPlaying[i])
+	While i < players.Length && i < playing.Length && i < idles.Length
+		If !playing[i] && players[i] && players[i].Is3DLoaded()
+			playing[i] = players[i].PlayIdle(idles[i])
 		EndIf
 		i += 1
 	EndWhile
@@ -222,15 +243,47 @@ Function StopBand(Bool force)
 	If bandPlaying.Length < Band.Length
 		bandPlaying = new Bool[16]
 	EndIf
+	If orchestraPlaying.Length < Orchestra.Length
+		orchestraPlaying = new Bool[32]
+	EndIf
+	StopAllOf(Band, bandPlaying, force)
+	StopAllOf(Orchestra, orchestraPlaying, force)
+	bandOn = False
+EndFunction
+
+Function StopAllOf(Actor[] players, Bool[] playing, Bool force)
 	Int i = 0
-	While i < Band.Length && i < bandPlaying.Length
-		If (force || bandPlaying[i]) && Band[i] && Band[i].Is3DLoaded()
-			Band[i].PlayIdle(BandStop)
+	While i < players.Length && i < playing.Length
+		If (force || playing[i]) && players[i] && players[i].Is3DLoaded()
+			players[i].PlayIdle(BandStop)
 		EndIf
-		bandPlaying[i] = False
+		playing[i] = False
 		i += 1
 	EndWhile
-	bandOn = False
+EndFunction
+
+; The crowd tiers on: the first CrowdTier tiers' markers enabled, the rest disabled.
+Function ApplyCrowdTier()
+	If !CrowdTier
+		Return
+	EndIf
+	Int want = CrowdTier.GetValue() as Int
+	If want == appliedTier
+		Return
+	EndIf
+	Int i = 0
+	While i < CrowdTiers.Length
+		If CrowdTiers[i]
+			If i < want
+				CrowdTiers[i].Enable()
+			Else
+				CrowdTiers[i].Disable()
+			EndIf
+		EndIf
+		i += 1
+	EndWhile
+	appliedTier = want
+	Debug.Trace("SkyrimFairAudio: crowd tiers on: " + want)
 EndFunction
 
 Function QueueArchers()

@@ -196,48 +196,7 @@ internal static class FairAudio
             mod.GetNextFormKey();
             mod.GetNextFormKey();
 
-            var at = member.At;
-            var look = looksFrom.Looks.First(l => l.Name == member.Look);
-            var npc = new Npc(mod)
-            {
-                EditorID = $"{p}Band{member.Name}",
-                Name = member.Title,
-                Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(looksFrom.Race)),
-                Template = new FormLinkNullable<INpcSpawnGetter>(faceList(look.Template)),
-                Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(looksFrom.Class)),
-                DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(member.Outfit)),
-                Configuration = new NpcConfiguration
-                {
-                    Flags = NpcConfiguration.Flag.AutoCalcStats | NpcConfiguration.Flag.Protected
-                        | (look.Female ? NpcConfiguration.Flag.Female : 0),
-                    TemplateFlags = NpcConfiguration.TemplateFlag.Traits,
-                    Level = new NpcLevel { Level = looksFrom.Level },
-                    CalcMinLevel = looksFrom.Level,
-                    CalcMaxLevel = looksFrom.Level,
-                    SpeedMultiplier = 100,
-                },
-                AIData = new AIData
-                {
-                    Aggression = Aggression.Unaggressive,
-                    Confidence = Confidence.Cowardly,
-                    Responsibility = Responsibility.NoCrime,
-                    Assistance = Assistance.HelpsNobody,
-                    Mood = Mood.Happy,
-                    EnergyLevel = 50,
-                },
-                ObjectBounds = new ObjectBounds { First = new P3Int16(-22, -14, 0), Second = new P3Int16(22, 14, 128) },
-                Height = 1f,
-                Weight = 50f,
-            };
-            npc.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(config.Stage.BandPackage)));
-            mod.Npcs.Add(npc);
-
-            var placed = new PlacedNpc(mod)
-            {
-                EditorID = $"{p}Band{member.Name}Ref",
-                Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
-                Placement = new Placement { Position = new P3Float(at[0], at[1], at[2] + 2f), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
-            };
+            var placed = Bard(mod, config, member, looksFrom, faceList);
             putNpc(placed);
             bandPlaced.Add(placed.FormKey);
             bandIdles.Add(FormKeyHelper.Parse(member.Idle));
@@ -332,6 +291,84 @@ internal static class FairAudio
             markers.Count,
             loopSeconds,
             config.Stage.Band.Select(b => b.Name).ToList());
+    }
+
+    /// <summary>
+    /// One bard: a visitor-kind NPC (the fair's face lists, Traits template) in bard's
+    /// clothes, held on their spot by <see cref="StageAudioConfig.BandPackage"/>, placed
+    /// where the member says. The caller puts the reference (persistent).
+    /// </summary>
+    private static PlacedNpc Bard(SkyrimMod mod, AudioConfig config, BandMember member, VendorsConfig looksFrom, Func<string, FormKey> faceList)
+    {
+        var p = config.EditorIdPrefix;
+        var at = member.At;
+        var look = looksFrom.Looks.First(l => l.Name == member.Look);
+        var npc = new Npc(mod)
+        {
+            EditorID = $"{p}Band{member.Name}",
+            Name = member.Title,
+            Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(looksFrom.Race)),
+            Template = new FormLinkNullable<INpcSpawnGetter>(faceList(look.Template)),
+            Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(looksFrom.Class)),
+            DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(member.Outfit)),
+            Configuration = new NpcConfiguration
+            {
+                Flags = NpcConfiguration.Flag.AutoCalcStats | NpcConfiguration.Flag.Protected
+                    | (look.Female ? NpcConfiguration.Flag.Female : 0),
+                TemplateFlags = NpcConfiguration.TemplateFlag.Traits,
+                Level = new NpcLevel { Level = looksFrom.Level },
+                CalcMinLevel = looksFrom.Level,
+                CalcMaxLevel = looksFrom.Level,
+                SpeedMultiplier = 100,
+            },
+            AIData = new AIData
+            {
+                Aggression = Aggression.Unaggressive,
+                Confidence = Confidence.Cowardly,
+                Responsibility = Responsibility.NoCrime,
+                Assistance = Assistance.HelpsNobody,
+                Mood = Mood.Happy,
+                EnergyLevel = 50,
+            },
+            ObjectBounds = new ObjectBounds { First = new P3Int16(-22, -14, 0), Second = new P3Int16(22, 14, 128) },
+            Height = 1f,
+            Weight = 50f,
+        };
+        npc.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(config.Stage.BandPackage)));
+        mod.Npcs.Add(npc);
+
+        return new PlacedNpc(mod)
+        {
+            EditorID = $"{p}Band{member.Name}Ref",
+            Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
+            Placement = new Placement { Position = new P3Float(at[0], at[1], at[2] + 2f), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
+        };
+    }
+
+    /// <summary>
+    /// The rest of the orchestra (<see cref="StageAudioConfig.Orchestra"/>), built after
+    /// every other record so no FormID before it moves, and given to the stage script as
+    /// new properties (<c>Orchestra</c>, <c>OrchestraIdles</c>), which an existing save
+    /// picks up (a property already in a save keeps its saved value; a new one is filled).
+    /// </summary>
+    public static int BuildOrchestra(SkyrimMod mod, AudioConfig config, VendorsConfig looksFrom, Func<string, FormKey> faceList,
+        Action<PlacedNpc> putNpc, FormKey quest)
+    {
+        var placed = new List<FormKey>();
+        var idles = new List<FormKey>();
+        foreach (var member in config.Stage.Orchestra)
+        {
+            var bard = Bard(mod, config, member, looksFrom, faceList);
+            putNpc(bard);
+            placed.Add(bard.FormKey);
+            idles.Add(FormKeyHelper.Parse(member.Idle));
+        }
+
+        var script = mod.Quests.First(q => q.FormKey == quest).VirtualMachineAdapter!.Scripts[0];
+        ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
+        script.Properties.Add(new ScriptObjectListProperty { Name = "Orchestra", Objects = placed.Select(Obj).ToExtendedList() });
+        script.Properties.Add(new ScriptObjectListProperty { Name = "OrchestraIdles", Objects = idles.Select(Obj).ToExtendedList() });
+        return placed.Count;
     }
 
     /// <summary>Length of a PCM WAV from its header: data bytes over bytes a second.</summary>

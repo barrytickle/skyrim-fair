@@ -2331,6 +2331,12 @@ internal sealed record StageAudioConfig
 
     /// <summary>The bards playing on the stage.</summary>
     public List<BandMember> Band { get; init; } = new();
+
+    /// <summary>
+    /// The rest of the orchestra, built last (after every other record) and given to the
+    /// stage script as its own properties, so existing saves pick them up.
+    /// </summary>
+    public List<BandMember> Orchestra { get; init; } = new();
 }
 
 internal sealed record BandMember
@@ -2785,6 +2791,12 @@ internal sealed record CrowdsConfig
 
     /// <summary>Animals placed as they are (the horses in the stable pen).</summary>
     public List<CrowdAnimal> Animals { get; init; } = new();
+
+    /// <summary>Extra layers of visitors, built last and switched live (see <see cref="CrowdTier"/>).</summary>
+    public List<CrowdTier> Tiers { get; init; } = new();
+
+    /// <summary>The global the stage script reads: how many tiers are on (defaults to all of them).</summary>
+    public string TierGlobal { get; init; } = "SkyrimFairCrowdTier";
 }
 
 internal sealed record CrowdAnimal
@@ -2802,6 +2814,23 @@ internal sealed record CrowdAnimal
 
     /// <summary>A Papyrus script put on the reference (the pen horses': not to be ridden off).</summary>
     public string Script { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// An extra layer of visitors on one enable-parent marker, switched live by the stage
+/// script from the <see cref="CrowdsConfig.TierGlobal"/> global (tiers 1..n on).
+/// </summary>
+internal sealed record CrowdTier
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>Their own package (a sandbox for wanderers); empty keeps the visitors' stay-put package.</summary>
+    public string Package { get; init; } = string.Empty;
+
+    /// <summary>EditorID suffix for the tier's own visitor records, when it has a package.</summary>
+    public string Suffix { get; init; } = string.Empty;
+
+    public List<CrowdGroup> Groups { get; init; } = new();
 }
 
 internal sealed record CrowdGroup

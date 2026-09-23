@@ -3095,6 +3095,299 @@
         {"name": "hay bale sitters", "near": "social_hay", "count": 1, "radius": 150, "arc": 180, "chance": 0.6},
         {"name": "stable hand", "near": "stable_shelter", "count": 1, "radius": 150, "arc": 90}
       ],
+      "tiers": [
+        {
+          "name": "stage audience",
+          "groups": [
+            {
+              "name": "audience centre",
+              "at": [
+                2048,
+                4140,
+                0
+              ],
+              "count": 16,
+              "radius": 520,
+              "arc": 55
+            },
+            {
+              "name": "audience west",
+              "at": [
+                1500,
+                4150,
+                20
+              ],
+              "count": 8,
+              "radius": 420,
+              "arc": 45
+            },
+            {
+              "name": "audience east",
+              "at": [
+                2600,
+                4150,
+                340
+              ],
+              "count": 8,
+              "radius": 420,
+              "arc": 45
+            },
+            {
+              "name": "audience west side",
+              "at": [
+                1173,
+                4620,
+                90
+              ],
+              "count": 6,
+              "radius": 380,
+              "arc": 40
+            },
+            {
+              "name": "audience east side",
+              "at": [
+                2923,
+                4620,
+                270
+              ],
+              "count": 6,
+              "radius": 380,
+              "arc": 40
+            }
+          ]
+        },
+        {
+          "name": "wanderers",
+          "package": "0001B217:Skyrim.esm",
+          "suffix": "Wanderer",
+          "groups": [
+            {
+              "name": "wanderers 1",
+              "at": [
+                2048,
+                -800,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 2",
+              "at": [
+                2048,
+                600,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 3",
+              "at": [
+                2048,
+                2000,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 4",
+              "at": [
+                2048,
+                3200,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 5",
+              "at": [
+                3780,
+                300,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 6",
+              "at": [
+                3780,
+                1700,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 7",
+              "at": [
+                3780,
+                3000,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 8",
+              "at": [
+                900,
+                2600,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            },
+            {
+              "name": "wanderers 9",
+              "at": [
+                700,
+                500,
+                0
+              ],
+              "count": 4,
+              "radius": 260,
+              "arc": 180
+            }
+          ]
+        },
+        {
+          "name": "busier stalls",
+          "groups": [
+            {
+              "name": "more sweetroll",
+              "theme": "sweetroll",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more mead",
+              "theme": "mead",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more roast",
+              "theme": "roast",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more bakery",
+              "theme": "bakery",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more hotdrinks",
+              "theme": "hotdrinks",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more pies",
+              "theme": "pies",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more smith",
+              "theme": "smith",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more jeweller",
+              "theme": "jeweller",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more clothing",
+              "theme": "clothing",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more furs",
+              "theme": "furs",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more alchemy",
+              "theme": "alchemy",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more curios",
+              "theme": "curios",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more toys",
+              "theme": "toys",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more honey",
+              "theme": "honey",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            },
+            {
+              "name": "more fletcher",
+              "theme": "fletcher",
+              "count": 2,
+              "radius": 200,
+              "arc": 70,
+              "chance": 0.8
+            }
+          ]
+        }
+      ],
       "animals": [
         {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80], "script": "SkyrimFairPenHorse"},
         {"name": "grey horse", "base": "00068D6D:Skyrim.esm", "near": "horse_pen", "at": [60, -120, -100], "script": "SkyrimFairPenHorse"},
@@ -3191,16 +3484,20 @@
         "bandPackage": "00025BFC:Skyrim.esm",
         "bandStop": "000E4242:Skyrim.esm",
         "band": [
-          {"name": "Lute", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [1840, 5380, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
-          {"name": "Drum", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [2048, 5480, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
-          {
-            "name": "Flute",
-            "title": "Fair Bard",
-            "idle": "00096F8C:Skyrim.esm",
-            "at": [2256, 5380, 134, 180],
-            "look": "Female",
-            "outfit": "00037C50:Skyrim.esm"
-          }
+          {"name": "Lute", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [2048, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+          {"name": "Drum", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [2048, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+          {"name": "Flute", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [1948, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
+        ],
+        "orchestra": [
+          {"name": "Lute02", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [1648, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+          {"name": "Lute03", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [1848, 5250, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+          {"name": "Lute04", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [2248, 5250, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
+          {"name": "Lute05", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [2448, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+          {"name": "Flute02", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [1748, 5440, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+          {"name": "Flute03", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [2148, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
+          {"name": "Flute04", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [2348, 5440, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+          {"name": "Drum02", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [1848, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+          {"name": "Drum03", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [2248, 5630, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
         ]
       },
       "ambience": {
