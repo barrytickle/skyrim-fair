@@ -2,7 +2,113 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Astra's folk dance in game (OAR), the figure's collision, the guard's retry (2026-09-23)
+## Current pass: the crowd library placed (51 figures), and the guard fixed (2026-09-23)
+
+Barry's test of the folk-dance build: "the game stays, but ... the bards don't play, and
+nobody does even a vanilla dance anymore". Then his brief: place the library
+(`docs/CLAUDE_CROWD_LIBRARY_TASK.md`).
+
+### Why nothing played: the guard never removed a spell
+
+- `Papyrus.0.log` shows no error. There was no `song 0 playing` line either, in 50 s at
+  the fair; the previous build started the song 3 s after arrival.
+- No `SkyrimFairGuard:` line at all. The list filled (`strips 2 spells`), but no NPC ever
+  removed one.
+- So the Stealth Detection Fixes x Maximum Destruction flood was still running. It built
+  up from arrival, and the stage script's updates queued behind it. The songs never
+  started, so the bards and dancers never did either. None of the new script code runs
+  before the first song.
+- **Cause:** SPID puts the spells on the NPC *record*, which vanilla `RemoveSpell` and
+  `HasSpell` don't reach.
+- **Fix:** the guard calls Papyrus Extender's `PO3_SKSEFunctions.RemoveBaseSpell`, which
+  takes a spell off the record and the actor, plus `RemoveSpell` for spells added to the
+  actor.
+  - It's compiled against a one-line stub (`src/Papyrus/stubs/`, on the compiler's import
+    path only, never deployed), so the fair doesn't need Papyrus Extender to build or
+    load.
+  - Without Papyrus Extender the call fails harmlessly, and the SPID ini exclusions in
+    `CODEX_HANDOVER.md` are the fallback.
+- The guard also runs on `OnCellAttach`, for NPCs a save brings in without an `OnLoad`.
+- It re-strips on every load: SPID puts the spells back each game start.
+
+### The crowd library
+
+The other agent built 38 figures: 16 poses, 12 characters, 21 outfits
+(`docs/CROWD.md`, "The library"). **51 copies of 36 figures are placed.** Standing03 and
+HandsBehind02 aren't used yet.
+
+| Where | Figures |
+| --- | --- |
+| Archery, behind the real spectators (x 530–830), facing the targets | 13 + the clapper: LookFar01–02, Pointing01–02, Clapping02–04, Cheering01–03, ArmsCrossed01–02, HandsBehind01 |
+| Stage, west of the audience (x 700–1150) | 10: ClappingHigh01, Tankard01, Tankard03, Cheering02, Toast01, Waving01, Laughing02, Talking01, HandsOnHips01, Standing02 |
+| Stage, east of the audience (x 2950–3400) | 10: ClappingHigh02, Tankard02, Cheering01, Cheering03, Toast02, Waving02, Laughing01, Talking02, HandsOnHips02, Standing01 |
+| Stage, south of the audience, either side of the avenue | 8: two Tankards, both ClappingHighs, both Toasts, Cheering03, Waving01 |
+| Seated on free seats | 7: Seated01–03 at the prize booth and score-board stools, the social benches west and east of the square, a stool by the east lane, and a bench at the gate picnic |
+| Leaning on the horse pen's south fence, facing the horses | 2: Leaning01–02 |
+
+**How it's placed:**
+- **`fairWorld.crowdPlacements`** is a flat, **append-only** list, in record order.
+  - A figure's STAT is made at its first placement. Then comes each copy, then its body
+    collision box.
+  - So appending a figure, or another copy of an old one, only ever adds records at the
+    end.
+  - The clapper moved into the list with the same records in the same order: the plugin
+    was byte-identical before the new placements were added.
+- **`tools/place_crowd.py`** plans the placements once and appends them; it never moves
+  existing ones. Its rules:
+  - Ground must be open on the navmesh raster's main area, which keeps figures out of
+    stall keepers' pockets.
+  - At least 65 units from any real NPC and 75 from another figure.
+  - At least 700 between copies of one figure.
+  - Nothing in the avenue, the east lane or the stage steps.
+  - Headings face the focus (the targets, or the dance floor), ±28°.
+  - Its inputs are the generator's new site dump (`build/crowd_sites.json`: benches and
+    whether a real sitter uses each, the pen's rails, every enabled actor), the navmesh
+    raster and `tools/crowd/figures.json`.
+- **Seated figures** (`seat` and `marker` in a placement):
+  - Placed on the furniture reference nearest `seat`, at its seat marker, facing as the
+    sitter does.
+  - The markers are read from the vanilla NIFs into `fairWorld.seatMarkers`:
+    FarmBench01 x ±30, CommonBench01 x −46/0/46, both facing −Y; WoodenBarStool (0, 4.8)
+    facing +Y.
+  - That seat becomes its **non-sittable static twin**, so no NPC sits down inside a
+    figure.
+  - The generator refuses a seat a real sitter is linked to.
+- **Leaners:** 34 units out from the pen fence, facing it. Its lower rail is at 77–85 up,
+  near the figures' 64–80 hand height.
+- **Collision:** a body box [−18, −14, 18, 14] at full height. Leaners use [−18, −6, 18, 26];
+  seated figures have none, because the bench is solid.
+
+### Verification
+
+- 36 STATs, each with the MODL and OBND from `figures.json` (0 mismatches). 51
+  references.
+- Against the deployed plugin: 128 records added, none removed. The only renumbered IDs
+  are the navmeshes, which always come last.
+- Standing figures: the nearest real NPC is 68 away, the nearest other figure 80.
+- Navmesh: 9 meshes, 7,819 triangles, 58 islands, **0 errors**. Figures are cut by their
+  model footprints (245 models), and actors on the mesh are 230 of 230.
+- Generator run twice: identical SHA256 `145abe7b16945a82...`. Four scripts compile.
+- Deployed: all 38 NIFs are in the mod folder, byte for byte.
+
+### Test
+
+1. **First, the guard** (it fixes the music):
+   - Does the first song start about 4 s after arriving, with the bards and dancers?
+   - `Papyrus.0.log` should show `SkyrimFairGuard: ... removed from the record True`.
+2. **Archery range:** 13 figures behind the real spectators, around the clapper.
+3. **The stage:** figures behind the audience on the west, east and south, with
+   tankards, goblets and overhead clapping.
+4. **Seated figures:**
+   - at the archery prize booth and score board
+   - on the social benches at both sides of the square
+   - at the gate picnic
+   Do they sit on the seat, not in it or floating above it, and facing the right way?
+5. **Leaners:** on the horse pen's south fence. Do their hands meet the rail?
+6. Skin tones (Nord, Breton, Imperial, Redguard), hair and beard colours, the props in
+   hand, how repetitive the faces look at 5, 15 and 30 m, and the frame rate.
+
+## Previous pass: Astra's folk dance in game (OAR), the figure's collision, the guard's retry (2026-09-23)
 
 Barry confirmed the first crowd figure in game: "he blended in that well that i had to do
 a double take", the right height and a natural skin colour. The only issue: no

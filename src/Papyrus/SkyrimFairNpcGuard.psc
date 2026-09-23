@@ -13,12 +13,20 @@ Event OnLoad()
 	Strip()
 EndEvent
 
+; A save loaded at the fair may bring NPCs in without an OnLoad.
+Event OnCellAttach()
+	Strip()
+EndEvent
+
 ; After a load the NPCs can load before the stage quest has filled the list: try again a
 ; few times, 5 s apart.
 Event OnUpdate()
 	Strip()
 EndEvent
 
+; SPID puts these spells on the NPC's record, which vanilla RemoveSpell doesn't reach, so
+; Papyrus Extender's RemoveBaseSpell takes them off the record (and the actor). Removing
+; from the record lasts until the game restarts, when SPID adds them again.
 Function Strip()
 	If !StripSpells
 		Return
@@ -34,9 +42,12 @@ Function Strip()
 	While i > 0
 		i -= 1
 		Spell s = StripSpells.GetAt(i) as Spell
-		If s && HasSpell(s)
-			Bool removed = RemoveSpell(s)
-			Debug.Trace("SkyrimFairGuard: " + self + " " + s + " removed " + removed + ", still has it " + HasSpell(s))
+		If s
+			Bool fromBase = PO3_SKSEFunctions.RemoveBaseSpell(self, s)
+			Bool added = RemoveSpell(s)
+			If fromBase || added
+				Debug.Trace("SkyrimFairGuard: " + self + " " + s + " removed from the record " + fromBase + ", from the actor " + added + ", still has it " + HasSpell(s))
+			EndIf
 		EndIf
 	EndWhile
 EndFunction

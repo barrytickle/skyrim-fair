@@ -127,10 +127,25 @@ internal sealed record FairWorldConfig
     public NavmeshConfig Navmesh { get; init; } = new();
 
     /// <summary>
-    /// Static crowd figures (docs/CROWD.md): posed people baked into STATs, built after
-    /// everything but the navmesh, so no earlier FormID moves when one is added.
+    /// Static crowd figures (docs/CROWD.md): posed people baked into STATs. These are the
+    /// definitions; <see cref="CrowdPlacements"/> places them. A figure's STAT is made at its
+    /// first placement, so the definitions' order doesn't matter.
     /// </summary>
     public List<CrowdFigure> CrowdFigures { get; init; } = new();
+
+    /// <summary>
+    /// Every crowd figure copy, in record order. **Append only**: each entry adds its records
+    /// (the figure's STAT on first use, the reference, its collision box) after the previous
+    /// entry's, and all of them after everything but the navmesh, so appending never moves a
+    /// FormID. Written by tools/place_crowd.py, then kept as it is.
+    /// </summary>
+    public List<CrowdPlacement> CrowdPlacements { get; init; } = new();
+
+    /// <summary>Seat markers of each furniture base (from their NIFs), for seated figures.</summary>
+    public List<SeatMarkers> SeatMarkers { get; init; } = new();
+
+    /// <summary>Where the generator writes the benches, rails and actors tools/place_crowd.py reads.</summary>
+    public string CrowdSitesDump { get; init; } = string.Empty;
 
     /// <summary>What every fair NPC gets: invulnerability, and other mods' spells taken off.</summary>
     public NpcGuardConfig NpcGuard { get; init; } = new();
@@ -319,6 +334,33 @@ internal sealed record FairWorldConfig
 /// lay it by its real size. Width runs along local X, depth along local Y, and the
 /// origin is at the bottom centre.
 /// </summary>
+internal sealed record CrowdPlacement
+{
+    public string Figure { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, yaw]</c> on the ground (standing and leaning figures).</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    /// <summary>Or on a seat: the furniture reference nearest <c>[x, y]</c>, and which of its markers.</summary>
+    public float[] Seat { get; init; } = Array.Empty<float>();
+
+    public int Marker { get; init; }
+}
+
+/// <summary>
+/// A furniture base's seat markers, <c>[x, y, heading]</c> in its own frame (the heading the
+/// sitter faces, degrees clockwise from the furniture's +Y), and its non-sittable twin: a
+/// seat given to a figure becomes the twin, so no NPC sits down inside the figure.
+/// </summary>
+internal sealed record SeatMarkers
+{
+    public string Furniture { get; init; } = string.Empty;
+
+    public string StaticTwin { get; init; } = string.Empty;
+
+    public List<float[]> Markers { get; init; } = new();
+}
+
 internal sealed record CrowdFigure : ProjectStaticConfig
 {
     /// <summary>Where copies stand: <c>[x, y, yaw]</c> each, on the ground. The figure faces +Y at yaw 0.</summary>

@@ -604,6 +604,19 @@ Project-owned mesh work is code-first and reproducible.
     (`tools/folk/rebase_folk.py`), or the actors would have to overlap.
   - Astra's sources in `character-actors/` stay uncommitted; the derived clips are
     git-ignored (`assets/meshes/actors/`).
+- **crowd figures are append-only:**
+  - Place them only by appending to `fairWorld.crowdPlacements`. A STAT is made at a
+    figure's first placement, so the order of `crowdFigures` definitions doesn't matter.
+  - Never reorder, remove or insert placements. To retire one, add a flag rather than
+    deleting it.
+  - `tools/place_crowd.py` appends new ones from the generator's `build/crowd_sites.json`
+    and the navmesh raster.
+  - A seated placement (`seat`, `marker`) turns its furniture into the static twin in
+    `seatMarkers`, and fails on a seat a real sitter uses.
+- **SPID-given spells live on the NPC record:** vanilla `RemoveSpell`/`HasSpell` don't see
+  them. The guard uses Papyrus Extender's `RemoveBaseSpell`, compiled against the stub in
+  `src/Papyrus/stubs/`. Stubs are only on the compiler's import path and are never
+  deployed; add another mod's natives there the same way
 - **figure collision:** `crowdFigures[].collision` is `[minX, minY, maxX, maxY, height]`
   in the figure's frame. The generator places a box primitive (as the stage walls) with
   each copy.

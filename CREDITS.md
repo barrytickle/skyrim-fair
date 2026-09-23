@@ -215,13 +215,22 @@ Attribution:
 
 The crowd figures (`meshes\SkyrimFair\Crowd\`, `docs/CROWD.md`) are vanilla Skyrim
 geometry posed with a vanilla animation:
-- the body, clothes and head meshes, the skeleton and `npc_applaud2.hkx` are Bethesda's
+- the body, clothes, hair, head, hands and feet meshes, both skeletons, and the idle and
+  furniture animations each pose is taken from are Bethesda's
+- the props held in hand (the AnimObject tankard and MQ201 goblet) are Bethesda's
 - every texture path is a vanilla one; no texture is shipped
 
 Like `Props/`, the built NIFs are kept out of git.
 
 **PyNifly** (by Bad Dog, GPL-3.0: the licence is vendored with the folk-dance tools as `character-actors/folk-dance/vendor/LICENSE-PyNifly`) is used as a **build tool only**, to write the NIFs
 from the command line. None of its code is bundled with the mod.
+
+## Papyrus Extender (optional, used if installed)
+
+The NPC guard calls powerofthree's **Papyrus Extender** (`RemoveBaseSpell`) to take other
+mods' SPID spells off the fair's NPCs. None of its files are bundled. The fair compiles
+against a one-line declaration of that function, and without Papyrus Extender the call
+does nothing.
 
 ## Paired folk dance (Astra)
 

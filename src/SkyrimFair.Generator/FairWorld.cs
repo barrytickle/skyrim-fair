@@ -794,49 +794,131 @@ internal static class FairWorld
                 + $"{guard.Count} spells stripped when their plugin is loaded");
         }
 
-        // ---- static crowd figures (docs/CROWD.md), after everything but the navmesh ------------------
-        // Each copy is followed by its invisible collision box (the invisible walls' kind).
-        var figureBoxes = 0;
-        foreach (var figure in config.CrowdFigures)
+        var seatDefs = config.SeatMarkers.ToDictionary(m => FormKeyHelper.Parse(m.Furniture));
+
+        // ---- the sites tools/place_crowd.py plans the crowd figures from ------------------------
+        if (config.CrowdSitesDump.Length > 0)
         {
-            var stat = AddStatic(mod, figure);
+            WriteCrowdSites();
+        }
+
+        // ---- static crowd figures (docs/CROWD.md), after everything but the navmesh ------------------
+        // In placement order: a figure's STAT at its first placement, then each copy followed by
+        // its invisible collision box (the invisible walls' kind). Append-only, so nothing moves.
+        var figureDefs = config.CrowdFigures.ToDictionary(f => f.EditorId, StringComparer.Ordinal);
+        var figureStats = new Dictionary<string, Static>(StringComparer.Ordinal);
+        var figureCounts = new SortedDictionary<string, int>(StringComparer.Ordinal);
+        var legacy = config.CrowdFigures.SelectMany(f => f.Places.Select(at => new CrowdPlacement { Figure = f.EditorId, At = at }));
+        foreach (var placement in legacy.Concat(config.CrowdPlacements))
+        {
+            var figure = figureDefs.TryGetValue(placement.Figure, out var def)
+                ? def
+                : throw new InvalidOperationException($"crowdPlacements: no crowdFigures entry {placement.Figure}");
+            if (!figureStats.TryGetValue(figure.EditorId, out var stat))
+            {
+                figureStats[figure.EditorId] = stat = AddStatic(mod, figure);
+            }
+
+            var at = placement.At;
+            if (placement.Seat.Length >= 2)
+            {
+                at = SeatPlace(placement);
+            }
+
+            var ground = plan.Height(at[0], at[1]);
+            Put(Place(mod, stat.FormKey, at[0], at[1], ground, at[2]));
+            figureCounts[figure.EditorId] = figureCounts.GetValueOrDefault(figure.EditorId) + 1;
+            if (!figure.Solid)
+            {
+                continue;
+            }
+
             var box = figure.Collision.Length == 5
                 ? figure.Collision
                 : new[] { -0.4f * figure.Width, -0.4f * figure.Depth, 0.4f * figure.Width, 0.4f * figure.Depth, figure.Height };
-            foreach (var at in figure.Places)
+            // The box's middle, turned into the world as the figure is (yaw clockwise from +Y).
+            var (u, v) = ((box[0] + box[2]) / 2f, (box[1] + box[3]) / 2f);
+            var yaw = at[2] * MathF.PI / 180f;
+            var (x, y) = (at[0] + u * MathF.Cos(yaw) + v * MathF.Sin(yaw), at[1] - u * MathF.Sin(yaw) + v * MathF.Cos(yaw));
+            Put(new PlacedObject(mod)
             {
-                var ground = plan.Height(at[0], at[1]);
-                Put(Place(mod, stat.FormKey, at[0], at[1], ground, at[2]));
-                if (!figure.Solid)
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
+                Primitive = new PlacedPrimitive
                 {
-                    continue;
-                }
+                    // Half-extents: across, along (the figure's +Y), up.
+                    Bounds = new P3Float((box[2] - box[0]) / 2f, (box[3] - box[1]) / 2f, box[4] / 2f),
+                    Color = System.Drawing.Color.FromArgb(0, 255, 255, 0),
+                    Unknown = 0.15f,
+                    Type = PlacedPrimitive.TypeEnum.Box,
+                },
+                Placement = new Placement
+                {
+                    Position = new P3Float(x, y, ground + box[4] / 2f),
+                    Rotation = new P3Float(0f, 0f, yaw),
+                },
+            });
+        }
 
-                // The box's middle, turned into the world as the figure is (yaw clockwise from +Y).
-                var (u, v) = ((box[0] + box[2]) / 2f, (box[1] + box[3]) / 2f);
-                var yaw = at[2] * MathF.PI / 180f;
-                var (x, y) = (at[0] + u * MathF.Cos(yaw) + v * MathF.Sin(yaw), at[1] - u * MathF.Sin(yaw) + v * MathF.Cos(yaw));
-                Put(new PlacedObject(mod)
-                {
-                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
-                    Primitive = new PlacedPrimitive
-                    {
-                        // Half-extents: across, along (the figure's +Y), up.
-                        Bounds = new P3Float((box[2] - box[0]) / 2f, (box[3] - box[1]) / 2f, box[4] / 2f),
-                        Color = System.Drawing.Color.FromArgb(0, 255, 255, 0),
-                        Unknown = 0.15f,
-                        Type = PlacedPrimitive.TypeEnum.Box,
-                    },
-                    Placement = new Placement
-                    {
-                        Position = new P3Float(x, y, ground + box[4] / 2f),
-                        Rotation = new P3Float(0f, 0f, yaw),
-                    },
-                });
-                figureBoxes++;
+        if (figureCounts.Count > 0)
+        {
+            Console.WriteLine($"  crowd figures: {figureCounts.Values.Sum()} placed, {figureCounts.Count} figures: "
+                + string.Join(", ", figureCounts.Select(kv => $"{kv.Key["SkyrimFairCrowd".Length..]} {kv.Value}")));
+        }
+
+        // A seated figure sits on a seat marker of the furniture reference nearest its seat,
+        // facing as the sitter would; the furniture becomes its non-sittable twin.
+        float[] SeatPlace(CrowdPlacement placement)
+        {
+            var (sx, sy) = (placement.Seat[0], placement.Seat[1]);
+            var seat = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>())
+                .Where(o => seatDefs.ContainsKey(o.Base.FormKey))
+                .OrderBy(o => (o.Placement!.Position.X - sx) * (o.Placement.Position.X - sx) + (o.Placement.Position.Y - sy) * (o.Placement.Position.Y - sy))
+                .First();
+            var sp = seat.Placement!;
+            var d = MathF.Sqrt((sp.Position.X - sx) * (sp.Position.X - sx) + (sp.Position.Y - sy) * (sp.Position.Y - sy));
+            if (d > 40f)
+            {
+                throw new InvalidOperationException($"crowdPlacements {placement.Figure}: no seat within 40 of ({sx}, {sy}); the nearest is {d:0} away");
             }
 
-            Console.WriteLine($"  crowd figure {figure.EditorId}: {figure.Places.Count} placed" + (figure.Solid ? ", each with a collision box" : ", walk-through"));
+            var sitters = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedNpc>())
+                .Concat(topCell.Persistent.OfType<PlacedNpc>())
+                .Count(n => n.LinkedReferences.Any(l => l.Reference.FormKey == seat.FormKey));
+            if (sitters > 0)
+            {
+                throw new InvalidOperationException($"crowdPlacements {placement.Figure}: the seat at ({sx}, {sy}) is a real sitter's");
+            }
+
+            var markers = seatDefs[seat.Base.FormKey];
+            var m = markers.Markers[placement.Marker];
+            var syaw = sp.Rotation.Z;
+            var (mx, my) = (sp.Position.X + m[0] * MathF.Cos(syaw) + m[1] * MathF.Sin(syaw), sp.Position.Y - m[0] * MathF.Sin(syaw) + m[1] * MathF.Cos(syaw));
+            seat.Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(markers.StaticTwin));
+            return new[] { mx, my, (syaw * 180f / MathF.PI + m[2] + 360f) % 360f };
+        }
+
+        void WriteCrowdSites()
+        {
+            var linked = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedNpc>()).Concat(topCell.Persistent.OfType<PlacedNpc>())
+                .SelectMany(n => n.LinkedReferences.Select(l => l.Reference.FormKey)).ToHashSet();
+            var objects = cells.OrderBy(c => c.Key.X).ThenBy(c => c.Key.Y).SelectMany(c => c.Value.Temporary.OfType<PlacedObject>()).ToList();
+            var seatsOut = objects.Where(o => seatDefs.ContainsKey(o.Base.FormKey)).Select(o => new
+            {
+                furniture = o.Base.FormKey.ToString(),
+                x = o.Placement!.Position.X, y = o.Placement.Position.Y, yaw = o.Placement.Rotation.Z * 180f / MathF.PI,
+                taken = linked.Contains(o.FormKey),
+            });
+            var rails = objects.Where(o => o.Base.FormKey == FormKeyHelper.Parse("0006EAAD:Skyrim.esm")).Select(o => new
+            {
+                x = o.Placement!.Position.X, y = o.Placement.Position.Y, yaw = o.Placement.Rotation.Z * 180f / MathF.PI,
+            });
+            var actors = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedNpc>()).Concat(topCell.Persistent.OfType<PlacedNpc>())
+                .Where(n => (n.MajorRecordFlagsRaw & 0x800) == 0)
+                .Select(n => new[] { n.Placement!.Position.X, n.Placement.Position.Y })
+                .OrderBy(p => p[0]).ThenBy(p => p[1]);
+            var path = Path.IsPathRooted(config.CrowdSitesDump) ? config.CrowdSitesDump : Path.Combine(FairPaths.ConfigDirectory, config.CrowdSitesDump);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(new { seats = seatsOut, rails, actors }));
         }
 
         // ---- the navmesh, last of all ------------------------------------------------------------

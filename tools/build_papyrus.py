@@ -16,6 +16,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "src" / "Papyrus"
 OUT = ROOT / "assets" / "scripts"
 VANILLA = ROOT / "build" / "papyrus" / "vanilla"
+# Compile-time declarations of other mods' natives (Papyrus Extender): imported, never compiled
+# into assets/scripts, so the real scripts from those mods answer at runtime.
+STUBS = SOURCE / "stubs"
 
 
 def unpack(ck: pathlib.Path) -> pathlib.Path:
@@ -51,7 +54,7 @@ def main() -> None:
         result = subprocess.run(
             [str(compiler), psc.name,
              f"-f={vanilla / 'TESV_Papyrus_Flags.flg'}",
-             f"-i={SOURCE};{vanilla}",
+             f"-i={SOURCE};{STUBS};{vanilla}",
              f"-o={OUT}"],
             cwd=SOURCE, capture_output=True, text=True)
         text = (result.stdout + result.stderr).strip()

@@ -112,6 +112,20 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**Crowd library placed, and the guard fixed: built and deployed, awaiting Barry's test** (plugin `145abe7b16945a82...`).
+- Barry's folk-dance test: the game stays up, but no song, bard or dance. The guard hadn't
+  removed a spell, because SPID spells sit on the NPC record. The flood still ran and
+  starved the stage script.
+  - Now it uses Papyrus Extender's `RemoveBaseSpell`, compiled against a stub.
+  - The folk dance itself is still untested.
+- 51 static figures of 36 designs:
+  - 13 behind the archery spectators
+  - 28 round the stage audience
+  - 7 seated on free benches, which become non-sittable
+  - 2 leaning on the horse pen
+- `fairWorld.crowdPlacements` is append-only; `tools/place_crowd.py` plans new
+  placements.
+
 **Astra's folk dance, the figure's collision, the guard retry: built and deployed, awaiting Barry's test** (plugin `09563660fbab2002...`).
 - Barry confirmed the clapping figure in game: the right height, natural colour, "had to
   do a double take". He asked for collision, now a box per figure (`crowdFigures[].collision`).
