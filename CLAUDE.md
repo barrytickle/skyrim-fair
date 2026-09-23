@@ -114,6 +114,31 @@ tested this build.** He's done for the night.
   one with the wreath. That's the `archery_booth` module in `fair.config.json`: posts at
   y 60 and 150, sign `000F0A22` at y 157.5, bar `000533D3` at y 105.
 
+**Barry's morning list (added 2026-09-23 late; nothing started):**
+
+1. **Bug: the archers stop their animation after a reload.** The Solitude training package
+   (`GuardSolitudeRangedTrainingPackage`) doesn't resume after a load. Check:
+   - how Castle Dour's archers survive a reload (package conditions, persistence, linked
+     refs, `EvaluatePackage`)
+   - otherwise, a load-game nudge from the audio quest's player alias
+     (`OnPlayerLoadGame` → `EvaluatePackage` on each archer)
+2. **Dancing NPCs.** Audit the external dance mod first:
+   `external/Professional Dancer 124608 1.5.0 ....7z`. Its licence is CC BY-NC 4.0; the
+   plan is to use it as a dependency, not bundle it (`CREDITS.md`). Find out how it makes
+   an NPC dance (spell, package, keyword, script API) and how our stage controller could
+   start and stop dancers with the songs.
+3. **A large crowd by the bards** to make the cheer and the performance feel real.
+   Mind performance: there are already about 123 actors.
+4. **Audit "Crowded Streets"** (`Crowded Streets.esp`, in Barry's load order; the mod is in
+   `E:\Modlists\Still In Skyrim\mods\`) to see how it adds so many NPCs to towns: leveled
+   actors, spawners, packages, performance tricks. Read the plugin with Mutagen,
+   read-only.
+5. **Navmesh** so NPCs can walk: start looking into generating one. That's a big,
+   separate job; plan it before building.
+6. **Vendor inventories:** populate the stalls' vendors, with **prices higher than usual
+   because it's a festival**. That means vendor factions, merchant chests, buy/sell
+   markup. The per-theme stock is in `docs/STALLS.md`.
+
 **From the previous build, still to confirm:**
 
 1. **Stage music.** Fixed by pointing the script at sound markers. Does a song start about
