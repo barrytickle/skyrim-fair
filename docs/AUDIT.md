@@ -4,6 +4,9 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: navmesh phases 2 and 3 (real footprints, keepers, the pen, the stage) (2026-09-23)
 
+**Confirmed in game (Barry):** no crash and nothing out of the ordinary, and **the archers
+now shoot after a reload**. The navmesh was their missing piece.
+
 Barry: "let's do stage two and 3 first, the archers can be a lower priority for now".
 Phase 1's mesh cut whole stall blocks, the pen and the stage out, and left 70 of 126
 actors off it.

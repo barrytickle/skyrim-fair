@@ -112,11 +112,12 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
-**Navmesh phases 1 to 3: built and deployed, awaiting Barry's test** (plugin `fbfdf1eb5f5d84e3...`).
-Obstacles use model footprints. All 126 actors stand on the mesh. The stage deck and
-steps are the performers' walled-off island. The pen has its own mesh. 7,253 triangles;
-the validator passes. The archers are lower priority for now (Barry). See
-`docs/NAVMESH.md` and `docs/AUDIT.md`.
+**Navmesh phases 1 to 3: confirmed in game (2026-09-23)** (plugin `fbfdf1eb5f5d84e3...`).
+Barry: no issues, nothing out of the ordinary. **It fixed the archers**: they shoot after a
+reload. (Their package's opening Travel needed a path. The near-self "Use Weapon
+Location" stays; it's harmless.) Next, possibly: auditing bespoke animations Barry and
+Astra may supply (the untracked `character-actors/` folder is theirs; don't commit it
+unasked).
 
 **Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
 
