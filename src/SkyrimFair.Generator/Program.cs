@@ -256,7 +256,7 @@ try
             Console.WriteLine($"  archery: {archery.Lanes} lanes (target, backstop, townsfolk archer) from {archery.Records} archer records");
         }
 
-        Console.WriteLine($"  mountains: {world.Mountains.Count}, persistent + Full LOD");
+        Console.WriteLine($"  mountains: {world.Mountains.Count}, large references (RNAM)");
         foreach (var m in world.Mountains)
         {
             Console.WriteLine(

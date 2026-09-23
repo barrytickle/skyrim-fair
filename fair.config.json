@@ -106,6 +106,36 @@
         }
       ]
     },
+    "treeline": {
+      "enabled": true,
+      "salt": 7,
+      "gridSpacing": 300,
+      "jitter": 0.45,
+      "denseFrom": 250,
+      "denseTo": 1300,
+      "outerDistance": 2000,
+      "peakDensity": 0.5,
+      "clusterPeriod": 1100,
+      "clearingThreshold": 0.36,
+      "gateClearRadius": 700,
+      "gateApproachDegrees": 16,
+      "gateApproachLength": 2200,
+      "leanDegrees": 2,
+      "sink": 24,
+      "trees": [
+        {"name": "TreePineForest01", "formKey": "0001306D:Skyrim.esm", "weight": 1.5, "minScale": 0.6, "maxScale": 1.0, "minDistance": 900},
+        {"name": "TreePineForest02", "formKey": "00018A02:Skyrim.esm", "weight": 2, "minScale": 0.55, "maxScale": 1.0, "minDistance": 800},
+        {"name": "TreePineForest04", "formKey": "0004FBB0:Skyrim.esm", "weight": 1.5, "minScale": 0.5, "maxScale": 0.9, "minDistance": 1000},
+        {"name": "TreePineForest05", "formKey": "00051126:Skyrim.esm", "weight": 3, "minScale": 0.8, "maxScale": 1.4, "minDistance": 380},
+        {"name": "TreePineForest03", "formKey": "0004B016:Skyrim.esm", "weight": 2.5, "minScale": 0.9, "maxScale": 1.6, "minDistance": 280, "maxDistance": 1500},
+        {"name": "TreePineShrub02", "formKey": "0009DAA0:Skyrim.esm", "weight": 1.5, "minScale": 0.8, "maxScale": 1.3, "minDistance": 200, "maxDistance": 1600},
+        {"name": "TreePineShrub01", "formKey": "0009DAA3:Skyrim.esm", "weight": 1, "minScale": 0.8, "maxScale": 1.3, "minDistance": 200, "maxDistance": 1200},
+        {"name": "TreeTundraShrub04", "formKey": "000AAE7F:Skyrim.esm", "weight": 1, "minScale": 0.9, "maxScale": 1.3, "minDistance": 150, "maxDistance": 900},
+        {"name": "RockPileL01PineForest03", "formKey": "000F99FD:Skyrim.esm", "weight": 0.8, "minScale": 0.8, "maxScale": 1.4, "minDistance": 250, "sink": 60},
+        {"name": "RockCliff02PineForest03", "formKey": "000D1EC6:Skyrim.esm", "weight": 0.5, "minScale": 0.7, "maxScale": 1.1, "minDistance": 500, "sink": 180},
+        {"name": "RockCliff07PineForest03", "formKey": "000D1EC7:Skyrim.esm", "weight": 0.4, "minScale": 0.6, "maxScale": 1.0, "minDistance": 600, "sink": 140}
+      ]
+    },
     "mountains": {
       "enabled": true,
       "baseZ": -1000,
@@ -127,8 +157,8 @@
         {
           "name": "far",
           "count": 13,
-          "minRadius": 17500,
-          "maxRadius": 20500,
+          "minRadius": 15800,
+          "maxRadius": 17800,
           "angleJitter": 0.35,
           "startDegrees": 23,
           "pieces": [
@@ -136,6 +166,33 @@
             {"name": "MountainPeak02_HeavySN", "formKey": "00046031:Skyrim.esm", "weight": 2, "minScale": 0.85, "maxScale": 1.1},
             {"name": "MountainCliff01_HeavySN", "formKey": "00048DE0:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.25},
             {"name": "MountainCliff04_HeavySN", "formKey": "00027DDC:Skyrim.esm", "weight": 1, "minScale": 1.0, "maxScale": 1.3}
+          ]
+        },
+        {
+          "name": "ridges",
+          "placeLast": true,
+          "count": 10,
+          "minRadius": 9000,
+          "maxRadius": 11800,
+          "angleJitter": 0.3,
+          "startDegrees": 40,
+          "clusterMin": 1,
+          "clusterMax": 3,
+          "clusterSpreadDegrees": 9,
+          "clusterRadiusSpread": 900,
+          "gapChance": 0.3,
+          "baseZ": -100,
+          "pieces": [
+            {"name": "MountainRidge01", "formKey": "00052171:Skyrim.esm", "weight": 3, "minScale": 1.1, "maxScale": 1.4},
+            {"name": "MountainRidge03", "formKey": "00053904:Skyrim.esm", "weight": 2, "minScale": 1.05, "maxScale": 1.3},
+            {"name": "MountainRidge02_Sparse_SN", "formKey": "000310A5:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.3},
+            {"name": "MountainCliffSm01_SparseSN", "formKey": "000A0EB3:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.3},
+            {"name": "MountainCliffSlopeTundraRocks01", "formKey": "0006E1AF:Skyrim.esm", "weight": 2, "minScale": 1.2, "maxScale": 1.5},
+            {"name": "MountainCliffSlopePineForest03", "formKey": "000D37B6:Skyrim.esm", "weight": 2, "minScale": 1.2, "maxScale": 1.5}
+          ],
+          "pinned": [
+            {"name": "MountainCliffSlopePineForest03", "formKey": "000D37B6:Skyrim.esm", "angle": 186, "radius": 8600, "scale": 1.5, "yaw": 95},
+            {"name": "MountainRidge01", "formKey": "00052171:Skyrim.esm", "angle": 170, "radius": 10600, "scale": 1.3, "yaw": 80}
           ]
         }
       ]

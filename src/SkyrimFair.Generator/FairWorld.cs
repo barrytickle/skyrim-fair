@@ -388,23 +388,22 @@ internal static class FairWorld
 
         // ---- distant mountains ------------------------------------------------------
         var mountains = new List<MountainPlacement>();
-        if (config.Mountains.Enabled)
-        {
-            if (master is null)
-            {
-                throw new InvalidOperationException(
-                    "FairWorld mountains are sunk by their mesh bounds, which are read from Skyrim.esm; " +
-                    "set Site.SkyrimDataPath or disable fairWorld.mountains.");
-            }
+        var lowest = new Dictionary<FormKey, float>();
+        var largeReferences = new List<(PlacedObject Ref, MountainPlacement Mountain)>();
+        float LowestPoint(FormKey key) => lowest.TryGetValue(key, out var z)
+            ? z
+            : throw new InvalidOperationException($"Mountain {key} is not a STAT in Skyrim.esm.");
 
-            var lowest = master.Statics.ToDictionary(r => r.FormKey, r => (float)r.ObjectBounds.First.Z);
+        // Large references, as vanilla's mountains are: ordinary references in their own
+        // cells, listed in the world's RNAM so they load five cells out (see
+        // MountainsConfig). Each must stay inside the large-reference grid from anywhere in
+        // the compound.
+        void PlaceMountains(IEnumerable<MountainPlacement> placements)
+        {
             var worldMin = config.CellRadius * -CellSize;
             var worldMax = (config.CellRadius + 1) * CellSize;
-            mountains = plan.Mountains(config.Mountains, key => lowest.TryGetValue(key, out var z)
-                ? z
-                : throw new InvalidOperationException($"Mountain {key} is not a STAT in Skyrim.esm.")).ToList();
-
-            foreach (var mountain in mountains)
+            var limit = config.Mountains.LargeReferenceCellLimit;
+            foreach (var mountain in placements)
             {
                 // Vanilla keeps its always-drawn scenery inside the world's object bounds.
                 if (mountain.X < worldMin || mountain.X >= worldMax || mountain.Y < worldMin || mountain.Y >= worldMax)
@@ -415,9 +414,39 @@ internal static class FairWorld
 
                 var placed = Place(mod, mountain.Base, mountain.X, mountain.Y, mountain.Z, mountain.Heading);
                 placed.Scale = mountain.Scale;
-                placed.MajorRecordFlagsRaw = PersistentRecordFlag | FullLodRecordFlag;
-                topCell.Persistent.Add(placed);
+                if (config.Mountains.LargeReferences)
+                {
+                    var (mx, my) = ((int)MathF.Floor(mountain.X / CellSize), (int)MathF.Floor(mountain.Y / CellSize));
+                    if (Math.Abs(mx) > limit || Math.Abs(my) > limit)
+                    {
+                        throw new InvalidOperationException(
+                            $"Mountain {mountain.Name} ({mountain.Row}) at {mountain.X:0}, {mountain.Y:0} is in cell {mx}, {my}, " +
+                            $"beyond the large-reference grid's reach (cells -{limit}..{limit}); reduce its row radius.");
+                    }
+
+                    Put(placed);
+                    largeReferences.Add((placed, mountain));
+                }
+                else
+                {
+                    placed.MajorRecordFlagsRaw = PersistentRecordFlag | FullLodRecordFlag;
+                    topCell.Persistent.Add(placed);
+                }
             }
+        }
+
+        if (config.Mountains.Enabled)
+        {
+            if (master is null)
+            {
+                throw new InvalidOperationException(
+                    "FairWorld mountains are sunk by their mesh bounds, which are read from Skyrim.esm; " +
+                    "set Site.SkyrimDataPath or disable fairWorld.mountains.");
+            }
+
+            lowest = master.Statics.ToDictionary(r => r.FormKey, r => (float)r.ObjectBounds.First.Z);
+            mountains = plan.Mountains(config.Mountains, LowestPoint, placeLast: false).ToList();
+            PlaceMountains(mountains);
         }
 
         // ---- forest backdrop ---------------------------------------------------------
@@ -471,6 +500,81 @@ internal static class FairWorld
             {
                 var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
                 script.Properties.Add(new ScriptObjectProperty { Name = "ArcherHold", Object = new FormLink<ISkyrimMajorRecordGetter>(hold.FormKey) });
+            }
+        }
+
+        // ---- the backdrop's later layers ----------------------------------------------------
+        // The treeline and the rows marked PlaceLast come after every other record, so
+        // adding or retuning them never moves the FormIDs before them.
+        if (config.Mountains.Enabled && master is not null)
+        {
+            var late = plan.Mountains(config.Mountains, LowestPoint, placeLast: true).ToList();
+            PlaceMountains(late);
+            mountains.AddRange(late);
+        }
+
+        if (config.Treeline.Enabled)
+        {
+            var treeline = plan.ForestTrees(config.Treeline, gateHeading).ToList();
+            foreach (var tree in treeline)
+            {
+                var placed = Place(mod, tree.Base, tree.X, tree.Y, tree.Z, tree.Heading);
+                placed.Placement!.Rotation = new P3Float(
+                    tree.LeanX * MathF.PI / 180f, tree.LeanY * MathF.PI / 180f, tree.Heading * MathF.PI / 180f);
+                placed.Scale = tree.Scale;
+                Put(placed);
+            }
+
+            trees.AddRange(treeline);
+        }
+
+        // ---- the large-reference table (RNAM) -------------------------------------------------
+        // Laid out as vanilla Tamriel's (read back with Mutagen): each reference is listed
+        // under every cell its footprint overlaps, and both the group's key and the entry
+        // hold a cell as (Y, X) in Mutagen's naming.
+        if (largeReferences.Count > 0)
+        {
+            var bounds = master!.Statics.ToDictionary(r => r.FormKey, r => r.ObjectBounds);
+            var groups = new SortedDictionary<(int Y, int X), List<(uint Id, FormKey Key, int CellX, int CellY)>>();
+            foreach (var (placed, m) in largeReferences)
+            {
+                var b = bounds[m.Base];
+                var reach = m.Scale * MathF.Sqrt(
+                    MathF.Max(b.First.X * b.First.X, b.Second.X * b.Second.X) + MathF.Max(b.First.Y * b.First.Y, b.Second.Y * b.Second.Y));
+                var (cellX, cellY) = ((int)MathF.Floor(m.X / CellSize), (int)MathF.Floor(m.Y / CellSize));
+                for (var gx = (int)MathF.Floor((m.X - reach) / CellSize); gx <= (int)MathF.Floor((m.X + reach) / CellSize); gx++)
+                {
+                    for (var gy = (int)MathF.Floor((m.Y - reach) / CellSize); gy <= (int)MathF.Floor((m.Y + reach) / CellSize); gy++)
+                    {
+                        if (Math.Abs(gx) > config.CellRadius || Math.Abs(gy) > config.CellRadius)
+                        {
+                            continue;
+                        }
+
+                        if (!groups.TryGetValue((gy, gx), out var list))
+                        {
+                            groups[(gy, gx)] = list = new();
+                        }
+
+                        list.Add((placed.FormKey.ID, placed.FormKey, cellX, cellY));
+                    }
+                }
+            }
+
+            worldspace.LargeReferences.Clear();
+            foreach (var ((gy, gx), list) in groups)
+            {
+                var group = new WorldspaceGridReference { GridPosition = new P2Int16((short)gy, (short)gx) };
+                foreach (var (_, key, cellX, cellY) in list.OrderBy(e => e.Id))
+                {
+                    group.References.Add(new WorldspaceReference
+                    {
+                        Reference = new FormLink<IPlacedObjectGetter>(key),
+                        Position = new P2Int16((short)cellY, (short)cellX),
+                    });
+                }
+
+                worldspace.LargeReferences.Add(group);
             }
         }
 
@@ -1127,6 +1231,9 @@ internal static class FairWorld
         /// </summary>
         public IEnumerable<TreePlacement> ForestTrees(ForestConfig forest, float gateHeading)
         {
+            // A second layer (the treeline) salts the hash streams, so its grid doesn't
+            // repeat the first's; salt 0 is the first layer's own stream.
+            float H(int x, int y, int k) => Hash3(x + forest.Salt * 7919, y - forest.Salt * 104729, k);
             var species = forest.Trees
                 .Select(t => (Tree: t, Key: FormKeyHelper.Parse(t.FormKey)))
                 .ToList();
@@ -1148,8 +1255,8 @@ internal static class FairWorld
             {
                 for (var gx = gx0; gx <= gx1; gx++)
                 {
-                    var x = (gx + 0.5f + (Hash3(gx, gy, 11) * 2f - 1f) * forest.Jitter) * forest.GridSpacing;
-                    var y = (gy + 0.5f + (Hash3(gx, gy, 12) * 2f - 1f) * forest.Jitter) * forest.GridSpacing;
+                    var x = (gx + 0.5f + (H(gx, gy, 11) * 2f - 1f) * forest.Jitter) * forest.GridSpacing;
+                    var y = (gy + 0.5f + (H(gx, gy, 12) * 2f - 1f) * forest.Jitter) * forest.GridSpacing;
                     var distance = Outside(x, y);
                     if (distance < nearest || distance > forest.OuterDistance)
                     {
@@ -1176,7 +1283,7 @@ internal static class FairWorld
                     var fadeOut = 1f - 0.75f * Smooth((distance - forest.DenseTo) / MathF.Max(1f, forest.OuterDistance - forest.DenseTo));
                     var clump = Smooth((cluster - forest.ClearingThreshold) / 0.22f);
                     var chance = forest.PeakDensity * (0.25f + 0.75f * rampIn) * fadeOut * clump;
-                    if (Hash3(gx, gy, 13) >= chance)
+                    if (H(gx, gy, 13) >= chance)
                     {
                         continue;
                     }
@@ -1189,7 +1296,7 @@ internal static class FairWorld
                         continue;
                     }
 
-                    var pick = Hash3(gx, gy, 14) * allowed.Sum(s => s.Tree.Weight);
+                    var pick = H(gx, gy, 14) * allowed.Sum(s => s.Tree.Weight);
                     var chosen = allowed[^1];
                     foreach (var s in allowed)
                     {
@@ -1204,11 +1311,11 @@ internal static class FairWorld
                     var tree = chosen.Tree;
                     yield return new TreePlacement(
                         chosen.Key, tree.Name, x, y,
-                        Height(x, y) - forest.Sink,
-                        Hash3(gx, gy, 15) * 360f,
-                        (Hash3(gx, gy, 16) * 2f - 1f) * forest.LeanDegrees,
-                        (Hash3(gx, gy, 17) * 2f - 1f) * forest.LeanDegrees,
-                        tree.MinScale + Hash3(gx, gy, 18) * (tree.MaxScale - tree.MinScale),
+                        Height(x, y) - (tree.Sink ?? forest.Sink),
+                        H(gx, gy, 15) * 360f,
+                        (H(gx, gy, 16) * 2f - 1f) * forest.LeanDegrees,
+                        (H(gx, gy, 17) * 2f - 1f) * forest.LeanDegrees,
+                        tree.MinScale + H(gx, gy, 18) * (tree.MaxScale - tree.MinScale),
                         distance);
                 }
             }
@@ -1220,7 +1327,7 @@ internal static class FairWorld
         /// the spacing, at a radius anywhere in the row's band, turned at random, and
         /// sunk so the mesh's lowest point lands on <see cref="MountainsConfig.BaseZ"/>.
         /// </summary>
-        public IEnumerable<MountainPlacement> Mountains(MountainsConfig mountains, Func<FormKey, float> lowestPoint)
+        public IEnumerable<MountainPlacement> Mountains(MountainsConfig mountains, Func<FormKey, float> lowestPoint, bool placeLast)
         {
             var (minX, minY, maxX, maxY) = Bounds;
             var (cx, cy) = ((minX + maxX) / 2f, (minY + maxY) / 2f);
@@ -1228,35 +1335,66 @@ internal static class FairWorld
             for (var r = 0; r < mountains.Rows.Count; r++)
             {
                 var row = mountains.Rows[r];
+                if (row.PlaceLast != placeLast)
+                {
+                    continue;
+                }
+
+                var baseZ = row.BaseZ ?? mountains.BaseZ;
                 var pieces = row.Pieces.Select(p => (Piece: p, Key: FormKeyHelper.Parse(p.FormKey))).ToList();
                 var totalWeight = pieces.Sum(p => p.Piece.Weight);
-                var spacing = 360f / row.Count;
+                var spacing = 360f / Math.Max(1, row.Count);
 
                 for (var k = 0; k < row.Count; k++)
                 {
-                    var angle = row.StartDegrees + (k + (Hash3(r, k, 21) * 2f - 1f) * row.AngleJitter) * spacing;
-                    var radius = row.MinRadius + Hash3(r, k, 22) * (row.MaxRadius - row.MinRadius);
-                    var rad = angle * MathF.PI / 180f;
-                    var x = cx + MathF.Sin(rad) * radius;
-                    var y = cy + MathF.Cos(rad) * radius;
-
-                    var pick = Hash3(r, k, 23) * totalWeight;
-                    var chosen = pieces[^1];
-                    foreach (var p in pieces)
+                    if (row.GapChance > 0f && Hash3(r, k, 26) < row.GapChance)
                     {
-                        pick -= p.Piece.Weight;
-                        if (pick < 0f)
-                        {
-                            chosen = p;
-                            break;
-                        }
+                        continue;
                     }
 
-                    var scale = chosen.Piece.MinScale + Hash3(r, k, 24) * (chosen.Piece.MaxScale - chosen.Piece.MinScale);
+                    var groupAngle = row.StartDegrees + (k + (Hash3(r, k, 21) * 2f - 1f) * row.AngleJitter) * spacing;
+                    var groupRadius = row.MinRadius + Hash3(r, k, 22) * (row.MaxRadius - row.MinRadius);
+                    var size = row.ClusterMin + (int)(Hash3(r, k, 27) * (row.ClusterMax - row.ClusterMin + 1));
+                    size = Math.Clamp(size, row.ClusterMin, Math.Max(row.ClusterMin, row.ClusterMax));
+
+                    for (var j = 0; j < size; j++)
+                    {
+                        // The group's first piece keeps the row's original hash streams, so a
+                        // row of single pieces places exactly as before.
+                        var (hk, salt) = j == 0 ? (k, 0) : (k * 16 + j, 1000);
+                        var angle = groupAngle + (j == 0 ? 0f : (Hash3(r, hk, salt + 28) * 2f - 1f) * row.ClusterSpreadDegrees);
+                        var radius = groupRadius + (j == 0 ? 0f : (Hash3(r, hk, salt + 29) * 2f - 1f) * row.ClusterRadiusSpread);
+                        var rad = angle * MathF.PI / 180f;
+                        var x = cx + MathF.Sin(rad) * radius;
+                        var y = cy + MathF.Cos(rad) * radius;
+
+                        var pick = Hash3(r, hk, salt + 23) * totalWeight;
+                        var chosen = pieces[^1];
+                        foreach (var p in pieces)
+                        {
+                            pick -= p.Piece.Weight;
+                            if (pick < 0f)
+                            {
+                                chosen = p;
+                                break;
+                            }
+                        }
+
+                        var scale = chosen.Piece.MinScale + Hash3(r, hk, salt + 24) * (chosen.Piece.MaxScale - chosen.Piece.MinScale);
+                        yield return new MountainPlacement(
+                            chosen.Key, chosen.Piece.Name, row.Name, x, y,
+                            baseZ - lowestPoint(chosen.Key) * scale,
+                            Hash3(r, hk, salt + 25) * 360f, scale, angle, radius);
+                    }
+                }
+
+                foreach (var pin in row.Pinned)
+                {
+                    var key = FormKeyHelper.Parse(pin.FormKey);
+                    var rad = pin.Angle * MathF.PI / 180f;
                     yield return new MountainPlacement(
-                        chosen.Key, chosen.Piece.Name, row.Name, x, y,
-                        mountains.BaseZ - lowestPoint(chosen.Key) * scale,
-                        Hash3(r, k, 25) * 360f, scale, angle, radius);
+                        key, pin.Name, row.Name, cx + MathF.Sin(rad) * pin.Radius, cy + MathF.Cos(rad) * pin.Radius,
+                        baseZ - lowestPoint(key) * pin.Scale, pin.Yaw, pin.Scale, pin.Angle, pin.Radius);
                 }
             }
         }

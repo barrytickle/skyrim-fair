@@ -2,7 +2,140 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: honey-style signs for Elven Goods, woodworker and archery; the archers' package restart (2026-09-23)
+## Current pass: the backdrop (large-reference mountains, a midground of ridges, a denser treeline) (2026-09-23)
+
+Barry's brief: from the middle of the fair the horizon is bare. The palisade and nearby
+trees show, but the mountains often don't until he walks up to a wall. Diagnose first,
+then build layered depth (treeline, ridges, mountains, sky) that holds from everywhere
+the player spends time. Don't touch the fair's interior.
+
+### Diagnosis: A, an object-loading problem (with some fog on top)
+
+Read back from the deployed plugin (`fbdc66277b56f95a...`):
+
+- The 24 mountains were **Persistent + Is Full LOD (`0x10400`) in the world's
+  persistent cell**, 10,800 to 23,300 from the origin, in cells 3 to 5 out.
+- Barry's INI: `uGridsToLoad=5` (two cells round the player's) and
+  `uLargeRefLODGridSize=11`. The world had **no large-reference table** (RNAM, 0 groups)
+  and no LOD of any kind (no `.lod` settings, no object, terrain or tree LOD).
+- From the centre (cell 0, 0) only cells -2..2 load. **Is Full LOD doesn't load a
+  reference whose cell is outside the grid.** Walk to a wall and the grid slides over,
+  bringing that side's nearest mountains in: exactly Barry's report. The handover's rule
+  that Persistent + Full LOD "draws them whatever cells are loaded" was never verified,
+  and is wrong for this case.
+- Modelled from seven points (below): **before, almost no mountain rises above the wall
+  from anywhere inside the fair**, only trees against sky.
+- Fog adds to it but isn't the cause: the clear weathers (`SkyrimClearTU`) fog linearly
+  from 0 to 40,000, so a peak at 17,000 is about 40% fogged; the cloudy ones from 1,000
+  to 100,000.
+- Placement also mattered: the near row's tops (about 2,700 high at 13,000 to 15,500) sit
+  barely above the tall pines' crowns from the centre.
+- Only 99 trees stood outside the wall, not the 490 the handover recorded.
+- Terrain: unloaded terrain beyond the grid never shows from inside, because the wall-top
+  sightline hides everything beyond the wall that low. Only the gate opening looks at
+  ground level.
+
+### The fix: vanilla's own method, large references
+
+Vanilla Tamriel's mountains aren't persistent and don't use Full LOD. They're ordinary
+references in their cells, listed in the world's **RNAM large-reference table**, which
+the game loads within `uLargeRefLODGridSize` (five cells round the player's) at full
+detail. Read back from Skyrim.esm: 8,455 groups, 120,659 entries for temporary
+references, **each reference listed under every cell its footprint overlaps** (its own
+and neighbours up to two away), with the cell stored as (Y, X) in Mutagen's naming.
+
+- The generator now writes the same table for `SkyrimFairWorld` (`FairWorld.cs`, "the
+  large-reference table"). The mountains are ordinary references in their own cells.
+- **Every large reference must lie in cells -4..4** (`mountains.largeReferenceCellLimit`),
+  so it is within five cells of anywhere in the compound (cells -1..1). The generator
+  throws if one doesn't. The far row came in from 17,500–20,500 to **15,800–17,800**.
+- `mountains.largeReferences: false` restores the old Persistent + Full LOD placement.
+
+**Generated LOD was assessed and not used in this pass.** Object LOD isn't needed:
+large references draw the real meshes at the distances that matter, with no assets.
+Terrain LOD isn't needed from inside: the wall hides ground beyond it. Both tools are in
+Barry's modlist (`tools/xlodgen`, `tools/dyndolod`), but they are GUI tools. DynDOLOD
+would regenerate the Tamriel output and write its own plugin. xLODGen terrain LOD for
+this world is a possible later step, as a Barry-run, documented stage, if the gate view
+needs it. Tree LOD would stop the far side's trees unloading (below). Neither is built.
+
+### New layers
+
+| Layer | What | Count |
+| --- | --- | --- |
+| Treeline (new, `fairWorld.treeline`) | a second, denser band 150 to 2,000 beyond the wall, clumped, with clearings (`clusterPeriod` 1,100, `clearingThreshold` 0.36). The smaller pines (`TreePineForest03`, `05`) stand nearest the wall; the tall ones (`01`, `02`, `04`, up to 3,300 high) from 800 to 1,000 out, scaled down. Pine and tundra shrubs as undergrowth, and pine-forest rock piles and cliffs (sunk 60 to 180). Its own hash salt, so it doesn't repeat the first layer's grid | 181 (trees, shrubs, rocks) |
+| Forest (unchanged) | the first layer, 320 to 5,200 out | 99 |
+| Ridges (new row, `ridges`) | the midground, 9,000 to 11,800 from the centre (5,000 to 8,000 behind the wall): groups of 1 to 3 overlapping pieces, 30% of groups left out for sky. Plain and sparse-snow `MountainRidge01/02/03`, `MountainCliffSm01`, the tundra-rock and pine-forest `MountainCliffSlope`, base Z -100, scale 1.0 to 1.5 | 11 |
+| Gate view | two pinned ridge pieces behind the gate's clearing: a pine-forest slope at bearing 186, 8,600 out, and `MountainRidge01` at 170, 10,600 | (in the 11) |
+| Near mountains (unchanged) | heavy-snow ridges and cliffs, 13,000 to 15,500 | 11 |
+| Far mountains | heavy-snow peaks and cliffs, now 15,800 to 17,800 | 13 |
+
+FormIDs: the treeline and the ridges row (`placeLast`) are generated after every other
+record, so nothing before them moved. The mountains keep their FormIDs; they only moved
+from the persistent cell into their own cells.
+
+### Verification
+
+- **Horizon model** (a throwaway Mutagen program in the session scratchpad, same method
+  as the other read-backs). From seven points (centre, market, Traders' Crossing,
+  archery, picnic, stage square, entrance), it takes every palisade panel, tree, shrub,
+  ridge and mountain the game would load there. That's ordinary references within two
+  cells of the viewer's cell, and large references within five cells of any cell RNAM
+  lists them under. It finds the highest silhouette in each degree of azimuth from eye
+  height. Result in `docs/images/backdrop_horizon_before_after.png`:
+  - **before:** only trees above the wall
+  - **after:** ridges and snowy peaks above the treeline all round, from every point,
+    with sky gaps that vary, and ridges and peaks through the gate
+- Generator run twice: identical SHA256 `c2cf866d709c5210...` (596,614 bytes). Deployed
+  byte-identical.
+- Read back against the deployed plugin: 192 records added, **none removed or
+  renumbered**. All 24 old mountains keep their FormIDs, now temporary in their cells. No
+  persistent Full LOD reference is left. RNAM: 104 groups, 405 entries, 35 distinct
+  references. Every entry matches its reference's cell as (Y, X); the own-cell key
+  matches in 35; neighbours reach up to 2 cells, as vanilla's do.
+
+### Performance
+
+- 35 large references drawn at full detail within five cells. Vanilla mountain meshes
+  are light, and the large-reference grid is vanilla's own streaming.
+- 220 trees (was 99), 36 shrubs and 24 rocks, all within two cells of the wall. Trees
+  have no LOD in this world, so each is a full tree model. That's still far less than a
+  vanilla forest cell.
+- No persistent Full LOD scenery is left.
+
+### Known limits
+
+- **The far side's trees:** from the east edge of the compound, the west wall's cell -2
+  unloads, and the trees beyond about 2,000 out on that side go with it (the new
+  treeline stays inside the loaded band). The large-reference ridges and mountains
+  stay. Tree LOD would fix it.
+- No terrain LOD: through the gate, the ground beyond two cells isn't drawn. The pinned
+  ridges stand inside the drawn ground.
+- The horizon model uses bounding boxes (a mountain's top as a peaked box, a tree's crown
+  as half its bounds' width). It shows what loads and roughly how high it reaches, not
+  how it looks. Barry's eye is the test.
+- Weather and fog are unchanged.
+
+### Clear-weather test
+
+In the console: **`fw 10a240`** forces `SkyrimClearTU` (clear, fog 0 to 40,000).
+**`fw 10a243`** forces `SkyrimCloudyTU` (cloudy, fog 1,000 to 100,000). Compare the two
+from the same spot. If a mountain appears or disappears as you walk across the
+compound (not as the weather changes), that is loading; report where.
+
+### Test for Barry
+
+1. `cow SkyrimFairWorld 0 0`, then `fw 10a240`. From the centre, the market, Traders'
+   Crossing, archery, the picnic tables, the stage square and the entrance: do ridges
+   and mountains show above the treeline in every direction?
+2. Walk across the compound: does any mountain pop in or out?
+3. The treeline: natural, with gaps, not a wall? Any tree or rock through the palisade?
+4. The gate: trees, then a ridge, then peaks?
+5. Any ugly mesh base or floating edge on a ridge?
+6. `fw 10a243` (cloudy): still reads, just hazier?
+7. Frame rate at the stage square, compared with before.
+
+## Previous pass: honey-style signs for Elven Goods, woodworker and archery; the archers' package restart (2026-09-23)
 
 Barry's test of `6f0917f`: **the volume is right now, for all the audio.** The signs are
 better, but the Elven Goods sign and the woodworker's still don't hang from their post,

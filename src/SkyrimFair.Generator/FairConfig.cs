@@ -115,6 +115,14 @@ internal sealed record FairWorldConfig
     /// <summary>The ring of vanilla conifers outside the wall.</summary>
     public ForestConfig Forest { get; init; } = new();
 
+    /// <summary>
+    /// A second, denser band of trees, shrubs and rocks close outside the wall, generated
+    /// after everything else (so the records before it keep their FormIDs). Kept within
+    /// about 2,000 of the wall: that band is inside the loaded grid wherever the player
+    /// stands in the compound.
+    /// </summary>
+    public ForestConfig Treeline { get; init; } = new() { Enabled = false };
+
     /// <summary>Distant vanilla mountains, always drawn.</summary>
     public MountainsConfig Mountains { get; init; } = new();
 
@@ -405,21 +413,37 @@ internal sealed record ForestConfig
 
     /// <summary>How far each trunk is sunk below the ground at its position.</summary>
     public float Sink { get; init; } = 24f;
+
+    /// <summary>Varies the hash streams, so a second layer doesn't repeat the first's grid.</summary>
+    public int Salt { get; init; }
 }
 
 /// <summary>
-/// Vanilla mountain meshes ringing the world far beyond the forest. The world has no
-/// LOD, so they are placed as vanilla places distant scenery in its small worlds
-/// (Skuldafn's and Sovngarde's clouds): in the persistent cell, flagged Persistent and
-/// Is Full LOD, which draws them whatever cells are loaded. Each row is a ring round the
-/// compound centre; pieces are sunk so their lowest point sits at <see cref="BaseZ"/>,
-/// well below anything the wall lets the player see.
+/// Vanilla mountain and ridge meshes beyond the forest, row by row round the compound
+/// centre; pieces are sunk so their lowest point sits at <see cref="BaseZ"/>, well below
+/// anything the wall lets the player see.
+///
+/// They are **large references**, as vanilla's mountains are: ordinary references in
+/// their own cells, listed in the world's large-reference table (RNAM), which the game
+/// loads within uLargeRefLODGridSize (11: five cells round the player) rather than
+/// uGridsToLoad (5: two cells). The first build placed them Persistent and Is Full LOD
+/// in the persistent cell instead; that doesn't load a reference whose cell is outside
+/// the grid, so from the middle of the fair only the nearest showed.
 /// </summary>
 internal sealed record MountainsConfig
 {
     public bool Enabled { get; init; } = true;
 
     public float BaseZ { get; init; } = -1000f;
+
+    /// <summary>Place them as large references (see above); false for the old persistent Full LOD refs.</summary>
+    public bool LargeReferences { get; init; } = true;
+
+    /// <summary>
+    /// Every large reference must lie within this many cells of the world's origin, so it
+    /// is inside the large-reference grid from anywhere in the compound (cells -1..1).
+    /// </summary>
+    public int LargeReferenceCellLimit { get; init; } = 4;
 
     public List<MountainRow> Rows { get; init; } = new();
 }
@@ -441,6 +465,47 @@ internal sealed record MountainRow
     public float StartDegrees { get; init; }
 
     public List<MountainPiece> Pieces { get; init; } = new();
+
+    /// <summary>Pieces in each group, from Min to Max: overlapping clumps instead of a ring of single pieces.</summary>
+    public int ClusterMin { get; init; } = 1;
+
+    public int ClusterMax { get; init; } = 1;
+
+    /// <summary>How far a group's pieces spread round from its angle (degrees) and in radius.</summary>
+    public float ClusterSpreadDegrees { get; init; }
+
+    public float ClusterRadiusSpread { get; init; }
+
+    /// <summary>Chance a group is left out: sky between the clumps.</summary>
+    public float GapChance { get; init; }
+
+    /// <summary>The row's own base Z; null uses <see cref="MountainsConfig.BaseZ"/>.</summary>
+    public float? BaseZ { get; init; }
+
+    /// <summary>
+    /// Generated after everything else in the world, so a new row doesn't move the FormIDs
+    /// of the records after the first rows (the archers' packages).
+    /// </summary>
+    public bool PlaceLast { get; init; }
+
+    /// <summary>Pieces placed by hand, as angle and radius round the compound centre (the gate view).</summary>
+    public List<PinnedMountain> Pinned { get; init; } = new();
+}
+
+internal sealed record PinnedMountain
+{
+    public string Name { get; init; } = string.Empty;
+
+    public string FormKey { get; init; } = string.Empty;
+
+    /// <summary>Degrees clockwise from north, round the compound centre.</summary>
+    public float Angle { get; init; }
+
+    public float Radius { get; init; }
+
+    public float Scale { get; init; } = 1f;
+
+    public float Yaw { get; init; }
 }
 
 internal sealed record MountainPiece
@@ -474,6 +539,9 @@ internal sealed record ForestTree
 
     /// <summary>Furthest from the wall this tree may stand.</summary>
     public float MaxDistance { get; init; } = float.MaxValue;
+
+    /// <summary>Its own sink below the ground (rocks bed deeper than trunks); null uses the layer's.</summary>
+    public float? Sink { get; init; }
 }
 
 /// <summary>

@@ -81,24 +81,27 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
 
-## Where we are (2026-09-23, third bug-fix pass)
+## Where we are (2026-09-23, backdrop pass)
 
-Committed and deployed; plugin SHA256 `fbdc66277b56f95a...`. **Barry has not yet tested
-it.** Details in `docs/AUDIT.md` ("Current pass").
+Committed and deployed; plugin SHA256 `c2cf866d709c5210...`. **Barry has not yet tested
+it.** He asked for the backdrop pass (his brief is in `docs/AUDIT.md`, "Current pass"),
+then **the navmesh next**. Stop for his visual review of the backdrop first.
 
-**Confirmed working in game:** the stage set, the pen horses, the bards playing, and
-**the audio levels** (stage, cheer and murmur all right now: don't change them).
+**Backdrop pass, awaiting Barry's test:** the mountains weren't loading from the middle
+of the fair (Persistent + Full LOD doesn't load outside `uGridsToLoad`). They're now
+vanilla-style large references in an RNAM table, plus a midground ridge row and a denser
+treeline. Clear-weather test: `fw 10a240`. Horizon model:
+`docs/images/backdrop_horizon_before_after.png`.
 
-**Fixed this pass, awaiting Barry's test:**
-- **Signs:** Elven Goods (curios group), woodworker (trader group) and the archery booth
-  now use the honey sign's layout with boards that carry their own bar.
-- **Archers:** a hold package gated by `SkyrimFairArcherHold`, flipped on and off by the
+**Awaiting Barry's test from the last bug-fix pass (`d6605f9`):**
+- Signs: Elven Goods (curios group), woodworker (trader group) and the archery booth now
+  use the honey sign's layout with boards that carry their own bar.
+- Archers: a hold package gated by `SkyrimFairArcherHold`, flipped on and off by the
   stage script on arrival and load, restarts their training package. If they still
   don't shoot: `Papyrus.0.log`, and ask Barry to try `resetai` on one in the console.
 
-**Still to confirm from earlier builds:** the cobbles along the avenue; the booth's
-props tilting as authored; the music fading walking away, and nothing playing after
-leaving or a save and load.
+**Confirmed working in game:** the stage set, the pen horses, the bards playing, and
+the audio levels (don't change them).
 
 **Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
 

@@ -81,12 +81,28 @@ Rules for this direction:
   beyond the wall, with none near the gate or in front of it. Only trees in cells
   -1..1 are always loaded, so far trees can pop in. Tree LOD for this worldspace is the
   eventual fix.
-- **Distant scenery must be Persistent + Is Full LOD (`0x10400`) in the persistent
-  cell, inside the world's object bounds.** That is vanilla's method for its small
-  worlds' distant clouds, and how the 24 snow-mountain `_HeavySN` STATs (`Plan.Mountains`,
-  `fairWorld.mountains`) draw with no LOD. Sink every mountain by its own mesh bounds
-  (lowest point at Z -1,000) so no base shows over the wall. Ordinary cell references
-  (the trees) still only draw while their cell is loaded.
+- **Distant scenery is large references (RNAM), as vanilla's mountains are**
+  (2026-09-23, corrected). The first build placed mountains Persistent + Is Full LOD in
+  the persistent cell. That does **not** load a reference whose cell is outside
+  `uGridsToLoad`, so from the middle of the fair they didn't show. Now each mountain and
+  ridge is an ordinary reference in its own cell, and the generator writes the world's
+  RNAM table, laid out as Tamriel's: each reference under every cell its footprint
+  overlaps, cells stored as (Y, X) in Mutagen's naming. The game loads them within
+  `uLargeRefLODGridSize` (five cells). **Keep every large reference in cells -4..4**
+  (`mountains.largeReferenceCellLimit`; the generator throws). Sink each by its own mesh
+  bounds so no base shows over the wall.
+- **The backdrop's layers:** forest (99, 320 to 5,200 out) and the denser `treeline` (181
+  trees, shrubs and rocks within 2,000 of the wall, the band that stays loaded from
+  anywhere inside), the `ridges` midground row (11, 9,000 to 11,800 from the centre, in
+  clumps with sky gaps, two pinned behind the gate), and the near and far snow rows (24).
+  New layers are generated last (`placeLast`, the treeline), so they never move other
+  records' FormIDs. Append new mountain rows at the end of `rows`: the row index is
+  part of each row's hash.
+- Tall vanilla pines are big (`TreePineForest04` is 3,272 high); near the wall they hide
+  everything behind them. The treeline keeps the smaller ones (`03`, `05`) nearest.
+- No LOD of any kind for this world. xLODGen terrain LOD and tree LOD are later options
+  (GUI tools, so a documented Barry-run stage); the large references make object LOD
+  unnecessary for now. See `docs/AUDIT.md` for the clear-weather test (`fw 10a240`).
 - **The gate model is open** (the asset). Keep the view through it dressed: the forest
   keeps only a short clearing straight out of it, and the mountains close the view.
 - **The main stage** (`FairStage.cs`, `fairWorld.stage`), 2026-09-22, night, **pending
