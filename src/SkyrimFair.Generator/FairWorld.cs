@@ -1381,10 +1381,14 @@ internal static class FairWorld
                         }
 
                         var scale = chosen.Piece.MinScale + Hash3(r, hk, salt + 24) * (chosen.Piece.MaxScale - chosen.Piece.MinScale);
+                        // A one-sided piece turns its finished local +Y to the compound.
+                        var heading = chosen.Piece.FacesCentre
+                            ? MathF.Atan2(cx - x, cy - y) * 180f / MathF.PI + (Hash3(r, hk, salt + 25) * 2f - 1f) * chosen.Piece.FaceJitter
+                            : Hash3(r, hk, salt + 25) * 360f;
                         yield return new MountainPlacement(
                             chosen.Key, chosen.Piece.Name, row.Name, x, y,
                             baseZ - lowestPoint(chosen.Key) * scale,
-                            Hash3(r, hk, salt + 25) * 360f, scale, angle, radius);
+                            (heading % 360f + 360f) % 360f, scale, angle, radius);
                     }
                 }
 

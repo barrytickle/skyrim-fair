@@ -116,6 +116,22 @@ from the persistent cell into their own cells.
   how it looks. Barry's eye is the test.
 - Weather and fog are unchanged.
 
+### Follow-up: the rock behind the gate (Barry's screenshot)
+
+Barry: the backdrop "does look better", but one rock behind the main gate shows a blank,
+untextured side. It was the pinned `MountainCliffSlopePineForest03`. Measured from the
+mesh (face area by outward normal): `MountainCliffSlope` and `MountainCliffSm01` are
+finished on local +Y and nearly open on -Y (4 to 5% of their side area faces -Y, against
+22 to 30% on +Y). The `MountainRidge01/02/03` pieces are finished both ways. The pinned
+slope had yaw 95, so its open side partly faced the fair, and the random headings of the
+other `CliffSm01` and `CliffSlope` pieces could do the same.
+
+New `facesCentre` option on a mountain piece: its finished +Y turns to the compound
+centre, within `faceJitter` (25 degrees). Set on every `MountainCliffSm01` and
+`MountainCliffSlope` piece (10 placed), and the pinned slope is at yaw 6 (its bearing,
+186, plus 180). Generator run twice: `fa26bb754bc2ad46...`; no record added, removed or
+renumbered; deployed.
+
 ### Clear-weather test
 
 In the console: **`fw 10a240`** forces `SkyrimClearTU` (clear, fog 0 to 40,000).

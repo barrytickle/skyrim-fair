@@ -98,6 +98,7 @@ Rules for this direction:
   New layers are generated last (`placeLast`, the treeline), so they never move other
   records' FormIDs. Append new mountain rows at the end of `rows`: the row index is
   part of each row's hash.
+- **`MountainCliffSlope` and `MountainCliffSm01` are one-sided** (finished on local +Y, open on -Y): give them `facesCentre`, or their blank side can face the fair. The `MountainRidge` pieces are finished both ways. Measure a new piece's face area by normal direction before placing it
 - Tall vanilla pines are big (`TreePineForest04` is 3,272 high); near the wall they hide
   everything behind them. The treeline keeps the smaller ones (`03`, `05`) nearest.
 - No LOD of any kind for this world. xLODGen terrain LOD and tree LOD are later options

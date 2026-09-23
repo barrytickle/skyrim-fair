@@ -519,6 +519,15 @@ internal sealed record MountainPiece
     public float MinScale { get; init; } = 1f;
 
     public float MaxScale { get; init; } = 1f;
+
+    /// <summary>
+    /// For one-sided meshes (MountainCliffSlope, MountainCliffSm01: finished on local +Y,
+    /// open on -Y): turn the finished side to the compound, within
+    /// <see cref="FaceJitter"/> degrees, instead of a random heading.
+    /// </summary>
+    public bool FacesCentre { get; init; }
+
+    public float FaceJitter { get; init; } = 25f;
 }
 
 internal sealed record ForestTree

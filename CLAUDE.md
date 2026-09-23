@@ -83,7 +83,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-23, backdrop pass)
 
-Committed and deployed; plugin SHA256 `c2cf866d709c5210...`. **Barry has not yet tested
+Committed and deployed; plugin SHA256 `fa26bb754bc2ad46...` (the backdrop, plus the one-sided rocks turned to face the fair). **Barry has not yet tested
 it.** He asked for the backdrop pass (his brief is in `docs/AUDIT.md`, "Current pass"),
 then **the navmesh next**. Stop for his visual review of the backdrop first.
 

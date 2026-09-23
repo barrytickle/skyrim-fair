@@ -150,7 +150,7 @@
           "pieces": [
             {"name": "MountainRidge02_Heavy_SN", "formKey": "0005304E:Skyrim.esm", "weight": 3, "minScale": 0.9, "maxScale": 1.2},
             {"name": "MountainRidge01_HeavySN", "formKey": "0005205B:Skyrim.esm", "weight": 2, "minScale": 0.9, "maxScale": 1.2},
-            {"name": "MountainCliffSm01_HeavySN", "formKey": "00050DC0:Skyrim.esm", "weight": 2, "minScale": 0.9, "maxScale": 1.15},
+            {"name": "MountainCliffSm01_HeavySN", "formKey": "00050DC0:Skyrim.esm", "weight": 2, "minScale": 0.9, "maxScale": 1.15, "facesCentre": true},
             {"name": "MountainCliff04_HeavySN", "formKey": "00027DDC:Skyrim.esm", "weight": 1, "minScale": 0.8, "maxScale": 1.0}
           ]
         },
@@ -186,12 +186,12 @@
             {"name": "MountainRidge01", "formKey": "00052171:Skyrim.esm", "weight": 3, "minScale": 1.1, "maxScale": 1.4},
             {"name": "MountainRidge03", "formKey": "00053904:Skyrim.esm", "weight": 2, "minScale": 1.05, "maxScale": 1.3},
             {"name": "MountainRidge02_Sparse_SN", "formKey": "000310A5:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.3},
-            {"name": "MountainCliffSm01_SparseSN", "formKey": "000A0EB3:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.3},
-            {"name": "MountainCliffSlopeTundraRocks01", "formKey": "0006E1AF:Skyrim.esm", "weight": 2, "minScale": 1.2, "maxScale": 1.5},
-            {"name": "MountainCliffSlopePineForest03", "formKey": "000D37B6:Skyrim.esm", "weight": 2, "minScale": 1.2, "maxScale": 1.5}
+            {"name": "MountainCliffSm01_SparseSN", "formKey": "000A0EB3:Skyrim.esm", "weight": 2, "minScale": 1.0, "maxScale": 1.3, "facesCentre": true},
+            {"name": "MountainCliffSlopeTundraRocks01", "formKey": "0006E1AF:Skyrim.esm", "weight": 2, "minScale": 1.2, "maxScale": 1.5, "facesCentre": true},
+            {"name": "MountainCliffSlopePineForest03", "formKey": "000D37B6:Skyrim.esm", "weight": 2, "minScale": 1.2, "maxScale": 1.5, "facesCentre": true}
           ],
           "pinned": [
-            {"name": "MountainCliffSlopePineForest03", "formKey": "000D37B6:Skyrim.esm", "angle": 186, "radius": 8600, "scale": 1.5, "yaw": 95},
+            {"name": "MountainCliffSlopePineForest03", "formKey": "000D37B6:Skyrim.esm", "angle": 186, "radius": 8600, "scale": 1.5, "yaw": 6},
             {"name": "MountainRidge01", "formKey": "00052171:Skyrim.esm", "angle": 170, "radius": 10600, "scale": 1.3, "yaw": 80}
           ]
         }
