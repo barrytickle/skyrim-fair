@@ -135,6 +135,15 @@ internal static class FairSingers
             Directory.Delete(voiceRoot, recursive: true);  // stale lines from earlier FormIDs
         }
 
+        // Only the singers' voice types may use these lines (the subtype is also idle chatter's).
+        var voices = new FormList(mod) { EditorID = $"{config.EditorIdPrefix}Voices" };
+        foreach (var (_, voice, _) in singers)
+        {
+            voices.Items.Add(new FormLink<ISkyrimMajorRecordGetter>(voice.FormKey));
+        }
+
+        mod.FormLists.Add(voices);
+
         var topics = new List<FormKey>();
         var starts = new List<float>();
         var firstLine = new List<int>();
@@ -159,11 +168,15 @@ internal static class FairSingers
             lineCount.Add(lines.Count);
             foreach (var line in lines)
             {
+                // Exactly BardSongs' song topics: Misc, subtype IDAT, no branch (DATA 00 07 0054,
+                // SNAM "IDAT"). A Topic-category DIAL with no branch, and an empty SNAM,
+                // crashed the game at startup: every vanilla Topic-category DIAL has a branch.
                 var topic = new DialogTopic(mod)
                 {
                     Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
-                    Category = DialogTopic.CategoryEnum.Topic,
-                    Subtype = DialogTopic.SubtypeEnum.Custom,
+                    Category = (DialogTopic.CategoryEnum)7,
+                    Subtype = (DialogTopic.SubtypeEnum)0x54,
+                    SubtypeName = new RecordType("IDAT"),
                     Priority = 50f,
                 };
                 var info = new DialogResponses(mod)
@@ -181,6 +194,9 @@ internal static class FairSingers
                     ScriptNotes = string.Empty,
                     Edits = string.Empty,
                 });
+                var singerVoice = new GetIsVoiceTypeConditionData { RunOnType = Condition.RunOnType.Subject };
+                singerVoice.VoiceTypeOrList.Link.SetTo(voices.FormKey);
+                info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = singerVoice });
                 topic.Responses.Add(info);
                 mod.DialogTopics.Add(topic);
                 topics.Add(topic.FormKey);

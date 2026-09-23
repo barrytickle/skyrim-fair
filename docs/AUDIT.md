@@ -2,7 +2,34 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the stage singers, and the crowd NIFs' second rebuild (2026-09-23)
+## Current pass: fixing the singers' startup crash (2026-09-23)
+
+Barry: a startup crash, 30 s after launch.
+- CrashLogger: `EXCEPTION_ACCESS_VIOLATION` at `SkyrimSE.exe+03D3E15` during init.
+- In the registers: our quest `SkyrimFairSingers` ("Stage singers", `250016BA`), and one
+  of its topics (`2500171B`), whose name reads as garbage memory.
+
+- **Cause (found in the raw bytes):** our 49 song topics were written with
+  `DATA 00000000` (category Topic, subtype Custom) and `SNAM 00000000`, an empty
+  subtype code.
+  - In `Skyrim.esm`, **all 6,503 Topic-category DIALs have a branch (`BNAM`)**. Ours had
+    none.
+  - BardSongs' song topic is `DATA 00 07 5400`, `SNAM "IDAT"`: category Misc, subtype
+    `0x54`, no branch.
+- **Fix:** the song topics are now exactly BardSongs' kind: Misc, `0x54`, `SNAM IDAT`.
+  All 49 match its `DATA`/`SNAM` bytes.
+  - That subtype is also used for idle chatter, and BardSongs guards its lines with
+    conditions. So each of our INFOs has **`GetIsVoiceType` in
+    `SkyrimFairSingerVoices`** (a new FormList of the three singer voice types). Only
+    the singers can say them.
+  - The new FormList shifted the INFO IDs by one, so the voice files were renamed to
+    match. The old deployed ones were cleared first; 147 of 147 are present.
+- Plugin deterministic: `57fb5199cd343a9b...`. Deployed.
+- **Not confirmed:** that this is the only startup problem. If it still crashes, the
+  crash log will say whether it's the same place. `fairWorld.singers.enabled: false`
+  builds the fair without the singers, to isolate it.
+
+## Previous pass: the stage singers, and the crowd NIFs' second rebuild (2026-09-23)
 
 Barry: (1) redeploy the rebuilt crowd NIFs (zero-length skin normals fixed; the tankard
 held) and refresh the prop figures' bounds. (2) Implement the singers from
