@@ -83,183 +83,84 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
 
-## Where we are (2026-09-23, backdrop pass)
+## Where we are (end of 2026-09-23)
 
-Committed and deployed; plugin SHA256 `fa26bb754bc2ad46...` (the backdrop, plus the one-sided rocks turned to face the fair). **Barry has not yet tested
-it.** He asked for the backdrop pass (his brief is in `docs/AUDIT.md`, "Current pass"),
-then **the navmesh next**. Stop for his visual review of the backdrop first.
+Plugin `497f5fd2d8ad0198...`, committed (`54a7b97`) and deployed. The day's detail is in
+`docs/AUDIT.md`, newest first.
 
-**Backdrop pass, awaiting Barry's test:** the mountains weren't loading from the middle
-of the fair (Persistent + Full LOD doesn't load outside `uGridsToLoad`). They're now
-vanilla-style large references in an RNAM table, plus a midground ridge row and a denser
-treeline. Clear-weather test: `fw 10a240`. Horizon model:
-`docs/images/backdrop_horizon_before_after.png`.
+**Confirmed in game by Barry:**
+- the stage set: songs, cheer, next song, and the audio levels (don't change them)
+- the bards playing, and the 12-man orchestra
+- the navmesh, which also fixed the archers after a reload
+- the backdrop
+- the signs (the honey-vendor layout)
+- the pen horses
+- a visitor walking to a bench and sitting
+- **the startup crash is fixed**: the singers' topics are now BardSongs' kind
+- **the freeze is fixed by the SPID exclusion patch**, from a save made before the fair
+  had been visited. Old saves keep the spells SPID gave before; test SPID changes from
+  a clean state (`cow SkyrimFairWorld 0 0` at the main menu, or an earlier save)
 
-**Archers (latest, awaiting Barry's test):** his log showed the training package running
-but stuck in its opening Travel (no navmesh after a load). Its "Use Weapon Location" is
-now near self. The hold-package flip is retired. Plugin SHA256 `8cb83cf315ebec13...`.
-Papyrus logging is now on in the "Still in Skyrim Plus" profile, so the log at
-`Documents/My Games/Skyrim Special Edition/Logs/Script/Papyrus.0.log` can be read
-directly (grep `SkyrimFairAudio`).
+**Built, not yet confirmed in game:**
+- **Dances:** each dancer's next dance starts as the last ends (6.7 s and 6 s clips).
+- **Astra's folk pair:** a 57.6 s clip, six loops, through Open Animation Replacer, at
+  (2048, 4420).
+- **The stage singers' lip sync:** only on Fiddle and Dragonborn-Approved, songs 2 and 3.
+  `set SkyrimFairAudioFirstTrack to 2` starts with Fiddle.
+- **The children**, the wanderers, and the archery-bench sitters.
 
-**Awaiting Barry's test from the last bug-fix pass (`d6605f9`):**
-- Signs: Elven Goods (curios group), woodworker (trader group) and the archery booth now
-  use the honey sign's layout with boards that carry their own bar.
-- Archers: a hold package gated by `SkyrimFairArcherHold`, flipped on and off by the
-  stage script on arrival and load, restarts their training package. If they still
-  don't shoot: `Papyrus.0.log`, and ask Barry to try `resetai` on one in the console.
+**Switched off:** the static crowd figures (`crowdFiguresEnabled: false`). Barry and the
+other agent couldn't fix their glowing. The library, tools and placements stay in the
+repo.
 
-**Confirmed working in game:** the stage set, the pen horses, the bards playing, and
-the audio levels (don't change them).
+## Plan for 2026-09-24 (Barry: "a plan list for tomorrow")
 
-**Latest (plugin `536becda924886e6...`), awaiting Barry's test from a clean world**
-(`cow SkyrimFairWorld 0 0` at the main menu, since old saves keep SPID's spells):
-- The SPID exclusion patch works: SPID's log shows no fair NPC getting either spell.
-- Dances replay as each ends. The folk clip is 57.6 s (six loops).
-- `set SkyrimFairAudioFirstTrack to 2` starts with Fiddle, to test the singers.
-- The static figures "not working": what Barry sees is still to hear.
+1. **Performance baseline (Barry, in game).** From a clean save, at the square, note the
+   fps:
+   - all crowd layers on
+   - `set SkyrimFairCrowdLayers to 0` (vendors, bards and archers only)
+   - `tai` (all AI off)
 
-**Stage singers: built and deployed, awaiting Barry's test** (plugin `06618bba7143ad4e...`).
-- Three singers with their own voice types, 49 sung lines (Fiddle, Dragonborn-Approved),
-  and 147 lip-only voice files named by the rule checked against BardSongs.
-- The stage script says each line at its start, timed from the song's start.
-- The crowd NIFs' second rebuild is redeployed. Crowd figures now take FormIDs from
-  0x10000.
+   Every earlier reading was taken during the script flood, so this is the first true
+   measure. It says whether the cost is AI, rendering or scripts.
+2. **Exclude more per-NPC extras (Claude, small).** Add them to `spidPatches`, the same
+   generated patch; SPID's log shows every fair NPC getting them:
+   - Stealth Detection Fixes' sleep (`0x80B`, `StealthKillDetectionFix_DISTR.ini`) and
+     killmove (`0x819`, `_Killmove_DISTR.ini`) abilities, which are pointless on
+     invulnerable NPCs
+   - Strange Runes' `po3_RUNE_DetectCastNPCAbility` (`StrangeRunes_DISTR.ini`), a script
+     on every NPC that runs on each equip
 
-**Compatibility patches: built and deployed, awaiting Barry's test** (plugin `6da22e995f0ee016...`).
-- The Papyrus guard could never run before the flood (Barry's log: 2 million queued, no
-  guard line). It's replaced by two light patches that switch the clashing spells off
-  inside the fair only: Maximum Destruction `8E6289` and Stealth Detection Fixes `0x817`.
-- Barry must enable both patch plugins in MO2, at the bottom of the plugin list.
-- Next, per Barry: many more statics in the archery range, market and tables, only 5–10
-  real wanderers besides vendors, bards and archers, and blending the statics in (placed
-  beyond real NPCs, calm poses near, size variation).
+   Check the new Papyrus log for other per-NPC scripts too (the footprints mod's
+   `footprintsFootstepsScriptHuman` appears).
+3. **Only run the crowd where the player is (Claude, the big one; plan first, then
+   build).** Depends on step 1's numbers.
+   - All nine cells stay loaded, so every actor runs AI all the time.
+   - Give each zone its own crowd layers: the dance floor, the market seats, the archery
+     range, the wanderers.
+   - The stage script enables each zone's layers only within a set distance of the
+     player, just beyond clear view, with a fade.
+4. **Barry's test list:**
+   - Do the dances run on through a song?
+   - Do the folk pair turn together, arms meeting?
+   - Do the singers' lips move with Fiddle?
+   - Do the children look right?
+   - Do the seated NPCs sit?
+5. **Afterwards, from the backlog, as Barry chooses:**
+   - vendor inventories at festival prices (`docs/STALLS.md`)
+   - the MCM (`docs/MCM.md`)
+   - the 6 trades not yet placed
+   - the music heard outside the Tamriel gate
+   - bard animation variants (`docs/BARDS.md`, "Animation side")
+   - the release checklist (`docs/RELEASE.md`)
 
-**Crowd library placed, and the guard fixed: built and deployed, awaiting Barry's test** (plugin `145abe7b16945a82...`).
-- Barry's folk-dance test: the game stays up, but no song, bard or dance. The guard hadn't
-  removed a spell, because SPID spells sit on the NPC record. The flood still ran and
-  starved the stage script.
-  - Now it uses Papyrus Extender's `RemoveBaseSpell`, compiled against a stub.
-  - The folk dance itself is still untested.
-- 51 static figures of 36 designs:
-  - 13 behind the archery spectators
-  - 28 round the stage audience
-  - 7 seated on free benches, which become non-sittable
-  - 2 leaning on the horse pen
-- `fairWorld.crowdPlacements` is append-only; `tools/place_crowd.py` plans new
-  placements.
-
-**Astra's folk dance, the figure's collision, the guard retry: built and deployed, awaiting Barry's test** (plugin `09563660fbab2002...`).
-- Barry confirmed the clapping figure in game: the right height, natural colour, "had to
-  do a double take". He asked for collision, now a box per figure (`crowdFigures[].collision`).
-- Astra's paired folk dance plays on two "Folk Dancer" NPCs at (2048, 4420).
-  - Each clip is re-based per dancer (`tools/folk/rebase_folk.py`) and replaces the Cicero
-    dance for that NPC only, through Open Animation Replacer (the conditions are
-    generated).
-  - The stage script starts the pair together and restarts it every 9.6 s through songs.
-- The guard retries while its list is empty: after Barry's first load no NPC had traced
-  a removal.
-- The other agent is making figure variants (poses, outfits, genders, races) in
-  `tools/crowd/`. Their NIFs deploy, but nothing places them yet.
-
-**First static crowd figure and the NPC guard: built and deployed, awaiting Barry's test** (plugin `1c3377521927c995...`).
-- `fairWorld.crowdFigures`: `SkyrimFairCrowdClapping01` at (580, 1640), facing the range.
-  It's built late so no FormID moves. Three fixes to the other agent's brief are recorded
-  in `docs/CLAUDE_CROWD_TASK.md`.
-- `fairWorld.npcGuard`: all fair NPCs invulnerable, and Stealth Detection Fixes' cloak plus
-  Maximum Destruction's per-effect script taken off them (the cause of the Papyrus freeze).
-  Whether `RemoveSpell` holds on SPID spells is still to be seen in `Papyrus.0.log`.
-- Barry's report on the redistribution: someone walked to a bench and sat, fine. Still
-  laggy, then the game froze (the mod clash above). He prefers the object route for
-  density.
-
-**Crowd redistributed: built and deployed, awaiting Barry's test** (plugin `93a50609179b1067...`).
-- 6 live layers (`SkyrimFairCrowdLayers`, default 6):
-  - the dance floor, front 26 and back 17. They dance the Cicero dances through songs
-    and cheer at the end
-  - 31 seated at the market tables
-  - 8 seated archery spectators
-  - 5 wanderers
-  - 6 children
-- 19 market standing groups retired (disabled). The visitors run a quiet stay package.
-  Benches and stools are sittable furniture.
-- Active actors 192, down from 227.
-- Next: object (static posed) people for density and the archery, as a proof first.
-
-**Crowds and orchestra: built and deployed, awaiting Barry's test** (plugin `cbbd6c578f889607...`).
-- Crowded Streets audited: it spawns cheap sandbox NPCs by script and deletes them on
-  leaving; its cap of 50 is a performance guard. For the fair, placed tiers are better.
-- Three crowd tiers switched live by `SkyrimFairCrowdTier` (default 3): stage audience 42,
-  wanderers (sandbox) 34, busier stalls 16. Actors go from 126 to 227, all on the navmesh.
-- A 12-man orchestra: 5 lutes, 4 flutes, 3 drums.
-- Barry to find his comfortable tier by frame rate.
-
-**Navmesh phases 1 to 3: confirmed in game (2026-09-23)** (plugin `fbfdf1eb5f5d84e3...`).
-Barry: no issues, nothing out of the ordinary. **It fixed the archers**: they shoot after a
-reload. (Their package's opening Travel needed a path. The near-self "Use Weapon
-Location" stays; it's harmless.) Next, possibly: auditing bespoke animations Barry and
-Astra may supply (the untracked `character-actors/` folder is theirs; don't commit it
-unasked).
-
-**Barry's morning list (added 2026-09-23 late; item 1 done this pass, the rest not started):**
-
-1. ✅ *(done this pass, untested)* **Bug: the archers stop their animation after a reload.** The Solitude training package
-   (`GuardSolitudeRangedTrainingPackage`) doesn't resume after a load. Check:
-   - how Castle Dour's archers survive a reload (package conditions, persistence, linked
-     refs, `EvaluatePackage`)
-   - otherwise, a load-game nudge from the audio quest's player alias
-     (`OnPlayerLoadGame` → `EvaluatePackage` on each archer)
-2. **Dancing NPCs.** Audit the external dance mod first:
-   `external/Professional Dancer 124608 1.5.0 ....7z`. Its licence is CC BY-NC 4.0; the
-   plan is to use it as a dependency, not bundle it (`CREDITS.md`). Find out how it makes
-   an NPC dance (spell, package, keyword, script API) and how our stage controller could
-   start and stop dancers with the songs.
-3. **A large crowd by the bards** to make the cheer and the performance feel real.
-   Mind performance: there are already about 123 actors.
-4. **Audit "Crowded Streets"** (`Crowded Streets.esp`, in Barry's load order; the mod is in
-   `E:\Modlists\Still In Skyrim\mods\`) to see how it adds so many NPCs to towns: leveled
-   actors, spawners, packages, performance tricks. Read the plugin with Mutagen,
-   read-only.
-5. **Navmesh** so NPCs can walk: start looking into generating one. That's a big,
-   separate job; plan it before building.
-6. **Vendor inventories:** populate the stalls' vendors, with **prices higher than usual
-   because it's a festival**. That means vendor factions, merchant chests, buy/sell
-   markup. The per-theme stock is in `docs/STALLS.md`.
-
-**From the previous build, still to confirm:**
-
-1. **Stage music.** Fixed by pointing the script at sound markers. Does a song start about
-   4 s after arriving? Then cheer, 2 s pause, next song? Does the music fade walking away?
-   Is nothing left playing after leaving, or after a save and load?
-   - If it's still silent: ask Barry to set `bEnableLogging=1` under `[Papyrus]` in
-     `profiles\Still in Skyrim Plus\Skyrim.ini` and send
-     `Documents\My Games\Skyrim Special Edition\Logs\Script\Papyrus.0.log`. The script
-     traces lines starting "SkyrimFairAudio:".
-   - Suspects to check next: `Sound.Play` from an XMarker speaker; the quest not starting
-     in an existing save.
-2. **The band (new, untested).** Three bards on the deck: lute (1840, 5380), drum
-   (2048, 5480), flute (2256, 5380), z 134, at vanilla instrument idle markers with copies
-   of Candlehearth Hall's bard package. Do they appear and play? Are they on the deck, not
-   in it or floating?
-3. **Crowd ambience.** It was very quiet, so it's now 4 dB down, from 10. Is the level
-   right? (`fairWorld.audio.ambience.staticAttenuation`)
-4. **Cobbles** back along the avenue after the opacity-share fix? Barry confirmed the
-   worn-ground gradient.
-5. **Archery sign:** hanging from the new flat stockade-beam bar, lined up with the posts?
-   Also check the booth's arrow bundles, leaning target, pitchfork and broom, which now
-   tilt as authored.
-6. **Pen horses:** can't be ridden now (`SkyrimFairPenHorse` blocks activation)? They
-   already stay in the pen.
-
-**Next likely work:**
-- Tune the audio balance.
-- Performer cues: the bards now start and stop with each song; dancers still to come,
-  and the "resume about 5 s in" timing (`docs/MUSIC.md` step 3). Professional Dancer is the planned dance system; see
-  `CREDITS.md`.
-- The music heard outside the Tamriel gate (step 4).
-- The MCM (`docs/MCM.md`): the `SkyrimFairAudio*` globals are ready for it.
-- The 6 trades not yet placed (`docs/STALLS.md`).
-- Navmesh, vendor inventories and quests: only when Barry asks.
+**Housekeeping to know:**
+- The other agent's `tools/crowd/` changes and `library.json` are uncommitted; they're
+  theirs to commit.
+- `character-actors/` is Barry's and Astra's, untracked; don't commit it.
+- Some records are kept only so no FormID moves: the retired guard's FormList, the
+  `SkyrimFairAtFair` global, and `SkyrimFairNpcGuard.pex`. Drop the pex from any release
+  package.
 
 **Open items before any public release** (the full list, with requirements and optional
 files, is `docs/RELEASE.md`; keep it current):
@@ -270,4 +171,4 @@ files, is `docs/RELEASE.md`; keep it current):
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance
 - Stroti can't be re-uploaded (see `CREDITS.md`)
-- performance: about 123 actors and about 24 real lights near the stage at night
+- performance: about 190 actors and about 24 real lights near the stage at night (tomorrow's plan)
