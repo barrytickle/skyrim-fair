@@ -2,7 +2,76 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the crowd redistributed: a dance floor, people seated at the tables, children (2026-09-23)
+## Current pass: the first static crowd figure, and the NPC guard (2026-09-23)
+
+Barry: add the static crowd prototype (another agent built it, `docs/CROWD.md`, and wrote
+the brief `docs/CLAUDE_CROWD_TASK.md`), noting what was fixed and why. Also make the fair's
+NPCs "have the same effects as child npc's where they can't be damaged", and deal with
+the freeze.
+
+### The crowd figure
+
+- A new `fairWorld.crowdFigures` list, built after everything but the navmesh. Its first
+  entry is `SkyrimFairCrowdClapping01`: a Nord man in farm clothes, clapping; one static
+  mesh, no AI.
+- One reference at (580, 1640), yaw 270: east of the archery spectators, facing the
+  targets.
+- **Three changes from the brief**, with the reasons, recorded in
+  `docs/CLAUDE_CROWD_TASK.md` ("Implemented"):
+  1. The brief's `market.fixed` only takes lane stalls.
+  2. Its spot would have put him in front of the spectators, not behind.
+  3. Both of its routes would have renumbered every later record, which saves depend
+     on.
+
+### The NPC guard (`fairWorld.npcGuard`)
+
+- **Invulnerable:** all 109 fair NPC records. They take no damage and can't be killed,
+  so no stealth kills or kill moves. It's the engine's Invulnerable flag; vanilla children get the same protection from their race.
+- **Other mods' spells taken off:** `SkyrimFairNpcGuard`, an Actor script on every fair
+  NPC record, removes the spells in the FormList `SkyrimFairStripSpells` in `OnLoad`.
+  - The stage quest fills the list on start and on every load with `GetFormFromFile`
+    from `stripSpells` (`plugin|id`).
+  - So neither mod becomes a master, and a missing one is skipped.
+  - First entries: Stealth Detection Fixes' `madDetectionCloak` (`0x817`) and Maximum
+    Destruction's `MD_Gore Human Magic` (`0x8E6289`). Their clash queued 2.2 million
+    Papyrus events at the fair and froze the VM.
+- **Unverified:** whether `RemoveSpell` removes a spell SPID put on the NPC record. The
+  script traces each attempt (`SkyrimFairGuard: ... removed True/False, still has it
+  ...`). If it doesn't hold, the fallback is the two SPID ini exclusions
+  (`-SkyrimFair.esp`, in `CODEX_HANDOVER.md`).
+
+### Verification
+
+- Against the deployed plugin: 3 records added at the end (the STAT, its reference, the
+  FormList). Only the navmeshes renumbered; nothing else moved.
+- STAT: OBND (−26, −35, 0) to (26, 35, 132), model
+  `Meshes\SkyrimFair\Crowd\SkyrimFairCrowd_Clapping01.nif`; same layout as the outhouse.
+  One REFR, at ground Z (0, the same as the hay bale beside it).
+- 109 of 109 NPC records invulnerable, with the guard script and its property.
+- Navmesh: the figure's footprint is cut (196 footprints). 7,344 triangles; actors on the
+  mesh 228 of 228.
+- Generator run twice: identical SHA256 `1c3377521927c995...`. Four scripts compile.
+  Deployed, NIF checksum `012524da…`.
+
+### Test
+
+Best from a save outside the fair.
+
+1. **The freeze:** does the fair stay up now? In `Papyrus.0.log`:
+   - `SkyrimFairAudio: NPC guard strips 2 spells`
+   - `SkyrimFairGuard:` lines, which should say `removed True, still has it False`
+   - no "Suspended stack count" dump
+2. **Frame rate:** with the Papyrus flood gone, compare with before.
+3. **The figure:** east of the archery spectators, past the hay pile.
+   - Height against the real NPCs
+   - Feet on the ground
+   - Facing the range
+   - Skin colour of the face and hands, and lighting
+   - How he reads from 5, 15 and 30 m
+4. **Invulnerable:** hitting a visitor does no damage. That's still a crime, as it is with
+   children.
+
+## Previous pass: the crowd redistributed: a dance floor, people seated at the tables, children (2026-09-23)
 
 Barry: about 60% of the crowd in the centre dancing, 30% in the market and 10% by the
 archery and horses. Fewer standing NPCs in the market, replaced by people sitting at the

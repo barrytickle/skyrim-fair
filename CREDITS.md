@@ -211,6 +211,18 @@ Attribution:
 
 > Festival decorations from Holidays (Nexus Mods, Skyrim Special Edition, mod 1533).
 
+## Static crowd figures (built from vanilla assets)
+
+The crowd figures (`meshes\SkyrimFair\Crowd\`, `docs/CROWD.md`) are vanilla Skyrim
+geometry posed with a vanilla animation:
+- the body, clothes and head meshes, the skeleton and `npc_applaud2.hkx` are Bethesda's
+- every texture path is a vanilla one; no texture is shipped
+
+Like `Props/`, the built NIFs are kept out of git.
+
+**PyNifly** (by Bad Dog; GPL according to the crowd brief. The local copy has no licence file, so confirm the version before a release) is used as a **build tool only**, to write the NIFs
+from the command line. None of its code is bundled with the mod.
+
 ## Recommended texture replacers (not bundled)
 
 These replace vanilla textures that the fair's own ground texture sets point at. Skyrim

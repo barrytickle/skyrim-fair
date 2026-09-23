@@ -671,6 +671,49 @@ internal static class FairWorld
             }
         }
 
+        // ---- static crowd figures (docs/CROWD.md), after everything but the navmesh ------------------
+        foreach (var figure in config.CrowdFigures)
+        {
+            var stat = AddStatic(mod, figure);
+            foreach (var at in figure.Places)
+            {
+                Put(Place(mod, stat.FormKey, at[0], at[1], plan.Height(at[0], at[1]), at[2]));
+            }
+
+            Console.WriteLine($"  crowd figure {figure.EditorId}: {figure.Places.Count} placed");
+        }
+
+        // ---- the NPC guard: invulnerable, and other mods' spells taken off ----------------------
+        // Records are only changed here, except the one FormList, so nothing earlier moves.
+        if (config.NpcGuard.Enabled && audio is not null)
+        {
+            var strip = new FormList(mod) { EditorID = "SkyrimFairStripSpells" };
+            mod.FormLists.Add(strip);
+            foreach (var npc in mod.Npcs)
+            {
+                if (config.NpcGuard.Invulnerable)
+                {
+                    npc.Configuration.Flags |= NpcConfiguration.Flag.Invulnerable;
+                }
+
+                npc.VirtualMachineAdapter ??= new VirtualMachineAdapter();
+                npc.VirtualMachineAdapter.Scripts.Add(new ScriptEntry
+                {
+                    Name = config.NpcGuard.Script,
+                    Properties = { new ScriptObjectProperty { Name = "StripSpells", Object = new FormLink<ISkyrimMajorRecordGetter>(strip.FormKey) } },
+                });
+            }
+
+            // The stage quest looks the spells up by plugin (no master needed) and fills the list.
+            var guard = config.NpcGuard.StripSpells.Select(s => s.Split('|')).ToList();
+            var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            script.Properties.Add(new ScriptObjectProperty { Name = "StripSpells", Object = new FormLink<ISkyrimMajorRecordGetter>(strip.FormKey) });
+            script.Properties.Add(new ScriptStringListProperty { Name = "StripPlugins", Data = guard.Select(g => g[0]).ToExtendedList() });
+            script.Properties.Add(new ScriptIntListProperty { Name = "StripIds", Data = guard.Select(g => Convert.ToInt32(g[1], 16)).ToExtendedList() });
+            Console.WriteLine($"  NPC guard: {mod.Npcs.Count} NPC records{(config.NpcGuard.Invulnerable ? " invulnerable" : "")}, "
+                + $"{guard.Count} spells stripped when their plugin is loaded");
+        }
+
         // ---- the navmesh, last of all ------------------------------------------------------------
         if (config.Navmesh.Enabled && master is not null)
         {

@@ -136,6 +136,10 @@
         {"name": "RockCliff07PineForest03", "formKey": "000D1EC7:Skyrim.esm", "weight": 0.4, "minScale": 0.6, "maxScale": 1.0, "minDistance": 600, "sink": 140}
       ]
     },
+    "crowdFigures": [
+      {"editorId": "SkyrimFairCrowdClapping01", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Clapping01.nif", "width": 51, "depth": 70, "height": 132, "places": [[580, 1640, 270]]}
+    ],
+    "npcGuard": {"enabled": true, "invulnerable": true, "stripSpells": ["StealthKillDetectionFix.esp|817", "MaximumDestruction.esp|8E6289"]},
     "navmesh": {
       "enabled": true,
       "resolution": 32,

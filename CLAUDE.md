@@ -112,6 +112,17 @@ directly (grep `SkyrimFairAudio`).
 **Confirmed working in game:** the stage set, the pen horses, the bards playing, and
 the audio levels (don't change them).
 
+**First static crowd figure and the NPC guard: built and deployed, awaiting Barry's test** (plugin `1c3377521927c995...`).
+- `fairWorld.crowdFigures`: `SkyrimFairCrowdClapping01` at (580, 1640), facing the range.
+  It's built late so no FormID moves. Three fixes to the other agent's brief are recorded
+  in `docs/CLAUDE_CROWD_TASK.md`.
+- `fairWorld.npcGuard`: all fair NPCs invulnerable, and Stealth Detection Fixes' cloak plus
+  Maximum Destruction's per-effect script taken off them (the cause of the Papyrus freeze).
+  Whether `RemoveSpell` holds on SPID spells is still to be seen in `Papyrus.0.log`.
+- Barry's report on the redistribution: someone walked to a bench and sat, fine. Still
+  laggy, then the game froze (the mod clash above). He prefers the object route for
+  density.
+
 **Crowd redistributed: built and deployed, awaiting Barry's test** (plugin `93a50609179b1067...`).
 - 6 live layers (`SkyrimFairCrowdLayers`, default 6):
   - the dance floor, front 26 and back 17. They dance the Cicero dances through songs

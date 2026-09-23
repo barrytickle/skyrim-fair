@@ -126,6 +126,15 @@ internal sealed record FairWorldConfig
     /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
     public NavmeshConfig Navmesh { get; init; } = new();
 
+    /// <summary>
+    /// Static crowd figures (docs/CROWD.md): posed people baked into STATs, built after
+    /// everything but the navmesh, so no earlier FormID moves when one is added.
+    /// </summary>
+    public List<CrowdFigure> CrowdFigures { get; init; } = new();
+
+    /// <summary>What every fair NPC gets: invulnerability, and other mods' spells taken off.</summary>
+    public NpcGuardConfig NpcGuard { get; init; } = new();
+
     /// <summary>Distant vanilla mountains, always drawn.</summary>
     public MountainsConfig Mountains { get; init; } = new();
 
@@ -307,6 +316,30 @@ internal sealed record FairWorldConfig
 /// lay it by its real size. Width runs along local X, depth along local Y, and the
 /// origin is at the bottom centre.
 /// </summary>
+internal sealed record CrowdFigure : ProjectStaticConfig
+{
+    /// <summary>Where copies stand: <c>[x, y, yaw]</c> each, on the ground. The figure faces +Y at yaw 0.</summary>
+    public List<float[]> Places { get; init; } = new();
+}
+
+/// <summary>
+/// Protects the fair's NPCs from damage, as vanilla children are, and has a script take
+/// other mods' spells off them as they load. Some mods give every NPC a cloak or a
+/// per-effect script; at the fair's density that floods Papyrus (docs/CODEX_HANDOVER.md).
+/// </summary>
+internal sealed record NpcGuardConfig
+{
+    public bool Enabled { get; init; }
+
+    public bool Invulnerable { get; init; } = true;
+
+    /// <summary>The Actor script put on every fair NPC record.</summary>
+    public string Script { get; init; } = "SkyrimFairNpcGuard";
+
+    /// <summary>Spells taken off, as <c>plugin|hex id</c>; a plugin that isn't loaded is skipped.</summary>
+    public List<string> StripSpells { get; init; } = new();
+}
+
 internal record ProjectStaticConfig
 {
     public string EditorId { get; init; } = string.Empty;

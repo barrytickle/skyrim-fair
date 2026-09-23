@@ -68,6 +68,11 @@ Idle[] Property CheerIdles Auto
 Int Property DanceEvery = 2 Auto
 {Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
 
+FormList Property StripSpells Auto
+{The NPC guard's list (SkyrimFairNpcGuard): filled here from StripPlugins/StripIds.}
+String[] Property StripPlugins Auto
+Int[] Property StripIds Auto
+
 Actor[] Property Archers Auto
 {The archery range's archers, each linked (unkeyed) to the stand it shoots from.}
 GlobalVariable Property ArcherHold Auto
@@ -102,6 +107,7 @@ Float holdEnds = 0.0
 
 Event OnInit()
 	Debug.Trace("SkyrimFairAudio: started, " + Songs.Length + " songs")
+	FillStripSpells()
 	RegisterForSingleUpdate(3.0)
 EndEvent
 
@@ -116,7 +122,26 @@ Function Recover()
 	bandPlaying = new Bool[16]
 	orchestraPlaying = new Bool[32]
 	appliedTier = -1
+	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
+EndFunction
+
+; Other mods' spells the NPC guard takes off the fair's NPCs, from whichever of their
+; plugins are loaded (GetFormFromFile returns None for one that isn't).
+Function FillStripSpells()
+	If !StripSpells
+		Return
+	EndIf
+	StripSpells.Revert()
+	Int i = 0
+	While i < StripPlugins.Length && i < StripIds.Length
+		Spell s = Game.GetFormFromFile(StripIds[i], StripPlugins[i]) as Spell
+		If s
+			StripSpells.AddForm(s)
+		EndIf
+		i += 1
+	EndWhile
+	Debug.Trace("SkyrimFairAudio: NPC guard strips " + StripSpells.GetSize() + " spells")
 EndFunction
 
 Event OnUpdate()
