@@ -176,7 +176,46 @@ repo.
      - Small animals: chickens, dogs, goats. Mind the AI cost.
      - Smoke from the cook fires, and the fair's sounds.
      - Report options and cost before building.
-6. **Afterwards, from the backlog, as Barry chooses:**
+6. **The stage show (Barry, end of the day):**
+   - **A shorter gap between a song's end and the cheer.**
+     - Measured: the songs' files end within 0.06–0.52 s of their last sound, and the
+       cheer is audible from 0.05 s. So the gap is the script's.
+     - The cheer waits for the song's full length on the update timer (late when Papyrus
+       is busy), then stops the song's instance.
+     - Fix: a new `CheerLead` property (about 1 s) starts the cheer as the last note
+       rings, and the song finishes on its own instead of being stopped. Keep its
+       instance for `StopAll`.
+     - Add a trace of the cheer's start, to measure.
+   - **The singers do something while they sing:** cheer and gesture idles between lines,
+     and walking left and right across the deck. Options:
+     - a patrol package between two or three deck markers (the deck is its own navmesh
+       island; `Say()` still works while walking)
+     - OAR-swapped "performing" idles (see the next item)
+   - **Generic lip sync instead of the tailored lines.** Barry: the tailored sync "doesn't
+     seem to work that much". Options:
+     - reuse vanilla bard songs' `.fuz` lip tracks (real singing mouths, not our words) as
+       each line's lip file
+     - drive the mouth from script with MfgFix's phoneme functions (`mfgfix.dll` is in
+       Barry's list): random open and close every 0.2 s while singing, stopped at the
+       cheer. Mind Papyrus cost: three singers only
+     - Check first whether the tailored lines played at all in Barry's test. Look for
+       `Say` in `Papyrus.0.log`; add a trace per line if needed.
+   - **Block the stage off from the player completely:** the collision walls already keep
+     the performers in. Add a collision box across the steps (and anywhere else the
+     player could climb), and check the navmesh stays the performers' island.
+   - **Instruments timed to the song:** play drums only in the drum sections and everyone
+     elsewhere, from each song's `cues.json` `intensity` (drums and strings, 2.5 s
+     resolution).
+     - The stage script switches each bard's idle (`PlayIdle` the instrument or
+       `IdleStop`) at section changes, timed from the song's start like the singer
+       lines.
+     - **Faster, more intense playing:** OAR doesn't change playback speed as far as I
+       know (check its docs). Instead, generate faster copies of the vanilla loops (the
+       HKX codec can retime, as `rebase_folk.py` rebuilds clips), and swap them in with
+       OAR for the fair's bards, on a global the script sets from the intensity. Re-send
+       the idle when the level changes, so OAR re-evaluates (`docs/BARDS.md`, "Animation
+       side").
+7. **Afterwards, from the backlog, as Barry chooses:**
    - vendor inventories at festival prices (`docs/STALLS.md`)
    - the MCM (`docs/MCM.md`)
    - the 6 trades not yet placed
