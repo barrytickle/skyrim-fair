@@ -244,7 +244,27 @@ repo.
        `intensity`, or a per-song "crowd mode" in the config).
      - The script switches the dancers' idles (dance / cheer / clap) at section changes,
        timed from the song's start.
-8. **Afterwards, from the backlog, as Barry chooses:**
+   - **Crowd idles Barry picked for the cheering parts:**
+     - `IdleCivilWarCheer` (`0F7C8C`), with no conditions
+     - `IdleApplaud2`–`5` (`0D8730`–`0D8733`); their only conditions are no shield and
+       no torch out
+     - `IdleApplaud2`, `3` and `IdleCivilWarCheer` are already the dancers' `CheerIdles`
+     - These are one-shot clips like the dances: replay each as it ends (read the clips'
+       lengths from the archive, as for the Cicero dances)
+8. **Stage dressing (Barry, 2026-09-23 night):**
+   - **Holidays' lanterns hanging from the stage roof:**
+     - the same lanterns as the overhead runs: `035D0D`, `035D12`–`035D16`, from
+       `Holidays.esp`
+     - hung from the roof rafters: `stage.rafters`, u −780 to 780 across, v −540 to 540,
+       z 690 in the stage's frame
+     - check each lantern model's hanging point, so they hang from the beam and don't
+       float or sink into it
+   - **Whiterun flags at the back of the stage:** `CityBannerWhiterun01` (`0D2025`), and
+     `CivilWarBanner01` (`060166`) poles as the `banner_whiterun` module uses them, along
+     the back wall (the deck's back edge is y ≈ 6000, facing the square).
+   - **FormID-safe:** the stage is built early, so add both as late-built dressing (the
+     late section, appended) or with `reserve`, never inside the stage's own records.
+9. **Afterwards, from the backlog, as Barry chooses:**
    - vendor inventories at festival prices (`docs/STALLS.md`)
    - the MCM (`docs/MCM.md`)
    - the 6 trades not yet placed
