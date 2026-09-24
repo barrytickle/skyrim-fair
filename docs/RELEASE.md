@@ -72,6 +72,23 @@ the music stops, and the performers freeze.
 - **Other mods like these:** any mod whose SPID line gives *every* NPC a cloak or a
   per-effect script. Add `-SkyrimFairNPC` the same way, and list the mod here.
 
+## Grass-cache setups: no grass at the fair unless a cache ships
+
+- **Who:** anyone whose grass loads only from a pregenerated cache: No Grass In Objects
+  (NGIO) or Grass Cache Helper NG with a grass-cache mod, as in most big modlists
+  (`bAllowCreateGrass=0`). Players without a cache get grass live and need nothing.
+- **What they'd see:** the fair's ground with no grass at all. Nothing breaks.
+- **The fix, to ship:** the fair's own cache, `Grass\SkyrimFairWorldx....y....cgid` for its
+  9 cells, generated once by a precache run on Barry's setup (only the `SkyrimFairWorld`
+  files kept). Harmless to players without a cache setup. If a user's grass mod changes
+  the grass records' density, the fair's grass is a little off for them (cosmetic).
+- **The note for the mod page:** "If you use a grass cache (NGIO / Grass Cache Helper NG),
+  install the included grass cache files, or the fair's ground will have no grass. If you
+  regenerate your own cache, do it with Skyrim Fair installed and it will be included."
+- **Testing it without a cache** (Barry's setup): `SetGrassLoadCreate = 0` in
+  `SKSE\Plugins\GrassCacheHelperNG.ini` and `bAllowCreateGrass=1` in the profile's
+  `skyrim.ini` [Grass]; put both back after.
+
 ## Before any public release
 
 Permissions and provenance (details in `CREDITS.md`):
@@ -97,6 +114,8 @@ Files and packaging:
 - [ ] The SPID exclusion patches (`dist/spid/`), shipped as optional files, rebuilt
       against the mods' current versions.
 - [ ] Remove the retired `SkyrimFairNpcGuard.pex` from the package; nothing uses it now.
+- [ ] The fair's grass cache (`Grass\SkyrimFairWorld*.cgid`), from a precache run, with the
+      mod-page note for grass-cache users (see "Grass-cache setups" above).
 
 Performance (`CLAUDE.md`):
 - [ ] The actor count at the fair, and the real lights near the stage at night.
