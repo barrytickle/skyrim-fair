@@ -3312,9 +3312,6 @@
       "quietPackage": "00025BFC:Skyrim.esm",
       "sitPackage": "000ECEEB:Skyrim.esm",
       "seats": {"000A4AD6:Skyrim.esm": 2, "0002E6CF:Skyrim.esm": 2, "00074EC6:Skyrim.esm": 1},
-      "danceIdles": ["000F7C8A:Skyrim.esm", "000F7C8B:Skyrim.esm"], "danceLengths": [6.667, 6.0],
-      "cheerIdles": ["000D8730:Skyrim.esm", "000F7C8C:Skyrim.esm", "000D8731:Skyrim.esm"], "cheerLengths": [7.333, 4.767, 7.133],
-      "clapIdles": ["000D8730:Skyrim.esm", "000D8731:Skyrim.esm", "000D8732:Skyrim.esm", "000D8733:Skyrim.esm"], "clapLengths": [7.333, 7.133, 9.0, 6.333],
       "children": {"name": "Fair Child", "race": "0002C65B:Skyrim.esm", "templates": ["000B94A3:Skyrim.esm", "000B94A9:Skyrim.esm", "0009F839:Skyrim.esm", "000274A5:Skyrim.esm", "00013385:Skyrim.esm", "00013668:Skyrim.esm"], "outfits": ["0006D92E:Skyrim.esm", "000958AC:Skyrim.esm", "000958C1:Skyrim.esm"]},
       "animals": [
         {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80], "script": "SkyrimFairPenHorse"},
@@ -3390,6 +3387,7 @@
         "hardEndLevel": 300,
         "hardEndFade": 1.5,
         "songsFile": "songs.config.json",
+        "performersFile": "performers.config.json",
         "cheers": [
           {
             "name": "cheer",
@@ -3399,24 +3397,6 @@
             "fadeOut": 3.5,
             "threshold": 600
           }
-        ],
-        "bandPackage": "00025BFC:Skyrim.esm",
-        "bandStop": "000E4242:Skyrim.esm",
-        "band": [
-          {"name": "Lute", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [2048, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
-          {"name": "Drum", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [2048, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
-          {"name": "Flute", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [1948, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
-        ],
-        "orchestra": [
-          {"name": "Lute02", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [1648, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
-          {"name": "Lute03", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [1848, 5250, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
-          {"name": "Lute04", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [2248, 5250, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
-          {"name": "Lute05", "title": "Fair Bard", "idle": "00096F8D:Skyrim.esm", "at": [2448, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
-          {"name": "Flute02", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [1748, 5440, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
-          {"name": "Flute03", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [2148, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
-          {"name": "Flute04", "title": "Fair Bard", "idle": "00096F8C:Skyrim.esm", "at": [2348, 5440, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
-          {"name": "Drum02", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [1848, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
-          {"name": "Drum03", "title": "Fair Bard", "idle": "00096F8B:Skyrim.esm", "at": [2248, 5630, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
         ]
       },
       "ambience": {

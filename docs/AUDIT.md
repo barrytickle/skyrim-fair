@@ -2,7 +2,23 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the songs in their own file, songs.config.json (2026-09-24)
+## Current pass: the musicians and the crowd's moves in performers.config.json (2026-09-24)
+
+Barry: "could we combine the instrument config with the crowd config?"
+
+- `performers.config.json`:
+  - `instruments`: `lute`, `drum`, `flute`, `putAway`, `holdPackage`. A musician's
+    `idle` names an instrument; the drummers' rest idle is `drum`, no longer a code
+    default.
+  - `band` (3) and `orchestra` (9), one musician a line.
+  - `crowdMoves`: `dance`, `clap` and `cheer`, each idles, names (labels only) and clip
+    lengths. The generator checks the counts match.
+- Removed from `fair.config.json`: `audio.stage.band/orchestra/bandStop/bandPackage` and
+  `crowds.dance/clap/cheer idles and lengths`; `audio.stage.performersFile` points to the
+  new file.
+- **The plugin is byte-identical** (`34f72fd94733297d...`). Nothing to deploy.
+
+## Previous pass: the songs in their own file, songs.config.json (2026-09-24)
 
 Barry: "can we do a songs.config.json with just the songs? I'm very lost in the fair.config.json".
 

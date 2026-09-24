@@ -46,6 +46,62 @@ try
         };
     }
 
+    // The musicians and the crowd's moves live in performers.config.json.
+    stageAudio = config.FairWorld.Audio.Stage;
+    if (stageAudio.PerformersFile.Length > 0)
+    {
+        var performersPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(configPath))!, stageAudio.PerformersFile);
+        var performers = JsonSerializer.Deserialize<PerformersFile>(
+            await File.ReadAllTextAsync(performersPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidOperationException($"{stageAudio.PerformersFile} could not be parsed.");
+        string Named(string key) => performers.Instruments.TryGetValue(key, out var form)
+            ? form
+            : throw new InvalidOperationException($"{stageAudio.PerformersFile}: instruments has no \"{key}\"");
+        List<BandMember> Players(List<BandMember> players) =>
+            players.Select(m => m with { Idle = m.Idle.Contains(':') ? m.Idle : Named(m.Idle) }).ToList();
+        (List<string> Idles, List<float> Lengths) Move(string kind)
+        {
+            if (!performers.CrowdMoves.TryGetValue(kind, out var move))
+            {
+                return (new List<string>(), new List<float>());
+            }
+
+            if (move.Lengths.Count != move.Idles.Count)
+            {
+                throw new InvalidOperationException($"{stageAudio.PerformersFile}: crowdMoves.{kind} has {move.Idles.Count} idles but {move.Lengths.Count} lengths");
+            }
+
+            return (move.Idles, move.Lengths);
+        }
+
+        var (dance, danceLengths) = Move("dance");
+        var (clap, clapLengths) = Move("clap");
+        var (cheer, cheerLengths) = Move("cheer");
+        config = config with
+        {
+            FairWorld = config.FairWorld with
+            {
+                Audio = config.FairWorld.Audio with
+                {
+                    Stage = stageAudio with
+                    {
+                        Band = Players(performers.Band),
+                        Orchestra = Players(performers.Orchestra),
+                        BandStop = Named("putAway"),
+                        BandPackage = Named("holdPackage"),
+                        DrumIdle = Named("drum"),
+                    },
+                },
+                Crowds = config.FairWorld.Crowds with
+                {
+                    DanceIdles = dance, DanceLengths = danceLengths,
+                    ClapIdles = clap, ClapLengths = clapLengths,
+                    CheerIdles = cheer, CheerLengths = cheerLengths,
+                },
+            },
+        };
+    }
+
     Console.WriteLine($"Building {config.Identity.Name}...");
     Console.WriteLine($"Working location: {config.Identity.WorkingLocation}");
     Console.WriteLine(

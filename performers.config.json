@@ -1,0 +1,43 @@
+{
+  "about": "The stage's performers: the musicians and what the crowd's dancers do. fair.config.json points here (fairWorld.audio.stage.performersFile). Musicians: 'idle' is the instrument (a name from 'instruments', or an idle's FormID); 'at' is [x, y, height, facing]; the drummers rest in a song's calm sections (songs.config.json). Crowd moves: the idles the dancers play in a section's dance, clap and cheer, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The 'cheer' moves also play once at every song's end. 'names' are labels only; the idles are what count. The drummers are the musicians whose instrument is 'drum'.",
+  "instruments": {
+    "lute": "00096F8D:Skyrim.esm",
+    "drum": "00096F8B:Skyrim.esm",
+    "flute": "00096F8C:Skyrim.esm",
+    "putAway": "000E4242:Skyrim.esm",
+    "holdPackage": "00025BFC:Skyrim.esm"
+  },
+  "band": [
+    {"name": "Lute", "title": "Fair Bard", "idle": "lute", "at": [2048, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Drum", "title": "Fair Bard", "idle": "drum", "at": [2048, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Flute", "title": "Fair Bard", "idle": "flute", "at": [1948, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
+  ],
+  "orchestra": [
+    {"name": "Lute02", "title": "Fair Bard", "idle": "lute", "at": [1648, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Lute03", "title": "Fair Bard", "idle": "lute", "at": [1848, 5250, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Lute04", "title": "Fair Bard", "idle": "lute", "at": [2248, 5250, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
+    {"name": "Lute05", "title": "Fair Bard", "idle": "lute", "at": [2448, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Flute02", "title": "Fair Bard", "idle": "flute", "at": [1748, 5440, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Flute03", "title": "Fair Bard", "idle": "flute", "at": [2148, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
+    {"name": "Flute04", "title": "Fair Bard", "idle": "flute", "at": [2348, 5440, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Drum02", "title": "Fair Bard", "idle": "drum", "at": [1848, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Drum03", "title": "Fair Bard", "idle": "drum", "at": [2248, 5630, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
+  ],
+  "crowdMoves": {
+    "dance": {
+      "idles": ["000F7C8A:Skyrim.esm", "000F7C8B:Skyrim.esm"],
+      "names": ["IdleCiceroDance1", "IdleCiceroDance2"],
+      "lengths": [6.667, 6.0]
+    },
+    "clap": {
+      "idles": ["000D8730:Skyrim.esm", "000D8731:Skyrim.esm", "000D8732:Skyrim.esm", "000D8733:Skyrim.esm"],
+      "names": ["IdleApplaud2", "IdleApplaud3", "IdleApplaud4", "IdleApplaud5"],
+      "lengths": [7.333, 7.133, 9.0, 6.333]
+    },
+    "cheer": {
+      "idles": ["000D8730:Skyrim.esm", "000F7C8C:Skyrim.esm", "000D8731:Skyrim.esm"],
+      "names": ["IdleApplaud2", "IdleCivilWarCheer", "IdleApplaud3"],
+      "lengths": [7.333, 4.767, 7.133]
+    }
+  }
+}

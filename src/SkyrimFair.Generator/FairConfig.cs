@@ -2579,6 +2579,13 @@ internal sealed record StageAudioConfig
     /// </summary>
     public string SongsFile { get; init; } = string.Empty;
 
+    /// <summary>
+    /// A file of its own holding the musicians and the crowd's moves (performers.config.json):
+    /// <see cref="Band"/>, <see cref="Orchestra"/>, <see cref="BandStop"/>, <see cref="BandPackage"/>,
+    /// <see cref="DrumIdle"/>, and the crowds' dance, clap and cheer idles. Program.cs reads it.
+    /// </summary>
+    public string PerformersFile { get; init; } = string.Empty;
+
     public List<StageCheer> Cheers { get; init; } = new();
 
     /// <summary>
@@ -3334,4 +3341,29 @@ internal sealed record FixedFace
 internal sealed record SongsFile
 {
     public List<StageSong> Songs { get; init; } = new();
+}
+
+/// <summary>performers.config.json: the musicians and the crowd's moves (see <see cref="StageAudioConfig.PerformersFile"/>).</summary>
+internal sealed record PerformersFile
+{
+    /// <summary>Named idles and forms: lute, drum, flute (a musician's idle may be one of these names), putAway, holdPackage.</summary>
+    public Dictionary<string, string> Instruments { get; init; } = new();
+
+    public List<BandMember> Band { get; init; } = new();
+
+    public List<BandMember> Orchestra { get; init; } = new();
+
+    /// <summary>dance, clap and cheer: the idles the dancers play in a section of that kind.</summary>
+    public Dictionary<string, CrowdMove> CrowdMoves { get; init; } = new();
+}
+
+internal sealed record CrowdMove
+{
+    public List<string> Idles { get; init; } = new();
+
+    /// <summary>Labels for the reader; not used.</summary>
+    public List<string> Names { get; init; } = new();
+
+    /// <summary>Each idle's clip length, seconds.</summary>
+    public List<float> Lengths { get; init; } = new();
 }
