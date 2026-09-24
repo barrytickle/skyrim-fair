@@ -2,7 +2,47 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the crowd drifts into a change; no mid-song cheers (2026-09-24)
+## Current pass: audits of Professional Dancer and Fireworks (2026-09-24, research only)
+
+### Professional Dancer 1.5.0 (Nexus 124608), `external/`
+- An FNIS behaviour mod: `FNIS_Dance_List.txt` makes events `Dance1`-`Dance14`
+  (behaviour generation needed). It dances by `Debug.SendAnimationEvent`, from the
+  player's powers and a menu. `Dance.esp` is ESL; masters SkyUI_SE and UIExtensions. Not
+  installed in Barry's list.
+- **10 new dances**, lengths read with the HKX codec: dance1 25.37, dance2 28.0, dance3
+  15.23, dance4 9.40, dance5 11.93, dance6 3.20, dance7 26.13, dance8 21.77, dance9 15.63,
+  dance10 27.33 s. Plus `spectatorcheer.hkx`, 26.67 s and seamless. Dance11-13 are copies
+  of vanilla Cicero.
+  - No root motion.
+  - dance2, 5, 7 and 10 sway the body 0.8-1.3 m (keep them for dancers with room).
+  - Most pop 7-15 degrees at the wrap; our restart-with-a-blend replay hides that.
+- **Recommended:** OAR per-dancer swaps of `special_cicerodance1/2.hkx`, conditioned on
+  `HasKeyword SkyrimFairNPC` plus `CompareValues` on a per-actor value the script sets
+  before `PlayIdle` (the `Variable0x` slot still to be checked against the list). The
+  script keeps the exact replay timing from a length table. No Pandora, no `Dance.esp`.
+- **Licence:** CC BY-NC (CREDITS.md), but the clips are Mixamo's, so the .hkx can't be
+  shipped. A local tool would copy them from the user's install into our OAR folder.
+
+### Fireworks (Nexus 183953), `external/`
+- `Fireworks.esp` is a full ESP (not ESL), masters Skyrim/Update. It edits vanilla
+  Honningbrew, Dragonsreach, navmesh 0BFB15, `WhiterunHoldLocation` and package 0978E3.
+- 56 LE-format NIFs (unconverted); scripts with source. No licence file; the Nexus page's
+  permissions are unread (403).
+- **Firing needs no player.** A launcher activator placed with `PlaceAtMe` fires itself
+  (OnLoad, about a 1 s prep, `Spell.Cast` straight up, bursts at about 4,500 units),
+  then deletes itself.
+  - Our script can look it up with `Game.GetFormFromFile` (a soft dependency, no master,
+    nothing bundled).
+  - Or cast the shell spells directly, for tighter timing.
+- **Cheap:** mortar launchers `FWSkyBursterMultiActivator` 029EBD (10 shells) and
+  `FWSkyBursterSingleActivator` 009417, and the white flare 03915F (one radius-3000 light,
+  30 s).
+- **Heavy:** star bursters and rockets spawn 120-200 scripted dynamic lights each.
+- **Never:** `FWBungerActivator` (casts Firebolt), `FWFlameJetActivator` (fire spray).
+  Explosions do damage and knockdown, harmless only at altitude in the open.
+- Timing: place about 4 s before the burst is wanted.
+
+## Previous pass: the crowd drifts into a change; no mid-song cheers (2026-09-24)
 
 Barry: **"I can't get on stage"** (the solid walls work, confirmed). And: "it feels a bit
 unnatural when the crowd goes to cheer from dancing. They just stop what they doing eerily
