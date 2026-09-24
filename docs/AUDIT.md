@@ -2,7 +2,27 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: an arrangement of Dragonborn-Approved, from its stems (2026-09-24)
+## Current pass: arrangements of Fiddle and Hey-Ho, Skyrim, from their stems (2026-09-24)
+
+The same method as Dragonborn-Approved.
+- **Fiddle** (202.8 s, onsets suggest 72 bpm, likely half-time):
+  - a drumless fiddle intro
+  - instrumental hooks at 0:23-0:35, 2:05-2:16 and 3:10-3:16: all fast, singers clap,
+    crowd cheers in
+  - a near-silent stop at 0:37-0:47, a 2.5 s dead stop at 1:00, and quiet stretches at
+    1:37-1:52 and 2:17-2:40: holds, crowd claps
+  - Vocal gaps from `cues.json`.
+- **Hey-Ho, Skyrim** (219.9 s, about 146 bpm):
+  - no `cues.json`, so its lines come from the vocal stem (`lines_from_vocal`)
+  - drum dips at 0:10, 0:50, 1:52 and 2:17 (drums hold, crowd claps at the first two)
+  - a build to 1:05-1:20 (drums and lute fast, flute fast over the vocal gap at
+    1:19-1:23, crowd cheers)
+  - a full stop at 2:45-2:52, and a 2.5 s stop at 3:30 before a fast, cheering finish
+- Built schedules match independent merges (Fiddle 29 sections, Hey-Ho 24). Plugin
+  `7ea819bac05f9d19...`, deterministic, FormIDs unchanged. Deployed. All four songs are now
+  arranged.
+
+## Previous pass: an arrangement of Dragonborn-Approved, from its stems (2026-09-24)
 
 Barry: "are you able to break the song down and have a go at it for the entry "dragonborn
 approved"".
