@@ -2550,6 +2550,9 @@ internal sealed record StageAudioConfig
 
     public float PauseAfterCheer { get; init; } = 2f;
 
+    /// <summary>Seconds before a song's end its cheer starts; the song finishes under it.</summary>
+    public float CheerLead { get; init; } = 1f;
+
     /// <summary>The ambience's level during a song, as a share of normal.</summary>
     public float DuckAmbience { get; init; } = 0.75f;
 

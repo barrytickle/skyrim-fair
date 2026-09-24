@@ -217,6 +217,7 @@ internal static class FairAudio
             new ScriptFloatListProperty { Name = "CheerLengths", Data = cheers.Select(c => c.Seconds).ToExtendedList() },
             Float("FirstSongDelay", config.Stage.FirstSongDelay),
             Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
+            Float("CheerLead", config.Stage.CheerLead),
             Float("DuckDuringSong", config.Stage.DuckAmbience),
             Obj("AmbienceCategory", ambienceCategory.FormKey),
             Obj("AmbienceEnabled", ambienceEnabled.FormKey),

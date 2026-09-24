@@ -85,7 +85,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-24, morning pass)
 
-Plugin `eb0bdc6052f5d707...` (a varied crowd: 390 faces), deployed. The detail is in `docs/AUDIT.md`, newest first.
+Plugin `039172b91f95a5c9...` (stage show B1: the cheer lead-in), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage, **crowd culling at margin 512** (a big fps gain; distant

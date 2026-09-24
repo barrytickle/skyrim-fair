@@ -31,6 +31,10 @@ Float Property FirstSongDelay = 4.0 Auto
 {Seconds after arriving (or loading) before the first song.}
 Float Property PauseAfterCheer = 2.0 Auto
 {The breath between the cheer and the next song.}
+Float Property CheerLead = 1.0 Auto
+{Seconds before a song's end that its cheer starts, as the last note rings. The song
+isn't stopped: it finishes on its own (the update timer can run late when Papyrus is
+busy, so waiting for the full length left a gap).}
 Float Property DuckDuringSong = 0.75 Auto
 {The ambience's level while a song plays, as a share of its normal level.}
 
@@ -122,6 +126,9 @@ Int phase = 0
 Int track = 0
 Int songInstance = 0
 Int cheerInstance = 0
+; The song finishing under its cheer, and when it ends (the band plays until then).
+Int tailInstance = 0
+Float bandUntil = 0.0
 Float phaseEnds = 0.0
 Float ambienceLevel = -1.0
 ; Which bards are playing, and which archers still wait to be set on their stands (an
@@ -159,6 +166,8 @@ Function Recover()
 	Debug.Trace("SkyrimFairAudio: game loaded, the set starts over")
 	songInstance = 0
 	cheerInstance = 0
+	tailInstance = 0
+	bandUntil = 0.0
 	phase = 0
 	ambienceLevel = -1.0
 	bandOn = False
@@ -239,7 +248,7 @@ Event OnUpdate()
 		Dance()
 		FolkDance(now)
 		Sing(now)
-	ElseIf bandOn
+	ElseIf bandOn && now >= bandUntil
 		StopBand(False)
 	EndIf
 
@@ -249,6 +258,10 @@ Event OnUpdate()
 	EndIf
 	If phase == 2 && folkOn && folkNext > now && Seconds(folkNext - now) < left
 		left = Seconds(folkNext - now)
+	EndIf
+	If phase != 2 && bandOn && bandUntil > now && Seconds(bandUntil - now) < left
+		; Wake as the song's last note ends, to put the instruments away.
+		left = Seconds(bandUntil - now)
 	EndIf
 	If phase == 2 && nextLine >= 0 && nextLine < endLine
 		; Wake for the next sung line.
@@ -273,6 +286,8 @@ Function Advance(Float now)
 		If track >= Songs.Length
 			track = 0
 		EndIf
+		; The last song's tail ended long ago (its cheer and the pause outlast the lead).
+		tailInstance = 0
 		songInstance = Songs[track].Play(StageSpeaker)
 		Debug.Trace("SkyrimFairAudio: song " + track + " playing, instance " + songInstance)
 		songsPlayed += 1
@@ -289,24 +304,38 @@ Function Advance(Float now)
 			endLine = nextLine + SongLineCount[track]
 		EndIf
 		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
-		Enter(2, SongLengths[track], now)
+		Enter(2, SongLengths[track] - Lead(), now)
 	ElseIf phase == 2
-		; The song has run its length: the crowd cheers, then a breath.
-		Sound.StopInstance(songInstance)
+		; The last note is ringing: the crowd cheers, the song finishes under it, then a breath.
+		Float lead = Lead()
+		tailInstance = songInstance
 		songInstance = 0
+		bandUntil = now + lead * TimeScale.GetValue() / 86400.0
 		Int cheer = SongCheers[track]
 		If cheer >= 0 && cheer < Cheers.Length
 			cheerInstance = Cheers[cheer].Play(StageSpeaker)
 			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue())
+			Debug.Trace("SkyrimFairAudio: cheer " + cheer + " at " + Seconds(now - songStarted) + " s into song " + track + " (" + SongLengths[track] + " s long, lead " + lead + ")")
 			Enter(3, CheerLengths[cheer], now)
 			Cheer()
 		Else
-			Enter(4, PauseAfterCheer, now)
+			Enter(4, lead + PauseAfterCheer, now)
 		EndIf
 	ElseIf phase == 3
 		cheerInstance = 0
 		Enter(4, PauseAfterCheer, now)
 	EndIf
+EndFunction
+
+; The cheer's lead, never more than half the song.
+Float Function Lead()
+	Float lead = CheerLead
+	If lead < 0.0
+		lead = 0.0
+	ElseIf lead > SongLengths[track] / 2.0
+		lead = SongLengths[track] / 2.0
+	EndIf
+	Return lead
 EndFunction
 
 Function Enter(Int newPhase, Float lengthSeconds, Float now)
@@ -329,6 +358,11 @@ Function StopAll()
 		Sound.StopInstance(cheerInstance)
 		cheerInstance = 0
 	EndIf
+	If tailInstance != 0
+		Sound.StopInstance(tailInstance)
+		tailInstance = 0
+	EndIf
+	bandUntil = 0.0
 	SetAmbience(False)
 	StopBand(False)
 EndFunction

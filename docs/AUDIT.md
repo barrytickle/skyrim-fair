@@ -2,7 +2,24 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: a varied crowd: 390 faces instead of 12 bandits (2026-09-24)
+## Current pass: the stage show, B1: the cheer starts as the last note rings (2026-09-24)
+
+- **Before:** the cheer waited for the song's full measured length on the update timer
+  (late when Papyrus is busy), then stopped the song. The files end within 0.06-0.52 s of
+  their last sound, so the gap was the script's.
+- **Now:** `CheerLead` (`audio.stage.cheerLead`, 1.0 s, a new property, so old saves
+  get it) starts the cheer that long before the song's end. The song isn't stopped: it
+  finishes under the cheer, its instance kept for `StopAll`. The band plays until the
+  song really ends (`bandUntil`, woken for), then puts the instruments away. A song with
+  no cheer pauses `lead + PauseAfterCheer`, as before.
+- **Trace:** `SkyrimFairAudio: cheer N at X s into song T (L s long, lead 1)`. With
+  that, the cheer's real timing can be read from `Papyrus.0.log`.
+- Plugin `039172b91f95a5c9...`, deterministic; all 3,892 records unchanged; deployed with
+  the scripts.
+- **To test:** listen to a song's end. If the cheer now tramples the last note, lower
+  `cheerLead`; if there's still a gap, raise it.
+
+## Previous pass: a varied crowd: 390 faces instead of 12 bandits (2026-09-24)
 
 Barry: "I keep seeing a lot of the same people. Especially the women with the tattoo
 faces."

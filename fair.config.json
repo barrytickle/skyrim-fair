@@ -3383,6 +3383,7 @@
         "cheerStaticAttenuation": 0,
         "firstSongDelay": 4,
         "pauseAfterCheer": 2,
+        "cheerLead": 1.0,
         "duckAmbience": 0.75,
         "hardEndLevel": 300,
         "hardEndFade": 1.5,
