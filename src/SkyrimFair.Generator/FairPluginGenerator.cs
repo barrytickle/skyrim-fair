@@ -310,7 +310,7 @@ internal static class FairPluginGenerator
             var ext = FairExterior.Build(mod, config, master, vanillaWorldspace, worldspace, persistentCell, mapMarker);
             Console.WriteLine($"  exterior: {ext.Panels} wall panels, {ext.Banners} banners, {ext.Ropes} rope halves, {ext.Lanterns} lanterns; "
                 + $"{ext.Silhouette} pieces of the fair inside; {ext.Disabled} vanilla references disabled; {ext.Songs} songs outside, "
-                + $"{ext.FireworkSites} firework sites; cells {string.Join(" ", ext.Cells.Select(c => $"({c.X},{c.Y})"))}; "
+                + $"{ext.FireworkSites} firework sites; {ext.Path} path pieces, {ext.Flags} gate flag pieces; cells {string.Join(" ", ext.Cells.Select(c => $"({c.X},{c.Y})"))}; "
                 + $"FormIDs 0x{ext.FormIds.From:X}-0x{ext.FormIds.To:X}");
         }
 

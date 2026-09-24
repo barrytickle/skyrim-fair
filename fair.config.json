@@ -3588,6 +3588,24 @@
       {"name": "fire middle", "centre": [1226, 1557], "radius": 150},
       {"name": "fire north", "centre": [1309, 3194], "radius": 150}
     ],
+    "approach": {
+      "start": 150,
+      "to": [-5900, -10120],
+      "clearHalfWidth": 450,
+      "spacing": 170,
+      "halfWidth": 200,
+      "sink": 6,
+      "pieces": ["0002C698:Skyrim.esm"],
+      "edgePieces": ["0001814C:Skyrim.esm", "0001812A:Skyrim.esm"]
+    },
+    "gateFlags": {
+      "out": 450,
+      "forward": 110,
+      "pieces": [
+        {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 0, "y": 0},
+        {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 0, "y": 3, "z": 395}
+      ]
+    },
     "show": {
       "cluster": "stage",
       "speakerHeight": 300,

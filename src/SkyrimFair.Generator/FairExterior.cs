@@ -235,6 +235,23 @@ internal static class FairExterior
 
         // ---- vanilla scenery inside the walls or through them: disabled ---------------------------------
         var scenery = FairPluginGenerator.CollectClearableBases(master);
+        var names = master.Statics.ToDictionary(st => st.FormKey, st => st.EditorID);
+
+        // The approach: from just out of the gate to the road, cleared and paved.
+        var (ofx, ofy) = (-flip * MathF.Sin(innerYaw), -flip * MathF.Cos(innerYaw));
+        var app = ext.Approach;
+        var (sx0, sy0) = (gx + ofx * app.Start, gy + ofy * app.Start);
+        var (sx1, sy1) = app.To is { Length: 2 } road ? (road[0], road[1]) : (sx0, sy0);
+        bool InApproach(float x, float y)
+        {
+            if (!app.Enabled) return false;
+            var (dx, dy) = (sx1 - sx0, sy1 - sy0);
+            var len = MathF.Max(1f, MathF.Sqrt(dx * dx + dy * dy));
+            var (tx0, ty0) = (x - sx0, y - sy0);
+            var along = (tx0 * dx + ty0 * dy) / len;
+            var across = MathF.Abs(tx0 * dy - ty0 * dx) / len;
+            return along >= -app.Start && along <= len && across <= app.ClearHalfWidth;
+        }
         var spawners = master.Activators.Where(a => (a.EditorID ?? "").StartsWith("critterSpawn", StringComparison.OrdinalIgnoreCase)).Select(a => a.FormKey).ToHashSet();
         var prey = master.LeveledNpcs.Where(l => (l.EditorID ?? "").StartsWith("LvlAnimal", StringComparison.OrdinalIgnoreCase)).Select(l => l.FormKey).ToHashSet();
         bool Inside(float x, float y)
@@ -280,7 +297,13 @@ internal static class FairExterior
                     if (o.Placement is not { } p) continue;
                     var (x, y) = (p.Position.X, p.Position.Y);
                     bool hit;
-                    if (spawners.Contains(o.Base.FormKey))
+                    if (InApproach(x, y) && FairPluginGenerator.WhyUnsafeToDisable(o, scenery) is null
+                        && !(names.GetValueOrDefault(o.Base.FormKey) ?? "").StartsWith("Road", StringComparison.Ordinal))
+                    {
+                        // The way in: everything but the road itself, landscape rocks too.
+                        hit = true;
+                    }
+                    else if (spawners.Contains(o.Base.FormKey))
                     {
                         hit = Inside(x, y);
                     }
@@ -441,6 +464,72 @@ internal static class FairExterior
             result.FireworkSites = sites.Count;
         }
 
+        // ---- the approach: road chunks up to the gate, and a Whiterun flag each side of it --------------
+        // Tilts follow the ground. Skyrim turns a reference about the world Z, then Y, then X,
+        // clockwise (the vanilla road pieces fit that best), so local up is (-sin y, cos y sin x,
+        // cos y cos x), and a piece lies on a slope of normal n at y = -asin(nx), x = atan2(ny, nz).
+        P3Float OnGround(float x, float y, float yaw)
+        {
+            const float e = 16f;
+            var (zx, zy) = ((Ground(x + e, y) - Ground(x - e, y)) / (2f * e), (Ground(x, y + e) - Ground(x, y - e)) / (2f * e));
+            var len = MathF.Sqrt(zx * zx + zy * zy + 1f);
+            var (nx, ny, nz) = (-zx / len, -zy / len, 1f / len);
+            return new P3Float(MathF.Atan2(ny, nz), -MathF.Asin(nx), yaw);
+        }
+
+        if (app.Enabled && app.Pieces.Count > 0)
+        {
+            var (dx, dy) = (sx1 - sx0, sy1 - sy0);
+            var length = MathF.Sqrt(dx * dx + dy * dy);
+            var (ux, uy) = (dx / length, dy / length);
+            var heading = MathF.Atan2(ux, uy);
+            var k = 0;
+            for (var at = 0f; at <= length; at += app.Spacing)
+            {
+                foreach (var side in new[] { 0f, -1f, 1f })
+                {
+                    k++;
+                    var piece = side == 0f ? app.Pieces[k % app.Pieces.Count] : app.EdgePieces[k % app.EdgePieces.Count];
+                    var off = side * app.HalfWidth + FairHash.Signed(4400, k, 1) * 30f;
+                    var slide = FairHash.Signed(4400, k, 2) * app.Spacing * 0.25f;
+                    var (x, y) = (sx0 + ux * (at + slide) + uy * off, sy0 + uy * (at + slide) - ux * off);
+                    var yaw = heading + MathF.PI / 2f + FairHash.Signed(4400, k, 3) * 0.2f + (side == 0f ? 0f : FairHash.Hash3(4400, k, 4) * MathF.PI);
+                    PutObject(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece)),
+                        Placement = new Placement { Position = new P3Float(x, y, Ground(x, y) - app.Sink), Rotation = OnGround(x, y, yaw) },
+                    });
+                    result.Path++;
+                }
+            }
+        }
+
+        // The flags stand just out from the wall either side of the gate, facing the road.
+        if (ext.GateFlags.Enabled && ext.GateFlags.Pieces.Count > 0)
+        {
+            var gf = ext.GateFlags;
+            var (rx, ry) = (ofy, -ofx);
+            var yaw = MathF.Atan2(ofx, ofy);
+            foreach (var side in new[] { -1f, 1f })
+            {
+                var (fx0, fy0) = (gx + rx * side * gf.Out + ofx * gf.Forward, gy + ry * side * gf.Out + ofy * gf.Forward);
+                var z = Ground(fx0, fy0);
+                foreach (var piece in gf.Pieces)
+                {
+                    PutObject(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece.Piece)),
+                        Placement = new Placement
+                        {
+                            Position = new P3Float(fx0 + MathF.Sin(yaw) * piece.Y, fy0 + MathF.Cos(yaw) * piece.Y, z + piece.Z),
+                            Rotation = new P3Float(0f, 0f, yaw),
+                        },
+                    });
+                    result.Flags++;
+                }
+            }
+        }
+
         // ---- file the cells ------------------------------------------------------------------------
         var grid = new ExteriorCellGrid(tamriel);
         foreach (var ((cx, cy), cell) in cells.OrderBy(c => c.Key.Y).ThenBy(c => c.Key.X))
@@ -472,6 +561,10 @@ internal sealed class ExteriorResult
     public int Songs { get; set; }
 
     public int FireworkSites { get; set; }
+
+    public int Path { get; set; }
+
+    public int Flags { get; set; }
 
     public List<(int X, int Y)> Cells { get; set; } = new();
 

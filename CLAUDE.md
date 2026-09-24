@@ -106,7 +106,9 @@ pop-in only when looking for it), **the varied crowd** (the new face pool), **th
 real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
-- **the compound's exterior in Tamriel** (plugin `fbe8255c...`): the old terrace at
+- **the compound's exterior in Tamriel** (**Barry: "honestly astonished"**; then the
+  rock in front of the gate cleared, a road-chunk path to the road, and a Whiterun flag
+  each side of the gate, plugin `eed0547c...`): the old terrace at
   (-2,-4) is knocked down. In its place is the fair's outline at 60%, with the gate at
   (-5900, -10800) facing the Whiterun-Rorikstead road. The gate is a load door into the
   fair and back. Inside are the stage, the four towers and three fires; faint music, a

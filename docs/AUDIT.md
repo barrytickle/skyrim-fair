@@ -17,6 +17,26 @@ from it? And some faint music".
 
 Plugin `fbe8255c0b5bd0e2...`, deterministic, deployed with `SkyrimFairOutsideShow.pex`.
 
+**Barry, in game: "honestly astonished at how good you've done this!"** He asked for the rock
+in front of the door to go, a path up to it ("or a stone wall, whatever you think is more
+natural"), and "the two large whiterun flags at both sides of the door".
+
+**Follow-up** (plugin `eed0547ce3b3aff8...`, deployed): all 4,110 records are unchanged,
+and 16 are added (`0x30133`-`0x30142`).
+- **The approach:** from 150 out of the gate to the road at (-5900, -10120), 900 wide,
+  every vanilla thing is disabled except the road. That's the flat rock (a vanilla
+  `DirtCliffs01FieldGrass01`, too big for the wall's clearing), two rock piles and 9
+  tundra shrubs.
+- **A path, rather than a wall:** a path reads more natural where the gate meets the road.
+  - It's made of vanilla road chunks every 170: a `RoadChunkM01` across the middle and
+    ragged `S01`/`L01` pieces at the edges (12 pieces).
+  - Each is tilted to the ground's slope. The convention was measured from vanilla's road
+    pieces in the area: Z, then Y, then X, about world axes, clockwise; this fits their
+    terrain to 5°, against 7.4° flat.
+- **Two Whiterun flags** (`CivilWarBanner01` pole with `CityBannerWhiterun01`, as the
+  avenue's `banner_whiterun`), 450 either side of the gate and 110 out, facing the road.
+
+
 **FormIDs:** against the life pass (`904835d8...`):
 - 3,802 records are unchanged.
 - **471 are gone: the whole old Tamriel prototype** (the terrace, its clutter and the test

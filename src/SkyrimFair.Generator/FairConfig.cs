@@ -3643,6 +3643,50 @@ internal sealed record ExteriorConfig
     public List<ExteriorCluster> Clusters { get; init; } = new();
 
     public ExteriorShow Show { get; init; } = new();
+
+    public ExteriorApproach Approach { get; init; } = new();
+
+    public ExteriorGateFlags GateFlags { get; init; } = new();
+}
+
+/// <summary>
+/// The way in: from <see cref="Start"/> out of the gate to <see cref="To"/> (a point on the
+/// road), vanilla scenery cleared within <see cref="ClearHalfWidth"/> (the road left), and
+/// road chunks laid on the ground every <see cref="Spacing"/>: one across the middle and a
+/// ragged edge piece each side.
+/// </summary>
+internal sealed record ExteriorApproach
+{
+    public bool Enabled { get; init; } = true;
+
+    public float Start { get; init; } = 150f;
+
+    public float[]? To { get; init; }
+
+    public float ClearHalfWidth { get; init; } = 450f;
+
+    public float Spacing { get; init; } = 170f;
+
+    public float HalfWidth { get; init; } = 200f;
+
+    public float Sink { get; init; } = 6f;
+
+    public List<string> Pieces { get; init; } = new();
+
+    public List<string> EdgePieces { get; init; } = new();
+}
+
+/// <summary>A flag either side of the gate, <see cref="Out"/> along the wall and <see cref="Forward"/> in front of it.</summary>
+internal sealed record ExteriorGateFlags
+{
+    public bool Enabled { get; init; } = true;
+
+    public float Out { get; init; } = 450f;
+
+    public float Forward { get; init; } = 110f;
+
+    /// <summary>The flag's pieces, in its frame (y toward the road).</summary>
+    public List<MarketPiece> Pieces { get; init; } = new();
 }
 
 /// <summary>
