@@ -2,7 +2,21 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the crowd switched off where it can't be seen (built, deployed, 2026-09-24)
+## Current pass: crowd culling margin 768 -> 512 (2026-09-24)
+
+Barry saw no pop-in at 768 and asked for the smaller margin ("even if i get some pop in,
+it's not the end of the world").
+
+- `crowdCulling.margin` 512. On at a spot (of 173): square 144 -> 129, market east lane
+  147 -> 119, avenue 154 -> 143, archery field 153 -> 148, gate 129 -> 117; mean 135 -> 120.
+- Only the table's values change: against the deployed plugin all 3,892 records keep
+  FormID and content identity, none added. Readback as before: no negative word, every
+  actor on at its own square, retired untouched.
+- Plugin `4dae188cafc0412f...`, deterministic, deployed.
+- **To test:** sprint into the market and round the stalls; if people pop in often, 640
+  sits between the two.
+
+## Previous pass: the crowd switched off where it can't be seen (built, deployed, 2026-09-24)
 
 Barry's baseline, with frame generation on (it can't be turned off in his pack), at the
 square:

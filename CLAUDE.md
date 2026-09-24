@@ -85,7 +85,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-24, morning pass)
 
-Plugin `8a5b898f2d0f0752...` (crowd culling), deployed. The detail is in `docs/AUDIT.md`, newest first.
+Plugin `4dae188cafc0412f...` (crowd culling, margin 512), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage. Performance "stable", but he has a frame-generation mod on, so

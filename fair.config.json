@@ -240,7 +240,7 @@
       "script": "SkyrimFairCrowdCull",
       "global": "SkyrimFairCrowdCulling",
       "spot": 256,
-      "margin": 768,
+      "margin": 512,
       "eyeHeights": [150, 210],
       "targetHeights": [40, 100, 160],
       "poll": 0.5,
