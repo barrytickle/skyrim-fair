@@ -1082,6 +1082,20 @@ internal static class FairWorld
             }
         }
 
+        // ---- the crowd switched off where it can't be seen, after everything is placed ----------
+        // Adds only script properties and one global; the actors keep their FormIDs.
+        if (config.CrowdCulling.Enabled && audio is not null && master is not null)
+        {
+            var cull = FairVisibility.Build(mod, config, worldspace, cells, topCell, PersistentRecordFlag, plan.Bounds, plan.Outside,
+                master, mod.Quests.First(q => q.FormKey == audio.Quest));
+            Console.WriteLine($"  crowd culling: {cull.Actors} actors switchable, {cull.Objects} objects block sight, {cull.StandingSpots} standing spots; "
+                + $"table {cull.Columns} x {cull.Rows} x {cull.Words} = {cull.TableLength}; on at a spot: mean {cull.MeanOn:0}, median {cull.MedianOn}, most {cull.MaxOn}");
+            foreach (var (name, on) in cull.At)
+            {
+                Console.WriteLine($"    {name}: {on} of {cull.Actors} on");
+            }
+        }
+
         mod.Worldspaces.Add(worldspace);
 
         return new FairWorldResult(

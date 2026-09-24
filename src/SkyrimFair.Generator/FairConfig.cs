@@ -129,6 +129,9 @@ internal sealed record FairWorldConfig
     /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
     public NavmeshConfig Navmesh { get; init; } = new();
 
+    /// <summary>Unseen crowd switched off where the player is (see <see cref="CrowdCullingConfig"/>).</summary>
+    public CrowdCullingConfig CrowdCulling { get; init; } = new();
+
     /// <summary>
     /// Crowd figures take FormIDs from here up, in placement order, not from the mod's
     /// counter: appending figures then never renumbers anything built after them (the
@@ -3171,4 +3174,51 @@ internal sealed record CollisionWall
 
     /// <summary>Longest single box; longer segments are split.</summary>
     public float PieceLength { get; init; } = 256f;
+}
+
+/// <summary>
+/// The crowd switched off where it can't be seen (docs/AUDIT.md, 2026-09-24). The fair has
+/// no occlusion, so the game draws actors hidden behind stalls. The generator works out,
+/// for each spot of a grid over the fair, which actors can be seen from anywhere within
+/// <see cref="Margin"/> of it, and the stage quest's <see cref="Script"/> enables only those
+/// as the player moves. Every placed object blocks sight by its navmesh footprint.
+/// </summary>
+internal sealed record CrowdCullingConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The script added to the stage quest, and the global that switches it (1 on).</summary>
+    public string Script { get; init; } = "SkyrimFairCrowdCull";
+
+    public string Global { get; init; } = "SkyrimFairCrowdCulling";
+
+    /// <summary>The grid's spacing: the player's spot is looked up in it.</summary>
+    public float Spot { get; init; } = 256f;
+
+    /// <summary>
+    /// An actor is on at a spot if it's seen from anywhere this close, so it's on before it
+    /// can come into view: a sprint covers about this in the script's poll and a 3D load.
+    /// </summary>
+    public float Margin { get; init; } = 768f;
+
+    /// <summary>Eye heights sight is checked from: standing, and a raised third-person camera.</summary>
+    public List<float> EyeHeights { get; init; } = new() { 150f, 210f };
+
+    /// <summary>Heights on each actor sight is checked to; any clear ray sees it.</summary>
+    public List<float> TargetHeights { get; init; } = new() { 40f, 100f, 160f };
+
+    /// <summary>Seconds between the script's checks at the fair, and elsewhere.</summary>
+    public float Poll { get; init; } = 0.5f;
+
+    public float IdlePoll { get; init; } = 5f;
+
+    /// <summary>
+    /// Actors never switched: NPC records whose EditorID starts with one of these (the
+    /// band, singers, archers and folk pair are script-driven), and every actor whose base
+    /// isn't the fair's own (the pen's horses).
+    /// </summary>
+    public List<string> AlwaysOn { get; init; } = new();
+
+    /// <summary>Named spots reported at build time, as [x, y].</summary>
+    public Dictionary<string, float[]> ReportAt { get; init; } = new();
 }

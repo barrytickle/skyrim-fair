@@ -692,7 +692,7 @@ internal static class FairNavmesh
     private static int FloorDiv(int a, int b) => (int)Math.Floor(a / (double)b);
 
     /// <summary>A model path as the footprint file keys it: lower case, backslashes, under meshes\.</summary>
-    private static string? ModelKey(string? path)
+    internal static string? ModelKey(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -703,11 +703,11 @@ internal static class FairNavmesh
         return k.StartsWith("meshes\\", StringComparison.Ordinal) ? k : "meshes\\" + k;
     }
 
-    private sealed record FootprintSet(float CellSize, float BandSize, float BandBase,
+    internal sealed record FootprintSet(float CellSize, float BandSize, float BandBase,
         Dictionary<string, List<(int X, int Y, uint Bands)>> Cells);
 
     /// <summary>tools/navmesh_footprints.json, from tools/make_footprints.py; empty if absent.</summary>
-    private static FootprintSet LoadFootprints(string path)
+    internal static FootprintSet LoadFootprints(string path)
     {
         var cells = new Dictionary<string, List<(int, int, uint)>>(StringComparer.Ordinal);
         var full = path.Length == 0 ? "" : Path.IsPathRooted(path) ? path : Path.Combine(FairPaths.ConfigDirectory, path);

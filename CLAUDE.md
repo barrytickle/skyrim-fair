@@ -85,7 +85,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-24, morning pass)
 
-Plugin `e3e982d8c3f76baa...`, deployed. The detail is in `docs/AUDIT.md`, newest first.
+Plugin `8a5b898f2d0f0752...` (crowd culling), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage. Performance "stable", but he has a frame-generation mod on, so
@@ -149,10 +149,11 @@ repo.
    Check the new Papyrus log for other per-NPC scripts too (the footprints mod's
    `footprintsFootstepsScriptHuman` appears).
 3. **Only run the crowd where the player is (Claude, the big one; plan first, then
-   build).** Depends on step 1's numbers. **Measured 2026-09-24 (`docs/AUDIT.md`):**
-   zone switching saves almost nothing (the fair is too open); even per-actor switching
-   with a safe margin only takes 233 actors to about 160. Waiting on Barry's three fps
-   readings, with frame generation off, before choosing.
+   build).** **Built and deployed 2026-09-24, not yet tested in game** (`docs/AUDIT.md`):
+   Barry's baseline (FG on: 77-96, layers 0: 120, `tai`: ~102) showed drawing, not AI,
+   is the cost. Per-actor culling from a generated visibility table: 173 switchable, about
+   29 off at the square and 38 on average (margin 768). `SkyrimFairCrowdCulling 0` turns
+   it off.
    - All nine cells stay loaded, so every actor runs AI all the time.
    - Give each zone its own crowd layers: the dance floor, the market seats, the archery
      range, the wanderers.

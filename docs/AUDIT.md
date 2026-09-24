@@ -2,7 +2,73 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: can the crowd be switched off where it can't be seen? (analysis, 2026-09-24)
+## Current pass: the crowd switched off where it can't be seen (built, deployed, 2026-09-24)
+
+Barry's baseline, with frame generation on (it can't be turned off in his pack), at the
+square:
+
+| Test | Displayed fps |
+|---|---|
+| everything on | 77-96 |
+| `SkyrimFairCrowdLayers 0` (93 fewer actors) | 120 (possibly a cap) |
+| `tai` (no AI) | ~102 |
+
+Removing actors outright gained more than stopping all AI, so most of the cost is drawing
+and animating them. The fair has no occlusion, so actors behind stalls are drawn too.
+Barry: "let's implement it".
+
+- **Generator** (`FairVisibility.cs`, `fairWorld.crowdCulling`), after the navmesh:
+  - every placed object (1,745 with footprints) is voxelised as the navmesh cuts it
+  - 622 standing spots on a 256 grid; rays from eyes at 150 and 210 to each actor at 40,
+    100 and 160
+  - each grid square's entry is every actor seen from any standing spot within 768: 29 x
+    33 squares x 6 words = 5,742 numbers, 31 actors a word
+- **Which actors:** 173 switchable. Always on: the band, the singers, the archers, the folk
+  pair (`alwaysOn`) and the horses (not the fair's records). The 36 retired visitors
+  (placed disabled) are left out. *The earlier estimate counted those 36 as savings, so
+  it was too high.*
+- **The switchable actors** are made persistent (the script names them) and lose their
+  crowd layer's enable parent (a reference with one can't be enabled by script). The new
+  script applies the layers itself: an actor is on if it's seen **and** its layer is on,
+  so `SkyrimFairCrowdLayers` works as before. The old layer markers stay, now empty.
+- **Script** `SkyrimFairCrowdCull`, a second script on the stage quest, with its own
+  0.5 s poll. When the player's square changes, it enables or disables only the actors
+  whose bit changed (`EnableNoWait`/`DisableNoWait`). Papyrus has no bitwise operators,
+  so bits are read by division, 31 to a word so words stay positive. The alias calls
+  `Resync()` on every load. If the table loads short (a property-array limit), it leaves
+  everyone on and traces why.
+- **Switch:** `set SkyrimFairCrowdCulling to 0` turns every actor back on.
+- **Expected** (of 173 switchable): square 144 on (29 off), market east lane 147, avenue
+  154, archery field 153, gate 129; mean 135. A smaller margin saves more (512: square
+  129, market 119) but risks pop-in at a sprint (0.5 s poll, a 256 square, the 3D load).
+  768 is the default.
+
+### Verification
+
+- Five scripts compile. Generator deterministic: `8a5b898f2d0f0752...`, run twice.
+- Against the deployed plugin (`e3e982d8`): all 3,891 records keep FormID, type, EditorID
+  and base; **1 added**, the global `SkyrimFairCrowdCulling` (`1759`, after the navmesh).
+- Read back:
+  - 173 actors, 173 layers, table 5,742 = 29 x 33 x 6, no negative word
+  - every switchable actor persistent, none with an enable parent
+  - every actor on at its own square
+  - the 36 retired untouched and not in the table
+- Deployed: plugin and scripts, byte-checked.
+- **Not verified in game:** the property arrays loading whole (over 128 entries), the
+  frame rate, pop-in, and seated visitors re-sitting after being switched back on.
+
+### What Barry should test
+
+1. From a clean start (`cow SkyrimFairWorld 0 0` from the main menu, since the actors'
+   enable parents changed): `Papyrus.0.log` should show `SkyrimFairCrowdCull: 173 actors,
+   table 5742 of 5742, ready True`.
+2. The same three readings at the square, plus one with `set SkyrimFairCrowdCulling to 0`
+   (culling off) to compare.
+3. Walk and sprint around the market, the avenue and the archery field: does anyone pop
+   in or out in view? Do seated visitors sit when you reach them?
+4. Does `set SkyrimFairCrowdLayers to 0` still clear the layers?
+
+## Previous pass: can the crowd be switched off where it can't be seen? (analysis, 2026-09-24)
 
 Barry confirmed the palisade, the lanterns and the stage in game. Performance is
 "stable", but with a frame-generation mod on. He asked for the optimisation (plan step 3).

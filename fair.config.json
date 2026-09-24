@@ -235,6 +235,19 @@
     "singers": {"enabled": true, "name": "Singer", "questEditorId": "SkyrimFairSingers", "emotionValue": 50, "cuesDir": "build/bards", "songs": {"Fiddle": "fiddle", "DragonbornApproved": "dragonbornapproved"}, "faceArchives": ["E:/Modlists/Still In Skyrim/stock/Data", "E:/Modlists/Still In Skyrim/mods/Vanilla Remastered - The New Normal (Part 1)", "E:/Modlists/Still In Skyrim/mods/Vanilla Remastered - The New Normal (Part 2)"], "members": [{"id": "lead", "voiceType": "SkyrimFairSingerLead", "face": "00039CF6:Skyrim.esm", "outfit": "0009593C:Skyrim.esm", "at": [2048, 5140, 134, 180]}, {"id": "left", "voiceType": "SkyrimFairSingerLeft", "face": "00039CFF:Skyrim.esm", "outfit": "0002D75E:Skyrim.esm", "at": [1848, 5160, 134, 185]}, {"id": "right", "voiceType": "SkyrimFairSingerRight", "face": "00039D17:Skyrim.esm", "outfit": "00037C50:Skyrim.esm", "at": [2248, 5160, 134, 175]}]},
     "folkDance": {"enabled": true, "centre": [2048, 4420], "heading": 0, "idle": "000F7C8A:Skyrim.esm", "length": 57.6, "name": "Folk Dancer", "oarFolder": "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairFolk", "dancers": [{"submod": "Male", "look": "SkyrimFairVisitorMale01", "at": [26, 0, 270]}, {"submod": "Female", "look": "SkyrimFairVisitorFemale01", "at": [-26, 0, 90]}]},
     "npcGuard": {"enabled": true, "invulnerable": true, "script": "", "stripSpells": []},
+    "crowdCulling": {
+      "enabled": true,
+      "script": "SkyrimFairCrowdCull",
+      "global": "SkyrimFairCrowdCulling",
+      "spot": 256,
+      "margin": 768,
+      "eyeHeights": [150, 210],
+      "targetHeights": [40, 100, 160],
+      "poll": 0.5,
+      "idlePoll": 5,
+      "alwaysOn": ["SkyrimFairAudioBand", "SkyrimFairSinger", "SkyrimFairArcher", "SkyrimFairFolkDancer"],
+      "reportAt": {"square": [2048, 3900], "market east lane": [3780, 2200], "avenue": [2048, 1400], "archery field": [0, 1400], "gate": [2048, -1500]}
+    },
     "navmesh": {
       "enabled": true,
       "resolution": 32,

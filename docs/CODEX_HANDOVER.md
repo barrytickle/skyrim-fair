@@ -659,6 +659,8 @@ Project-owned mesh work is code-first and reproducible.
 - **new props renumber:** prop STATs (`tools/static_props.json`) are made early, sorted by name. Late dressing should reuse existing props and vanilla statics
 - **a static with an all-zero OBND** (vanilla `CartFurnStatic01`) is cut from the navmesh by its model footprint; without one it's listed as unknown. Run `tools/make_footprints.py` after placing one
 - the stage frame (u across, v toward the audience) is a dressing group at the stage origin (2048, 5544) with yaw 180; the rafters' logs jitter in height, so hang things from them by reading the built rafters back (the lanterns sit 3 into the log)
+- **crowd culling** (`fairWorld.crowdCulling`, `FairVisibility.cs`, `SkyrimFairCrowdCull.psc`): after the navmesh, a visibility table (every placed object voxelised by its navmesh footprint; rays from standing spots to each actor) says which actors are on in each 256 square. Switchable actors are persistent and have **no enable parent** (a reference with one can't be enabled by script); the script applies `SkyrimFairCrowdLayers` itself. New crowd actors are switchable automatically; script-driven ones need an `alwaysOn` prefix. Any layout change changes the table: run the footprint tool, then the generator. `set SkyrimFairCrowdCulling to 0` for everything on
+- Papyrus is case-insensitive: a local named like a property (`layers` / `Layers`) fails to compile with type errors
 - vendors and archers template the fair's own `SkyrimFairFaces*` leveled lists, copied from Skyrim.esm at generation, so mods that edit vanilla commoner lists (Dawi NPC Encounters) cannot change the fair's faces
 
 ### Permanent foundation construction method
