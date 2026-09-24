@@ -36,8 +36,7 @@ faces."
   and 14 NPC templates.
 - **To see it: start clean** (`cow SkyrimFairWorld 0 0` from the main menu). A templated
   NPC's face is rolled when its runtime copy is made, and a save keeps it.
-- **Not verified in game:** the look, the folk pair's fit with their new faces, and the
-  band's instruments.
+- **Confirmed by Barry:** "yup it looks good!!!"
 
 ## Previous pass: crowd culling margin 768 -> 512 (2026-09-24)
 

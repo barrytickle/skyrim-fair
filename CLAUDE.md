@@ -88,8 +88,8 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 Plugin `eb0bdc6052f5d707...` (a varied crowd: 390 faces), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
-lanterns and the stage, and **crowd culling at margin 512** (a big fps gain; distant
-pop-in only when looking for it). Performance "stable", but he has a frame-generation mod on, so
+lanterns and the stage, **crowd culling at margin 512** (a big fps gain; distant
+pop-in only when looking for it), and **the varied crowd** (the new face pool). Performance "stable", but he has a frame-generation mod on, so
 real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
@@ -105,7 +105,7 @@ real frame times are unknown.
   rune detection (plan step 2, done)
 - **a varied crowd:** the face lists were six Imperial bandits a sex (the "tattoo faces");
   now 245 men's and 145 women's vanilla faces by race weight, with fixed human faces for
-  the band and the folk pair. Needs a clean start to see
+  the band and the folk pair. Confirmed by Barry: "it looks good"
 
 **Confirmed in game by Barry:**
 - the stage set: songs, cheer, next song, and the audio levels (don't change them)
