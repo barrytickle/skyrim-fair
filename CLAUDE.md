@@ -95,240 +95,91 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
   - Modules and vignettes both honour `rotX`/`rotY`.
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
+- **FormID ranges.** New things that must not renumber anything go in a range of their own:
+  switch `mod.ModHeader.Stats.NextFormID`, build, then put it back.
+  - `0x10000` crowd figures (off)
+  - `0x20000` `fairWorld.life`
+  - `0x30000` `exterior`
 
-## Where we are (2026-09-24, morning pass)
+  Inside a range, append only. Diff FormIDs against the deployed plugin every pass.
+- **Rotations:** Skyrim turns a reference about the world's Z, then Y, then X, clockwise.
+  To lie on a slope of normal n: `y = -asin(nx)`, `x = atan2(ny, nz)` (`FairExterior.OnGround`).
+- **Grass needs a cache in Barry's profile** (`bAllowCreateGrass=0`). The fair's worldspace
+  has none: `docs/RELEASE.md`, "Grass-cache setups".
+- **Edit scripts:** write Python edit scripts to the scratchpad with the Write tool.
+  Bash heredocs break on apostrophes.
 
-Plugin `d9a2f942bf8b4f68...` (stage show: cheer lead-in, solid stage walls, per-instrument/singers/crowd timelines, fast instrument loops via OAR, the crowd facing the stage, singer gestures), deployed. The detail is in `docs/AUDIT.md`, newest first.
+## Where we are (end of 2026-09-24)
 
-**Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
-lanterns and the stage, **crowd culling at margin 512** (a big fps gain; distant
-pop-in only when looking for it), **the varied crowd** (the new face pool), **the stage can't be climbed** (the solid invisible walls), and **Professional Dancer's dances** (Dance.esp plus a Pandora run). Performance "stable", but he has a frame-generation mod on, so
-real frame times are unknown.
+Plugin `eed0547ce3b3aff8...`, committed (`66190a8`) and deployed. The day's detail is in
+`docs/AUDIT.md`, newest first. Everything below the navmesh line of the old plan is done
+or listed here.
 
-**Built and deployed on 2026-09-24, not yet confirmed in game:**
-- **the compound's exterior in Tamriel** (**Barry: "honestly astonished"**; then the
-  rock in front of the gate cleared, a road-chunk path to the road, and a Whiterun flag
-  each side of the gate, plugin `eed0547c...`): the old terrace at
-  (-2,-4) is knocked down. In its place is the fair's outline at 60%, with the gate at
-  (-5900, -10800) facing the Whiterun-Rorikstead road. The gate is a load door into the
-  fair and back. Inside are the stage, the four towers and three fires; faint music, a
-  crowd murmur and night fireworks play from inside. Barry's test list is in
-  `docs/AUDIT.md`
-- **more life** (`fairWorld.life`, plugin `904835d8...`; **Barry: the decorations "look
-  fantastic"**; with live grass on, Barry saw the shrubs and "nice patches of grass"): 34 Whiterun banners and pennant
-  ropes with lanterns on the palisade, 81 shrubs/ferns/flowers, a goat pen, pelt lines,
-  lantern posts, tool corners, produce piles, smoke over the 5 fires, 6 chickens, 3 goats
-  and 2 dogs; the grass LTEX has more grass, but this profile shows grass only from a cache
-  (`bAllowCreateGrass=0`). Barry's test list is in `docs/AUDIT.md`. Barry also confirmed
-  the children and the seated visitors; the folk pair is fine at a distance; the singers
-  don't walk yet (not built)
-- the folk-dance keyword fix (last night's build, deployed this morning)
-- **a taller palisade** (confirmed above): scale 4 (560 tall), measured from sightlines to hide the ground
-  to ~5,300 past the wall; the gate is 3.6. 59 panels, with 89 FormIDs reserved
-  (`reservedPanels`), so nothing renumbered
-- **late-built dressing** (`market.lateDressing`): 18 Holidays lanterns hung 3 into the
-  stage rafters, three Whiterun flags behind the back bays, packing gear north of
-  `range_storage`, and four parked Helgen carts (gate forecourt x2, north-east camps,
-  stables; no room by the south-east camps)
-- SPID exclusions for Stealth Detection Fixes' sleep and killmove and Strange Runes'
-  rune detection (plan step 2, done)
-- **a varied crowd:** the face lists were six Imperial bandits a sex (the "tattoo faces");
-  now 245 men's and 145 women's vanilla faces by race weight, with fixed human faces for
-  the band and the folk pair. Confirmed by Barry: "it looks good"
+**Confirmed in game by Barry today:**
+- the taller palisade (scale 4) and gate, and the stage lanterns and Whiterun flags
+- **crowd culling** at margin 512 (77-96 -> 90-120 fps with frame generation; pop-in only
+  when looking for it)
+- **the varied crowd** (the face pool)
+- **the stage can't be climbed** (solid invisible walls)
+- **Professional Dancer's dances** (Dance.esp plus Pandora; optional, detected at runtime)
+- the stage-show timelines in `songs.config.json`, which Barry edits himself
+- the children, the seated visitors; the folk pair is fine at a distance
+- **more life** (`fairWorld.life`): the decorations "look fantastic". With live grass,
+  Barry saw the shrubs and "nice patches of grass"
+- **the Tamriel exterior** ("honestly astonished"). Then:
+  - the rock in front of the gate cleared
+  - a road-chunk path to the road
+  - a Whiterun flag each side of the gate
 
-**Confirmed in game by Barry:**
-- the stage set: songs, cheer, next song, and the audio levels (don't change them)
-- the bards playing, and the 12-man orchestra
-- the navmesh, which also fixed the archers after a reload
-- the backdrop
-- the signs (the honey-vendor layout)
-- the pen horses
-- a visitor walking to a bench and sitting
-- **the startup crash is fixed**: the singers' topics are now BardSongs' kind
-- **the freeze is fixed by the SPID exclusion patch**, from a save made before the fair
-  had been visited. Old saves keep the spells SPID gave before; test SPID changes from
-  a clean state (`cow SkyrimFairWorld 0 0` at the main menu, or an earlier save)
+  These last three are built and deployed, and not yet seen.
 
 **Built, not yet confirmed in game:**
-- **Dances:** each dancer's next dance starts as the last ends (6.7 s and 6 s clips).
-- **Astra's folk pair:** a 57.6 s clip, six loops, through Open Animation Replacer, at
-  (2048, 4420).
-- **The stage singers' lip sync:** only on Fiddle and Dragonborn-Approved, songs 2 and 3.
-  `set SkyrimFairAudioFirstTrack to 2` starts with Fiddle.
-- **The children**, the wanderers, and the archery-bench sitters.
+- **the show clock** (`ShowNow`): cheers and fireworks on time with the music (they were
+  10-35 s late). Barry: "i trust ya"
+- **the fair's own fireworks** after each song (vanilla effects, no dependency)
+- **fast and held instrument loops** through OAR (`build_tempo.py`)
+- **the exterior's details:**
+  - the gate door both ways
+  - the faint music (12 dB down, `exterior.show`) and crowd murmur outside
+  - night fireworks from inside, about every 150 s
+  - the view from the hills
+- the more-life details:
+  - banners against the logs (`out` 34, `bannerDrop` 70)
+  - pelts over the rope, tools leant on the barrels
+  - the smoke's size (0.6)
+  - the goats staying in the pen, the chickens and dogs behaving
+- the singers' lip sync on Fiddle and Dragonborn-Approved (**de-prioritised**: "too far
+  away to see")
 
-**Switched off:** the static crowd figures (`crowdFiguresEnabled: false`). Barry and the
-other agent couldn't fix their glowing. The library, tools and placements stay in the
-repo.
+**Switched off:** the static crowd figures (`crowdFiguresEnabled: false`), for their glow.
 
-## Plan for 2026-09-24 (Barry: "a plan list for tomorrow")
+## Plan for 2026-09-25
 
-1. **Performance baseline (Barry, in game).** From a clean save, at the square, note the
-   fps:
-   - all crowd layers on
-   - `set SkyrimFairCrowdLayers to 0` (vendors, bards and archers only)
-   - `tai` (all AI off)
-
-   Every earlier reading was taken during the script flood, so this is the first true
-   measure. It says whether the cost is AI, rendering or scripts.
-2. **Done 2026-09-24.** ~~Exclude more per-NPC extras (Claude, small).~~ Add them to `spidPatches`, the same
-   generated patch; SPID's log shows every fair NPC getting them:
-   - Stealth Detection Fixes' sleep (`0x80B`, `StealthKillDetectionFix_DISTR.ini`) and
-     killmove (`0x819`, `_Killmove_DISTR.ini`) abilities, which are pointless on
-     invulnerable NPCs
-   - Strange Runes' `po3_RUNE_DetectCastNPCAbility` (`StrangeRunes_DISTR.ini`), a script
-     on every NPC that runs on each equip
-
-   Check the new Papyrus log for other per-NPC scripts too (the footprints mod's
-   `footprintsFootstepsScriptHuman` appears).
-3. **Only run the crowd where the player is (Claude, the big one; plan first, then
-   build).** **Built and deployed 2026-09-24; Barry: "a huge boost", 77-96 -> 90-120 fps
-   (frame generation and DLSS on) at the square, ~130 looking away from the dancers; no
-   pop-in. Seated re-sitting not yet reported
-   (`docs/AUDIT.md`):
-   Barry's baseline (FG on: 77-96, layers 0: 120, `tai`: ~102) showed drawing, not AI,
-   is the cost. Per-actor culling from a generated visibility table: 173 switchable, about
-   29 off at the square and 38 on average (margin 768). `SkyrimFairCrowdCulling 0` turns
-   it off.
-   - All nine cells stay loaded, so every actor runs AI all the time.
-   - Give each zone its own crowd layers: the dance floor, the market seats, the archery
-     range, the wanderers.
-   - The stage script enables each zone's layers only within a set distance of the
-     player, just beyond clear view, with a fade.
-4. **Barry's test list:**
-   - Do the dances run on through a song?
-   - Do the folk pair turn together, arms meeting?
-   - Do the singers' lips move with Fiddle?
-   - Do the children look right?
-   - Do the seated NPCs sit?
-5. **Immersion (Barry, added at the end of the day).** The palisade, gate, packing gear
-   and carts were built on 2026-09-24 (see above; the palisade used reserved FormIDs, not
-   the visual-scale idea below). The more-life audit is still to do:
-   - **A taller palisade, to hide the hills beyond.**
-     - It's `fairWorld.palisade.scale` 2.5 now: 350 units tall.
-     - **Don't just raise `scale`:** pieces are spaced by width × scale, so their number
-       would change and every later FormID would move.
-     - Add a visual scale (for example 3.5–4) and keep the spacing on 2.5. The pieces
-       overlap more, their count stays the same, and nothing renumbers.
-     - Check the corners, the gate tuck, and the navmesh wall margin (the thicker
-       collision).
-     - Then check what still shows above it: the RNAM mountains should, the near hills
-       shouldn't. Use Barry's screenshots.
-   - **A bigger gate:** `fairWorld.gatePiece.scale` 2.5. The same caution: keep the gap and
-     tuck on the old width, and check how it meets the palisade.
-   - **Packing-up gear by the archery range:** crates, chests, sacks, bundled arrows and
-     bedrolls beside `range_storage` (-900, 1400).
-   - **Travellers' kit:** empty carts and wagons with no horses, parked by the camps, the
-     gate forecourt and the stables.
-     - Find vanilla carriage and wagon statics (the Helgen-style cart, farm wagons) with
-       Mutagen.
-     - Build on the existing `cart` and `camp` modules.
-     - Place them as new dressing entries **built last** (the late section), or with
-       `reserve`, so no FormID moves.
-   - **An audit: how to add more life.**
-     - Shrubs and flowers inside the walls and along the paths (vanilla shrub statics,
-       non-harvestable flora).
-     - Grass on the ground textures, and more props: laundry lines, lanterns, hay,
-       bunting, tools, food.
-     - Small animals: chickens, dogs, goats. Mind the AI cost.
-     - Smoke from the cook fires, and the fair's sounds.
-     - Report options and cost before building.
-6. **The stage show (Barry, end of the day):**
-   - **A shorter gap between a song's end and the cheer.**
-     - Measured: the songs' files end within 0.06–0.52 s of their last sound, and the
-       cheer is audible from 0.05 s. So the gap is the script's.
-     - The cheer waits for the song's full length on the update timer (late when Papyrus
-       is busy), then stops the song's instance.
-     - Fix: a new `CheerLead` property (about 1 s) starts the cheer as the last note
-       rings, and the song finishes on its own instead of being stopped. Keep its
-       instance for `StopAll`.
-     - Add a trace of the cheer's start, to measure.
-   - **The singers do something while they sing:** cheer and gesture idles between lines,
-     and walking left and right across the deck. Options:
-     - a patrol package between two or three deck markers (the deck is its own navmesh
-       island; `Say()` still works while walking)
-     - OAR-swapped "performing" idles (see the next item)
-   - **Generic lip sync: de-prioritised by Barry (2026-09-24): "they're too far away to see on stage".**
-   - **Singers moving: Barry wants them moving, "maybe like crab walking style" (sidestepping, facing the crowd).**
-   - (old note) **Generic lip sync instead of the tailored lines.** Barry: the tailored sync "doesn't
-     seem to work that much". Options:
-     - reuse vanilla bard songs' `.fuz` lip tracks (real singing mouths, not our words) as
-       each line's lip file
-     - drive the mouth from script with MfgFix's phoneme functions (`mfgfix.dll` is in
-       Barry's list): random open and close every 0.2 s while singing, stopped at the
-       cheer. Mind Papyrus cost: three singers only
-     - Check first whether the tailored lines played at all in Barry's test. Look for
-       `Say` in `Papyrus.0.log`; add a trace per line if needed.
-   - **Block the stage off from the player completely:** the collision walls already keep
-     the performers in. Add a collision box across the steps (and anywhere else the
-     player could climb), and check the navmesh stays the performers' island.
-   - **Instruments timed to the song:** play drums only in the drum sections and everyone
-     elsewhere, from each song's `cues.json` `intensity` (drums and strings, 2.5 s
-     resolution).
-     - The stage script switches each bard's idle (`PlayIdle` the instrument or
-       `IdleStop`) at section changes, timed from the song's start like the singer
-       lines.
-     - **Faster, more intense playing:** OAR doesn't change playback speed as far as I
-       know (check its docs). Instead, generate faster copies of the vanilla loops (the
-       HKX codec can retime, as `rebase_folk.py` rebuilds clips), and swap them in with
-       OAR for the fair's bards, on a global the script sets from the intensity. Re-send
-       the idle when the level changes, so OAR re-evaluates (`docs/BARDS.md`, "Animation
-       side").
-7. **Dancing (Barry, last thing on 2026-09-23):**
-   - **Astra's folk dance never played; fix built, not yet deployed.**
-     - OAR's condition was `IsActorBase` on our records, but the folk dancers are
-       templated. In game they run on runtime copies: SPID's log shows their bases as
-       `FF0021C1` and `FF0012B0`. So OAR never matched, and they did Cicero's dance.
-     - Now each has its own keyword (`SkyrimFairFolkDancerMale`/`Female`, the last
-       records, so nothing renumbers). OAR's condition is `HasKeyword`, in the same
-       format as EVG Conditional Idles.
-     - Built (`e166ad798013ffe2...`), committed, but **not deployed**: `deploy.py` hit
-       "Permission denied" on `SkyrimFair.esp`, with the game or MO2 holding it. Deploy
-       first thing; nothing was copied, so the mod folder is consistent.
-     - Then check OAR's in-game menu lists "Skyrim Fair folk dance", and that the pair
-       turn together.
-     - **Same trap elsewhere:** anything conditioned on a fair NPC's base record fails
-       for templated NPCs. Use keywords.
-   - **Audit the dance mod for variety:** `external/Professional Dancer 124608 1.5.0
-     ....7z` (CC BY-NC 4.0, to use as a dependency, not bundle; `CREDITS.md`).
-     - How does it make an NPC dance: spell, package, keyword, script API, OAR or
-       behaviour?
-     - What dances does it have?
-     - Can the stage script start and stop them per dancer, with the songs?
-     - Or can its clips feed our existing replay-at-clip-end scheme through OAR, on a
-       keyword, as the folk dance does?
-   - **The crowd in the instrument timing:** some songs, or sections, have the crowd
-     cheering and clapping instead of dancing.
-     - Drive it from the same per-song schedule as the instruments (`cues.json`
-       `intensity`, or a per-song "crowd mode" in the config).
-     - The script switches the dancers' idles (dance / cheer / clap) at section changes,
-       timed from the song's start.
-   - **Crowd idles Barry picked for the cheering parts:**
-     - `IdleCivilWarCheer` (`0F7C8C`), with no conditions
-     - `IdleApplaud2`–`5` (`0D8730`–`0D8733`); their only conditions are no shield and
-       no torch out
-     - `IdleApplaud2`, `3` and `IdleCivilWarCheer` are already the dancers' `CheerIdles`
-     - These are one-shot clips like the dances: replay each as it ends (read the clips'
-       lengths from the archive, as for the Cicero dances)
-8. **Built 2026-09-24.** Stage dressing (Barry, 2026-09-23 night):
-   - **Holidays' lanterns hanging from the stage roof:**
-     - the same lanterns as the overhead runs: `035D0D`, `035D12`–`035D16`, from
-       `Holidays.esp`
-     - hung from the roof rafters: `stage.rafters`, u −780 to 780 across, v −540 to 540,
-       z 690 in the stage's frame
-     - check each lantern model's hanging point, so they hang from the beam and don't
-       float or sink into it
-   - **Whiterun flags at the back of the stage:** `CityBannerWhiterun01` (`0D2025`), and
-     `CivilWarBanner01` (`060166`) poles as the `banner_whiterun` module uses them, along
-     the back wall (the deck's back edge is y ≈ 6000, facing the square).
-   - **FormID-safe:** the stage is built early, so add both as late-built dressing (the
-     late section, appended) or with `reserve`, never inside the stage's own records.
-9. **Afterwards, from the backlog, as Barry chooses:**
+1. **Barry's checks** from yesterday's builds (the lists are in `docs/AUDIT.md`'s last
+   three passes):
+   - the exterior's path, flags and gate doors
+   - the outside music level, and the fireworks at night
+   - the more-life details above
+   - Put the live-grass test settings back if they're still on: `SetGrassLoadCreate = 1`
+     in `GrassCacheHelperNG.ini`, and `bAllowCreateGrass=0` in the profile's `skyrim.ini`.
+2. **The singers move: "maybe like crab walking style"** (sidestepping across the deck,
+   facing the crowd). Plan first, then build.
+   - A patrol package between deck markers turns them to walk.
+   - Real sidestepping may come from `KeepOffsetFromActor` on an invisible pacing actor,
+     or from OAR swapping a strafe animation while they move.
+   - Test on the deck's own navmesh island; `Say()` works while walking.
+3. **Exterior follow-ups, as Barry chooses:**
+   - Tamriel's navmesh isn't cut by the wall (NPCs may walk into it).
+   - No LOD: it shows only within about two cells. DynDOLOD or xLODGen object LOD would
+     show it from the mountains; that's a Barry-run tool.
+   - More inside for the view from above: a few tents or stalls.
+4. **Grass for release:** if Barry likes it, generate a grass cache for `SkyrimFairWorld`
+   (a precache run, keeping only its `.cgid` files) to ship.
+5. **From the backlog, as Barry chooses:**
    - vendor inventories at festival prices (`docs/STALLS.md`)
    - the MCM (`docs/MCM.md`)
    - the 6 trades not yet placed
-   - the music heard outside the Tamriel gate
-   - bard animation variants (`docs/BARDS.md`, "Animation side")
+   - bard animation variants (`docs/BARDS.md`)
    - the release checklist (`docs/RELEASE.md`)
 
 **Housekeeping to know:**
@@ -338,14 +189,19 @@ repo.
 - Some records are kept only so no FormID moves: the retired guard's FormList, the
   `SkyrimFairAtFair` global, and `SkyrimFairNpcGuard.pex`. Drop the pex from any release
   package.
+- The old Tamriel terrace code (`FairFoundation.cs`) still runs, so its FormIDs stay
+  allocated; `FairExterior` drops its references. Don't delete the code without reserving
+  its IDs.
+- Don't write to Barry's MO2 profile or other mods' folders. The auto-mode classifier
+  refuses it, and Barry installs mods himself. `deploy.py` into `mods/Skyrim Fair` is fine.
 
-**Open items before any public release** (the full list, with requirements and optional
-files, is `docs/RELEASE.md`; keep it current):
-- **ship the SPID exclusion patches** (`dist/spid/`, for Maximum Destruction and Stealth
-  Detection Fixes) as optional files. Without them the fair freezes the game for those
-  mods' users. The ESP condition patches were tried and don't work
+**Open items before any public release** (the full list is `docs/RELEASE.md`; keep it
+current):
+- ship the SPID exclusion patches (`dist/spid/`) as optional files
+- a grass cache for the fair's worldspace, with the mod-page note
+- the Tamriel exterior's limits: the navmesh, LOD, and landscape mods in that area
+- Professional Dancer: optional but recommended (Dance.esp, then Pandora); nothing of it ships
 - permission for the Whiterun stonefloor textures
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance
 - Stroti can't be re-uploaded (see `CREDITS.md`)
-- performance: about 190 actors and about 24 real lights near the stage at night (tomorrow's plan)
