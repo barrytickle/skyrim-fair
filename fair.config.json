@@ -3354,14 +3354,14 @@
       "centreWear": 0.2
     },
     "collisionWalls": [
-      {"name": "stage steps foot", "from": [1661, 4523], "to": [2435, 4523]},
-      {"name": "stage steps west", "from": [1661, 4523], "to": [1661, 5073]},
-      {"name": "stage steps east", "from": [2435, 4523], "to": [2435, 5073]},
-      {"name": "stage front west", "from": [1158, 5073], "to": [1661, 5073]},
-      {"name": "stage front east", "from": [2435, 5073], "to": [2938, 5073]},
-      {"name": "stage west", "from": [1158, 5073], "to": [1158, 6015]},
-      {"name": "stage east", "from": [2938, 5073], "to": [2938, 6015]},
-      {"name": "stage back", "from": [1158, 6015], "to": [2938, 6015]}
+      {"name": "stage steps foot", "from": [1661, 4523], "to": [2435, 4523], "layer": 3},
+      {"name": "stage steps west", "from": [1661, 4523], "to": [1661, 5073], "layer": 3},
+      {"name": "stage steps east", "from": [2435, 4523], "to": [2435, 5073], "layer": 3},
+      {"name": "stage front west", "from": [1158, 5073], "to": [1661, 5073], "layer": 3},
+      {"name": "stage front east", "from": [2435, 5073], "to": [2938, 5073], "layer": 3},
+      {"name": "stage west", "from": [1158, 5073], "to": [1158, 6015], "layer": 3},
+      {"name": "stage east", "from": [2938, 5073], "to": [2938, 6015], "layer": 3},
+      {"name": "stage back", "from": [1158, 6015], "to": [2938, 6015], "layer": 3}
     ],
     "stallDirectory": "docs/STALLS.md",
     "audio": {

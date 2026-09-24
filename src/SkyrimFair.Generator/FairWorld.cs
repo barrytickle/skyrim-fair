@@ -332,6 +332,7 @@ internal static class FairWorld
                 Put(new PlacedObject(mod)
                 {
                     Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
+                    CollisionLayer = wall.Layer,
                     Primitive = new PlacedPrimitive
                     {
                         // Half-extents: across, along, up.

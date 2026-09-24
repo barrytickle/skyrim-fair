@@ -3180,6 +3180,13 @@ internal sealed record CollisionWall
 
     /// <summary>Longest single box; longer segments are split.</summary>
     public float PieceLength { get; init; } = 256f;
+
+    /// <summary>
+    /// The box's collision layer index, or none for the default (CollisionBox). 3,
+    /// L_TRANSPARENT, blocks the player and NPCs but not arrows, and SkyParkour won't climb
+    /// onto it (its ledge check excludes Transparent), so it can't be vaulted.
+    /// </summary>
+    public uint? Layer { get; init; }
 }
 
 /// <summary>

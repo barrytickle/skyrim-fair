@@ -2,7 +2,26 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the stage show, B1: the cheer starts as the last note rings (2026-09-24)
+## Current pass: the stage show, B2: the stage walls can't be vaulted (2026-09-24)
+
+Barry could get onto the stage "from vaulting on the walls round the back and sides, and
+jumping on the stairs from a different angle".
+
+- **The cause: SkyParkour** (in the modlist). Its ledge check climbs onto any collision
+  layer except NonCollidable, CharController, Weapon, Projectile, Transparent, Clutter,
+  Biped, ActorZone and DebrisLarge (`include/_References/ExclusionLists.h` in
+  github.com/Tsptds/skyrim-SkyParkourNG). The stage's 29 invisible boxes had no layer
+  set, which is CollisionBox: a 400-high ledge to mantle onto and drop over.
+- **Fix:** `collisionWalls[].layer: 3`, **L_TRANSPARENT**. Read from Skyrim.esm's COLL
+  records, it collides with the character controller and bipeds (player and NPCs) but not
+  projectiles. Vanilla uses it on 22 CollisionMarker boxes, and SkyParkour excludes it
+  from climbing. Only the boxes' `XCZC` layer changes.
+- Plugin `27bae193c1a05128...`, deterministic; all 3,892 records keep FormID identity;
+  navmesh unchanged (9 meshes, 7,515 triangles). Deployed.
+- **To test:** try to vault the walls at the back and sides, and jump at the steps from
+  the side. Do the band and singers still stay in?
+
+## Previous pass: the stage show, B1: the cheer starts as the last note rings (2026-09-24)
 
 - **Before:** the cheer waited for the song's full measured length on the update timer
   (late when Papyrus is busy), then stopped the song. The files end within 0.06-0.52 s of
