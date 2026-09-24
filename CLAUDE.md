@@ -106,7 +106,7 @@ real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
 - **more life** (`fairWorld.life`, plugin `904835d8...`; **Barry: the decorations "look
-  fantastic"**, the grass test not yet reported): 34 Whiterun banners and pennant
+  fantastic"**; with live grass on, Barry saw the shrubs and "nice patches of grass"): 34 Whiterun banners and pennant
   ropes with lanterns on the palisade, 81 shrubs/ferns/flowers, a goat pen, pelt lines,
   lantern posts, tool corners, produce piles, smoke over the 5 fires, 6 chickens, 3 goats
   and 2 dogs; the grass LTEX has more grass, but this profile shows grass only from a cache
@@ -239,7 +239,9 @@ repo.
      - a patrol package between two or three deck markers (the deck is its own navmesh
        island; `Say()` still works while walking)
      - OAR-swapped "performing" idles (see the next item)
-   - **Generic lip sync instead of the tailored lines.** Barry: the tailored sync "doesn't
+   - **Generic lip sync: de-prioritised by Barry (2026-09-24): "they're too far away to see on stage".**
+   - **Singers moving: Barry wants them moving, "maybe like crab walking style" (sidestepping, facing the crowd).**
+   - (old note) **Generic lip sync instead of the tailored lines.** Barry: the tailored sync "doesn't
      seem to work that much". Options:
      - reuse vanilla bard songs' `.fuz` lip tracks (real singing mouths, not our words) as
        each line's lip file
