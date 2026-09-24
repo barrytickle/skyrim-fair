@@ -2,7 +2,26 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: arrangements of Fiddle and Hey-Ho, Skyrim, from their stems (2026-09-24)
+## Current pass: the crowd drifts into a change; no mid-song cheers (2026-09-24)
+
+Barry: **"I can't get on stage"** (the solid walls work, confirmed). And: "it feels a bit
+unnatural when the crowd goes to cheer from dancing. They just stop what they doing eerily
+and turn to the stage... Maybe we shouldn't have the cheer."
+
+- **No mid-song crowd cheers:** in Fiddle, Hey-Ho and Dragonborn-Approved each `cheer`
+  became `dance` (repeats merged). The song-end cheer stays.
+- **Changes drift in:** a crowd change no longer cuts every dancer off at once. Each dancer
+  takes the new mode up when the move in hand ends (clips of 6-9 s, so the floor changes
+  over a few seconds). A dancer switching into clap or cheer turns to the stage then,
+  alone, in the 3 smooth steps (`FaceStage(which)`).
+- The song-end cheer works the same way: `Cheer()` sets the cheer mode, and `Dance()`
+  keeps running through the cheer phase.
+- Plugin `8d824fb8095588e9...`, deterministic, FormIDs unchanged, deployed with the
+  scripts.
+- Audits of Professional Dancer (dance variety) and Fireworks (auto-triggering) are
+  running.
+
+## Previous pass: arrangements of Fiddle and Hey-Ho, Skyrim, from their stems (2026-09-24)
 
 The same method as Dragonborn-Approved.
 - **Fiddle** (202.8 s, onsets suggest 72 bpm, likely half-time):

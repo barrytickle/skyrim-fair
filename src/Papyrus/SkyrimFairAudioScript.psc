@@ -191,6 +191,8 @@ Float folkNext = 0.0
 Bool[] dancing
 Float[] danceEnds
 Int[] dancePlays
+; The crowd mode each dancer's last move was from.
+Int[] danceMode
 Float danceWake = 0.0
 Bool folkOn = False
 Int songsPlayed = 0
@@ -311,12 +313,17 @@ Event OnUpdate()
 		SingerGestures(now)
 		FolkDance(now)
 		Sing(now)
-	ElseIf bandOn && now >= bandUntil
-		StopBand(False)
+	Else
+		If phase == 3
+			Dance()
+		EndIf
+		If bandOn && now >= bandUntil
+			StopBand(False)
+		EndIf
 	EndIf
 
 	Float left = Seconds(phaseEnds - now)
-	If phase == 2 && danceWake > now && Seconds(danceWake - now) < left
+	If (phase == 2 || phase == 3) && danceWake > now && Seconds(danceWake - now) < left
 		left = Seconds(danceWake - now)
 	EndIf
 	If phase == 2 && folkOn && folkNext > now && Seconds(folkNext - now) < left
@@ -367,6 +374,7 @@ Function Advance(Float now)
 		dancing = new Bool[128]
 		danceEnds = new Float[128]
 		dancePlays = new Int[128]
+		danceMode = new Int[128]
 		folkOn = False
 		folkNext = 0.0
 		songStarted = now
@@ -643,16 +651,10 @@ Function Sections(Float now)
 		singing = mode > 0
 	EndIf
 	If crowd != crowdMode
+		; Each dancer takes the new mode up as their move in hand ends (Dance), so the crowd
+		; drifts into it rather than stopping as one.
 		Debug.Trace("SkyrimFairAudio: crowd " + crowd + " at " + into + " s")
 		crowdMode = crowd
-		Int i = 0
-		While i < dancing.Length
-			dancing[i] = False
-			i += 1
-		EndWhile
-		If crowd > 0
-			FaceStage()
-		EndIf
 	EndIf
 EndFunction
 
@@ -679,9 +681,9 @@ Bool Function Playing(Idle instrument)
 	Return True
 EndFunction
 
-; Every loaded dancer turns to face the stage (its speaker), over a few quick steps. A
-; dancer already facing it (within 10 degrees) stays as they are.
-Function FaceStage()
+; The chosen dancers turn to face the stage (its speaker), over a few quick steps. A dancer
+; already facing it (within 10 degrees) stays as they are.
+Function FaceStage(Bool[] which)
 	If !StageSpeaker
 		Return
 	EndIf
@@ -689,7 +691,7 @@ Function FaceStage()
 	Float[] turn = new Float[128]
 	Int i = 0
 	While i < Dancers.Length && i < 128
-		If Dancers[i] && Dancers[i].Is3DLoaded()
+		If which[i] && Dancers[i] && Dancers[i].Is3DLoaded()
 			start[i] = Dancers[i].GetAngleZ()
 			turn[i] = Dancers[i].GetHeadingAngle(StageSpeaker)
 		EndIf
@@ -748,14 +750,25 @@ Function Dance()
 		danceEnds = new Float[128]
 		dancePlays = new Int[128]
 	EndIf
+	If danceMode.Length < Dancers.Length
+		danceMode = new Int[128]
+	EndIf
 	Float now = Utility.GetCurrentGameTime()
 	Float perSecond = TimeScale.GetValue() / 86400.0
 	danceWake = 0.0
+	Bool[] turning = new Bool[128]
+	Bool anyTurn = False
 	Int i = 0
 	While i < Dancers.Length && i < dancing.Length
 		If (!dancing[i] || now >= danceEnds[i]) && Dancers[i] && Dancers[i].Is3DLoaded()
 			Int which = (i + dancePlays[i]) % idles.Length
 			If Dancers[i].PlayIdle(idles[which])
+				; Into clap or cheer from another mode: this dancer turns to the stage.
+				If crowdMode > 0 && danceMode[i] != crowdMode
+					turning[i] = True
+					anyTurn = True
+				EndIf
+				danceMode[i] = crowdMode
 				dancing[i] = True
 				dancePlays[i] = dancePlays[i] + 1
 				Float clipSeconds = 6.0
@@ -770,6 +783,9 @@ Function Dance()
 		EndIf
 		i += 1
 	EndWhile
+	If anyTurn
+		FaceStage(turning)
+	EndIf
 EndFunction
 
 ; Every line whose start has come is said by all three singers. Each start is measured
@@ -822,20 +838,13 @@ Function Cheer()
 		EndIf
 		s += 1
 	EndWhile
-	If CheerIdles.Length == 0
-		Return
+	; The floor cheers as each dancer's move ends (Dance runs through the cheer too).
+	If CheerIdles.Length > 0
+		crowdMode = 2
 	EndIf
-	FaceStage()
-	Int i = 0
-	While i < Dancers.Length
-		If Dancers[i] && Dancers[i].Is3DLoaded()
-			Dancers[i].PlayIdle(CheerIdles[i % CheerIdles.Length])
-		EndIf
-		i += 1
-	EndWhile
 	nextLine = -1
 	; The folk pair stops, and starts afresh with the next song.
-	i = 0
+	Int i = 0
 	While i < FolkDancers.Length
 		If FolkDancers[i] && FolkDancers[i].Is3DLoaded()
 			FolkDancers[i].PlayIdle(BandStop)

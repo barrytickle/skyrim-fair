@@ -99,7 +99,7 @@ Plugin `d9a2f942bf8b4f68...` (stage show: cheer lead-in, solid stage walls, per-
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage, **crowd culling at margin 512** (a big fps gain; distant
-pop-in only when looking for it), and **the varied crowd** (the new face pool). Performance "stable", but he has a frame-generation mod on, so
+pop-in only when looking for it), **the varied crowd** (the new face pool), and **the stage can't be climbed** (the solid invisible walls). Performance "stable", but he has a frame-generation mod on, so
 real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
