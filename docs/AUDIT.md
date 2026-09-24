@@ -2,7 +2,26 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the singers move: gestures while singing, clapping while resting, a wave at the end (2026-09-24)
+## Current pass: "rest" holds the instrument; "away" puts it away (2026-09-24)
+
+Barry: "is there a way we can use "rest" to just have them idle with the instrument there?
+That way they're not putting the instrument away every 30s mid song".
+
+- The instrument levels are now `rest` (0: held, still), `normal` (1), `fast` (2) and
+  `away` (3: put away, the old rest).
+- `build_tempo.py` also writes `<Instrument>Rest/`: each loop with its first frame (the
+  pose it starts from, straight out of taking the instrument up) on every frame, at the
+  same length. Read back: largest movement 0.
+- The generator writes a `Rest` submod per instrument (`SkyrimFairTempo<Instrument>` ==
+  0, interruptible) beside the `Fast` ones.
+- The script puts an instrument away only on `away`. Every level change sets the tempo
+  global, so OAR swaps in the held, normal or fast loop.
+- The seeded `rest` stretches (the drum's calm parts) now hold. The plugin is unchanged
+  (`d9a2f942...`): the change is the script and the OAR clips and configs, deployed.
+- **To test:** in Fiddle's calm stretches (0:00, 0:37.5), do the drummers stand holding
+  their sticks, still, and play again at 0:22.5 and 0:50?
+
+## Previous pass: the singers move: gestures while singing, clapping while resting, a wave at the end (2026-09-24)
 
 Barry: "For the singers, i'd like them to have animations, so they're not just stood still".
 

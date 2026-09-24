@@ -2661,7 +2661,7 @@ internal sealed record StageSong
     public string Cheer { get; init; } = string.Empty;
 
     /// <summary>
-    /// Each instrument's timeline: [second, "rest" | "normal" | "fast"], from the song's
+    /// Each instrument's timeline: [second, "rest" | "normal" | "fast" | "away"], from the song's
     /// start, an entry where it changes. Whoever plays that instrument follows it (a
     /// resting instrument is put away). None: it plays throughout.
     /// </summary>

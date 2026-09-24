@@ -1168,7 +1168,7 @@ internal static class FairWorld
         // level (0 rest, 1 normal, 2 fast); while it's 2, OAR swaps in that instrument's fast loop
         // (tools/bards/build_tempo.py) for the fair's NPCs. Interruptible, so the switch lands on
         // the section rather than at the end of a 17 s loop.
-        if (audio is not null && config.Audio.Stage.Fast.Count > 0)
+        if (audio is not null && config.Audio.Stage.Instruments.Count > 0)
         {
             var stageScript = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
             var npcKeyword = mod.Keywords.First(k => k.EditorID == config.NpcKeyword);
@@ -1181,7 +1181,7 @@ internal static class FairWorld
             {
                 name = "Skyrim Fair tempo",
                 author = "Skyrim Fair",
-                description = "The fair's musicians only: faster copies of the vanilla instrument loops, for the fast stretches of a song.",
+                description = "The fair's musicians only: faster and held copies of the vanilla instrument loops, for the fast and rest stretches of a song.",
             }, json));
             object Form(FormKey key) => new Dictionary<string, string> { ["pluginName"] = mod.ModKey.FileName, ["formID"] = key.ID.ToString("X") };
             var tempo = new List<FormKey>();
@@ -1191,37 +1191,46 @@ internal static class FairWorld
                 var global = new GlobalFloat(mod) { EditorID = $"SkyrimFairTempo{name}", Data = 1f };
                 mod.Globals.Add(global);
                 tempo.Add(global.FormKey);
-                if (!config.Audio.Stage.Fast.TryGetValue(instrument, out var speed))
+                // A submod per level with its own clips: fast (the loop sped up) and rest (held
+                // still on its first frame), both from tools/bards/build_tempo.py.
+                var subs = new List<(string Sub, int Level, string Description)>
                 {
-                    continue;
+                    ($"{name}Rest", 0, $"The fair's {instrument} players hold it, still, while {global.EditorID} is 0 (rest)."),
+                };
+                if (config.Audio.Stage.Fast.TryGetValue(instrument, out var speed))
+                {
+                    subs.Add(($"{name}Fast", 2, $"The fair's {instrument} players' loop, {speed}x, while {global.EditorID} is 2 (fast)."));
                 }
 
-                var sub = Path.Combine(folder, $"{name}Fast");
-                Directory.CreateDirectory(sub);
-                File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+                foreach (var (subName, level, description) in subs)
                 {
-                    ["name"] = $"{name}, fast",
-                    ["description"] = $"The fair's {instrument} players' loop, {speed}x, while {global.EditorID} is 2.",
-                    ["priority"] = 1900000001,
-                    ["interruptible"] = true,
-                    ["conditions"] = new object[]
+                    var sub = Path.Combine(folder, subName);
+                    Directory.CreateDirectory(sub);
+                    File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
                     {
-                        new Dictionary<string, object>
+                        ["name"] = $"{name}, {(level == 0 ? "rest" : "fast")}",
+                        ["description"] = description,
+                        ["priority"] = 1900000001,
+                        ["interruptible"] = true,
+                        ["conditions"] = new object[]
                         {
-                            ["condition"] = "HasKeyword",
-                            ["requiredVersion"] = "1.0.0.0",
-                            ["Keyword"] = new Dictionary<string, object> { ["form"] = Form(npcKeyword.FormKey) },
+                            new Dictionary<string, object>
+                            {
+                                ["condition"] = "HasKeyword",
+                                ["requiredVersion"] = "1.0.0.0",
+                                ["Keyword"] = new Dictionary<string, object> { ["form"] = Form(npcKeyword.FormKey) },
+                            },
+                            new Dictionary<string, object>
+                            {
+                                ["condition"] = "CompareValues",
+                                ["requiredVersion"] = "1.0.0.0",
+                                ["Value A"] = new Dictionary<string, object> { ["form"] = Form(global.FormKey) },
+                                ["Comparison"] = "==",
+                                ["Value B"] = new Dictionary<string, object> { ["value"] = (double)level },
+                            },
                         },
-                        new Dictionary<string, object>
-                        {
-                            ["condition"] = "CompareValues",
-                            ["requiredVersion"] = "1.0.0.0",
-                            ["Value A"] = new Dictionary<string, object> { ["form"] = Form(global.FormKey) },
-                            ["Comparison"] = "==",
-                            ["Value B"] = new Dictionary<string, object> { ["value"] = 2.0 },
-                        },
-                    },
-                }, json));
+                    }, json));
+                }
             }
 
             stageScript.Properties.Add(new ScriptObjectListProperty

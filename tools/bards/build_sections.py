@@ -9,7 +9,7 @@ intensity from the bass band (build_vocals.intensity: calm / normal / intense, 2
 steps, blips under 5 s merged).
 
 Each song gets a timeline per part of the show, [second, what], an entry where it changes:
-- lute, drum, flute: rest (whoever plays it puts it away), normal or fast
+- lute, drum, flute: rest (held, still), normal, fast, or away (put away)
 - singers: sing or rest (resting, their lines are skipped)
 - crowd: dance, clap or cheer (the dancers' idles)
 The seed rests the drum and claps where the drums are calm (from the bass band), and

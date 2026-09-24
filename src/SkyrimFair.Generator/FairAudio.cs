@@ -235,7 +235,8 @@ internal static class FairAudio
         var instruments = new[] { "lute", "drum", "flute" };
         IEnumerable<(float Start, int[] Play, int Sing, int Crowd)> SongSections(StageSong song)
         {
-            var levels = new[] { "rest", "normal", "fast" };
+            // 0 rest (holding it, still), 1 normal, 2 fast, 3 away (put away).
+            var levels = new[] { "rest", "normal", "fast", "away" };
             var play = new[] { song.Lute, song.Drum, song.Flute }
                 .Select((entries, k) => Timeline(song, instruments[k], entries, levels)).ToArray();
             var sing = Timeline(song, "singers", song.Singers, new[] { "rest", "sing" });

@@ -1,4 +1,4 @@
-"""Fast copies of the vanilla instrument loops, for a song's "fast" stretches.
+"""Fast and held copies of the vanilla instrument loops, for a song's "fast" and "rest" stretches.
 
     python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"
 
@@ -7,10 +7,14 @@ faster), extracts that instrument's vanilla loop(s) from the archives and writes
 that plays that much faster: every frame kept, the frame time (and so the clip's length and
 its blocks') divided by the speed. The loops carry no annotations, so nothing else moves.
 
+It also writes a held copy of every instrument's loop, for "rest": the loop's first frame
+(the pose it starts from, straight from taking the instrument up) on every frame, the same
+length, so the player stands holding the instrument, still, instead of putting it away.
+
 Written to assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairTempo/
-<Instrument>Fast/, where Open Animation Replacer swaps them in for the fair's musicians
-while the stage script holds that instrument's tempo global at 2 (the generator writes the
-submods' config.json with those conditions). Derived from vanilla files, so git-ignored and
+<Instrument>Fast/ and <Instrument>Rest/, where Open Animation Replacer swaps them in for the
+fair's musicians while the stage script holds that instrument's tempo global at 2 (fast) or
+0 (rest); the generator writes the submods' config.json with those conditions. Derived from vanilla files, so git-ignored and
 shipped only in the built mod, as the static props are.
 
 Plain Python: the vendored PyNifly HKX codec (GPL-3.0, character-actors/folk-dance/vendor)
@@ -49,6 +53,33 @@ def main():
 
     show = json.loads((ROOT / 'songs.config.json').read_text(encoding='utf-8'))
     speeds = show.get('fast', {})
+    def source(clip):
+        src = WORK / clip
+        if not src.exists():
+            subprocess.run([sys.executable, str(ROOT / 'tools' / 'bsa_extract.py'), '--data', args.data,
+                            '--extract', f'meshes/actors/character/animations/{clip}', '--out', str(WORK)],
+                           check=True, capture_output=True)
+        return src
+
+    # Held copies, for "rest": the first frame on every frame.
+    for instrument, clips in CLIPS.items():
+        sub = OUT / f'{instrument.capitalize()}Rest'
+        sub.mkdir(parents=True, exist_ok=True)
+        for clip in clips:
+            src = source(clip)
+            anim = load_skyrim_animation(str(src))
+            for t in anim.tracks:
+                t.translations = [t.translations[0]] * len(t.translations)
+                t.rotations = [t.rotations[0]] * len(t.rotations)
+                t.scales = [t.scales[0]] * len(t.scales)
+            target = sub / clip
+            write_skyrim_animation(str(target), anim, ptr_size=src.read_bytes()[16])
+            back = load_skyrim_animation(str(target))
+            moved = max(abs(a - b) for t in back.tracks for f in t.rotations for a, b in zip(f, t.rotations[0]))
+            sha = hashlib.sha256(target.read_bytes()).hexdigest()
+            print(f'{instrument} rest: {clip} held on its first frame, {back.duration:.3f} s, '
+                  f'largest movement {moved:.5f}; sha256 {sha[:16]}')
+
     for instrument, speed in speeds.items():
         if instrument not in CLIPS:
             sys.exit(f'songs.config.json fast: no loop known for "{instrument}" (known: {", ".join(CLIPS)})')
@@ -57,11 +88,7 @@ def main():
         sub = OUT / f'{instrument.capitalize()}Fast'
         sub.mkdir(parents=True, exist_ok=True)
         for clip in CLIPS[instrument]:
-            src = WORK / clip
-            if not src.exists():
-                subprocess.run([sys.executable, str(ROOT / 'tools' / 'bsa_extract.py'), '--data', args.data,
-                                '--extract', f'meshes/actors/character/animations/{clip}', '--out', str(WORK)],
-                               check=True, capture_output=True)
+            src = source(clip)
             anim = load_skyrim_animation(str(src))
             if anim.annotations:
                 sys.exit(f'{clip}: has annotations, which a retime would have to move too')

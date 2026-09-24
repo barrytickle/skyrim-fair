@@ -109,12 +109,14 @@ Float[] Property SectionStarts Auto
 Int[] Property SectionDrums Auto
 {Retired (the drums alone): a save keeps its old value; SectionPlay has every instrument now.}
 Int[] Property SectionPlay Auto
-{For each section, each instrument in InstrumentIdles in turn: 0 rest, 1 play, 2 intense.}
+{For each section, each instrument in InstrumentIdles in turn: 0 rest (held, still), 1 normal,
+2 fast, 3 away (put away).}
 Idle[] Property InstrumentIdles Auto
 {The instruments with timelines (lute, drum, flute): a musician whose idle is one follows it.}
 GlobalVariable[] Property InstrumentTempo Auto
 {Each instrument's tempo global (InstrumentIdles order), held at its level: 0 rest, 1 normal,
-2 fast. Open Animation Replacer plays a faster loop for the fair's musicians while it's 2.}
+2 fast, 3 away. Open Animation Replacer plays a held loop for the fair's musicians while it's
+0 and a faster one while it's 2.}
 Int[] Property SectionSing Auto
 {For each section: 1 the singers sing (their lines are said), 0 they rest (lines skipped).}
 Int[] Property SectionCrowd Auto
@@ -568,7 +570,8 @@ Function SingerGestures(Float now)
 EndFunction
 
 ; Every section whose start has come is applied, from the song's own start (so timer error
-; never adds up). A resting instrument's players put theirs away and take it up again after;
+; never adds up). An instrument sent away is put away and taken up again after; a resting one
+; is held still (OAR plays a held loop on the tempo global);
 ; resting singers skip their lines; a change of crowd mode gives each dancer the new mode's
 ; idle straight away.
 Function Sections(Float now)
@@ -596,9 +599,11 @@ Function Sections(Float now)
 		Int k = 0
 		While k < count && k < 8
 			Int level = SectionPlay[applied * count + k]
-			If (level > 0) != (playLevel[k] > 0)
+			If level != playLevel[k]
 				Debug.Trace("SkyrimFairAudio: instrument " + k + " level " + level + " at " + into + " s")
-				If level == 0
+			EndIf
+			If (level == 3) != (playLevel[k] == 3)
+				If level == 3
 					Rest(Band, BandIdles, bandPlaying, InstrumentIdles[k])
 					Rest(Orchestra, OrchestraIdles, orchestraPlaying, InstrumentIdles[k])
 				EndIf
@@ -645,7 +650,7 @@ Bool Function Playing(Idle instrument)
 	Int k = 0
 	While k < InstrumentIdles.Length && k < playLevel.Length
 		If InstrumentIdles[k] == instrument
-			Return playLevel[k] > 0
+			Return playLevel[k] != 3
 		EndIf
 		k += 1
 	EndWhile
