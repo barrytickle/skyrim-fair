@@ -2578,7 +2578,11 @@ internal sealed record StageAudioConfig
 
     public CrowdMove SingerRest { get; init; } = new();
 
+    /// <summary>A "cheer" stretch of the singers' timeline.</summary>
     public CrowdMove SingerCheer { get; init; } = new();
+
+    /// <summary>The move each singer makes at a song's end.</summary>
+    public CrowdMove SingerEnd { get; init; } = new();
 
     public float SingerGap { get; init; } = 2f;
 
@@ -2671,7 +2675,7 @@ internal sealed record StageSong
 
     public List<System.Text.Json.JsonElement[]> Flute { get; init; } = new();
 
-    /// <summary>The singers' timeline: [second, "sing" | "rest"]; resting, their lines are skipped. None: they sing.</summary>
+    /// <summary>The singers' timeline: [second, "sing" | "rest"]; resting, their lines are skipped (and they clap). None: they sing.</summary>
     public List<System.Text.Json.JsonElement[]> Singers { get; init; } = new();
 
     /// <summary>The crowd's timeline: [second, "dance" | "clap" | "cheer"]. None: they dance throughout.</summary>
@@ -3382,7 +3386,7 @@ internal sealed record StageShowFile
     /// <summary>How many times faster each instrument's loop plays in a "fast" stretch.</summary>
     public Dictionary<string, float> Fast { get; init; } = new();
 
-    /// <summary>sing, rest and cheer: the singers' gestures while singing, while resting, and at a song's end.</summary>
+    /// <summary>sing, rest, cheer and end: the singers' gestures while singing, while resting, in a cheer stretch, and at a song's end.</summary>
     public Dictionary<string, CrowdMove> SingerMoves { get; init; } = new();
 
     /// <summary>Seconds each singer stands between moves.</summary>

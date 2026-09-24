@@ -79,6 +79,7 @@ try
                         SingerSing = show.SingerMoves.GetValueOrDefault("sing") ?? new CrowdMove(),
                         SingerRest = show.SingerMoves.GetValueOrDefault("rest") ?? new CrowdMove(),
                         SingerCheer = show.SingerMoves.GetValueOrDefault("cheer") ?? new CrowdMove(),
+                        SingerEnd = show.SingerMoves.GetValueOrDefault("end") ?? new CrowdMove(),
                         SingerGap = show.SingerGap,
                     },
                 },

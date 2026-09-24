@@ -2,7 +2,22 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Barry's own arrangement of Round the Green (2026-09-24)
+## Current pass: the singers cheer while they sing and clap while they rest (2026-09-24)
+
+Barry: "can we have a civilwarcheer emote for the bards as they're singing?", then "can we
+just bind cheer to "sing" clap to "rest"".
+
+- `singerMoves.sing` is IdleCivilWarCheer alone (4.767 s), `rest` is IdleApplaud2/3, and
+  the song-end wave moved to its own `end` (script property `SingerEndMove`;
+  `SingerCheerMove` retired).
+- When the singers' timeline switches (sing <-> rest), each singer starts the new mode's
+  move at once instead of finishing the gesture in hand.
+- (A separate "cheer" singers option was built and removed again at Barry's word. The
+  script's `SingerCheerMoves` stays declared, and unused.)
+- Plugin `bdee0e603aabfbe8...`, deterministic, FormIDs unchanged, deployed with the
+  scripts.
+
+## Previous pass: Barry's own arrangement of Round the Green (2026-09-24)
 
 - Barry wrote Round the Green's five timelines by hand (lute 19 entries, drum 32, flute 8,
   singers 11, crowd dancing throughout).

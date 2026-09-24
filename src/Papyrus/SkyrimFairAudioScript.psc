@@ -95,6 +95,12 @@ Idle[] Property SingerRestMoves Auto
 Float[] Property SingerRestLengths Auto
 {While the singers rest (a song's singers timeline), these instead (clapping along).}
 Idle Property SingerCheerMove Auto
+{Retired: the song-end move is SingerEndMove now.}
+Idle[] Property SingerCheerMoves Auto
+Float[] Property SingerCheerLengths Auto
+{A "cheer" stretch of the singers' timeline: they break into these (the Civil War cheer) at
+once, replayed through the stretch, and keep singing their lines.}
+Idle Property SingerEndMove Auto
 {At a song's end, with the crowd's cheer (a wave).}
 Float Property SingerGap = 2.0 Auto
 {Seconds each singer stands between moves.}
@@ -118,7 +124,8 @@ GlobalVariable[] Property InstrumentTempo Auto
 2 fast, 3 away. Open Animation Replacer plays a held loop for the fair's musicians while it's
 0 and a faster one while it's 2.}
 Int[] Property SectionSing Auto
-{For each section: 1 the singers sing (their lines are said), 0 they rest (lines skipped).}
+{For each section: 1 the singers sing (their lines are said), 2 they sing and cheer, 0 they
+rest (lines skipped).}
 Int[] Property SectionCrowd Auto
 {0 the dancers dance, 1 they clap, 2 they cheer.}
 Int[] Property SongFirstSection Auto
@@ -198,6 +205,7 @@ Int drumLevel = 1
 ; Each instrument's level (InstrumentIdles order) and whether the singers sing.
 Int[] playLevel
 Bool singing = True
+Int singMode = 1
 Int crowdMode = 0
 ; Each singer's next move (game time) and how many they've made, and the soonest due.
 Float[] singerNext
@@ -373,6 +381,7 @@ Function Advance(Float now)
 		EndWhile
 		SetTempo(1)
 		singing = True
+		singMode = 1
 		; The singers' first moves, staggered.
 		singerNext = new Float[16]
 		singerPlays = new Int[16]
@@ -542,6 +551,9 @@ Function SingerGestures(Float now)
 	If !singing
 		moves = SingerRestMoves
 		lengths = SingerRestLengths
+	ElseIf singMode == 2 && SingerCheerMoves.Length > 0
+		moves = SingerCheerMoves
+		lengths = SingerCheerLengths
 	EndIf
 	If moves.Length == 0
 		Return
@@ -614,11 +626,21 @@ Function Sections(Float now)
 			playLevel[k] = level
 			k += 1
 		EndWhile
-		Bool sing = applied >= SectionSing.Length || SectionSing[applied] > 0
-		If sing != singing
-			Debug.Trace("SkyrimFairAudio: singers " + sing + " at " + into + " s")
+		Int mode = 1
+		If applied < SectionSing.Length
+			mode = SectionSing[applied]
 		EndIf
-		singing = sing
+		If mode != singMode
+			Debug.Trace("SkyrimFairAudio: singers " + mode + " at " + into + " s")
+			; A new mode's move starts now, not when the last gesture ends.
+			Int si = 0
+			While si < singerNext.Length
+				singerNext[si] = now
+				si += 1
+			EndWhile
+		EndIf
+		singMode = mode
+		singing = mode > 0
 	EndIf
 	If crowd != crowdMode
 		Debug.Trace("SkyrimFairAudio: crowd " + crowd + " at " + into + " s")
@@ -794,9 +816,9 @@ EndFunction
 ; The song's end: the singers wave, and the floor turns to the stage and claps and cheers.
 Function Cheer()
 	Int s = 0
-	While SingerCheerMove && s < Singers.Length
+	While SingerEndMove && s < Singers.Length
 		If Singers[s] && Singers[s].Is3DLoaded()
-			Singers[s].PlayIdle(SingerCheerMove)
+			Singers[s].PlayIdle(SingerEndMove)
 		EndIf
 		s += 1
 	EndWhile

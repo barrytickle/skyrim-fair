@@ -305,6 +305,8 @@ internal static class FairAudio
             new ScriptObjectListProperty { Name = "SingerRestMoves", Objects = Moves(config.Stage.SingerRest).Idles },
             new ScriptFloatListProperty { Name = "SingerRestLengths", Data = Moves(config.Stage.SingerRest).Lengths },
             Float("SingerGap", config.Stage.SingerGap),
+            new ScriptObjectListProperty { Name = "SingerCheerMoves", Objects = Moves(config.Stage.SingerCheer).Idles },
+            new ScriptFloatListProperty { Name = "SingerCheerLengths", Data = Moves(config.Stage.SingerCheer).Lengths },
             new ScriptFloatListProperty { Name = "SectionStarts", Data = Sections().Select(x => x.Start).ToExtendedList() },
             new ScriptIntListProperty { Name = "SectionPlay", Data = Sections().SelectMany(x => x.Play).ToExtendedList() },
             new ScriptIntListProperty { Name = "SectionSing", Data = Sections().Select(x => x.Sing).ToExtendedList() },
@@ -331,9 +333,9 @@ internal static class FairAudio
             Obj("BandStop", FormKeyHelper.Parse(config.Stage.BandStop)),
             new ScriptObjectListProperty { Name = "Archers", Objects = archers.Select(a => Obj("", a)).ToExtendedList() },
         });
-        if (config.Stage.SingerCheer.Idles.Count > 0)
+        if (config.Stage.SingerEnd.Idles.Count > 0)
         {
-            script.Properties.Add(Obj("SingerCheerMove", FormKeyHelper.Parse(config.Stage.SingerCheer.Idles[0])));
+            script.Properties.Add(Obj("SingerEndMove", FormKeyHelper.Parse(config.Stage.SingerEnd.Idles[0])));
         }
 
         var adapter = new QuestAdapter();
