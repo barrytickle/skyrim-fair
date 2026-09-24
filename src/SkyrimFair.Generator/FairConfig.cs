@@ -129,6 +129,9 @@ internal sealed record FairWorldConfig
     /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
     public NavmeshConfig Navmesh { get; init; } = new();
 
+    /// <summary>The faces the fair's face lists are filled with (see <see cref="FacePoolConfig"/>).</summary>
+    public FacePoolConfig Faces { get; init; } = new();
+
     /// <summary>Unseen crowd switched off where the player is (see <see cref="CrowdCullingConfig"/>).</summary>
     public CrowdCullingConfig CrowdCulling { get; init; } = new();
 
@@ -3221,4 +3224,59 @@ internal sealed record CrowdCullingConfig
 
     /// <summary>Named spots reported at build time, as [x, y].</summary>
     public Dictionary<string, float[]> ReportAt { get; init; } = new();
+}
+
+/// <summary>
+/// The pool the fair's face lists are filled from (<see cref="FairFaces"/>): generic vanilla
+/// NPCs of the weighted races, with their own face and FaceGen, no warpaint or scars.
+/// </summary>
+internal sealed record FacePoolConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The vanilla lists whose fair copies are refilled, as template FormKey to the copy's
+    /// EditorID; a copy is female if its EditorID ends in "Female".
+    /// </summary>
+    public Dictionary<string, string> Lists { get; init; } = new();
+
+    /// <summary>Relative share of each race's entries, by race EditorID.</summary>
+    public Dictionary<string, float> RaceWeights { get; init; } = new();
+
+    /// <summary>Entries a list gets in all (255 at most): the weights are shares of these.</summary>
+    public int Entries { get; init; } = 200;
+
+    public float MaxPaint { get; init; } = 0.05f;
+
+    public float MaxDirt { get; init; } = 0.3f;
+
+    /// <summary>Scars are ordinary on Skyrim's townsfolk; warpaint is what reads as a bandit.</summary>
+    public bool AllowScars { get; init; } = true;
+
+    /// <summary>Most entries one face gets: a race with few faces gets fewer entries, not look-alikes.</summary>
+    public int MaxRepeat { get; init; } = 2;
+
+    /// <summary>EditorID prefixes left out: quest, dungeon and DLC characters.</summary>
+    public List<string> ExcludePrefixes { get; init; } = new();
+
+    /// <summary>Left out when the name or EditorID contains one of these (ghosts, corpses).</summary>
+    public List<string> ExcludeNames { get; init; } = new();
+
+    /// <summary>Folders whose BSAs hold the vanilla FaceGen; a face without its files is left out.</summary>
+    public List<string> Archives { get; init; } = new();
+
+    /// <summary>Records given one fixed face instead of a list (see <see cref="FairFaces.Fixed"/>).</summary>
+    public List<FixedFace> Fixed { get; init; } = new();
+}
+
+internal sealed record FixedFace
+{
+    /// <summary>NPC records whose EditorID starts with this.</summary>
+    public string Prefix { get; init; } = string.Empty;
+
+    /// <summary>The races their faces come from.</summary>
+    public List<string> Races { get; init; } = new();
+
+    /// <summary>How far the face's height may be from 1 (the folk pair's clips need a normal height).</summary>
+    public float HeightTolerance { get; init; } = 1f;
 }

@@ -235,6 +235,23 @@
     "singers": {"enabled": true, "name": "Singer", "questEditorId": "SkyrimFairSingers", "emotionValue": 50, "cuesDir": "build/bards", "songs": {"Fiddle": "fiddle", "DragonbornApproved": "dragonbornapproved"}, "faceArchives": ["E:/Modlists/Still In Skyrim/stock/Data", "E:/Modlists/Still In Skyrim/mods/Vanilla Remastered - The New Normal (Part 1)", "E:/Modlists/Still In Skyrim/mods/Vanilla Remastered - The New Normal (Part 2)"], "members": [{"id": "lead", "voiceType": "SkyrimFairSingerLead", "face": "00039CF6:Skyrim.esm", "outfit": "0009593C:Skyrim.esm", "at": [2048, 5140, 134, 180]}, {"id": "left", "voiceType": "SkyrimFairSingerLeft", "face": "00039CFF:Skyrim.esm", "outfit": "0002D75E:Skyrim.esm", "at": [1848, 5160, 134, 185]}, {"id": "right", "voiceType": "SkyrimFairSingerRight", "face": "00039D17:Skyrim.esm", "outfit": "00037C50:Skyrim.esm", "at": [2248, 5160, 134, 175]}]},
     "folkDance": {"enabled": true, "centre": [2048, 4420], "heading": 0, "idle": "000F7C8A:Skyrim.esm", "length": 57.6, "name": "Folk Dancer", "oarFolder": "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairFolk", "dancers": [{"submod": "Male", "look": "SkyrimFairVisitorMale01", "at": [26, 0, 270]}, {"submod": "Female", "look": "SkyrimFairVisitorFemale01", "at": [-26, 0, 90]}]},
     "npcGuard": {"enabled": true, "invulnerable": true, "script": "", "stripSpells": []},
+    "faces": {
+      "enabled": true,
+      "lists": {"0001A319:Skyrim.esm": "SkyrimFairFacesMale", "0001A31E:Skyrim.esm": "SkyrimFairFacesFemale"},
+      "raceWeights": {"NordRace": 40, "ImperialRace": 14, "BretonRace": 12, "RedguardRace": 10, "DarkElfRace": 8, "HighElfRace": 5, "WoodElfRace": 3, "OrcRace": 4, "KhajiitRace": 2, "ArgonianRace": 2},
+      "entries": 250,
+      "maxPaint": 0.05,
+      "maxDirt": 0.4,
+      "allowScars": true,
+      "maxRepeat": 2,
+      "excludePrefixes": ["Treas", "Test", "Warehouse", "Summon", "Dummy"],
+      "excludeNames": ["Ghost", "Corpse", "Dead", "Spectral", "Draugr", "Phantom", "Spirit", "Shade", "Sovngarde"],
+      "archives": ["E:/Modlists/Still In Skyrim/stock/Data", "E:/Modlists/Still In Skyrim/mods/Vanilla Remastered - The New Normal (Part 1)", "E:/Modlists/Still In Skyrim/mods/Vanilla Remastered - The New Normal (Part 2)"],
+      "fixed": [
+        {"prefix": "SkyrimFairAudioBand", "races": ["NordRace", "ImperialRace", "BretonRace", "RedguardRace", "DarkElfRace", "WoodElfRace"]},
+        {"prefix": "SkyrimFairFolkDancer", "races": ["ImperialRace"], "heightTolerance": 0.001}
+      ]
+    },
     "crowdCulling": {
       "enabled": true,
       "script": "SkyrimFairCrowdCull",

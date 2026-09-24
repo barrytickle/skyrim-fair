@@ -253,6 +253,22 @@ internal static class FairWorld
 
             var copy = vanilla.Duplicate(mod.GetNextFormKey());
             copy.EditorID = $"SkyrimFairFaces{vanilla.EditorID}";
+
+            // Refilled from the face pool: the vanilla "commoner" lists are six bandits a sex.
+            if (config.Faces.Enabled && config.Faces.Lists.TryGetValue(template, out var poolId))
+            {
+                var female = poolId.EndsWith("Female", StringComparison.Ordinal);
+                var (entries, perRace, distinct, dropped) = FairFaces.Pool(master!, config.Faces, female, config.Faces.Archives);
+                copy.EditorID = poolId;
+                copy.Entries = entries.Select(e => new LeveledNpcEntry
+                {
+                    Data = new LeveledNpcEntryData { Level = 1, Count = 1, Reference = new FormLink<INpcSpawnGetter>(e) },
+                }).ToExtendedList();
+                Console.WriteLine($"  faces {poolId}: {entries.Count} entries, {distinct} different faces: "
+                    + string.Join(", ", perRace.Select(kv => $"{kv.Key} {kv.Value}"))
+                    + "; left out: " + string.Join(", ", dropped.Select(kv => $"{kv.Key} {kv.Value}")));
+            }
+
             mod.LeveledNpcs.Add(copy);
             return faceLists[template] = copy.FormKey;
         }
@@ -949,6 +965,14 @@ internal static class FairWorld
         {
             var (singers, lines, files) = FairSingers.Build(mod, config.Singers, config.Audio, config.Vendors, master, audio.Quest, PutPersistentNpc);
             Console.WriteLine($"  singers: {singers} on the deck, {lines} sung lines, {files} voice files");
+        }
+
+        // ---- fixed faces for the band and the folk pair (their animations want a human skeleton) ----
+        // Only the records' template changes, so nothing renumbers.
+        if (config.Faces.Enabled && config.Faces.Fixed.Count > 0 && master is not null)
+        {
+            Console.WriteLine($"  faces: {FairFaces.Fixed(master, config.Faces, mod.Npcs)} records given a fixed face "
+                + $"({string.Join(", ", config.Faces.Fixed.Select(f => f.Prefix))})");
         }
 
         // ---- SkyrimFairNPC: a keyword on every fair NPC, for other mods' SPID exclusions ----------

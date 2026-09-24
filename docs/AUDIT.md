@@ -2,7 +2,44 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: crowd culling margin 768 -> 512 (2026-09-24)
+## Current pass: a varied crowd: 390 faces instead of 12 bandits (2026-09-24)
+
+Barry: "I keep seeing a lot of the same people. Especially the women with the tattoo
+faces."
+
+- **The cause:** visitors, stall-keepers, archers, the band and the folk pair take their
+  looks (Traits) from the fair's copies of vanilla `0001A319`/`0001A31E`. Those are
+  `LCharBanditMeleeCommonerM/F`: **six Imperial bandits a sex**, warpaint and all. The
+  whole fair had 12 faces.
+- **The pool** (`fairWorld.faces`, `FairFaces.cs`), from Skyrim.esm:
+  - kept: generic NPCs (not unique, so no clones of named characters) of every playable
+    race with their own face
+  - filtered out: warpaint over 0.05; dirt over 0.4; names or EditorIDs with ghost,
+    corpse, phantom, Sovngarde and so on; test and summon records
+  - checked: both FaceGen files present in the archives (none renders dark)
+  - scars allowed: they're common on vanilla townsfolk; warpaint is what reads as a
+    bandit
+  - dropped for women / men: 357 / 606 unique, 98 / 138 warpaint, 124 / 268 dirt
+- **The lists** keep their records (FormIDs unchanged; renamed `SkyrimFairFacesMale`/
+  `Female`) and are refilled with up to 250 entries by race weight:
+  - Nord 40, Imperial 14, Breton 12, Redguard 10, Dunmer 8, Altmer 5, Orc 4, Bosmer 3,
+    Khajiit 2, Argonian 2
+  - spread through each race's faces, and no face more than twice (`maxRepeat`), so a
+    race with few faces gets fewer entries, not look-alikes
+  - **245 different men's faces and 145 women's** (there are fewer clean vanilla women)
+- **Fixed faces** (`faces.fixed`) for records whose animations want a human skeleton: the
+  12 musicians (Nord, Imperial, Breton, Redguard, Dunmer, Bosmer faces) and the folk pair
+  (Imperials of height 1.0, as before, so the paired clip still meets). Only their
+  `Template` changes.
+- Plugin `eb0bdc6052f5d707...`, deterministic, deployed. Against the deployed plugin: all
+  3,892 records keep their FormIDs; the only changes are the two lists' entries and names,
+  and 14 NPC templates.
+- **To see it: start clean** (`cow SkyrimFairWorld 0 0` from the main menu). A templated
+  NPC's face is rolled when its runtime copy is made, and a save keeps it.
+- **Not verified in game:** the look, the folk pair's fit with their new faces, and the
+  band's instruments.
+
+## Previous pass: crowd culling margin 768 -> 512 (2026-09-24)
 
 Barry saw no pop-in at 768 and asked for the smaller margin ("even if i get some pop in,
 it's not the end of the world").

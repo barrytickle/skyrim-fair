@@ -85,7 +85,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-24, morning pass)
 
-Plugin `4dae188cafc0412f...` (crowd culling, margin 512), deployed. The detail is in `docs/AUDIT.md`, newest first.
+Plugin `eb0bdc6052f5d707...` (a varied crowd: 390 faces), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage, and **crowd culling at margin 512** (a big fps gain; distant
@@ -103,6 +103,9 @@ real frame times are unknown.
   stables; no room by the south-east camps)
 - SPID exclusions for Stealth Detection Fixes' sleep and killmove and Strange Runes'
   rune detection (plan step 2, done)
+- **a varied crowd:** the face lists were six Imperial bandits a sex (the "tattoo faces");
+  now 245 men's and 145 women's vanilla faces by race weight, with fixed human faces for
+  the band and the folk pair. Needs a clean start to see
 
 **Confirmed in game by Barry:**
 - the stage set: songs, cheer, next song, and the audio levels (don't change them)
