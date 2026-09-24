@@ -2,7 +2,33 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: fast instruments: normal and fast tempo, through OAR (2026-09-24)
+## Current pass: the singers move: gestures while singing, clapping while resting, a wave at the end (2026-09-24)
+
+Barry: "For the singers, i'd like them to have animations, so they're not just stood still".
+
+- `songs.config.json` `singerMoves` (the same shape as `crowdMoves`) and `singerGap`:
+  - **sing:** IdlePointFar_01, IdlePointFar_02, IdlePointClose (2.167 s each),
+    LooseDialogueResponsePositive (6.833 s, the longest of its three random clips) and
+    IdleCivilWarCheer (4.767 s)
+  - **rest:** IdleApplaud2, IdleApplaud3 (clapping along in a `singers` rest stretch)
+  - **cheer:** IdleWave (2.033 s), at every song's end with the crowd
+  - All are vanilla idles with no conditions. Clip lengths were read from the archive (the
+    pointing clips are `mt_pointfar_01/02`, `mt_pointclose`, found through
+    `animationsetdata`).
+- Why not the talking gestures: `TalkingExpressive` and the `Dialogue*Expressive` idles
+  need a dialogue emotion of 50 or more and come from the talking system, not from `Say`.
+- Script `SingerGestures(now)`: each singer makes the next move as the last ends plus
+  `SingerGap` (2 s) plus 0.4 s per singer, first moves staggered 1.5 / 2.8 / 4.1 s into
+  the song. A move that doesn't play is retried a second later. The update wakes for the
+  next one.
+- Plugin `d9a2f942bf8b4f68...`, deterministic; no records added; every idle's label
+  checked against Skyrim.esm. Deployed with the scripts.
+- **Not yet:** walking across the deck while singing (a patrol between deck markers,
+  planned).
+- **To test:** do the singers point, gesture and fist-pump while singing, clap in a rest
+  stretch, and wave at the end? Does their lip sync still run (Fiddle)?
+
+## Previous pass: fast instruments: normal and fast tempo, through OAR (2026-09-24)
 
 Barry: "for the instruments, can we have like "normal" "Fast" as well? So it speeds up the
 animation of the instruments to look like it matches the tempo of the songs."

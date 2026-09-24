@@ -2573,6 +2573,15 @@ internal sealed record StageAudioConfig
     /// </summary>
     public Dictionary<string, float> Fast { get; init; } = new();
 
+    /// <summary>The singers' moves (from songs.config.json): while singing, while resting, at a song's end.</summary>
+    public CrowdMove SingerSing { get; init; } = new();
+
+    public CrowdMove SingerRest { get; init; } = new();
+
+    public CrowdMove SingerCheer { get; init; } = new();
+
+    public float SingerGap { get; init; } = 2f;
+
     /// <summary>Where the fast clips and their OAR submods live.</summary>
     public string TempoOarFolder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairTempo";
 
@@ -3372,6 +3381,12 @@ internal sealed record StageShowFile
 
     /// <summary>How many times faster each instrument's loop plays in a "fast" stretch.</summary>
     public Dictionary<string, float> Fast { get; init; } = new();
+
+    /// <summary>sing, rest and cheer: the singers' gestures while singing, while resting, and at a song's end.</summary>
+    public Dictionary<string, CrowdMove> SingerMoves { get; init; } = new();
+
+    /// <summary>Seconds each singer stands between moves.</summary>
+    public float SingerGap { get; init; } = 2f;
 }
 
 internal sealed record CrowdMove

@@ -76,6 +76,10 @@ try
                         BandPackage = Named("holdPackage"),
                         Instruments = show.Instruments,
                         Fast = show.Fast,
+                        SingerSing = show.SingerMoves.GetValueOrDefault("sing") ?? new CrowdMove(),
+                        SingerRest = show.SingerMoves.GetValueOrDefault("rest") ?? new CrowdMove(),
+                        SingerCheer = show.SingerMoves.GetValueOrDefault("cheer") ?? new CrowdMove(),
+                        SingerGap = show.SingerGap,
                     },
                 },
                 Crowds = config.FairWorld.Crowds with

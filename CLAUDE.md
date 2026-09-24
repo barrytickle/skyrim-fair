@@ -50,6 +50,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
   - the instruments by name
   - the band and orchestra
   - the crowd's moves: the dance, clap and cheer idles with their clip lengths
+  - `fast` (each instrument's fast-loop speed), `singerMoves` (sing / rest / cheer gestures) and `singerGap`
 
 - `src/SkyrimFair.Generator/`:
   - `FairWorld.cs`: worldspace, terrain and ground painting
@@ -94,7 +95,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-24, morning pass)
 
-Plugin `3076e9bbe5949e5e...` (stage show: cheer lead-in, solid stage walls, per-instrument/singers/crowd timelines, fast instrument loops via OAR, the crowd facing the stage), deployed. The detail is in `docs/AUDIT.md`, newest first.
+Plugin `d9a2f942bf8b4f68...` (stage show: cheer lead-in, solid stage walls, per-instrument/singers/crowd timelines, fast instrument loops via OAR, the crowd facing the stage, singer gestures), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage, **crowd culling at margin 512** (a big fps gain; distant

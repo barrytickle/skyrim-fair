@@ -87,6 +87,17 @@ Actor[] Property Singers Auto
 each sung line is a topic whose voice file (silent audio, a lip track) differs per
 singer's voice type.}
 Topic[] Property SingerTopics Auto
+Idle[] Property SingerMoves Auto
+Float[] Property SingerMoveLengths Auto
+{While they sing, the singers gesture: these idles, in turn, each clip replayed after its
+length and a breath (SingerGap), the three staggered so they don't move as one.}
+Idle[] Property SingerRestMoves Auto
+Float[] Property SingerRestLengths Auto
+{While the singers rest (a song's singers timeline), these instead (clapping along).}
+Idle Property SingerCheerMove Auto
+{At a song's end, with the crowd's cheer (a wave).}
+Float Property SingerGap = 2.0 Auto
+{Seconds each singer stands between moves.}
 Float[] Property SingerStarts Auto
 {Each line's start, in seconds from its song's start.}
 Int[] Property SongFirstLine Auto
@@ -186,6 +197,10 @@ Int drumLevel = 1
 Int[] playLevel
 Bool singing = True
 Int crowdMode = 0
+; Each singer's next move (game time) and how many they've made, and the soonest due.
+Float[] singerNext
+Int[] singerPlays
+Float singerWake = 0.0
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -283,6 +298,7 @@ Event OnUpdate()
 		Sections(now)
 		PlayBand()
 		Dance()
+		SingerGestures(now)
 		FolkDance(now)
 		Sing(now)
 	ElseIf bandOn && now >= bandUntil
@@ -295,6 +311,9 @@ Event OnUpdate()
 	EndIf
 	If phase == 2 && folkOn && folkNext > now && Seconds(folkNext - now) < left
 		left = Seconds(folkNext - now)
+	EndIf
+	If phase == 2 && singerWake > now && Seconds(singerWake - now) < left
+		left = Seconds(singerWake - now)
 	EndIf
 	If phase != 2 && bandOn && bandUntil > now && Seconds(bandUntil - now) < left
 		; Wake as the song's last note ends, to put the instruments away.
@@ -352,6 +371,14 @@ Function Advance(Float now)
 		EndWhile
 		SetTempo(1)
 		singing = True
+		; The singers' first moves, staggered.
+		singerNext = new Float[16]
+		singerPlays = new Int[16]
+		Int si = 0
+		While si < 16
+			singerNext[si] = now + (1.5 + si * 1.3) * TimeScale.GetValue() / 86400.0
+			si += 1
+		EndWhile
 		crowdMode = 0
 		nextSection = -1
 		endSection = -1
@@ -499,6 +526,45 @@ Function ApplyCrowdLayers()
 	EndWhile
 	appliedTier = want
 	Debug.Trace("SkyrimFairAudio: crowd layers on: " + want)
+EndFunction
+
+; Each singer whose next move is due makes it: a gesture while they sing, clapping while they
+; rest. A move that doesn't play is tried again a second later.
+Function SingerGestures(Float now)
+	singerWake = 0.0
+	If Singers.Length == 0 || singerNext.Length < Singers.Length
+		Return
+	EndIf
+	Idle[] moves = SingerMoves
+	Float[] lengths = SingerMoveLengths
+	If !singing
+		moves = SingerRestMoves
+		lengths = SingerRestLengths
+	EndIf
+	If moves.Length == 0
+		Return
+	EndIf
+	Float perSecond = TimeScale.GetValue() / 86400.0
+	Int i = 0
+	While i < Singers.Length
+		If now >= singerNext[i] && Singers[i] && Singers[i].Is3DLoaded()
+			Int which = (i * 2 + singerPlays[i]) % moves.Length
+			Float clip = 3.0
+			If which < lengths.Length
+				clip = lengths[which]
+			EndIf
+			If Singers[i].PlayIdle(moves[which])
+				singerPlays[i] = singerPlays[i] + 1
+				singerNext[i] = now + (clip + SingerGap + i * 0.4) * perSecond
+			Else
+				singerNext[i] = now + perSecond
+			EndIf
+		EndIf
+		If singerWake == 0.0 || singerNext[i] < singerWake
+			singerWake = singerNext[i]
+		EndIf
+		i += 1
+	EndWhile
 EndFunction
 
 ; Every section whose start has come is applied, from the song's own start (so timer error
@@ -720,8 +786,15 @@ Function FolkDance(Float now)
 	folkNext = now + FolkClipLength * TimeScale.GetValue() / 86400.0
 EndFunction
 
-; The song's end: the floor turns to the stage and claps and cheers with the crowd.
+; The song's end: the singers wave, and the floor turns to the stage and claps and cheers.
 Function Cheer()
+	Int s = 0
+	While SingerCheerMove && s < Singers.Length
+		If Singers[s] && Singers[s].Is3DLoaded()
+			Singers[s].PlayIdle(SingerCheerMove)
+		EndIf
+		s += 1
+	EndWhile
 	If CheerIdles.Length == 0
 		Return
 	EndIf

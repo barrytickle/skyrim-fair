@@ -102,7 +102,7 @@ def write_songs(doc):
             lines.append(f'  {j(k)}: [')
             lines += ['    ' + j(m, ensure_ascii=False) + (',' if i < len(v) - 1 else '') for i, m in enumerate(v)]
             lines.append('  ]')
-        elif k == 'crowdMoves':
+        elif k in ('crowdMoves', 'singerMoves'):
             moves = list(v.items())
             lines.append(f'  {j(k)}: {{')
             for i, (kind, move) in enumerate(moves):

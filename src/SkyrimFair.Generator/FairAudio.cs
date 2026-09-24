@@ -271,6 +271,18 @@ internal static class FairAudio
             return index;
         }
 
+        // The singers' moves: idles and their clip lengths, checked to pair up.
+        (ExtendedList<ScriptObjectProperty> Idles, ExtendedList<float> Lengths) Moves(CrowdMove move)
+        {
+            if (move.Idles.Count != move.Lengths.Count)
+            {
+                throw new InvalidOperationException($"songs.config.json singerMoves: {move.Idles.Count} idles but {move.Lengths.Count} lengths");
+            }
+
+            return (move.Idles.Select(i => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse(i)) }).ToExtendedList(),
+                move.Lengths.ToExtendedList());
+        }
+
         // ---- the stage script ------------------------------------------------------------
         ScriptObjectProperty Obj(string name, FormKey key) => new() { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
         ScriptFloatProperty Float(string name, float value) => new() { Name = name, Data = value };
@@ -287,6 +299,11 @@ internal static class FairAudio
             Float("FirstSongDelay", config.Stage.FirstSongDelay),
             Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
             Float("CheerLead", config.Stage.CheerLead),
+            new ScriptObjectListProperty { Name = "SingerMoves", Objects = Moves(config.Stage.SingerSing).Idles },
+            new ScriptFloatListProperty { Name = "SingerMoveLengths", Data = Moves(config.Stage.SingerSing).Lengths },
+            new ScriptObjectListProperty { Name = "SingerRestMoves", Objects = Moves(config.Stage.SingerRest).Idles },
+            new ScriptFloatListProperty { Name = "SingerRestLengths", Data = Moves(config.Stage.SingerRest).Lengths },
+            Float("SingerGap", config.Stage.SingerGap),
             new ScriptFloatListProperty { Name = "SectionStarts", Data = Sections().Select(x => x.Start).ToExtendedList() },
             new ScriptIntListProperty { Name = "SectionPlay", Data = Sections().SelectMany(x => x.Play).ToExtendedList() },
             new ScriptIntListProperty { Name = "SectionSing", Data = Sections().Select(x => x.Sing).ToExtendedList() },
@@ -313,6 +330,11 @@ internal static class FairAudio
             Obj("BandStop", FormKeyHelper.Parse(config.Stage.BandStop)),
             new ScriptObjectListProperty { Name = "Archers", Objects = archers.Select(a => Obj("", a)).ToExtendedList() },
         });
+        if (config.Stage.SingerCheer.Idles.Count > 0)
+        {
+            script.Properties.Add(Obj("SingerCheerMove", FormKeyHelper.Parse(config.Stage.SingerCheer.Idles[0])));
+        }
+
         var adapter = new QuestAdapter();
         adapter.Scripts.Add(script);
         var alias = new QuestFragmentAlias { Property = new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 0 } };

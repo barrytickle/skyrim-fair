@@ -1,5 +1,5 @@
 {
-  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | normal | fast] (whoever plays that instrument follows it; fast plays its loop faster, by FAST's speed), singers [second, sing | rest] (resting, their lines are skipped) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. FAST: how many times faster each instrument's loop plays in a 'fast' stretch (tools/bards/build_tempo.py makes the clips). BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. 'names' are labels only. Rebuild after editing.",
+  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | normal | fast] (whoever plays that instrument follows it; fast plays its loop faster, by FAST's speed), singers [second, sing | rest] (resting, their lines are skipped) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. FAST: how many times faster each instrument's loop plays in a 'fast' stretch (tools/bards/build_tempo.py makes the clips). BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. SINGER MOVES: the singers' gestures while they sing, while they rest (a 'rest' stretch in their timeline) and the one they make at a song's end, with clip lengths; SINGER GAP is the seconds each stands between moves. 'names' are labels only. Rebuild after editing.",
   "songs": [
     {
       "name": "RoundTheGreen",
@@ -220,5 +220,23 @@
       "names": ["IdleApplaud2", "IdleCivilWarCheer", "IdleApplaud3"],
       "lengths": [7.333, 4.767, 7.133]
     }
-  }
+  },
+  "singerMoves": {
+    "sing": {
+      "idles": ["000B8F1E:Skyrim.esm", "000B8F1F:Skyrim.esm", "000FFA0C:Skyrim.esm", "00058B45:Skyrim.esm", "000F7C8C:Skyrim.esm"],
+      "names": ["IdlePointFar_01", "IdlePointFar_02", "IdlePointClose", "LooseDialogueResponsePositive", "IdleCivilWarCheer"],
+      "lengths": [2.167, 2.167, 2.167, 6.833, 4.767]
+    },
+    "rest": {
+      "idles": ["000D8730:Skyrim.esm", "000D8731:Skyrim.esm"],
+      "names": ["IdleApplaud2", "IdleApplaud3"],
+      "lengths": [7.333, 7.133]
+    },
+    "cheer": {
+      "idles": ["0003EA32:Skyrim.esm"],
+      "names": ["IdleWave"],
+      "lengths": [2.033]
+    }
+  },
+  "singerGap": 2.0
 }
