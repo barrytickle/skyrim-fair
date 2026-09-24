@@ -22,6 +22,7 @@ hand-made: a C#/Mutagen generator reads `fair.config.json` and writes `dist/Skyr
 ```
 python tools/make_static_props.py --data "E:/Modlists/Still In Skyrim/stock/Data"   # only when props change
 python tools/build_audio.py                                                          # music/, sound-effects/ -> assets/sound/
+python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast instrument loops (when a speed changes)
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
 # after a layout change, for the navmesh's obstacle footprints (then run the generator again):
 python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"
@@ -93,7 +94,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Where we are (2026-09-24, morning pass)
 
-Plugin `34f72fd94733297d...` (stage show: cheer lead-in, solid invisible stage walls, drums and crowd by song section, the crowd facing the stage to clap), deployed. The detail is in `docs/AUDIT.md`, newest first.
+Plugin `3076e9bbe5949e5e...` (stage show: cheer lead-in, solid stage walls, per-instrument/singers/crowd timelines, fast instrument loops via OAR, the crowd facing the stage), deployed. The detail is in `docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
 lanterns and the stage, **crowd culling at margin 512** (a big fps gain; distant

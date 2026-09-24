@@ -101,6 +101,9 @@ Int[] Property SectionPlay Auto
 {For each section, each instrument in InstrumentIdles in turn: 0 rest, 1 play, 2 intense.}
 Idle[] Property InstrumentIdles Auto
 {The instruments with timelines (lute, drum, flute): a musician whose idle is one follows it.}
+GlobalVariable[] Property InstrumentTempo Auto
+{Each instrument's tempo global (InstrumentIdles order), held at its level: 0 rest, 1 normal,
+2 fast. Open Animation Replacer plays a faster loop for the fair's musicians while it's 2.}
 Int[] Property SectionSing Auto
 {For each section: 1 the singers sing (their lines are said), 0 they rest (lines skipped).}
 Int[] Property SectionCrowd Auto
@@ -347,6 +350,7 @@ Function Advance(Float now)
 			playLevel[pl] = 1
 			pl += 1
 		EndWhile
+		SetTempo(1)
 		singing = True
 		crowdMode = 0
 		nextSection = -1
@@ -419,6 +423,7 @@ Function StopAll()
 		tailInstance = 0
 	EndIf
 	bandUntil = 0.0
+	SetTempo(1)
 	SetAmbience(False)
 	StopBand(False)
 EndFunction
@@ -532,6 +537,9 @@ Function Sections(Float now)
 					Rest(Orchestra, OrchestraIdles, orchestraPlaying, InstrumentIdles[k])
 				EndIf
 			EndIf
+			If level != playLevel[k] && k < InstrumentTempo.Length && InstrumentTempo[k]
+				InstrumentTempo[k].SetValue(level)
+			EndIf
 			playLevel[k] = level
 			k += 1
 		EndWhile
@@ -553,6 +561,17 @@ Function Sections(Float now)
 			FaceStage()
 		EndIf
 	EndIf
+EndFunction
+
+; Every instrument's tempo global to one level (1: normal, at a song's start and when the set stops).
+Function SetTempo(Int level)
+	Int k = 0
+	While k < InstrumentTempo.Length
+		If InstrumentTempo[k] && InstrumentTempo[k].GetValue() != level
+			InstrumentTempo[k].SetValue(level)
+		EndIf
+		k += 1
+	EndWhile
 EndFunction
 
 ; Whether a musician with this idle plays now: an instrument with a timeline follows it.

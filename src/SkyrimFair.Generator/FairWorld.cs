@@ -1163,6 +1163,75 @@ internal static class FairWorld
             Console.WriteLine($"  solid walls: {solidWallPieces.Count} pieces of {config.SolidWall.EditorId} ({config.SolidWall.Model})");
         }
 
+        // ---- instrument tempo: a global per instrument, and OAR's fast clips on it ------------------
+        // Last of all, so nothing renumbers. The stage script holds each global at the section's
+        // level (0 rest, 1 normal, 2 fast); while it's 2, OAR swaps in that instrument's fast loop
+        // (tools/bards/build_tempo.py) for the fair's NPCs. Interruptible, so the switch lands on
+        // the section rather than at the end of a 17 s loop.
+        if (audio is not null && config.Audio.Stage.Fast.Count > 0)
+        {
+            var stageScript = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            var npcKeyword = mod.Keywords.First(k => k.EditorID == config.NpcKeyword);
+            var folder = Path.IsPathRooted(config.Audio.Stage.TempoOarFolder)
+                ? config.Audio.Stage.TempoOarFolder
+                : Path.Combine(FairPaths.ConfigDirectory, config.Audio.Stage.TempoOarFolder);
+            Directory.CreateDirectory(folder);
+            var json = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+            File.WriteAllText(Path.Combine(folder, "config.json"), System.Text.Json.JsonSerializer.Serialize(new
+            {
+                name = "Skyrim Fair tempo",
+                author = "Skyrim Fair",
+                description = "The fair's musicians only: faster copies of the vanilla instrument loops, for the fast stretches of a song.",
+            }, json));
+            object Form(FormKey key) => new Dictionary<string, string> { ["pluginName"] = mod.ModKey.FileName, ["formID"] = key.ID.ToString("X") };
+            var tempo = new List<FormKey>();
+            foreach (var instrument in new[] { "lute", "drum", "flute" })
+            {
+                var name = char.ToUpperInvariant(instrument[0]) + instrument[1..];
+                var global = new GlobalFloat(mod) { EditorID = $"SkyrimFairTempo{name}", Data = 1f };
+                mod.Globals.Add(global);
+                tempo.Add(global.FormKey);
+                if (!config.Audio.Stage.Fast.TryGetValue(instrument, out var speed))
+                {
+                    continue;
+                }
+
+                var sub = Path.Combine(folder, $"{name}Fast");
+                Directory.CreateDirectory(sub);
+                File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+                {
+                    ["name"] = $"{name}, fast",
+                    ["description"] = $"The fair's {instrument} players' loop, {speed}x, while {global.EditorID} is 2.",
+                    ["priority"] = 1900000001,
+                    ["interruptible"] = true,
+                    ["conditions"] = new object[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            ["condition"] = "HasKeyword",
+                            ["requiredVersion"] = "1.0.0.0",
+                            ["Keyword"] = new Dictionary<string, object> { ["form"] = Form(npcKeyword.FormKey) },
+                        },
+                        new Dictionary<string, object>
+                        {
+                            ["condition"] = "CompareValues",
+                            ["requiredVersion"] = "1.0.0.0",
+                            ["Value A"] = new Dictionary<string, object> { ["form"] = Form(global.FormKey) },
+                            ["Comparison"] = "==",
+                            ["Value B"] = new Dictionary<string, object> { ["value"] = 2.0 },
+                        },
+                    },
+                }, json));
+            }
+
+            stageScript.Properties.Add(new ScriptObjectListProperty
+            {
+                Name = "InstrumentTempo",
+                Objects = tempo.Select(k => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) }).ToExtendedList(),
+            });
+            Console.WriteLine($"  tempo: {string.Join(", ", config.Audio.Stage.Fast.Select(kv => $"{kv.Key} x{kv.Value}"))}; OAR submods in {config.Audio.Stage.TempoOarFolder}");
+        }
+
         mod.Worldspaces.Add(worldspace);
 
         return new FairWorldResult(

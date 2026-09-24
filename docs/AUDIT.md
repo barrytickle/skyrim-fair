@@ -2,7 +2,37 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: a timeline for every part of the band, and the singers (2026-09-24)
+## Current pass: fast instruments: normal and fast tempo, through OAR (2026-09-24)
+
+Barry: "for the instruments, can we have like "normal" "Fast" as well? So it speeds up the
+animation of the instruments to look like it matches the tempo of the songs."
+
+- The instrument levels are now `rest | normal | fast` (`play` became normal; the drum's
+  seeded `intense` stretches became fast). `songs.config.json` `fast` sets each
+  instrument's speed: lute 1.3, drum 1.4, flute 1.3.
+- **Clips:** `tools/bards/build_tempo.py` (plain Python, the vendored HKX codec) extracts
+  the vanilla loops and writes copies with every frame kept and the frame time, length and
+  block length divided by the speed:
+  - `animobjectluteloop` 8.767 -> 6.744 s
+  - `animobjectdrumloop` 16.667 -> 11.905 s
+  - `animobjectflutelong/short` 12 -> 9.231 s
+  - Decoded poses match the originals to 0.0005. The loops have no annotations (the
+    tool refuses a clip that has any). Deterministic. Git-ignored (derived vanilla),
+    shipped in the built mod.
+- **OAR:** `SkyrimFairTempo/<Instrument>Fast/config.json`, written by the generator:
+  `HasKeyword SkyrimFairNPC` and `CompareValues` (global `SkyrimFairTempo<Instrument>`
+  == 2), `interruptible: true` so the switch lands on the section, not at the end of a
+  loop. Format read from OAR's source (`SharedTypes.cpp` NumericValue: `"form"`;
+  `BaseConditions.h`: `"=="`).
+- **Globals** `SkyrimFairTempoLute/Drum/Flute` (`175B`-`175D`, last of all). The script
+  (`InstrumentTempo`) holds each at the section's level, resets them to 1 at each song's
+  start and when the set stops.
+- Plugin `3076e9bbe5949e5e...`, deterministic; only the 3 globals added. Deployed with the
+  clips, configs and scripts.
+- **To test:** OAR's in-game menu should list "Skyrim Fair tempo". In a fast drum stretch
+  (Fiddle 0:22.5), do the drummers play visibly faster, and switch back at 0:37.5?
+
+## Previous pass: a timeline for every part of the band, and the singers (2026-09-24)
 
 Barry: "is it just drums? Can we have the singers, the lute, the flute".
 

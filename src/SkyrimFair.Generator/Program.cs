@@ -75,6 +75,7 @@ try
                         BandStop = Named("putAway"),
                         BandPackage = Named("holdPackage"),
                         Instruments = show.Instruments,
+                        Fast = show.Fast,
                     },
                 },
                 Crowds = config.FairWorld.Crowds with

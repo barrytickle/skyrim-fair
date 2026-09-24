@@ -9,7 +9,7 @@ intensity from the bass band (build_vocals.intensity: calm / normal / intense, 2
 steps, blips under 5 s merged).
 
 Each song gets a timeline per part of the show, [second, what], an entry where it changes:
-- lute, drum, flute: rest (whoever plays it puts it away), play or intense
+- lute, drum, flute: rest (whoever plays it puts it away), normal or fast
 - singers: sing or rest (resting, their lines are skipped)
 - crowd: dance, clap or cheer (the dancers' idles)
 The seed rests the drum and claps where the drums are calm (from the bass band), and
@@ -61,7 +61,7 @@ TIMELINES = ('lute', 'drum', 'flute', 'singers', 'crowd')
 
 def timelines(inst, defaults):
     """{part: [[second, what], ...]}, an entry only where it changes."""
-    level = {'calm': 'rest', 'normal': 'play', 'intense': 'intense'}
+    level = {'calm': 'rest', 'normal': 'normal', 'intense': 'fast'}
     drums, crowd = [], []
     for s in bv.intensity(inst, defaults)['drums']:
         d, c = level[s['level']], 'clap' if s['level'] == 'calm' else 'dance'
@@ -69,7 +69,7 @@ def timelines(inst, defaults):
             drums.append([s['start'], d])
         if not crowd or crowd[-1][1] != c:
             crowd.append([s['start'], c])
-    return {'lute': [[0.0, 'play']], 'drum': drums, 'flute': [[0.0, 'play']], 'singers': [[0.0, 'sing']], 'crowd': crowd}
+    return {'lute': [[0.0, 'normal']], 'drum': drums, 'flute': [[0.0, 'normal']], 'singers': [[0.0, 'sing']], 'crowd': crowd}
 
 
 def write_songs(doc):
@@ -93,7 +93,7 @@ def write_songs(doc):
     for k in rest:
         lines[-1] += ','
         v = doc[k]
-        if k == 'instruments':
+        if k in ('instruments', 'fast'):
             items = list(v.items())
             lines.append(f'  {j(k)}: {{')
             lines += [f'    {j(a)}: {j(b)}' + (',' if i < len(items) - 1 else '') for i, (a, b) in enumerate(items)]

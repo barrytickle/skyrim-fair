@@ -1,5 +1,5 @@
 {
-  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | play | intense] (whoever plays that instrument follows it), singers [second, sing | rest] (resting, their lines are skipped) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. 'names' are labels only. Rebuild after editing.",
+  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | normal | fast] (whoever plays that instrument follows it; fast plays its loop faster, by FAST's speed), singers [second, sing | rest] (resting, their lines are skipped) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. FAST: how many times faster each instrument's loop plays in a 'fast' stretch (tools/bards/build_tempo.py makes the clips). BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. 'names' are labels only. Rebuild after editing.",
   "songs": [
     {
       "name": "RoundTheGreen",
@@ -7,25 +7,25 @@
       "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav",
       "cheer": "cheer",
       "lute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "drum": [
-        [0.0, "play"],
+        [0.0, "normal"],
         [2.5, "rest"],
-        [15.0, "intense"],
+        [15.0, "fast"],
         [20.0, "rest"],
-        [32.5, "intense"],
-        [50.0, "play"],
+        [32.5, "fast"],
+        [50.0, "normal"],
         [72.5, "rest"],
-        [77.5, "intense"],
-        [97.5, "play"],
+        [77.5, "fast"],
+        [97.5, "normal"],
         [105.0, "rest"],
-        [112.5, "play"],
+        [112.5, "normal"],
         [122.5, "rest"],
-        [135.0, "intense"]
+        [135.0, "fast"]
       ],
       "flute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "singers": [
         [0.0, "sing"]
@@ -50,26 +50,26 @@
       "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav",
       "cheer": "cheer",
       "lute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "drum": [
-        [0.0, "play"],
+        [0.0, "normal"],
         [10.0, "rest"],
-        [15.0, "intense"],
-        [20.0, "play"],
-        [35.0, "intense"],
+        [15.0, "fast"],
+        [20.0, "normal"],
+        [35.0, "fast"],
         [50.0, "rest"],
-        [55.0, "play"],
-        [62.5, "intense"],
-        [110.0, "play"],
-        [125.0, "intense"],
-        [140.0, "play"],
+        [55.0, "normal"],
+        [62.5, "fast"],
+        [110.0, "normal"],
+        [125.0, "fast"],
+        [140.0, "normal"],
         [165.0, "rest"],
-        [170.0, "play"],
-        [180.0, "intense"]
+        [170.0, "normal"],
+        [180.0, "fast"]
       ],
       "flute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "singers": [
         [0.0, "sing"]
@@ -90,28 +90,28 @@
       "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav",
       "cheer": "cheer",
       "lute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "drum": [
         [0.0, "rest"],
-        [22.5, "intense"],
+        [22.5, "fast"],
         [37.5, "rest"],
-        [50.0, "intense"],
+        [50.0, "fast"],
         [65.0, "rest"],
-        [77.5, "intense"],
+        [77.5, "fast"],
         [97.5, "rest"],
-        [102.5, "play"],
+        [102.5, "normal"],
         [117.5, "rest"],
-        [122.5, "intense"],
+        [122.5, "fast"],
         [137.5, "rest"],
-        [145.0, "play"],
+        [145.0, "normal"],
         [150.0, "rest"],
-        [162.5, "intense"],
+        [162.5, "fast"],
         [182.5, "rest"],
-        [187.5, "intense"]
+        [187.5, "fast"]
       ],
       "flute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "singers": [
         [0.0, "sing"]
@@ -141,27 +141,27 @@
       "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
       "cheer": "cheer",
       "lute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "drum": [
         [0.0, "rest"],
-        [7.5, "play"],
+        [7.5, "normal"],
         [15.0, "rest"],
-        [27.5, "intense"],
-        [40.0, "play"],
-        [52.5, "intense"],
-        [72.5, "play"],
-        [85.0, "intense"],
-        [95.0, "play"],
-        [157.5, "intense"],
-        [180.0, "play"],
-        [195.0, "intense"],
-        [202.5, "play"],
+        [27.5, "fast"],
+        [40.0, "normal"],
+        [52.5, "fast"],
+        [72.5, "normal"],
+        [85.0, "fast"],
+        [95.0, "normal"],
+        [157.5, "fast"],
+        [180.0, "normal"],
+        [195.0, "fast"],
+        [202.5, "normal"],
         [207.5, "rest"],
-        [217.5, "intense"]
+        [217.5, "fast"]
       ],
       "flute": [
-        [0.0, "play"]
+        [0.0, "normal"]
       ],
       "singers": [
         [0.0, "sing"]
@@ -182,6 +182,11 @@
     "flute": "00096F8C:Skyrim.esm",
     "putAway": "000E4242:Skyrim.esm",
     "holdPackage": "00025BFC:Skyrim.esm"
+  },
+  "fast": {
+    "lute": 1.3,
+    "drum": 1.4,
+    "flute": 1.3
   },
   "band": [
     {"name": "Lute", "title": "Fair Bard", "idle": "lute", "at": [2048, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},

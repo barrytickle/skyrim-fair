@@ -2566,6 +2566,16 @@ internal sealed record StageAudioConfig
     /// </summary>
     public Dictionary<string, string> Instruments { get; init; } = new();
 
+    /// <summary>
+    /// How many times faster each instrument's loop plays in a "fast" stretch (songs.config.json
+    /// "fast"; tools/bards/build_tempo.py makes the clips). The generator writes an OAR submod
+    /// per instrument, swapping the fast clip in while that instrument's tempo global is 2.
+    /// </summary>
+    public Dictionary<string, float> Fast { get; init; } = new();
+
+    /// <summary>Where the fast clips and their OAR submods live.</summary>
+    public string TempoOarFolder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairTempo";
+
     /// <summary>The ambience's level during a song, as a share of normal.</summary>
     public float DuckAmbience { get; init; } = 0.75f;
 
@@ -2642,7 +2652,7 @@ internal sealed record StageSong
     public string Cheer { get; init; } = string.Empty;
 
     /// <summary>
-    /// Each instrument's timeline: [second, "rest" | "play" | "intense"], from the song's
+    /// Each instrument's timeline: [second, "rest" | "normal" | "fast"], from the song's
     /// start, an entry where it changes. Whoever plays that instrument follows it (a
     /// resting instrument is put away). None: it plays throughout.
     /// </summary>
@@ -3359,6 +3369,9 @@ internal sealed record StageShowFile
 
     /// <summary>dance, clap and cheer: the idles the dancers play in a section of that kind.</summary>
     public Dictionary<string, CrowdMove> CrowdMoves { get; init; } = new();
+
+    /// <summary>How many times faster each instrument's loop plays in a "fast" stretch.</summary>
+    public Dictionary<string, float> Fast { get; init; } = new();
 }
 
 internal sealed record CrowdMove
