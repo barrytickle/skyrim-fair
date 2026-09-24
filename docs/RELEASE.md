@@ -20,6 +20,7 @@ Replacer, below.
 | --- | --- |
 | **Open Animation Replacer** (needs SKSE) | Astra's paired folk dance doesn't play. The two folk dancers do the vanilla Cicero dance instead (`fairWorld.folkDance`, `CODEX_HANDOVER.md`) |
 | Terrain Parallax 1.5 – 4K2K (Nexus SE 54860) | The ground loses its parallax. It's a visual replacer only, and nothing of it ships |
+| **Professional Dancer** (Nexus SE 124608), optional but recommended. Needs `Dance.esp` enabled (its masters: SkyUI, UIExtensions) and **Pandora or Nemesis run after installing** (Pandora picks up its FNIS list itself; it doesn't appear in Pandora's mod list) | The crowd's dancers use only the vanilla Cicero dances. With it, while dancing, they take five of its dances in turn (its animation events; `songs.config.json` `moreDances`). The fair checks for it at runtime and ships nothing of it |
 
 ## Compatibility with per-NPC spell mods: must be solved before any release
 

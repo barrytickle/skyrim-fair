@@ -32,6 +32,13 @@ The mod page credits the source dance animations to creators whose animations we
 
 ### Skyrim Fair usage
 
+**An optional, recommended dependency, detected at runtime (2026-09-24):** when `Dance.esp` is
+loaded, the stage script plays five of its dances on the fair's dancers through its own
+animation events (`Dance1`, `Dance3`, `Dance4`, `Dance8`, `Dance9`; they exist once the user has
+run Pandora or Nemesis with the mod installed). Without it, the vanilla dances play. **No file of
+Professional Dancer is copied, bundled or redistributed**: the fair only sends its event names.
+An earlier build that copied its clips into an OAR folder was removed for that reason.
+
 Our preferred integration is to treat Professional Dancer as an external dependency rather than redistributing its animation files inside Skyrim Fair.
 
 If any Professional Dancer files are ever bundled, modified, or redistributed directly, their use must comply with the author's CC BY-NC 4.0 terms and the provenance/licensing of the underlying animation assets must be checked separately.
