@@ -150,7 +150,8 @@ repo.
    `footprintsFootstepsScriptHuman` appears).
 3. **Only run the crowd where the player is (Claude, the big one; plan first, then
    build).** **Built and deployed 2026-09-24; Barry: "a huge boost", 77-96 -> 90-120 fps
-   (frame generation on) at the square.** Pop-in and seated re-sitting not yet reported
+   (frame generation and DLSS on) at the square, ~130 looking away from the dancers; no
+   pop-in. Seated re-sitting not yet reported
    (`docs/AUDIT.md`):
    Barry's baseline (FG on: 77-96, layers 0: 120, `tai`: ~102) showed drawing, not AI,
    is the cost. Per-actor culling from a generated visibility table: 173 switchable, about

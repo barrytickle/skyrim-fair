@@ -60,8 +60,13 @@ Barry: "let's implement it".
 ### In game (Barry, 2026-09-24)
 
 - **"a huge boost in fps"**: 90-120 displayed (frame generation on), from 77-96 before.
-  120 may be a cap. Still to hear: pop-in while sprinting, seated visitors re-sitting,
-  and the log's `ready True`.
+  120 may be a cap. About 130 when not looking at the dance floor.
+- **No pop-in seen** walking and sprinting round the fair: the 768 margin holds.
+- Barry runs DLSS with frame generation too, so these are displayed rates on a
+  GPU-assisted setup; the culling's saving is on the actors' side, which DLSS doesn't
+  touch.
+- Not yet reported: seated visitors re-sitting. The dance floor, always in view from the
+  square, is now the heaviest thing on screen.
 
 ### What Barry should test
 
