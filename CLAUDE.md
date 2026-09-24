@@ -105,7 +105,8 @@ pop-in only when looking for it), **the varied crowd** (the new face pool), **th
 real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
-- **more life** (`fairWorld.life`, plugin `904835d8...`): 34 Whiterun banners and pennant
+- **more life** (`fairWorld.life`, plugin `904835d8...`; **Barry: the decorations "look
+  fantastic"**, the grass test not yet reported): 34 Whiterun banners and pennant
   ropes with lanterns on the palisade, 81 shrubs/ferns/flowers, a goat pen, pelt lines,
   lantern posts, tool corners, produce piles, smoke over the 5 fires, 6 chickens, 3 goats
   and 2 dogs; the grass LTEX has more grass, but this profile shows grass only from a cache

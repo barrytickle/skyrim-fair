@@ -9,6 +9,10 @@ by the bards", so F is dropped). He also confirmed the children and the seated v
 ("look great"), and the folk pair is fine at a distance. The singers don't walk the deck;
 that isn't built.
 
+**Barry, in game: "The decorations you've made look fantastic, you've really helped bring
+this to life."** Confirmed as a whole; grass (the live-grass test) and the details on the
+test list below not yet reported one by one.
+
 Plugin `904835d8ddbbc0fb...`, deterministic (two runs, same SHA256), deployed. Against
 the deployed `7ec9724f...`: **all 3,915 records keep their FormID and content**; 359 are
 added, all in the new life range `0x20000`-`0x20166` (`FairLife.cs`, see
