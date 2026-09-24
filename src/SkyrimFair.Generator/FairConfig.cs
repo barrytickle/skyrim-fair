@@ -2573,6 +2573,12 @@ internal sealed record StageAudioConfig
 
     public List<StageSong> Songs { get; init; } = new();
 
+    /// <summary>
+    /// A file of its own holding <see cref="Songs"/> (songs.config.json, next to the fair
+    /// config), so the songs and their sections are easy to find and edit. Program.cs reads it.
+    /// </summary>
+    public string SongsFile { get; init; } = string.Empty;
+
     public List<StageCheer> Cheers { get; init; } = new();
 
     /// <summary>
@@ -3322,4 +3328,10 @@ internal sealed record FixedFace
 
     /// <summary>How far the face's height may be from 1 (the folk pair's clips need a normal height).</summary>
     public float HeightTolerance { get; init; } = 1f;
+}
+
+/// <summary>songs.config.json: the stage songs, in playlist order (see <see cref="StageAudioConfig.SongsFile"/>).</summary>
+internal sealed record SongsFile
+{
+    public List<StageSong> Songs { get; init; } = new();
 }

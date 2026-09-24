@@ -1,9 +1,9 @@
-"""Seed each stage song's sections (drums, crowd) in fair.config.json from its stems.
+"""Seed each stage song's sections (drums, crowd) in songs.config.json from its stems.
 
     "<Blender 3.6>/3.6/python/bin/python.exe" tools/bards/build_sections.py [--write] [--force] [song ...]
 
 (Blender's bundled Python, for numpy; ffmpeg on the path.) For each song in
-fairWorld.audio.stage.songs, unpacks music/stem/<title> Stems.zip, tells the instrumental
+songs.config.json (fair.config.json's fairWorld.audio.stage.songsFile), unpacks music/stem/<title> Stems.zip, tells the instrumental
 from the vocal by its bass share (as build_vocals.py does), and reads the drums'
 intensity from the bass band (build_vocals.intensity: calm / normal / intense, 2.5 s
 steps, blips under 5 s merged).
@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_vocals as bv  # noqa: E402
 
 ROOT = bv.ROOT
-CONFIG = ROOT / 'fair.config.json'
+SONGS = ROOT / 'songs.config.json'
 WORK = ROOT / 'build' / 'bards' / 'sections'
 NL = chr(10)
 
@@ -59,32 +59,33 @@ def sections(inst, defaults):
     return [[s['start'], s['level'], 'clap' if s['level'] == 'calm' else 'dance'] for s in drums]
 
 
-def write_songs(text, songs):
-    """The config with its stage songs array rewritten, a song a line; the rest untouched."""
-    start = text.index('"songs": [', text.index('"hardEndFade"'))
-    depth = 0
-    end = None
-    for k in range(start + len('"songs": '), len(text)):
-        depth += {'[': 1, ']': -1}.get(text[k], 0)
-        if depth == 0:
-            end = k + 1
-            break
-    indent = ' ' * (start - text.rindex(NL, 0, start) - 1)
-    body = (',' + NL).join(indent + '  ' + json.dumps(song, ensure_ascii=False) for song in songs)
-    return text[:start] + '"songs": [' + NL + body + NL + indent + ']' + text[end:]
+def write_songs(doc):
+    """songs.config.json as Barry edits it: a song a block, a section a line."""
+    lines = ['{', f'  "about": {json.dumps(doc["about"])},', '  "songs": [']
+    for n, song in enumerate(doc['songs']):
+        lines.append('    {')
+        for k in [k for k in song if k != 'sections']:
+            lines.append(f'      {json.dumps(k)}: {json.dumps(song[k], ensure_ascii=False)},')
+        lines.append('      "sections": [')
+        sections = song.get('sections', [])
+        for i, (t, drums, crowd) in enumerate(sections):
+            lines.append(f'        [{json.dumps(t)}, {json.dumps(drums)}, {json.dumps(crowd)}]' + (',' if i < len(sections) - 1 else ''))
+        lines.append('      ]')
+        lines.append('    }' + (',' if n < len(doc['songs']) - 1 else ''))
+    lines += ['  ]', '}', '']
+    return NL.join(lines)
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split(NL)[0])
-    ap.add_argument('songs', nargs='*', help='song names (fairWorld.audio.stage.songs[].name); all by default')
+    ap.add_argument('songs', nargs='*', help='song names (songs.config.json); all by default')
     ap.add_argument('--write', action='store_true', help='add sections to songs that have none')
     ap.add_argument('--force', action='store_true', help="replace every chosen song's sections")
     args = ap.parse_args()
 
     defaults = json.loads((ROOT / 'tools' / 'bards' / 'songs.json').read_text(encoding='utf-8'))['defaults']
-    text = CONFIG.read_text(encoding='utf-8')
-    config = json.loads(text)
-    songs = config['fairWorld']['audio']['stage']['songs']
+    doc = json.loads(SONGS.read_text(encoding='utf-8'))
+    songs = doc['songs']
     changed = 0
     for song in songs:
         if args.songs and song['name'] not in args.songs:
@@ -99,10 +100,10 @@ def main():
             changed += 1
 
     if changed:
-        text = write_songs(text, songs)
+        text = write_songs(doc)
         json.loads(text)
-        CONFIG.write_text(text, encoding='utf-8')
-        print(f'wrote sections for {changed} song(s) to {CONFIG.name}')
+        SONGS.write_text(text, encoding='utf-8')
+        print(f'wrote sections for {changed} song(s) to {SONGS.name}')
 
 
 if __name__ == '__main__':

@@ -29,6 +29,23 @@ try
         return 1;
     }
 
+    // The stage songs live in a file of their own (songs.config.json), next to the config.
+    var stageAudio = config.FairWorld.Audio.Stage;
+    if (stageAudio.SongsFile.Length > 0)
+    {
+        var songsPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(configPath))!, stageAudio.SongsFile);
+        var songsFile = JsonSerializer.Deserialize<SongsFile>(
+            await File.ReadAllTextAsync(songsPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidOperationException($"{stageAudio.SongsFile} could not be parsed.");
+        config = config with
+        {
+            FairWorld = config.FairWorld with
+            {
+                Audio = config.FairWorld.Audio with { Stage = stageAudio with { Songs = songsFile.Songs } },
+            },
+        };
+    }
+
     Console.WriteLine($"Building {config.Identity.Name}...");
     Console.WriteLine($"Working location: {config.Identity.WorkingLocation}");
     Console.WriteLine(

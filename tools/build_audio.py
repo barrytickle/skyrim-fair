@@ -1,6 +1,6 @@
 """Build the fair's runtime sound files from Barry's converted audio.
 
-Reads fairWorld.audio in fair.config.json. Every source is already mono 44.1 kHz 16-bit
+Reads fairWorld.audio in fair.config.json (the stage songs from songs.config.json). Every source is already mono 44.1 kHz 16-bit
 PCM (music/mono, sound-effects/mono); this checks that rather than reconverting, then
 writes clean WAVs (a fmt and a data chunk only, no ffmpeg LIST tags) under
 assets/sound/, at the Data-relative paths the plugin's sound descriptors name:
@@ -156,6 +156,8 @@ def seamless(samples: array.array, crossfade: float) -> array.array:
 def main() -> None:
     cfg = json.loads((ROOT / "fair.config.json").read_text(encoding="utf-8"))
     audio = cfg["fairWorld"]["audio"]
+    if audio["stage"].get("songsFile"):  # the songs live in songs.config.json
+        audio["stage"]["songs"] = json.loads((ROOT / audio["stage"]["songsFile"]).read_text(encoding="utf-8"))["songs"]
     made = []
 
     stage = audio["stage"]

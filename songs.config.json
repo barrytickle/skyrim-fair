@@ -1,0 +1,95 @@
+{
+  "about": "The stage songs, in playlist order. fair.config.json points here (fairWorld.audio.stage.songsFile). Each section is [start in seconds, drums, crowd]: drums calm (the drummers rest), normal or intense (they play); crowd dance, clap or cheer. Edit freely, keep the starts in order, then rebuild. tools/bards/build_sections.py --force re-seeds a song's sections from its stems (overwriting your edits).",
+  "songs": [
+    {
+      "name": "RoundTheGreen",
+      "source": "music/mono/Round the Green.wav",
+      "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav",
+      "cheer": "cheer",
+      "sections": [
+        [0.0, "normal", "dance"],
+        [2.5, "calm", "clap"],
+        [15.0, "intense", "dance"],
+        [20.0, "calm", "clap"],
+        [32.5, "intense", "dance"],
+        [50.0, "normal", "dance"],
+        [72.5, "calm", "clap"],
+        [77.5, "intense", "dance"],
+        [97.5, "normal", "dance"],
+        [105.0, "calm", "clap"],
+        [112.5, "normal", "dance"],
+        [122.5, "calm", "clap"],
+        [135.0, "intense", "dance"]
+      ]
+    },
+    {
+      "name": "HeyHoSkyrim",
+      "source": "music/mono/Hey-Ho, Skyrim.wav",
+      "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav",
+      "cheer": "cheer",
+      "sections": [
+        [0.0, "normal", "dance"],
+        [10.0, "calm", "clap"],
+        [15.0, "intense", "dance"],
+        [20.0, "normal", "dance"],
+        [35.0, "intense", "dance"],
+        [50.0, "calm", "clap"],
+        [55.0, "normal", "dance"],
+        [62.5, "intense", "dance"],
+        [110.0, "normal", "dance"],
+        [125.0, "intense", "dance"],
+        [140.0, "normal", "dance"],
+        [165.0, "calm", "clap"],
+        [170.0, "normal", "dance"],
+        [180.0, "intense", "dance"]
+      ]
+    },
+    {
+      "name": "Fiddle",
+      "source": "music/mono/Fiddle.wav",
+      "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav",
+      "cheer": "cheer",
+      "sections": [
+        [0.0, "calm", "clap"],
+        [22.5, "intense", "dance"],
+        [37.5, "calm", "clap"],
+        [50.0, "intense", "dance"],
+        [65.0, "calm", "clap"],
+        [77.5, "intense", "dance"],
+        [97.5, "calm", "clap"],
+        [102.5, "normal", "dance"],
+        [117.5, "calm", "clap"],
+        [122.5, "intense", "dance"],
+        [137.5, "calm", "clap"],
+        [145.0, "normal", "dance"],
+        [150.0, "calm", "clap"],
+        [162.5, "intense", "dance"],
+        [182.5, "calm", "clap"],
+        [187.5, "intense", "dance"]
+      ]
+    },
+    {
+      "name": "DragonbornApproved",
+      "source": "music/mono/Dragonborn-Approved.wav",
+      "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
+      "cheer": "cheer",
+      "sections": [
+        [0.0, "calm", "clap"],
+        [7.5, "normal", "dance"],
+        [15.0, "calm", "clap"],
+        [27.5, "intense", "dance"],
+        [40.0, "normal", "dance"],
+        [52.5, "intense", "dance"],
+        [72.5, "normal", "dance"],
+        [85.0, "intense", "dance"],
+        [95.0, "normal", "dance"],
+        [157.5, "intense", "dance"],
+        [180.0, "normal", "dance"],
+        [195.0, "intense", "dance"],
+        [202.5, "normal", "dance"],
+        [207.5, "calm", "clap"],
+        [217.5, "intense", "dance"]
+      ]
+    }
+  ]
+}

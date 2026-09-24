@@ -2,7 +2,22 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: a solid invisible wall round the stage; the crowd faces the stage to clap and cheer (2026-09-24)
+## Current pass: the songs in their own file, songs.config.json (2026-09-24)
+
+Barry: "can we do a songs.config.json with just the songs? I'm very lost in the fair.config.json".
+
+- `songs.config.json` at the repo root holds the four stage songs (name, source, file,
+  cheer, sections), a section a line, with an "about" note on how to edit them.
+- `fair.config.json`'s `audio.stage.songs` is replaced by `"songsFile": "songs.config.json"`.
+- Readers:
+  - Program.cs loads it into `StageAudioConfig.Songs` (record `SongsFile`)
+  - `tools/build_audio.py` follows `songsFile`
+  - `tools/bards/build_sections.py` reads and writes it, in the same layout (round-trip
+    byte-identical)
+- **The plugin is byte-identical** to the deployed `34f72fd94733297d...`, so nothing to
+  deploy.
+
+## Previous pass: a solid invisible wall round the stage; the crowd faces the stage to clap and cheer (2026-09-24)
 
 Barry: "the invisible wall stuff still happens... I can just walk up the stairs as well".
 "When the crowd clap or cheer, can we get them to look towards the stage?"

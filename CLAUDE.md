@@ -42,6 +42,10 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Code map
 
+- **`songs.config.json`**: the stage songs alone, in playlist order, with each song's
+  sections (`[start, drums, crowd]`, a line each). `fair.config.json` points to it
+  (`fairWorld.audio.stage.songsFile`). Barry edits the sections here.
+
 - `src/SkyrimFair.Generator/`:
   - `FairWorld.cs`: worldspace, terrain and ground painting
   - `FairMarket.cs`: stalls, modules, vignettes
