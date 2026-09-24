@@ -2,7 +2,30 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: dependency-free fireworks of our own; Professional Dancer only when it's installed (2026-09-24)
+## Current pass: the show keeps time with the music (a real-time clock) (2026-09-24)
+
+Barry: **"we got new dances!!"** (Professional Dancer through Pandora: confirmed), but
+"there's a big delay, like 10-20s between the song ending, the cheer & firework starting".
+
+- **Measured from `Papyrus.0.log`:**
+  - Song 0 started at 16:10:44. The script put its cheer at 148.9 s, on time by its own
+    clock, but logged it at 16:13:48: 184 s of real time.
+  - Through the song the script's clock ran 12-35% behind real time (a table of log
+    timestamps against the script's "at X s").
+- **The cause:** the show was timed on game time, which the engine lets fall behind real
+  time on long frames. The music plays in real time. (A 30 s real / 7 s script stretch was
+  a menu or the console: our stage category is under `AudioCategoryPausedDuringMenuFade`,
+  so the music pauses there too.)
+- **The fix:** a show clock (`ShowNow`) that counts real seconds, each step capped at 1.6x
+  the game time that passed plus 0.25 s, so menu time isn't counted. The music's schedule
+  runs on it: song and cheer ends, sections, sung lines, the band's last note. The
+  animations' replays stay on game time, since their clips run on game time: the dances,
+  singer gestures, the folk pair, the drift-in caps.
+- Script only; the plugin is unchanged. Deployed.
+- **To test:** does the cheer (and the fireworks) now follow the end of each song within a
+  second or two? The log's `cheer ... at X s` against its timestamps should agree.
+
+## Previous pass: dependency-free fireworks of our own; Professional Dancer only when it's installed (2026-09-24)
 
 Barry: "let's do the fireworks ourselves ... Then maybe we just have a check if dances.esp
 is installed? if not use the vanilla dances, if they are have more varied dances?"

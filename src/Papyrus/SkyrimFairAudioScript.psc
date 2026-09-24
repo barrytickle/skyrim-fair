@@ -197,6 +197,12 @@ Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
 Int tailInstance = 0
 Float bandUntil = 0.0
+; The show's clock, in game-day units like the rest: real seconds, so it keeps pace with the
+; music when the engine lets game time fall behind (long frames), but never more than a little
+; over the game time that passed, so a menu (which pauses the music too) isn't counted.
+Float showDays = 0.0
+Float lastReal = 0.0
+Float lastGame = 0.0
 Float phaseEnds = 0.0
 Float ambienceLevel = -1.0
 ; Which bards are playing, and which archers still wait to be set on their stands (an
@@ -256,6 +262,7 @@ Function Recover()
 	cheerInstance = 0
 	tailInstance = 0
 	bandUntil = 0.0
+	lastReal = 0.0
 	phase = 0
 	ambienceLevel = -1.0
 	bandOn = False
@@ -306,12 +313,14 @@ Event OnUpdate()
 	EndIf
 
 	Float now = Utility.GetCurrentGameTime()
+	; The music's schedule runs on the show clock; the animations (their clips) on game time.
+	Float show = ShowNow()
 	If phase == 0
 		; Arrived, or loaded at the fair.
 		If FirstTrack && FirstTrack.GetValue() >= 0.0 && (FirstTrack.GetValue() as Int) < Songs.Length
 			track = FirstTrack.GetValue() as Int
 		EndIf
-		Enter(1, FirstSongDelay, now)
+		Enter(1, FirstSongDelay, show)
 		StopBand(True)
 		QueueArchers()
 	EndIf
@@ -323,9 +332,9 @@ Event OnUpdate()
 		If songInstance != 0 || cheerInstance != 0
 			StopAll()
 		EndIf
-		Enter(1, FirstSongDelay, now)
-	ElseIf now >= phaseEnds
-		Advance(now)
+		Enter(1, FirstSongDelay, show)
+	ElseIf show >= phaseEnds
+		Advance(show)
 	EndIf
 
 	If songInstance != 0
@@ -333,22 +342,22 @@ Event OnUpdate()
 	EndIf
 	SetAmbience(phase == 2)
 	If phase == 2
-		Sections(now)
+		Sections(show)
 		PlayBand()
 		Dance()
 		SingerGestures(now)
 		FolkDance(now)
-		Sing(now)
+		Sing(show)
 	Else
 		If phase == 3
 			Dance()
 		EndIf
-		If bandOn && now >= bandUntil
+		If bandOn && show >= bandUntil
 			StopBand(False)
 		EndIf
 	EndIf
 
-	Float left = Seconds(phaseEnds - now)
+	Float left = Seconds(phaseEnds - show)
 	If (phase == 2 || phase == 3) && danceWake > now && Seconds(danceWake - now) < left
 		left = Seconds(danceWake - now)
 	EndIf
@@ -358,20 +367,20 @@ Event OnUpdate()
 	If phase == 2 && singerWake > now && Seconds(singerWake - now) < left
 		left = Seconds(singerWake - now)
 	EndIf
-	If phase != 2 && bandOn && bandUntil > now && Seconds(bandUntil - now) < left
+	If phase != 2 && bandOn && bandUntil > show && Seconds(bandUntil - show) < left
 		; Wake as the song's last note ends, to put the instruments away.
-		left = Seconds(bandUntil - now)
+		left = Seconds(bandUntil - show)
 	EndIf
 	If phase == 2 && nextSection >= 0 && nextSection < endSection
 		; Wake for the next section.
-		Float toSection = SectionStarts[nextSection] - Seconds(now - songStarted)
+		Float toSection = SectionStarts[nextSection] - Seconds(show - songStarted)
 		If toSection < left
 			left = toSection
 		EndIf
 	EndIf
 	If phase == 2 && nextLine >= 0 && nextLine < endLine
 		; Wake for the next sung line.
-		Float toLine = SingerStarts[nextLine] - Seconds(now - songStarted)
+		Float toLine = SingerStarts[nextLine] - Seconds(show - songStarted)
 		If toLine < left
 			left = toLine
 		EndIf
@@ -421,7 +430,7 @@ Function Advance(Float now)
 		singerPlays = new Int[16]
 		Int si = 0
 		While si < 16
-			singerNext[si] = now + (1.5 + si * 1.3) * TimeScale.GetValue() / 86400.0
+			singerNext[si] = Utility.GetCurrentGameTime() + (1.5 + si * 1.3) * TimeScale.GetValue() / 86400.0
 			si += 1
 		EndWhile
 		crowdMode = 0
@@ -469,6 +478,28 @@ Float Function Lead()
 		lead = SongLengths[track] / 2.0
 	EndIf
 	Return lead
+EndFunction
+
+; The show clock (see showDays): each call adds the real seconds since the last, capped at 1.6x
+; the game time that passed plus a quarter second. The log showed game time 12-35% behind real
+; time during a song (2026-09-24), so the cheer came 10-35 s after the music had ended.
+Float Function ShowNow()
+	Float realNow = Utility.GetCurrentRealTime()
+	Float gameNow = Utility.GetCurrentGameTime()
+	Float perSecond = TimeScale.GetValue() / 86400.0
+	If lastReal > 0.0 && realNow >= lastReal
+		Float step = realNow - lastReal
+		Float cap = (gameNow - lastGame) / perSecond * 1.6 + 0.25
+		If step > cap
+			step = cap
+		EndIf
+		If step > 0.0
+			showDays += step * perSecond
+		EndIf
+	EndIf
+	lastReal = realNow
+	lastGame = gameNow
+	Return showDays
 EndFunction
 
 Function Enter(Int newPhase, Float lengthSeconds, Float now)
@@ -678,7 +709,7 @@ Function Sections(Float now)
 			; A new mode's move starts now, not when the last gesture ends.
 			Int si = 0
 			While si < singerNext.Length
-				singerNext[si] = now
+				singerNext[si] = Utility.GetCurrentGameTime()
 				si += 1
 			EndWhile
 		EndIf
@@ -690,7 +721,7 @@ Function Sections(Float now)
 		; drifts into it rather than stopping as one.
 		Debug.Trace("SkyrimFairAudio: crowd " + crowd + " at " + into + " s")
 		crowdMode = crowd
-		CapDances(now)
+		CapDances(Utility.GetCurrentGameTime())
 	EndIf
 EndFunction
 
