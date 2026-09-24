@@ -2,7 +2,49 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: dance styles from Professional Dancer; fireworks after every song (2026-09-24)
+## Current pass: dependency-free fireworks of our own; Professional Dancer only when it's installed (2026-09-24)
+
+Barry: "let's do the fireworks ourselves ... Then maybe we just have a check if dances.esp
+is installed? if not use the vanilla dances, if they are have more varied dances?"
+
+### Fireworks: the fair's own, vanilla effects, no dependency
+- Fireworks.esp isn't used. Per colour, **duplicates of vanilla records** (so every
+  vanilla subrecord is kept), appended last:
+  - EXPL `SkyrimFairFireworkBurst{Gold,Blue,Violet}`:
+    - gold: FireStormExplosion, with FireballStormImpactExplosionNoDamage placed
+    - blue: crExplosionFrost01
+    - violet: ChainLightningMassExplosion
+    - All: damage 0, force 0, radius 400, no enchantment or impact data, a vanilla
+      light. Knockdown flags cleared; read back, none of the three had one (flag 4).
+  - PROJ `SkyrimFairFireworkShell*`: the vanilla fire bolt, speed 1500, Explosion +
+    AltTrigger, timer 3.0 / 2.2 / 2.4 s (`fireworks.climb`), so it bursts at about
+    4,500 / 3,300 / 3,600 units.
+  - MGEF and SPEL: FireDamageFFAimed and Firebolt, magnitude 0, cost 0.
+- The launch sites (`175E`-`1760`, same FormIDs) are now vanilla `xMarkerActivator`, which
+  can cast. There's an aim marker above each (`1762`-`1764`, spread 120 apart).
+- The script casts `FireworkShells[k].Cast(site, aim)` as each song ends, `stagger` 0.6 s
+  apart, and `atNight` (20:00-05:00) more from the middle site. The Fireworks.esp lookup
+  properties are gone.
+
+### More dances: only when Professional Dancer is installed
+- `songs.config.json` `moreDances` (events Dance1/3/4/8/9, with the clip lengths) and
+  `moreDancesPlugin` (Dance.esp). The script checks for DanceIdle1 (`000803`) once per
+  load with `Game.GetFormFromFile`. When it's there, dancers take those dances in turn:
+  `Debug.SendAnimationEvent(IdleForceDefaultState)`, 0.1 s, then the dance event, as the
+  mod does (a package can swallow the first). Otherwise, vanilla dances.
+- The events exist only after Pandora or Nemesis has run with the mod installed. Its
+  dances loop, so leaving a mod dance (clap, cheer, the song's end, leaving the fair)
+  settles the dancer with `IdleForceDefaultState` first.
+- The copied-clip OAR route is gone: `build_dances.py` deleted, the clips removed from
+  `assets/` and from the mod folder (only the 11 files deployed earlier).
+
+- Plugin `7ec9724f8fe91a24...`, deterministic. 15 records added (3 aims, 12 firework
+  records), 3 sites re-based. Deployed.
+- **To test:** fireworks after every song, no mod needed (`set gamehour to 22` for the
+  night shells). For the dances: install Professional Dancer with Dance.esp enabled and
+  re-run Pandora; the log says `Dance.esp loaded: True`.
+
+## Previous pass: dance styles from Professional Dancer; fireworks after every song (2026-09-24)
 
 Barry: "Yeah that sounds good for dancer. And for fireworks yeah let's use the lighter ones
 :) as long as we can just automatically trigger them. Maybe they go off after the end of

@@ -2586,19 +2586,13 @@ internal sealed record StageAudioConfig
 
     public float SingerGap { get; init; } = 2f;
 
-    public List<DanceStyle> DanceStyles { get; init; } = new();
+    public List<MoreDance> MoreDances { get; init; } = new();
+
+    public string MoreDancesPlugin { get; init; } = "Dance.esp";
+
+    public string MoreDancesCheck { get; init; } = "000803";
 
     public FireworksShow Fireworks { get; init; } = new();
-
-    /// <summary>Where the dance styles' OAR submods live, and the actor value that picks one (Variable10, 77).</summary>
-    public string DanceStylesOarFolder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairDances";
-
-    public string DanceStyleValue { get; init; } = "Variable10";
-
-    public int DanceStyleValueIndex { get; init; } = 77;
-
-    /// <summary>The idle the styles replace the clip of (vanilla IdleCiceroDance1).</summary>
-    public string DanceStyleIdle { get; init; } = "000F7C8A:Skyrim.esm";
 
     /// <summary>Where the fast clips and their OAR submods live.</summary>
     public string TempoOarFolder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairTempo";
@@ -3406,39 +3400,46 @@ internal sealed record StageShowFile
     /// <summary>Seconds each singer stands between moves.</summary>
     public float SingerGap { get; init; } = 2f;
 
-    /// <summary>The dancers' styles: Professional Dancer's clips through OAR (tools/bards/build_dances.py).</summary>
-    public List<DanceStyle> DanceStyles { get; init; } = new();
+    /// <summary>
+    /// Professional Dancer's dances (its animation events, which exist once the mod is installed and
+    /// Pandora or Nemesis has run), used while dancing when its plugin is loaded; vanilla otherwise.
+    /// </summary>
+    public List<MoreDance> MoreDances { get; init; } = new();
 
-    /// <summary>Fireworks after each song (Fireworks.esp, looked up at runtime; nothing if it isn't loaded).</summary>
+    public string MoreDancesPlugin { get; init; } = "Dance.esp";
+
+    /// <summary>A record in the plugin that proves it's loaded (DanceIdle1).</summary>
+    public string MoreDancesCheck { get; init; } = "000803";
+
+    /// <summary>The fair's own fireworks after each song (vanilla effects, no dependency).</summary>
     public FireworksShow Fireworks { get; init; } = new();
 }
 
-internal sealed record DanceStyle
+internal sealed record MoreDance
 {
-    public string Name { get; init; } = string.Empty;
+    /// <summary>The animation event (Professional Dancer's FNIS list: Dance1..Dance14).</summary>
+    public string Event { get; init; } = string.Empty;
 
-    /// <summary>The clip, in Professional Dancer's animations/Dance folder.</summary>
-    public string Clip { get; init; } = string.Empty;
-
-    /// <summary>Its length in seconds (the build tool checks it against the clip).</summary>
+    /// <summary>Its clip's length in seconds (read from the mod's .hkx with the codec).</summary>
     public float Length { get; init; }
 }
 
 internal sealed record FireworksShow
 {
-    public string Plugin { get; init; } = "Fireworks.esp";
-
-    /// <summary>Launcher activators (FormIDs in the plugin, hex), one per site in turn, set off as each song ends.</summary>
+    /// <summary>Shells sent up as each song ends, one per site in turn: gold, blue or violet.</summary>
     public List<string> AfterSong { get; init; } = new();
 
-    /// <summary>Also at night (20:00-05:00), at the middle site: a flare.</summary>
+    /// <summary>More at night (20:00-05:00), from the middle site.</summary>
     public List<string> AtNight { get; init; } = new();
 
     /// <summary>Launch sites, [x, y]: in the open, away from people and trees.</summary>
     public List<float[]> Sites { get; init; } = new();
 
-    /// <summary>Seconds between one site's launch and the next.</summary>
+    /// <summary>Seconds between one shell and the next.</summary>
     public float Stagger { get; init; } = 0.6f;
+
+    /// <summary>Seconds each colour's shell climbs before it bursts (at 1,500 units a second).</summary>
+    public Dictionary<string, float> Climb { get; init; } = new();
 }
 
 internal sealed record CrowdMove

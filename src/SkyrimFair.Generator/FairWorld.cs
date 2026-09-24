@@ -1241,76 +1241,41 @@ internal static class FairWorld
             Console.WriteLine($"  tempo: {string.Join(", ", config.Audio.Stage.Fast.Select(kv => $"{kv.Key} x{kv.Value}"))}; OAR submods in {config.Audio.Stage.TempoOarFolder}");
         }
 
-        // ---- the dancers' styles and the fireworks, last of all so nothing renumbers ----------------
+        // ---- more dances and the fireworks, last of all so nothing renumbers ----------------------
         if (audio is not null)
         {
             var show = config.Audio.Stage;
             var stageScript = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
-            var npcKeyword = mod.Keywords.First(k => k.EditorID == config.NpcKeyword);
-            object Form(FormKey key) => new Dictionary<string, string> { ["pluginName"] = mod.ModKey.FileName, ["formID"] = key.ID.ToString("X") };
-            var json = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
 
-            // Dance styles: OAR swaps Professional Dancer's clip N in for the Cicero dance while a
-            // fair NPC's Variable10 is N (the script sets it before each dance).
-            if (show.DanceStyles.Count > 0)
+            // More dances: Professional Dancer's animation events, used while its plugin is loaded.
+            if (show.MoreDances.Count > 0)
             {
-                var folder = Path.IsPathRooted(show.DanceStylesOarFolder) ? show.DanceStylesOarFolder : Path.Combine(FairPaths.ConfigDirectory, show.DanceStylesOarFolder);
-                Directory.CreateDirectory(folder);
-                File.WriteAllText(Path.Combine(folder, "config.json"), System.Text.Json.JsonSerializer.Serialize(new
-                {
-                    name = "Skyrim Fair dance styles",
-                    author = "Skyrim Fair (clips: Professional Dancer, Nexus 124608)",
-                    description = "The fair's dancers only: Professional Dancer's dances in place of the Cicero dance, one per style, picked by the stage script.",
-                }, json));
-                for (var n = 1; n <= show.DanceStyles.Count; n++)
-                {
-                    var sub = Path.Combine(folder, $"Style{n:00}");
-                    Directory.CreateDirectory(sub);
-                    File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
-                    {
-                        ["name"] = $"Style {n}: {show.DanceStyles[n - 1].Name}",
-                        ["description"] = $"{show.DanceStyles[n - 1].Clip} ({show.DanceStyles[n - 1].Length} s) while {show.DanceStyleValue} is {n}.",
-                        ["priority"] = 1900000002,
-                        ["conditions"] = new object[]
-                        {
-                            new Dictionary<string, object>
-                            {
-                                ["condition"] = "HasKeyword",
-                                ["requiredVersion"] = "1.0.0.0",
-                                ["Keyword"] = new Dictionary<string, object> { ["form"] = Form(npcKeyword.FormKey) },
-                            },
-                            new Dictionary<string, object>
-                            {
-                                ["condition"] = "CompareValues",
-                                ["requiredVersion"] = "1.0.0.0",
-                                ["Value A"] = new Dictionary<string, object> { ["actorValue"] = show.DanceStyleValueIndex, ["actorValueType"] = "Value" },
-                                ["Comparison"] = "==",
-                                ["Value B"] = new Dictionary<string, object> { ["value"] = (double)n },
-                            },
-                        },
-                    }, json));
-                }
-
-                stageScript.Properties.Add(new ScriptFloatListProperty { Name = "DanceStyleLengths", Data = show.DanceStyles.Select(d => d.Length).ToExtendedList() });
-                stageScript.Properties.Add(new ScriptObjectProperty { Name = "DanceStyleIdle", Object = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse(show.DanceStyleIdle)) });
-                stageScript.Properties.Add(new ScriptStringProperty { Name = "DanceStyleValue", Data = show.DanceStyleValue });
-                Console.WriteLine($"  dance styles: {string.Join(", ", show.DanceStyles.Select(d => $"{d.Name} {d.Length}s"))}; OAR submods in {show.DanceStylesOarFolder}");
+                stageScript.Properties.Add(new ScriptStringListProperty { Name = "MoreDanceEvents", Data = show.MoreDances.Select(d => d.Event).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptFloatListProperty { Name = "MoreDanceLengths", Data = show.MoreDances.Select(d => d.Length).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptStringProperty { Name = "MoreDancesPlugin", Data = show.MoreDancesPlugin });
+                stageScript.Properties.Add(new ScriptIntProperty { Name = "MoreDancesCheck", Data = Convert.ToInt32(show.MoreDancesCheck, 16) });
+                Console.WriteLine($"  more dances: {show.MoreDances.Count} from {show.MoreDancesPlugin} when it's loaded ({string.Join(", ", show.MoreDances.Select(d => $"{d.Event} {d.Length}s"))})");
             }
 
-            // Fireworks: persistent launch markers, a switch, and the launchers' FormIDs.
+            // Fireworks, the fair's own: vanilla effects in records of ours, no damage, no knockdown.
+            // A shell is a spell cast from a launch site's invisible marker at an aim marker above it;
+            // its projectile (the vanilla fire bolt) climbs and bursts on its timer.
             var fw = show.Fireworks;
             if (fw.AfterSong.Count > 0 && fw.Sites.Count > 0)
             {
                 var sites = new List<FormKey>();
+                var aims = new List<FormKey>();
+                var marker = FormKeyHelper.Parse("0006CD3D:Skyrim.esm");  // xMarkerActivator: invisible, can cast
                 for (var n = 0; n < fw.Sites.Count; n++)
                 {
                     var (sx, sy) = (fw.Sites[n][0], fw.Sites[n][1]);
+                    var z = plan.Height(sx, sy);
                     var site = new PlacedObject(mod)
                     {
                         EditorID = $"SkyrimFairFireworkSite{n + 1:00}",
                         MajorRecordFlagsRaw = PersistentRecordFlag,
-                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("0000003B:Skyrim.esm")),
-                        Placement = new Placement { Position = new P3Float(sx, sy, plan.Height(sx, sy)), Rotation = new P3Float(0f, 0f, 0f) },
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(marker),
+                        Placement = new Placement { Position = new P3Float(sx, sy, z + 16f), Rotation = new P3Float(0f, 0f, 0f) },
                     };
                     topCell.Persistent.Add(site);
                     sites.Add(site.FormKey);
@@ -1318,20 +1283,97 @@ internal static class FairWorld
 
                 var on = new GlobalFloat(mod) { EditorID = "SkyrimFairFireworks", Data = 1f };
                 mod.Globals.Add(on);
-                int Hex(string id) => Convert.ToInt32(id, 16);
-                stageScript.Properties.Add(new ScriptObjectListProperty
+
+                // Each site's aim, straight up (a little apart, so the bursts spread).
+                for (var n = 0; n < fw.Sites.Count; n++)
                 {
-                    Name = "FireworkSites",
-                    Objects = sites.Select(k => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) }).ToExtendedList(),
-                });
-                stageScript.Properties.Add(new ScriptStringProperty { Name = "FireworkPlugin", Data = fw.Plugin });
-                stageScript.Properties.Add(new ScriptIntListProperty { Name = "FireworkIds", Data = fw.AfterSong.Select(Hex).ToExtendedList() });
-                stageScript.Properties.Add(new ScriptIntListProperty { Name = "FireworkNightIds", Data = fw.AtNight.Select(Hex).ToExtendedList() });
+                    var (sx, sy) = (fw.Sites[n][0], fw.Sites[n][1]);
+                    var aim = new PlacedObject(mod)
+                    {
+                        EditorID = $"SkyrimFairFireworkAim{n + 1:00}",
+                        MajorRecordFlagsRaw = PersistentRecordFlag,
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(marker),
+                        Placement = new Placement { Position = new P3Float(sx + (n - (fw.Sites.Count - 1) / 2f) * 120f, sy + 60f, plan.Height(sx, sy) + 1500f), Rotation = new P3Float(0f, 0f, 0f) },
+                    };
+                    topCell.Persistent.Add(aim);
+                    aims.Add(aim.FormKey);
+                }
+
+                // The shells: a vanilla burst each, with a flash of vanilla light.
+                var colours = new Dictionary<string, (string Burst, string Light, string Placed)>
+                {
+                    ["gold"] = ("0008196B:Skyrim.esm", "0001CBB3:Skyrim.esm", "000EA517:Skyrim.esm"),   // FireStormExplosion; FireballStormImpactExplosionNoDamage
+                    ["blue"] = ("00078C12:Skyrim.esm", "00032DAA:Skyrim.esm", ""),                      // crExplosionFrost01
+                    ["violet"] = ("000BECB0:Skyrim.esm", "00057C68:Skyrim.esm", ""),                    // ChainLightningMassExplosion
+                };
+                var boltProjectile = master!.Projectiles.First(p => p.FormKey == FormKeyHelper.Parse("00012E84:Skyrim.esm"));  // FireboltProjectile01
+                var boltEffect = master.MagicEffects.First(m => m.FormKey == FormKeyHelper.Parse("00012F03:Skyrim.esm"));     // FireDamageFFAimed
+                var boltSpell = master.Spells.First(p => p.FormKey == FormKeyHelper.Parse("00012FD0:Skyrim.esm"));            // Firebolt
+                var shells = new Dictionary<string, FormKey>();
+                foreach (var colour in fw.AfterSong.Concat(fw.AtNight).Distinct().OrderBy(c => c, StringComparer.Ordinal))
+                {
+                    if (!colours.TryGetValue(colour, out var parts))
+                    {
+                        throw new InvalidOperationException($"songs.config.json fireworks: no shell \"{colour}\" (gold, blue, violet)");
+                    }
+
+                    var name = char.ToUpperInvariant(colour[0]) + colour[1..];
+                    var burst = master.Explosions.First(x => x.FormKey == FormKeyHelper.Parse(parts.Burst)).Duplicate(mod.GetNextFormKey());
+                    burst.EditorID = $"SkyrimFairFireworkBurst{name}";
+                    burst.Damage = 0f;
+                    burst.Force = 0f;
+                    burst.Radius = 400f;
+                    burst.ObjectEffect.Clear();
+                    burst.ImpactDataSet.Clear();
+                    burst.Flags &= ~(Explosion.Flag.KnockDownAlways | Explosion.Flag.KnockDownByFormula);
+                    burst.Light.SetTo(FormKeyHelper.Parse(parts.Light));
+                    if (parts.Placed.Length > 0)
+                    {
+                        burst.PlacedObject.SetTo(FormKeyHelper.Parse(parts.Placed));
+                    }
+
+                    mod.Explosions.Add(burst);
+
+                    var shell = boltProjectile.Duplicate(mod.GetNextFormKey());
+                    shell.EditorID = $"SkyrimFairFireworkShell{name}";
+                    shell.Flags |= Projectile.Flag.Explosion | Projectile.Flag.AltTrigger;
+                    shell.Speed = 1500f;
+                    shell.Gravity = 0f;
+                    shell.ExplosionAltTriggerTimer = fw.Climb.GetValueOrDefault(colour, 3f);
+                    shell.Explosion.SetTo(burst.FormKey);
+                    mod.Projectiles.Add(shell);
+
+                    var effect = boltEffect.Duplicate(mod.GetNextFormKey());
+                    effect.EditorID = $"SkyrimFairFireworkEffect{name}";
+                    effect.Name = "Firework";
+                    effect.Projectile.SetTo(shell.FormKey);
+                    mod.MagicEffects.Add(effect);
+
+                    var spell = boltSpell.Duplicate(mod.GetNextFormKey());
+                    spell.EditorID = $"SkyrimFairFirework{name}";
+                    spell.Name = "Firework";
+                    spell.BaseCost = 0;
+                    spell.Effects.Clear();
+                    spell.Effects.Add(new Effect
+                    {
+                        BaseEffect = new FormLinkNullable<IMagicEffectGetter>(effect.FormKey),
+                        Data = new EffectData { Magnitude = 0f, Area = 0, Duration = 0 },
+                    });
+                    mod.Spells.Add(spell);
+                    shells[colour] = spell.FormKey;
+                }
+
+                ScriptObjectProperty Ref(FormKey k) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) };
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "FireworkSites", Objects = sites.Select(Ref).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "FireworkAims", Objects = aims.Select(Ref).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "FireworkShells", Objects = fw.AfterSong.Select(c => Ref(shells[c])).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "FireworkNightShells", Objects = fw.AtNight.Select(c => Ref(shells[c])).ToExtendedList() });
                 stageScript.Properties.Add(new ScriptFloatProperty { Name = "FireworkStagger", Data = fw.Stagger });
                 stageScript.Properties.Add(new ScriptObjectProperty { Name = "FireworksOn", Object = new FormLink<ISkyrimMajorRecordGetter>(on.FormKey) });
-                Console.WriteLine($"  fireworks: {fw.AfterSong.Count} launchers after each song at {fw.Sites.Count} sites, {fw.AtNight.Count} more at night ({fw.Plugin}, looked up at runtime)");
+                Console.WriteLine($"  fireworks: {string.Join(", ", fw.AfterSong)} after each song from {fw.Sites.Count} sites, {string.Join(", ", fw.AtNight)} more at night; shells {string.Join(", ", shells.Keys)}");
             }
         }
+
 
         mod.Worldspaces.Add(worldspace);
 
