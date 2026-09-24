@@ -13,8 +13,9 @@ it's not the end of the world").
   FormID and content identity, none added. Readback as before: no negative word, every
   actor on at its own square, retired untouched.
 - Plugin `4dae188cafc0412f...`, deterministic, deployed.
-- **To test:** sprint into the market and round the stalls; if people pop in often, 640
-  sits between the two.
+- **Confirmed by Barry:** "that works wonderfully". Pop-in can be seen in the distance
+  when looking for it, "i don't think it's noticable if you're not trying to look for
+  it". Keep 512; 640 is the fallback if that changes.
 
 ## Previous pass: the crowd switched off where it can't be seen (built, deployed, 2026-09-24)
 
