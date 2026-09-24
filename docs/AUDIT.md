@@ -57,6 +57,12 @@ Barry: "let's implement it".
 - **Not verified in game:** the property arrays loading whole (over 128 entries), the
   frame rate, pop-in, and seated visitors re-sitting after being switched back on.
 
+### In game (Barry, 2026-09-24)
+
+- **"a huge boost in fps"**: 90-120 displayed (frame generation on), from 77-96 before.
+  120 may be a cap. Still to hear: pop-in while sprinting, seated visitors re-sitting,
+  and the log's `ready True`.
+
 ### What Barry should test
 
 1. From a clean start (`cow SkyrimFairWorld 0 0` from the main menu, since the actors'
