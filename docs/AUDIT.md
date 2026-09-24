@@ -2,7 +2,21 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: one stage-show file, and drums and crowd on timelines of their own (2026-09-24)
+## Current pass: a timeline for every part of the band, and the singers (2026-09-24)
+
+Barry: "is it just drums? Can we have the singers, the lute, the flute".
+
+- Each song in `songs.config.json` has `lute`, `drum`, `flute` (`[second, rest | play |
+  intense]`), `singers` (`[second, sing | rest]`) and `crowd` timelines. The seed is the
+  drum's from the stems; lute and flute play and the singers sing throughout.
+- Script: `SectionPlay` (per section, each instrument in `InstrumentIdles` order: lute,
+  drum, flute) replaces `SectionDrums`; `SectionSing` makes resting singers skip their
+  lines. A musician whose idle is one of `InstrumentIdles` follows that timeline. The old
+  `SectionDrums`/`DrumIdle` properties stay declared, unused (saves keep them).
+- Plugin `2d5c14bac391a35b...`, deterministic; FormIDs unchanged; 58 sections, 174 play
+  levels. Deployed with the scripts.
+
+## Previous pass: one stage-show file, and drums and crowd on timelines of their own (2026-09-24)
 
 Barry: "can we integrate the performers into the songs.config?" and "ideally i want at
 second [0] crowd does X, also at second [0] drums start."

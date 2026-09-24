@@ -1,12 +1,15 @@
 {
-  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has two timelines, in seconds from the song's start, an entry where something changes: drums [second, rest | play | intense] (whoever plays the drum rests in a 'rest' stretch) and crowd [second, dance | clap | cheer]. Before a timeline's first entry the drums play and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. 'names' are labels only. Rebuild after editing.",
+  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | play | intense] (whoever plays that instrument follows it), singers [second, sing | rest] (resting, their lines are skipped) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. 'names' are labels only. Rebuild after editing.",
   "songs": [
     {
       "name": "RoundTheGreen",
       "source": "music/mono/Round the Green.wav",
       "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav",
       "cheer": "cheer",
-      "drums": [
+      "lute": [
+        [0.0, "play"]
+      ],
+      "drum": [
         [0.0, "play"],
         [2.5, "rest"],
         [15.0, "intense"],
@@ -20,6 +23,12 @@
         [112.5, "play"],
         [122.5, "rest"],
         [135.0, "intense"]
+      ],
+      "flute": [
+        [0.0, "play"]
+      ],
+      "singers": [
+        [0.0, "sing"]
       ],
       "crowd": [
         [0.0, "dance"],
@@ -40,7 +49,10 @@
       "source": "music/mono/Hey-Ho, Skyrim.wav",
       "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav",
       "cheer": "cheer",
-      "drums": [
+      "lute": [
+        [0.0, "play"]
+      ],
+      "drum": [
         [0.0, "play"],
         [10.0, "rest"],
         [15.0, "intense"],
@@ -55,6 +67,12 @@
         [165.0, "rest"],
         [170.0, "play"],
         [180.0, "intense"]
+      ],
+      "flute": [
+        [0.0, "play"]
+      ],
+      "singers": [
+        [0.0, "sing"]
       ],
       "crowd": [
         [0.0, "dance"],
@@ -71,7 +89,10 @@
       "source": "music/mono/Fiddle.wav",
       "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav",
       "cheer": "cheer",
-      "drums": [
+      "lute": [
+        [0.0, "play"]
+      ],
+      "drum": [
         [0.0, "rest"],
         [22.5, "intense"],
         [37.5, "rest"],
@@ -88,6 +109,12 @@
         [162.5, "intense"],
         [182.5, "rest"],
         [187.5, "intense"]
+      ],
+      "flute": [
+        [0.0, "play"]
+      ],
+      "singers": [
+        [0.0, "sing"]
       ],
       "crowd": [
         [0.0, "clap"],
@@ -113,7 +140,10 @@
       "source": "music/mono/Dragonborn-Approved.wav",
       "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
       "cheer": "cheer",
-      "drums": [
+      "lute": [
+        [0.0, "play"]
+      ],
+      "drum": [
         [0.0, "rest"],
         [7.5, "play"],
         [15.0, "rest"],
@@ -129,6 +159,12 @@
         [202.5, "play"],
         [207.5, "rest"],
         [217.5, "intense"]
+      ],
+      "flute": [
+        [0.0, "play"]
+      ],
+      "singers": [
+        [0.0, "sing"]
       ],
       "crowd": [
         [0.0, "clap"],

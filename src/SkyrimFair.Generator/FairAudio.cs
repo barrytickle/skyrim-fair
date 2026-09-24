@@ -231,20 +231,32 @@ internal static class FairAudio
             return list;
         }
 
-        IEnumerable<(float Start, int Drums, int Crowd)> SongSections(StageSong song)
+        // The instruments with timelines, in the order the script's InstrumentIdles has them.
+        var instruments = new[] { "lute", "drum", "flute" };
+        IEnumerable<(float Start, int[] Play, int Sing, int Crowd)> SongSections(StageSong song)
         {
-            var drums = Timeline(song, "drums", song.Drums, new[] { "rest", "play", "intense" });
+            var levels = new[] { "rest", "play", "intense" };
+            var play = new[] { song.Lute, song.Drum, song.Flute }
+                .Select((entries, k) => Timeline(song, instruments[k], entries, levels)).ToArray();
+            var sing = Timeline(song, "singers", song.Singers, new[] { "rest", "sing" });
             var crowd = Timeline(song, "crowd", song.Crowd, new[] { "dance", "clap", "cheer" });
-            var (d, c) = (1, 0);
-            foreach (var at in drums.Select(x => x.At).Concat(crowd.Select(x => x.At)).Distinct().OrderBy(x => x))
+            var now = instruments.Select(_ => 1).ToArray();
+            var (singing, mode) = (1, 0);
+            var times = play.SelectMany(t => t.Select(x => x.At)).Concat(sing.Select(x => x.At)).Concat(crowd.Select(x => x.At));
+            foreach (var at in times.Distinct().OrderBy(x => x))
             {
-                foreach (var x in drums.Where(x => x.At == at)) d = x.Value;
-                foreach (var x in crowd.Where(x => x.At == at)) c = x.Value;
-                yield return (at, d, c);
+                for (var k = 0; k < play.Length; k++)
+                {
+                    foreach (var x in play[k].Where(x => x.At == at)) now[k] = x.Value;
+                }
+
+                foreach (var x in sing.Where(x => x.At == at)) singing = x.Value;
+                foreach (var x in crowd.Where(x => x.At == at)) mode = x.Value;
+                yield return (at, now.ToArray(), singing, mode);
             }
         }
 
-        List<(float Start, int Drums, int Crowd)> Sections() => config.Stage.Songs.SelectMany(SongSections).ToList();
+        List<(float Start, int[] Play, int Sing, int Crowd)> Sections() => config.Stage.Songs.SelectMany(SongSections).ToList();
         List<(int First, int Count)> SectionIndex()
         {
             var index = new List<(int, int)>();
@@ -276,11 +288,18 @@ internal static class FairAudio
             Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
             Float("CheerLead", config.Stage.CheerLead),
             new ScriptFloatListProperty { Name = "SectionStarts", Data = Sections().Select(x => x.Start).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SectionDrums", Data = Sections().Select(x => x.Drums).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionPlay", Data = Sections().SelectMany(x => x.Play).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionSing", Data = Sections().Select(x => x.Sing).ToExtendedList() },
+            new ScriptObjectListProperty
+            {
+                Name = "InstrumentIdles",
+                Objects = instruments.Select(i => Obj("", FormKeyHelper.Parse(config.Stage.Instruments.TryGetValue(i, out var idle)
+                    ? idle
+                    : throw new InvalidOperationException($"songs.config.json: instruments has no \"{i}\"")))).ToExtendedList(),
+            },
             new ScriptIntListProperty { Name = "SectionCrowd", Data = Sections().Select(x => x.Crowd).ToExtendedList() },
             new ScriptIntListProperty { Name = "SongFirstSection", Data = SectionIndex().Select(x => x.First).ToExtendedList() },
             new ScriptIntListProperty { Name = "SongSectionCount", Data = SectionIndex().Select(x => x.Count).ToExtendedList() },
-            Obj("DrumIdle", FormKeyHelper.Parse(config.Stage.DrumIdle)),
             Float("DuckDuringSong", config.Stage.DuckAmbience),
             Obj("AmbienceCategory", ambienceCategory.FormKey),
             Obj("AmbienceEnabled", ambienceEnabled.FormKey),

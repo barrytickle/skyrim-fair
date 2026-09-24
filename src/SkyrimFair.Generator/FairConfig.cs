@@ -2560,8 +2560,11 @@ internal sealed record StageAudioConfig
     /// <summary>Seconds before a song's end its cheer starts; the song finishes under it.</summary>
     public float CheerLead { get; init; } = 1f;
 
-    /// <summary>The idle the drummers play (vanilla IdleDrumStart): they rest in a song's calm sections.</summary>
-    public string DrumIdle { get; init; } = "00096F8B:Skyrim.esm";
+    /// <summary>
+    /// The instruments with timelines, by name (lute, drum, flute), as their idles: a musician
+    /// whose idle is one follows that instrument's timeline in each song.
+    /// </summary>
+    public Dictionary<string, string> Instruments { get; init; } = new();
 
     /// <summary>The ambience's level during a song, as a share of normal.</summary>
     public float DuckAmbience { get; init; } = 0.75f;
@@ -2639,11 +2642,18 @@ internal sealed record StageSong
     public string Cheer { get; init; } = string.Empty;
 
     /// <summary>
-    /// The drums' timeline: [second, "rest" | "play" | "intense"], from the song's start,
-    /// an entry where they change. Whoever plays the drum rests in a "rest" stretch. None:
-    /// they play throughout.
+    /// Each instrument's timeline: [second, "rest" | "play" | "intense"], from the song's
+    /// start, an entry where it changes. Whoever plays that instrument follows it (a
+    /// resting instrument is put away). None: it plays throughout.
     /// </summary>
-    public List<System.Text.Json.JsonElement[]> Drums { get; init; } = new();
+    public List<System.Text.Json.JsonElement[]> Lute { get; init; } = new();
+
+    public List<System.Text.Json.JsonElement[]> Drum { get; init; } = new();
+
+    public List<System.Text.Json.JsonElement[]> Flute { get; init; } = new();
+
+    /// <summary>The singers' timeline: [second, "sing" | "rest"]; resting, their lines are skipped. None: they sing.</summary>
+    public List<System.Text.Json.JsonElement[]> Singers { get; init; } = new();
 
     /// <summary>The crowd's timeline: [second, "dance" | "clap" | "cheer"]. None: they dance throughout.</summary>
     public List<System.Text.Json.JsonElement[]> Crowd { get; init; } = new();

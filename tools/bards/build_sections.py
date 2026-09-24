@@ -8,12 +8,14 @@ from the vocal by its bass share (as build_vocals.py does), and reads the drums'
 intensity from the bass band (build_vocals.intensity: calm / normal / intense, 2.5 s
 steps, blips under 5 s merged).
 
-Each song gets two timelines, [second, what], an entry where it changes:
-- drums: rest (whoever plays the drum rests), play or intense
+Each song gets a timeline per part of the show, [second, what], an entry where it changes:
+- lute, drum, flute: rest (whoever plays it puts it away), play or intense
+- singers: sing or rest (resting, their lines are skipped)
 - crowd: dance, clap or cheer (the dancers' idles)
-The seed rests the drums and claps where the drums are calm, and plays and dances
-elsewhere. The timelines are Barry's to tune by hand: --write adds them only to songs that
-have none, --force replaces them. Without either, they're printed.
+The seed rests the drum and claps where the drums are calm (from the bass band), and
+plays and dances elsewhere; the lute and flute play and the singers sing throughout. The
+timelines are Barry's to tune by hand: --write adds them only to songs that have none,
+--force replaces them. Without either, they're printed.
 
 Only the stems are read; no singer lines or voice files are made (that's build_vocals.py).
 """
@@ -54,8 +56,11 @@ def instrumental(title, work):
     return probe[1][1]
 
 
+TIMELINES = ('lute', 'drum', 'flute', 'singers', 'crowd')
+
+
 def timelines(inst, defaults):
-    """(drums, crowd), each [[second, what], ...] with an entry only where it changes."""
+    """{part: [[second, what], ...]}, an entry only where it changes."""
     level = {'calm': 'rest', 'normal': 'play', 'intense': 'intense'}
     drums, crowd = [], []
     for s in bv.intensity(inst, defaults)['drums']:
@@ -64,7 +69,7 @@ def timelines(inst, defaults):
             drums.append([s['start'], d])
         if not crowd or crowd[-1][1] != c:
             crowd.append([s['start'], c])
-    return drums, crowd
+    return {'lute': [[0.0, 'play']], 'drum': drums, 'flute': [[0.0, 'play']], 'singers': [[0.0, 'sing']], 'crowd': crowd}
 
 
 def write_songs(doc):
@@ -74,13 +79,14 @@ def write_songs(doc):
     lines = ['{', f'  "about": {j(doc["about"])},', '  "songs": [']
     for n, song in enumerate(doc['songs']):
         lines.append('    {')
-        for k in [k for k in song if k not in ('drums', 'crowd')]:
+        for k in [k for k in song if k not in TIMELINES]:
             lines.append(f'      {j(k)}: {j(song[k], ensure_ascii=False)},')
-        for name in ('drums', 'crowd'):
-            entries = song.get(name, [])
+        parts = [p for p in TIMELINES if p in song]
+        for n2, name in enumerate(parts):
+            entries = song[name]
             lines.append(f'      {j(name)}: [')
             lines += [f'        [{j(t)}, {j(v)}]' + (',' if i < len(entries) - 1 else '') for i, (t, v) in enumerate(entries)]
-            lines.append('      ]' + (',' if name == 'drums' else ''))
+            lines.append('      ]' + (',' if n2 < len(parts) - 1 else ''))
         lines.append('    }' + (',' if n < len(doc['songs']) - 1 else ''))
     lines.append('  ]')
     rest = [k for k in doc if k not in ('about', 'songs')]
@@ -127,11 +133,11 @@ def main():
         if args.songs and song['name'] not in args.songs:
             continue
         title = Path(song['source']).stem
-        drums, crowd = timelines(instrumental(title, WORK / song['name']), defaults)
+        seeded = timelines(instrumental(title, WORK / song['name']), defaults)
         shutil.rmtree(WORK / song['name'])
-        print(f"{song['name']}: drums {json.dumps(drums)}; crowd {json.dumps(crowd)}")
-        if (args.write and 'drums' not in song and 'crowd' not in song) or args.force:
-            song['drums'], song['crowd'] = drums, crowd
+        print(f"{song['name']}: " + '; '.join(f'{k} {json.dumps(v)}' for k, v in seeded.items()))
+        if (args.write and not any(p in song for p in TIMELINES)) or args.force:
+            song.update(seeded)
             changed += 1
 
     if changed:

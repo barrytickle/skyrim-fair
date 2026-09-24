@@ -74,7 +74,7 @@ try
                         Orchestra = Players(show.Orchestra),
                         BandStop = Named("putAway"),
                         BandPackage = Named("holdPackage"),
-                        DrumIdle = Named("drum"),
+                        Instruments = show.Instruments,
                     },
                 },
                 Crowds = config.FairWorld.Crowds with

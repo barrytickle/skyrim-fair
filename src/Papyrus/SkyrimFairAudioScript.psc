@@ -96,14 +96,20 @@ Int[] Property SongLineCount Auto
 Float[] Property SectionStarts Auto
 {Every song's sections, song by song: each one's start in seconds from its song's start.}
 Int[] Property SectionDrums Auto
-{0 calm (the drummers rest), 1 normal, 2 intense.}
+{Retired (the drums alone): a save keeps its old value; SectionPlay has every instrument now.}
+Int[] Property SectionPlay Auto
+{For each section, each instrument in InstrumentIdles in turn: 0 rest, 1 play, 2 intense.}
+Idle[] Property InstrumentIdles Auto
+{The instruments with timelines (lute, drum, flute): a musician whose idle is one follows it.}
+Int[] Property SectionSing Auto
+{For each section: 1 the singers sing (their lines are said), 0 they rest (lines skipped).}
 Int[] Property SectionCrowd Auto
 {0 the dancers dance, 1 they clap, 2 they cheer.}
 Int[] Property SongFirstSection Auto
 {For each song, its first section, or -1 for a song without (drums and dancing throughout).}
 Int[] Property SongSectionCount Auto
 Idle Property DrumIdle Auto
-{The drummers' idle: a bard with it rests while the drums are calm.}
+{Retired: InstrumentIdles has every instrument now.}
 
 GlobalVariable Property AtFair Auto
 {1 while the player is at the fair: the compatibility patches switch other mods' per-NPC
@@ -173,6 +179,9 @@ Int endLine = -1
 Int nextSection = -1
 Int endSection = -1
 Int drumLevel = 1
+; Each instrument's level (InstrumentIdles order) and whether the singers sing.
+Int[] playLevel
+Bool singing = True
 Int crowdMode = 0
 Bool[] archerPending
 Bool[] archerHeld
@@ -332,6 +341,13 @@ Function Advance(Float now)
 		nextLine = -1
 		endLine = -1
 		drumLevel = 1
+		playLevel = new Int[8]
+		Int pl = 0
+		While pl < 8
+			playLevel[pl] = 1
+			pl += 1
+		EndWhile
+		singing = True
 		crowdMode = 0
 		nextSection = -1
 		endSection = -1
@@ -424,7 +440,7 @@ Function PlayAll(Actor[] players, Idle[] idles, Bool[] playing)
 	Int i = 0
 	While i < players.Length && i < playing.Length && i < idles.Length
 		; The drummers rest while the drums are calm.
-		If !playing[i] && players[i] && players[i].Is3DLoaded() && (drumLevel > 0 || idles[i] != DrumIdle)
+		If !playing[i] && players[i] && players[i].Is3DLoaded() && Playing(idles[i])
 			playing[i] = players[i].PlayIdle(idles[i])
 		EndIf
 		i += 1
@@ -481,28 +497,50 @@ Function ApplyCrowdLayers()
 EndFunction
 
 ; Every section whose start has come is applied, from the song's own start (so timer error
-; never adds up). The drummers put their sticks down when the drums go calm and take them up
-; again after; a change of crowd mode gives each dancer the new mode's idle straight away.
+; never adds up). A resting instrument's players put theirs away and take it up again after;
+; resting singers skip their lines; a change of crowd mode gives each dancer the new mode's
+; idle straight away.
 Function Sections(Float now)
 	If nextSection < 0
 		Return
 	EndIf
+	If playLevel.Length < 8
+		playLevel = new Int[8]
+		Int pl = 0
+		While pl < 8
+			playLevel[pl] = 1
+			pl += 1
+		EndWhile
+	EndIf
 	Float into = Seconds(now - songStarted)
-	Int drums = drumLevel
+	Int count = InstrumentIdles.Length
+	Int applied = -1
 	Int crowd = crowdMode
 	While nextSection < endSection && nextSection < SectionStarts.Length && SectionStarts[nextSection] <= into + 0.05
-		drums = SectionDrums[nextSection]
+		applied = nextSection
 		crowd = SectionCrowd[nextSection]
 		nextSection += 1
 	EndWhile
-	If (drums > 0) != (drumLevel > 0)
-		Debug.Trace("SkyrimFairAudio: drums " + drums + " at " + into + " s")
-		If drums == 0
-			RestDrums(Band, BandIdles, bandPlaying)
-			RestDrums(Orchestra, OrchestraIdles, orchestraPlaying)
+	If applied >= 0
+		Int k = 0
+		While k < count && k < 8
+			Int level = SectionPlay[applied * count + k]
+			If (level > 0) != (playLevel[k] > 0)
+				Debug.Trace("SkyrimFairAudio: instrument " + k + " level " + level + " at " + into + " s")
+				If level == 0
+					Rest(Band, BandIdles, bandPlaying, InstrumentIdles[k])
+					Rest(Orchestra, OrchestraIdles, orchestraPlaying, InstrumentIdles[k])
+				EndIf
+			EndIf
+			playLevel[k] = level
+			k += 1
+		EndWhile
+		Bool sing = applied >= SectionSing.Length || SectionSing[applied] > 0
+		If sing != singing
+			Debug.Trace("SkyrimFairAudio: singers " + sing + " at " + into + " s")
 		EndIf
+		singing = sing
 	EndIf
-	drumLevel = drums
 	If crowd != crowdMode
 		Debug.Trace("SkyrimFairAudio: crowd " + crowd + " at " + into + " s")
 		crowdMode = crowd
@@ -515,6 +553,18 @@ Function Sections(Float now)
 			FaceStage()
 		EndIf
 	EndIf
+EndFunction
+
+; Whether a musician with this idle plays now: an instrument with a timeline follows it.
+Bool Function Playing(Idle instrument)
+	Int k = 0
+	While k < InstrumentIdles.Length && k < playLevel.Length
+		If InstrumentIdles[k] == instrument
+			Return playLevel[k] > 0
+		EndIf
+		k += 1
+	EndWhile
+	Return True
 EndFunction
 
 ; Every loaded dancer turns to face the stage (its speaker), over a few quick steps. A
@@ -553,10 +603,10 @@ Function FaceStage()
 	EndWhile
 EndFunction
 
-Function RestDrums(Actor[] players, Idle[] idles, Bool[] playing)
+Function Rest(Actor[] players, Idle[] idles, Bool[] playing, Idle instrument)
 	Int i = 0
 	While i < players.Length && i < playing.Length && i < idles.Length
-		If idles[i] == DrumIdle && playing[i] && players[i] && players[i].Is3DLoaded()
+		If idles[i] == instrument && playing[i] && players[i] && players[i].Is3DLoaded()
 			players[i].PlayIdle(BandStop)
 			playing[i] = False
 		EndIf
@@ -619,7 +669,7 @@ Function Sing(Float now)
 	Float into = Seconds(now - songStarted)
 	While nextLine < endLine && nextLine < SingerStarts.Length && SingerStarts[nextLine] <= into + 0.05
 		Int i = 0
-		While i < Singers.Length
+		While i < Singers.Length && singing
 			If Singers[i] && Singers[i].Is3DLoaded()
 				Singers[i].Say(SingerTopics[nextLine])
 			EndIf
