@@ -89,6 +89,16 @@ the music stops, and the performers freeze.
   `SKSE\Plugins\GrassCacheHelperNG.ini` and `bAllowCreateGrass=1` in the profile's
   `skyrim.ini` [Grass]; put both back after.
 
+## The Tamriel exterior: known limits
+
+- Tamriel's navmesh isn't cut by the compound's wall, so vanilla NPCs and animals may walk
+  into it. The fix is a navmesh edit in the CK (on a copy, never saving the generated
+  ESP) or a generated navmesh override. Decide before release.
+- No LOD: the compound shows only within loaded cells. DynDOLOD / xLODGen object LOD for
+  the palisade, stage and towers would show it from the mountains.
+- It sits on vanilla ground at (-2..-1, -4..-3): landscape mods that change that area
+  can bury or float the wall. Check the popular ones.
+
 ## Before any public release
 
 Permissions and provenance (details in `CREDITS.md`):

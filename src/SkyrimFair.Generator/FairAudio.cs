@@ -480,7 +480,7 @@ internal static class FairAudio
     }
 
     /// <summary>Length of a PCM WAV from its header: data bytes over bytes a second.</summary>
-    private static float WavSeconds(string path)
+    internal static float WavSeconds(string path)
     {
         if (!File.Exists(path))
         {

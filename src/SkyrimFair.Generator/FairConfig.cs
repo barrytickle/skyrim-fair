@@ -19,6 +19,9 @@ internal sealed record FairConfig
 
     public FairWorldConfig FairWorld { get; init; } = new();
 
+    /// <summary>The compound's exterior in Tamriel, with the gate into the fair (<see cref="ExteriorConfig"/>).</summary>
+    public ExteriorConfig Exterior { get; init; } = new();
+
     public void Validate()
     {
         if (string.IsNullOrWhiteSpace(PluginName))
@@ -3594,4 +3597,98 @@ internal sealed record LifeAnimal
 
     /// <summary><c>[x, y, yaw]</c> each, in the module's frame or the world's.</summary>
     public List<float[]> At { get; init; } = new();
+}
+
+/// <summary>
+/// The fair compound's exterior in Tamriel (FairExterior.cs): the fair's outline scaled by
+/// <see cref="Scale"/> about its gate, turned by <see cref="RotationDegrees"/> and put with its
+/// gate at <see cref="Gate"/>; its own FormID range, built last.
+/// </summary>
+internal sealed record ExteriorConfig
+{
+    public bool Enabled { get; init; }
+
+    public uint FormIdBase { get; init; } = 0x30000;
+
+    /// <summary>Where the gate stands in Tamriel.</summary>
+    public float[] Gate { get; init; } = { 0f, 0f };
+
+    /// <summary>0 or 180.</summary>
+    public float RotationDegrees { get; init; }
+
+    public float Scale { get; init; } = 1f;
+
+    /// <summary>The vanilla load door copied for both gates (its sounds and flags; the model is the fair's gate).</summary>
+    public string DoorTemplate { get; init; } = "00050973:Skyrim.esm";
+
+    public string GateName { get; init; } = "The Wanderer's Fair";
+
+    public string ExitName { get; init; } = "Whiterun Hold";
+
+    /// <summary>How far in from each gate the player arrives.</summary>
+    public float Arrive { get; init; } = 300f;
+
+    /// <summary>How far out in front of the gate the map marker stands.</summary>
+    public float MapMarkerOut { get; init; } = 900f;
+
+    /// <summary>Banners and pennant ropes on the wall's outer face (the fair's life.palisade settings).</summary>
+    public bool Decorate { get; init; } = true;
+
+    /// <summary>Vanilla scenery bigger than this (landscape rocks) is left alone.</summary>
+    public float ClearMaxRadius { get; init; } = 900f;
+
+    public float ClearMargin { get; init; } = 100f;
+
+    /// <summary>Parts of the built fair copied inside: the stage, the towers, the fires.</summary>
+    public List<ExteriorCluster> Clusters { get; init; } = new();
+
+    public ExteriorShow Show { get; init; } = new();
+}
+
+/// <summary>
+/// A part of the fair copied into the exterior, whole and unscaled: every placed object within
+/// <see cref="Radius"/> of <see cref="Centre"/> (or inside <see cref="Rect"/>, [x0, y0, x1, y1]),
+/// moved to <see cref="To"/> ([u, v] from the gate in the fair's frame, unscaled) or, without
+/// it, to the centre's scaled place.
+/// </summary>
+internal sealed record ExteriorCluster
+{
+    public string Name { get; init; } = string.Empty;
+
+    public float[] Centre { get; init; } = { 0f, 0f };
+
+    public float Radius { get; init; } = 200f;
+
+    public float[]? Rect { get; init; }
+
+    public float[]? To { get; init; }
+}
+
+/// <summary>The fair heard and seen from outside: its songs, faintly, the crowd, and fireworks at night.</summary>
+internal sealed record ExteriorShow
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>The cluster the music and the fireworks come from (the stage).</summary>
+    public string Cluster { get; init; } = "stage";
+
+    public float SpeakerHeight { get; init; } = 300f;
+
+    public float MusicMinDistance { get; init; } = 1500f;
+
+    public float MusicMaxDistance { get; init; } = 9000f;
+
+    /// <summary>Decibels quieter than the stage.</summary>
+    public float MusicAttenuation { get; init; } = 12f;
+
+    public float SongGap { get; init; } = 20f;
+
+    public float CrowdMinDistance { get; init; } = 800f;
+
+    public float CrowdMaxDistance { get; init; } = 4000f;
+
+    public float CrowdAttenuation { get; init; } = 6f;
+
+    /// <summary>Seconds between volleys at night (varied a little).</summary>
+    public float FireworkEvery { get; init; } = 150f;
 }

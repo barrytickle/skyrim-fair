@@ -2,7 +2,91 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: more life (palisade banners, plants, grass, props, smoke, animals) (2026-09-24)
+## Current pass: the compound's exterior in Tamriel, replacing the old terrace (2026-09-24)
+
+Barry: "build the exterior outside of whiterun. I did have a place at -2 -4 in tamriel. I
+think we should knock that down and replace it with the exterior of the compound". He
+chose:
+- the spot: shifted south, with the gate on the road
+- 60% scale
+- the wall following the ground (no landscape edits)
+- silhouettes inside
+
+Then he added: "Could we show the watchtowers as well? And have the fireworks come out
+from it? And some faint music".
+
+Plugin `fbe8255c0b5bd0e2...`, deterministic, deployed with `SkyrimFairOutsideShow.pex`.
+
+**FormIDs:** against the life pass (`904835d8...`):
+- 3,802 records are unchanged.
+- **471 are gone: the whole old Tamriel prototype** (the terrace, its clutter and the test
+  stall, `0x801`-`0x9E0`). No FormID is reused.
+- One changed: the fair's main gate (same FormID) now has a door base.
+- 307 are added, all in the exterior's range `0x30000`-`0x30132` (`FairExterior.cs`, built
+  last, the counter put back after).
+- The terrace's STAT kit records and the sandbox cell stay.
+
+- **Where:**
+  - The fair's outline, scaled 0.6 about its gate and turned 180°, with the gate at
+    (-5900, -10800), about 750 south of the Whiterun-Rorikstead road and facing it.
+  - It spans cells (-2..-1, -4..-3), 4,300 x 5,000. It's centred on the old site, so it's
+    basically where the terrace was.
+  - Inside, nothing important was in the way: no road, stream or Civil War markers. The
+    road runs along y ≈ -10,050, and the Fort Greymoor siege markers lie west and north.
+  - The relief inside is about 300.
+- **The wall:** 36 of the fair's own palisade panels, laid by the same code on Tamriel's
+  ground. Each stands on the lowest ground under it, so no end floats on the slopes (the
+  west side falls up to 0.4).
+  - The outer face carries 18 banners, 4 pennant-rope halves and 8 lanterns (the life
+    palisade settings, outward).
+  - No landscape is edited.
+- **The gate is a load door both ways:**
+  - `SkyrimFairExteriorGate` ("The Wanderer's Fair") and `SkyrimFairExitGate` ("Whiterun
+    Hold") are copies of Whiterun's main gate door (its open and close sounds), with
+    Barry's closed gate model.
+  - The fair's own gate reference is now the exit door, persistent.
+  - You arrive 300 in from the gate, facing the stage, or 300 out, facing the road.
+  - The map marker (same FormID) moved to the road, 900 in front of the gate.
+- **Inside, what shows over the wall and from the hills:** 217 pieces copied from the
+  built fair, whole and unscaled:
+  - the stage, 4,380 in from the gate
+  - the four light towers (two by the gate, two flanking the stage, moved out to fit the
+    smaller compound), with their banners and braziers
+  - the three south cook fires, with their smoke and lights, at their scaled places
+- **Heard and seen from outside:**
+  - `SkyrimFairOutsideShow`, on a marker at the stage, runs while its cell is attached.
+  - The fair's four songs play in turn, 20 s apart, from a speaker over the stage. They're
+    12 dB under the stage mix, heard from 1,500 to 9,000.
+  - A crowd-murmur loop plays at the middle, 6 dB down, out to 4,000.
+  - At night (20:00-05:00), about every 150 s (varied), a volley of the fair's fireworks
+    goes up from its three launch sites behind the stage, a colour each, rotating.
+  - `SkyrimFairFireworks` and the music global turn them off.
+- **Disabled vanilla:** 37 references inside the outline or through the wall line (trees,
+  rocks, a critter spawner, three plains-prey spawns). Landscape-sized rocks (radius over
+  900) are left alone.
+
+**Known limits (for Barry and `docs/RELEASE.md`):**
+- **Tamriel's navmesh isn't cut:** vanilla NPCs and animals may try to walk through the
+  walls.
+- **No LOD:** the compound shows only within the loaded cells (about two cells away), not
+  from far mountains. Object LOD (DynDOLOD / xLODGen) would fix it; that's a Barry-run
+  tool.
+- The music and fireworks run only while the compound's cell is loaded.
+
+**To test (Barry):**
+1. `coc` somewhere near, or fast-travel to the map marker "The Wanderer's Fair".
+2. From the road, check:
+   - Does the wall sit on the ground all round?
+   - Do the stage roof and the towers show over it?
+   - Do the banners hang on the outer face?
+3. Walk to the gate and activate it: do you arrive inside, facing the stage? Activate the
+   gate from inside: do you come out facing the road?
+4. Can you hear the music faintly near the walls, and the crowd murmur near them? Too
+   loud, or too quiet? (12 and 6 dB)
+5. At night, wait a couple of minutes near the gate: fireworks?
+6. Climb a hill nearby and look down: does the inside read as the fair?
+
+## Previous pass: more life (palisade banners, plants, grass, props, smoke, animals) (2026-09-24)
 
 Barry picked options A, B, C, D, E and G of the audit below ("The sounds will be drowned out
 by the bards", so F is dropped). He also confirmed the children and the seated visitors

@@ -62,6 +62,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
   - `FairArchery.cs`
   - `FairTowers.cs`
   - `FairAudio.cs`: sound, the stage quest, the band
+  - `FairExterior.cs`: the compound's exterior in Tamriel (the gate, the wall, silhouettes, the outside show), own FormID range (`exterior.formIdBase`)
   - `FairLife.cs`: palisade banners and ropes, plants, props, smoke, animals, on their own FormID range (`life.formIdBase`)
   - `FairConfig.cs`: every config record
 - `src/Papyrus/*.psc`: the stage audio controller, its player alias, and the pen horse.
@@ -105,6 +106,12 @@ pop-in only when looking for it), **the varied crowd** (the new face pool), **th
 real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
+- **the compound's exterior in Tamriel** (plugin `fbe8255c...`): the old terrace at
+  (-2,-4) is knocked down. In its place is the fair's outline at 60%, with the gate at
+  (-5900, -10800) facing the Whiterun-Rorikstead road. The gate is a load door into the
+  fair and back. Inside are the stage, the four towers and three fires; faint music, a
+  crowd murmur and night fireworks play from inside. Barry's test list is in
+  `docs/AUDIT.md`
 - **more life** (`fairWorld.life`, plugin `904835d8...`; **Barry: the decorations "look
   fantastic"**; with live grass on, Barry saw the shrubs and "nice patches of grass"): 34 Whiterun banners and pennant
   ropes with lanterns on the palisade, 81 shrubs/ferns/flowers, a goat pen, pelt lines,

@@ -1762,6 +1762,14 @@ internal static class FairWorld
 
     private sealed record PaintTexture(FormKey Texture, Func<float, float, float> Alpha);
 
+    /// <summary>
+    /// The palisade's panels along another outline on other ground: the compound's exterior in
+    /// Tamriel (<see cref="FairExterior"/>), laid exactly as the fair's own wall is.
+    /// </summary>
+    internal static IReadOnlyList<WallPanel> WallPanelsOn(FairWorldConfig config, Func<float, float, float> height)
+        => new Plan(config) { HeightOverride = height }
+            .WallPanels(config.Palisade, config.GatePiece.Width * config.GatePiece.Scale / 2f).ToList();
+
     private sealed class Plan
     {
         private readonly FairWorldConfig config;
@@ -1929,8 +1937,16 @@ internal static class FairWorld
         /// <summary>Distance outside the perimeter; negative inside.</summary>
         public float Outside(float x, float y) => SignedDistance(perimeter, x, y);
 
+        /// <summary>Ground heights from elsewhere (Tamriel's, for the compound's exterior) instead of the generated terrain.</summary>
+        public Func<float, float, float>? HeightOverride { get; init; }
+
         public float Height(float x, float y)
         {
+            if (HeightOverride is { } over)
+            {
+                return over(x, y);
+            }
+
             var t = config.Terrain;
             var beyond = Outside(x, y) - t.FlatMargin;
             if (beyond <= 0f)

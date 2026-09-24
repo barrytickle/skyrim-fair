@@ -3565,6 +3565,42 @@
       }
     }
   },
+  "exterior": {
+    "enabled": true,
+    "formIdBase": 196608,
+    "gate": [-5900, -10800],
+    "rotationDegrees": 180,
+    "scale": 0.6,
+    "gateName": "The Wanderer's Fair",
+    "exitName": "Whiterun Hold",
+    "arrive": 300,
+    "mapMarkerOut": 900,
+    "decorate": true,
+    "clearMaxRadius": 900,
+    "clearMargin": 100,
+    "clusters": [
+      {"name": "stage", "centre": [2048, 5544], "rect": [1010, 4450, 3090, 6150], "to": [0, 4380]},
+      {"name": "tower gate west", "centre": [1500, -1790], "radius": 180, "to": [-548, 201]},
+      {"name": "tower gate east", "centre": [2600, -1800], "radius": 180, "to": [552, 191]},
+      {"name": "tower stage west", "centre": [798, 5250], "radius": 180, "to": [-1250, 4086]},
+      {"name": "tower stage east", "centre": [3298, 5250], "radius": 180, "to": [1250, 4086]},
+      {"name": "fire south", "centre": [1138, -363], "radius": 150},
+      {"name": "fire middle", "centre": [1226, 1557], "radius": 150},
+      {"name": "fire north", "centre": [1309, 3194], "radius": 150}
+    ],
+    "show": {
+      "cluster": "stage",
+      "speakerHeight": 300,
+      "musicMinDistance": 1500,
+      "musicMaxDistance": 9000,
+      "musicAttenuation": 12,
+      "songGap": 20,
+      "crowdMinDistance": 800,
+      "crowdMaxDistance": 4000,
+      "crowdAttenuation": 6,
+      "fireworkEvery": 150
+    }
+  },
   "site": {
     "skyrimDataPath": "E:\\Modlists\\Still In Skyrim\\stock\\Data",
     "worldspace": "0000003C:Skyrim.esm",

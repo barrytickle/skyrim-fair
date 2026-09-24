@@ -29,115 +29,7 @@ internal static class FairLife
         // ---- the palisade: banners, and pennant ropes swagged between them -----------------------
         if (life.Palisade.Enabled && life.Palisade.Banners.Count > 0)
         {
-            var pal = life.Palisade;
-            var pitch = world.Palisade.Width * world.Palisade.Scale * (1f - world.Palisade.Overlap);
-
-            // Straight runs of panels, broken at corners and at the gate.
-            var runs = new List<List<WallPanel>>();
-            WallPanel? last = null;
-            foreach (var p in panels)
-            {
-                var nearGate = MathF.Sqrt((p.X - world.Gate[0]) * (p.X - world.Gate[0]) + (p.Y - world.Gate[1]) * (p.Y - world.Gate[1])) < pal.GateClear;
-                if (nearGate)
-                {
-                    last = null;
-                    continue;
-                }
-
-                var turn = last is null ? 0f : MathF.Abs(((p.Heading - last.Heading) % 180f + 270f) % 180f - 90f);
-                var gap = last is null ? 0f : MathF.Sqrt((p.X - last.X) * (p.X - last.X) + (p.Y - last.Y) * (p.Y - last.Y));
-                if (last is null || turn > 4f || gap > pitch * 1.35f)
-                {
-                    runs.Add(new List<WallPanel>());
-                }
-
-                runs[^1].Add(p);
-                last = p;
-            }
-
-            var banner = 0;
-            var rope = 0;
-            foreach (var run in runs)
-            {
-                // The panel's local X runs along the wall; the banners face the fair.
-                var h = run[0].Heading * Deg;
-                var (ux, uy) = (MathF.Cos(h), -MathF.Sin(h));
-                var (nx, ny) = (-uy, ux);
-                if ((cx - run[0].X) * nx + (cy - run[0].Y) * ny < 0f)
-                {
-                    (nx, ny) = (-nx, -ny);
-                }
-
-                var first = (run.Count - 1) % pal.Every / 2;
-                var anchors = new List<(float X, float Y, float Top)>();
-                for (var i = first; i < run.Count; i += pal.Every)
-                {
-                    var p = run[i];
-                    var top = p.Z + world.Palisade.Height * p.Scale;
-                    var (ax, ay) = (p.X + nx * pal.Out, p.Y + ny * pal.Out);
-                    anchors.Add((ax, ay, top));
-                    put(new PlacedObject(mod)
-                    {
-                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(pal.Banners[banner % pal.Banners.Count])),
-                        Scale = pal.BannerScale == 1f ? null : pal.BannerScale,
-                        Placement = new Placement
-                        {
-                            Position = new P3Float(ax, ay, top - pal.BannerDrop),
-                            Rotation = new P3Float(0f, 0f, MathF.Atan2(ny, -nx)),
-                        },
-                    });
-                    banner++;
-                }
-
-                // Two mirrored halves of the festival line meet at the low middle, as the lane
-                // crossings are hung (FairMarket): each half starts 53 from its origin, runs 682
-                // along its local (+X, -Y) diagonal (heading 134.7) and rises 150, times its scale.
-                for (var a = 0; a + 1 < anchors.Count && pal.Ropes.Count > 0; a++)
-                {
-                    var ends = new[] { anchors[a], anchors[a + 1] };
-                    var (mx, my) = ((ends[0].X + ends[1].X) / 2f, (ends[0].Y + ends[1].Y) / 2f);
-                    var topZ = MathF.Min(ends[0].Top, ends[1].Top) - pal.RopeDrop;
-                    foreach (var e in ends)
-                    {
-                        var (dx, dy) = (e.X - mx, e.Y - my);
-                        var d = MathF.Sqrt(dx * dx + dy * dy);
-                        var scale = d / 682f;
-                        var (ex, ey) = (dx / d, dy / d);
-                        var heading = MathF.Atan2(ex, ey) / Deg;
-                        var oz = topZ - 150f * scale;
-                        put(new PlacedObject(mod)
-                        {
-                            Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(pal.Ropes[rope % pal.Ropes.Count])),
-                            Scale = scale,
-                            Placement = new Placement
-                            {
-                                Position = new P3Float(mx - ex * 53f * scale, my - ey * 53f * scale, oz),
-                                Rotation = new P3Float(0f, 0f, (heading - 134.7f) * Deg),
-                            },
-                        });
-                        result.Ropes++;
-
-                        for (var along = pal.LanternSpacing * 0.5f; along < d - 30f && pal.Lanterns.Count > 0; along += pal.LanternSpacing)
-                        {
-                            var frac = along / d;
-                            put(new PlacedObject(mod)
-                            {
-                                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(pal.Lanterns[result.Lanterns % pal.Lanterns.Count])),
-                                Placement = new Placement
-                                {
-                                    Position = new P3Float(mx + ex * along, my + ey * along, oz + 150f * scale * frac * frac - 4f),
-                                    Rotation = new P3Float(0f, 0f, heading * Deg),
-                                },
-                            });
-                            result.Lanterns++;
-                        }
-                    }
-
-                    rope++;
-                }
-            }
-
-            result.Banners = banner;
+            (result.Banners, result.Ropes, result.Lanterns) = DecoratePalisade(mod, life.Palisade, world.Palisade, world.Gate, panels, (cx, cy), false, put);
         }
 
         // ---- market dressing: drying lines, lantern posts, tools, produce, the goat pen ----------
@@ -265,6 +157,127 @@ internal static class FairLife
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Banners on a palisade's face (the inner one, or the outer when <paramref name="outward"/>),
+    /// every few panels, and pennant ropes swagged between them: how many of each were placed.
+    /// </summary>
+    internal static (int Banners, int Ropes, int Lanterns) DecoratePalisade(
+        SkyrimMod mod, LifePalisade pal, PalisadeConfig wall, float[] gate, IReadOnlyList<WallPanel> panels,
+        (float X, float Y) centre, bool outward, Action<PlacedObject> put)
+    {
+        var (cx, cy) = centre;
+        var ropes = 0;
+        var lanterns = 0;
+        var pitch = wall.Width * wall.Scale * (1f - wall.Overlap);
+
+        // Straight runs of panels, broken at corners and at the gate.
+        var runs = new List<List<WallPanel>>();
+        WallPanel? last = null;
+        foreach (var p in panels)
+        {
+            var nearGate = MathF.Sqrt((p.X - gate[0]) * (p.X - gate[0]) + (p.Y - gate[1]) * (p.Y - gate[1])) < pal.GateClear;
+            if (nearGate)
+            {
+                last = null;
+                continue;
+            }
+
+            var turn = last is null ? 0f : MathF.Abs(((p.Heading - last.Heading) % 180f + 270f) % 180f - 90f);
+            var gap = last is null ? 0f : MathF.Sqrt((p.X - last.X) * (p.X - last.X) + (p.Y - last.Y) * (p.Y - last.Y));
+            if (last is null || turn > 4f || gap > pitch * 1.35f)
+            {
+                runs.Add(new List<WallPanel>());
+            }
+
+            runs[^1].Add(p);
+            last = p;
+        }
+
+        var banner = 0;
+        var rope = 0;
+        foreach (var run in runs)
+        {
+            // The panel's local X runs along the wall; the banners face the fair.
+            var h = run[0].Heading * Deg;
+            var (ux, uy) = (MathF.Cos(h), -MathF.Sin(h));
+            var (nx, ny) = (-uy, ux);
+            if (((cx - run[0].X) * nx + (cy - run[0].Y) * ny < 0f) != outward)
+            {
+                (nx, ny) = (-nx, -ny);
+            }
+
+            var first = (run.Count - 1) % pal.Every / 2;
+            var anchors = new List<(float X, float Y, float Top)>();
+            for (var i = first; i < run.Count; i += pal.Every)
+            {
+                var p = run[i];
+                var top = p.Z + wall.Height * p.Scale;
+                var (ax, ay) = (p.X + nx * pal.Out, p.Y + ny * pal.Out);
+                anchors.Add((ax, ay, top));
+                put(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(pal.Banners[banner % pal.Banners.Count])),
+                    Scale = pal.BannerScale == 1f ? null : pal.BannerScale,
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(ax, ay, top - pal.BannerDrop),
+                        Rotation = new P3Float(0f, 0f, MathF.Atan2(ny, -nx)),
+                    },
+                });
+                banner++;
+            }
+
+            // Two mirrored halves of the festival line meet at the low middle, as the lane
+            // crossings are hung (FairMarket): each half starts 53 from its origin, runs 682
+            // along its local (+X, -Y) diagonal (heading 134.7) and rises 150, times its scale.
+            for (var a = 0; a + 1 < anchors.Count && pal.Ropes.Count > 0; a++)
+            {
+                var ends = new[] { anchors[a], anchors[a + 1] };
+                var (mx, my) = ((ends[0].X + ends[1].X) / 2f, (ends[0].Y + ends[1].Y) / 2f);
+                var topZ = MathF.Min(ends[0].Top, ends[1].Top) - pal.RopeDrop;
+                foreach (var e in ends)
+                {
+                    var (dx, dy) = (e.X - mx, e.Y - my);
+                    var d = MathF.Sqrt(dx * dx + dy * dy);
+                    var scale = d / 682f;
+                    var (ex, ey) = (dx / d, dy / d);
+                    var heading = MathF.Atan2(ex, ey) / Deg;
+                    var oz = topZ - 150f * scale;
+                    put(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(pal.Ropes[rope % pal.Ropes.Count])),
+                        Scale = scale,
+                        Placement = new Placement
+                        {
+                            Position = new P3Float(mx - ex * 53f * scale, my - ey * 53f * scale, oz),
+                            Rotation = new P3Float(0f, 0f, (heading - 134.7f) * Deg),
+                        },
+                    });
+                    ropes++;
+
+                    for (var along = pal.LanternSpacing * 0.5f; along < d - 30f && pal.Lanterns.Count > 0; along += pal.LanternSpacing)
+                    {
+                        var frac = along / d;
+                        put(new PlacedObject(mod)
+                        {
+                            Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(pal.Lanterns[lanterns % pal.Lanterns.Count])),
+                            Placement = new Placement
+                            {
+                                Position = new P3Float(mx + ex * along, my + ey * along, oz + 150f * scale * frac * frac - 4f),
+                                Rotation = new P3Float(0f, 0f, heading * Deg),
+                            },
+                        });
+                        lanterns++;
+                    }
+                }
+
+                rope++;
+            }
+        }
+
+        return (banner, ropes, lanterns);
     }
 }
 

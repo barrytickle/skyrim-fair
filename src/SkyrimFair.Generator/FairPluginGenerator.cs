@@ -304,6 +304,16 @@ internal static class FairPluginGenerator
             ? FairWorld.Build(mod, config.FairWorld, master)
             : null;
 
+        // ---- the compound's exterior in Tamriel: replaces the old terrace, built last ------
+        if (config.Exterior.Enabled && master is not null && vanillaWorldspace is not null && fairWorld is not null)
+        {
+            var ext = FairExterior.Build(mod, config, master, vanillaWorldspace, worldspace, persistentCell, mapMarker);
+            Console.WriteLine($"  exterior: {ext.Panels} wall panels, {ext.Banners} banners, {ext.Ropes} rope halves, {ext.Lanterns} lanterns; "
+                + $"{ext.Silhouette} pieces of the fair inside; {ext.Disabled} vanilla references disabled; {ext.Songs} songs outside, "
+                + $"{ext.FireworkSites} firework sites; cells {string.Join(" ", ext.Cells.Select(c => $"({c.X},{c.Y})"))}; "
+                + $"FormIDs 0x{ext.FormIds.From:X}-0x{ext.FormIds.To:X}");
+        }
+
         var outputPath = Path.Combine(outputDirectory, mod.ModKey.FileName);
 
         // Masters are sorted against this order. Holidays.esp (Nexus 1533) supplies the
@@ -354,7 +364,7 @@ internal static class FairPluginGenerator
     /// <summary>
     /// Refuses anything that is not plain scenery. Returns null when safe to disable.
     /// </summary>
-    private static string? WhyUnsafeToDisable(
+    internal static string? WhyUnsafeToDisable(
         IPlacedObjectGetter placed, Dictionary<FormKey, float> scenery)
     {
         if (!scenery.ContainsKey(placed.Base.FormKey))
@@ -388,7 +398,7 @@ internal static class FairPluginGenerator
     /// Scenery only. Activators, containers, doors, furniture and anything an NPC or
     /// quest might reference are deliberately excluded.
     /// </summary>
-    private static Dictionary<FormKey, float> CollectClearableBases(ISkyrimModGetter master)
+    internal static Dictionary<FormKey, float> CollectClearableBases(ISkyrimModGetter master)
         => CollectSceneryBounds(master).ToDictionary(p => p.Key, p => p.Value.Radius);
 
     /// <summary>
@@ -422,7 +432,7 @@ internal static class FairPluginGenerator
         return bounds;
     }
 
-    private static ICellGetter? FindVanillaCell(IWorldspaceGetter worldspace, int cx, int cy)
+    internal static ICellGetter? FindVanillaCell(IWorldspaceGetter worldspace, int cx, int cy)
     {
         foreach (var block in worldspace.SubCells)
         {
@@ -464,7 +474,7 @@ internal static class FairPluginGenerator
         return vanilla.DeepCopy(CellHeaderOnly);
     }
 
-    private static Cell BuildExteriorCell(IWorldspaceGetter? vanillaWorldspace, int cx, int cy)
+    internal static Cell BuildExteriorCell(IWorldspaceGetter? vanillaWorldspace, int cx, int cy)
     {
         if (vanillaWorldspace is not null)
         {
