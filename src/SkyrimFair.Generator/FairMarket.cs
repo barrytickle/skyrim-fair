@@ -810,6 +810,63 @@ internal static class FairMarket
 
                 return at;
             },
+            PlaceMore = (list, seedBase, actors) =>
+                list.Select((d, i) => PlaceDressing(d, seedBase + i, actors) is { } p ? ((d.Module.Length > 0 ? d.Module : d.Piece), p.X, p.Y) : ((string, float, float)?)null).ToList(),
+            PlacePlants = (plants, wallSpots, actors) =>
+            {
+                // Candidates: the strip inside the wall (given), then each lane's edges.
+                var spots = new List<(float X, float Y, int Seed)>();
+                for (var i = 0; i < wallSpots.Count; i++)
+                {
+                    if (FairHash.Hash3(900, i, 1) < plants.WallChance) spots.Add((wallSpots[i].X, wallSpots[i].Y, 10000 + i));
+                }
+
+                for (var li = 0; li < lanes.Count; li++)
+                {
+                    var lane = lanes[li];
+                    var k = 0;
+                    for (var at = plants.LaneSpacing / 2f; at < lane.Length; at += plants.LaneSpacing)
+                    {
+                        var (cx, cy, tx, ty, half) = Station(lane, at);
+                        foreach (var side in new[] { 1f, -1f })
+                        {
+                            k++;
+                            if (FairHash.Hash3(901 + li, k, 2) >= plants.LaneChance) continue;
+                            var off = half + market.Clearance + plants.LaneBeyond + FairHash.Hash3(901 + li, k, 3) * 60f;
+                            var slide = FairHash.Signed(901 + li, k, 4) * plants.LaneSpacing * 0.3f;
+                            spots.Add((cx - ty * side * off + tx * slide, cy + tx * side * off + ty * slide, 20000 + li * 1000 + k));
+                        }
+                    }
+                }
+
+                var plant = new MarketModule { Name = "plant", Width = plants.Size, Depth = plants.Size };
+                var count = 0;
+                foreach (var (x, y, seed) in spots)
+                {
+                    if (WhyNot(plant, x, y, 0f, wallMargin: 40f, keepFrontages: true) is not null) continue;
+                    var clear = plants.ActorClearance;
+                    if (actors.Any(a => MathF.Abs(a.X - x) < clear && MathF.Abs(a.Y - y) < clear)) continue;
+                    var flower = plants.Flowers.Count > 0 && FairHash.Hash3(seed, 1, 5) < plants.FlowerShare;
+                    var pool = flower ? plants.Flowers : plants.Pieces;
+                    var piece = pool[(int)(FairHash.Hash3(seed, 2, 5) * pool.Count) % pool.Count];
+                    var scale = plants.Scale[0] + FairHash.Hash3(seed, 3, 5) * (plants.Scale[1] - plants.Scale[0]);
+                    put(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(piece)),
+                        Scale = scale,
+                        Placement = new Placement
+                        {
+                            Position = new P3Float(x, y, ground(x, y) - plants.Sink),
+                            Rotation = new P3Float(0f, 0f, FairHash.Hash3(seed, 4, 5) * MathF.PI * 2f),
+                        },
+                    });
+                    placed.Add(new Placed(x, y, 0f, plants.Size / 2f, plants.Size / 2f));
+                    pieceCount++;
+                    count++;
+                }
+
+                return count;
+            },
         };
     }
 
@@ -934,6 +991,17 @@ internal sealed record MarketResult(
     /// </summary>
     public Func<IReadOnlyList<(float X, float Y)>, IReadOnlyList<(string Module, float X, float Y)?>> PlaceLate { get; init; } =
         _ => Array.Empty<(string, float, float)?>();
+
+    /// <summary>As <see cref="PlaceLate"/>, for another list (the life dressing), with its own seeds from the given base.</summary>
+    public Func<IReadOnlyList<MarketDressing>, int, IReadOnlyList<(float X, float Y)>, IReadOnlyList<(string Module, float X, float Y)?>> PlaceMore { get; init; } =
+        (_, _, _) => Array.Empty<(string, float, float)?>();
+
+    /// <summary>
+    /// Plants at the given spots inside the wall and along the lanes' edges, each only where
+    /// the market's fit check passes and clear of the NPCs: how many were placed.
+    /// </summary>
+    public Func<LifePlants, IReadOnlyList<(float X, float Y)>, IReadOnlyList<(float X, float Y)>, int> PlacePlants { get; init; } =
+        (_, _, _) => 0;
 }
 
 /// <summary>A placed rectangle: half-extents along the thing's own X (width) and Y (depth).</summary>

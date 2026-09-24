@@ -1064,6 +1064,34 @@ internal static class FairWorld
                 + string.Concat(late.Select((p, i) => p is { } q ? "" : $"; refused {config.Market.LateDressing[i].Module} at ({config.Market.LateDressing[i].X:0}, {config.Market.LateDressing[i].Y:0})")));
         }
 
+        // ---- more life (docs/AUDIT.md): its own FormID range, so nothing after it renumbers ------
+        // Built before the navmesh and the culling so both see it; the counter is put back after.
+        if (config.Life.Enabled && master is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            if (saved >= config.Life.FormIdBase)
+            {
+                throw new InvalidOperationException($"FormIDs reached the life range (0x{config.Life.FormIdBase:X}): raise life.formIdBase");
+            }
+
+            mod.ModHeader.Stats.NextFormID = config.Life.FormIdBase;
+            var actorsNow = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedNpc>())
+                .Concat(topCell.Persistent.OfType<PlacedNpc>())
+                .Select(n => (n.Placement!.Position.X, n.Placement.Position.Y))
+                .ToList();
+            var lifeResult = FairLife.Build(mod, config, master, panels, config.Perimeter.Select(p => (p[0], p[1])).ToList(), plan.Height,
+                cells, market, actorsNow, Put, npc =>
+                {
+                    var pos = npc.Placement!.Position;
+                    cells[((int)MathF.Floor(pos.X / CellSize), (int)MathF.Floor(pos.Y / CellSize))].Temporary.Add(npc);
+                });
+            Console.WriteLine($"  life: {lifeResult.Banners} palisade banners, {lifeResult.Ropes} rope halves, {lifeResult.Lanterns} lanterns; "
+                + $"{lifeResult.Dressing} dressing groups{(lifeResult.Refused.Count > 0 ? " (refused " + string.Join("; ", lifeResult.Refused) + ")" : "")}; "
+                + $"{lifeResult.Plants} plants; {lifeResult.Smokes} smokes; {lifeResult.Animals} animals; "
+                + $"FormIDs 0x{config.Life.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // The mod's own counter must stay below the crowd figures' range.
         var counter = mod.ModHeader.Stats.NextFormID;
         if (counter >= config.CrowdFormIdBase)
@@ -1666,6 +1694,11 @@ internal static class FairWorld
             var copy = ltex.Duplicate(mod.GetNextFormKey());
             copy.EditorID = $"{ground.EditorIdPrefix}{name}";
             copy.TextureSet.SetTo(set.FormKey);
+            foreach (var g in t.Grasses)
+            {
+                copy.Grasses.Add(new FormLink<IGrassGetter>(FormKeyHelper.Parse(g)));
+            }
+
             mod.LandscapeTextures.Add(copy);
             result[t.Role] = copy.FormKey;
         }

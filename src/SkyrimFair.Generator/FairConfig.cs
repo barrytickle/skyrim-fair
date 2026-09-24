@@ -129,6 +129,9 @@ internal sealed record FairWorldConfig
     /// <summary>The generated navmesh (docs/NAVMESH.md).</summary>
     public NavmeshConfig Navmesh { get; init; } = new();
 
+    /// <summary>More life in the fair (docs/AUDIT.md, 2026-09-24): see <see cref="LifeConfig"/>.</summary>
+    public LifeConfig Life { get; init; } = new();
+
     /// <summary>The faces the fair's face lists are filled with (see <see cref="FacePoolConfig"/>).</summary>
     public FacePoolConfig Faces { get; init; } = new();
 
@@ -3042,6 +3045,9 @@ internal sealed record GroundTexture
 
     /// <summary>The parallax height map; empty derives <c>&lt;diffuse&gt;_p.dds</c>.</summary>
     public string Height { get; init; } = string.Empty;
+
+    /// <summary>Grass (GRAS) added to the copy's own list, after the source's.</summary>
+    public List<string> Grasses { get; init; } = new();
 }
 
 /// <summary>
@@ -3451,4 +3457,141 @@ internal sealed record CrowdMove
 
     /// <summary>Each idle's clip length, seconds.</summary>
     public List<float> Lengths { get; init; } = new();
+}
+
+/// <summary>
+/// More life in the fair, built after the late dressing but from its own FormID range
+/// (<see cref="FormIdBase"/> up, the mod's counter put back after), so every record built
+/// later (the navmesh, the culling global, the solid walls, the tempo and fireworks
+/// records) keeps its FormID, while the navmesh and the culling still see all of it.
+/// </summary>
+internal sealed record LifeConfig
+{
+    public bool Enabled { get; init; }
+
+    public uint FormIdBase { get; init; } = 0x20000;
+
+    public LifePalisade Palisade { get; init; } = new();
+
+    public LifePlants Plants { get; init; } = new();
+
+    /// <summary>Market dressing (modules), placed as the late dressing is, clear of the NPCs.</summary>
+    public List<MarketDressing> Dressing { get; init; } = new();
+
+    public LifeSmoke Smoke { get; init; } = new();
+
+    public List<LifeAnimal> Animals { get; init; } = new();
+}
+
+/// <summary>
+/// Banners on the palisade's inner face, every <see cref="Every"/> panels, and a pennant
+/// rope swagged between each pair along a straight run (two mirrored halves of the festival
+/// line meeting low in the middle, as the lane crossings are), hung with lanterns.
+/// </summary>
+internal sealed record LifePalisade
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Hanging banners (MSTTs), cycled; each hangs from its origin, its local -X out from the wall.</summary>
+    public List<string> Banners { get; init; } = new();
+
+    public float BannerScale { get; init; } = 1f;
+
+    /// <summary>How far below the wall's top each banner's origin hangs.</summary>
+    public float BannerDrop { get; init; } = 70f;
+
+    /// <summary>How far in from the panel's centre line the banners and ropes hang.</summary>
+    public float Out { get; init; } = 34f;
+
+    public int Every { get; init; } = 2;
+
+    /// <summary>No banner within this of the gate's centre.</summary>
+    public float GateClear { get; init; } = 520f;
+
+    /// <summary>Festival ropes cycled; empty for none.</summary>
+    public List<string> Ropes { get; init; } = new();
+
+    /// <summary>How far below the wall's top the ropes' high ends are.</summary>
+    public float RopeDrop { get; init; } = 95f;
+
+    public List<string> Lanterns { get; init; } = new();
+
+    public float LanternSpacing { get; init; } = 150f;
+}
+
+/// <summary>Shrubs, ferns and a few flowers: a strip inside the wall, and along the lanes' edges.</summary>
+internal sealed record LifePlants
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>Shrubs and ferns (TREE or STAT bases), picked at random.</summary>
+    public List<string> Pieces { get; init; } = new();
+
+    /// <summary>Flowers (harvestable flora), for <see cref="FlowerShare"/> of the plants.</summary>
+    public List<string> Flowers { get; init; } = new();
+
+    public float FlowerShare { get; init; } = 0.2f;
+
+    /// <summary>The strip inside the wall: how far in from the panels (min, max), and a candidate every <see cref="WallSpacing"/>.</summary>
+    public float[] WallInset { get; init; } = { 110f, 190f };
+
+    public float WallSpacing { get; init; } = 170f;
+
+    public float WallChance { get; init; } = 0.75f;
+
+    /// <summary>Along the lanes: a candidate each side every <see cref="LaneSpacing"/>, just past the corridor's edge.</summary>
+    public float LaneSpacing { get; init; } = 300f;
+
+    public float LaneBeyond { get; init; } = 40f;
+
+    public float LaneChance { get; init; } = 0.45f;
+
+    public float[] Scale { get; init; } = { 0.6f, 1.1f };
+
+    /// <summary>Room each plant needs (its fit-check square), and from any NPC.</summary>
+    public float Size { get; init; } = 70f;
+
+    public float ActorClearance { get; init; } = 90f;
+
+    public float Sink { get; init; } = 4f;
+}
+
+/// <summary>A smoke plume over every placed fire of the given bases.</summary>
+internal sealed record LifeSmoke
+{
+    public bool Enabled { get; init; } = true;
+
+    public string Piece { get; init; } = string.Empty;
+
+    public List<string> Fires { get; init; } = new();
+
+    public float Z { get; init; } = 30f;
+
+    public float Scale { get; init; } = 1f;
+}
+
+/// <summary>
+/// Animals of the fair's own: a copy of a vanilla creature, with the fair's NPC keyword
+/// (so the SPID exclusions and the crowd culling take it), invulnerable, and optionally
+/// calmed (unaggressive, its factions and packages replaced).
+/// </summary>
+internal sealed record LifeAnimal
+{
+    public string EditorId { get; init; } = string.Empty;
+
+    public string Base { get; init; } = string.Empty;
+
+    /// <summary>Replace the copy's factions with these (rank 0); null keeps the vanilla ones.</summary>
+    public List<string>? Factions { get; init; }
+
+    /// <summary>Replace the copy's packages with these; null keeps the vanilla ones.</summary>
+    public List<string>? Packages { get; init; }
+
+    public bool Unaggressive { get; init; }
+
+    /// <summary>A market dressing module it stands in (the first placed one of that name); empty for world positions.</summary>
+    public string Near { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, yaw]</c> each, in the module's frame or the world's.</summary>
+    public List<float[]> At { get; init; } = new();
 }

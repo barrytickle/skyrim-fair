@@ -210,7 +210,8 @@ Attribution:
 Skyrim Fair uses Holidays as a **master**: the fair's festival rope lines (Holidays'
 Whiterun, Saturalia, Riften, Windhelm, Imperial and Stormcloak colourways of the vanilla
 Solitude festival line), its coloured hanging lanterns, and its apple basket, mead crate,
-silver platter and sign stand are Holidays' own records, placed by reference. **No
+silver platter and sign stand are Holidays' own records, placed by reference (the lanterns
+also hang from the palisade's pennant ropes and the lantern posts, 2026-09-24). **No
 Holidays file is copied or redistributed**; players need Holidays installed and loaded
 before SkyrimFair.esp.
 

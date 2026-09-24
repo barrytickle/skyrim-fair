@@ -72,8 +72,10 @@ internal static class FairVisibility
         var solid = new uint[nx, ny];
         int Band(float z) => Math.Clamp((int)MathF.Floor((z - footprints.BandBase) / footprints.BandSize), 0, 31);
 
+        // What the navmesh ignores (plants, cloth, smoke) doesn't hide anyone either.
+        var seeThrough = nav.IgnoreBases.Select(FormKeyHelper.Parse).ToHashSet();
         var objects = cells.Values.SelectMany(c => c.Temporary).Concat(persistentCell.Persistent).OfType<PlacedObject>()
-            .Where(o => o.Primitive is null && (o.MajorRecordFlagsRaw & 0x800) == 0)
+            .Where(o => o.Primitive is null && (o.MajorRecordFlagsRaw & 0x800) == 0 && !seeThrough.Contains(o.Base.FormKey))
             .OrderBy(o => o.FormKey.ID);
         var painted = 0;
         foreach (var o in objects)

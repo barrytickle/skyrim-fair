@@ -2,7 +2,83 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: audit, "more life" in the fair (2026-09-24, research only)
+## Current pass: more life (palisade banners, plants, grass, props, smoke, animals) (2026-09-24)
+
+Barry picked options A, B, C, D, E and G of the audit below ("The sounds will be drowned out
+by the bards", so F is dropped). He also confirmed the children and the seated visitors
+("look great"), and the folk pair is fine at a distance. The singers don't walk the deck;
+that isn't built.
+
+Plugin `904835d8ddbbc0fb...`, deterministic (two runs, same SHA256), deployed. Against
+the deployed `7ec9724f...`: **all 3,915 records keep their FormID and content**; 359 are
+added, all in the new life range `0x20000`-`0x20166` (`FairLife.cs`, see
+CODEX_HANDOVER). The counter is switched to that range and put back, so the navmesh, the
+culling global and everything built after keep their FormIDs. The navmesh and the culling
+see the new things, since they're built first.
+
+- **A. The palisade:** 34 Whiterun banners (`CityBannerWhiterun01Inside`/`02Inside`,
+  alternating) on the inner face, every second panel, 70 below the wall's top, none within
+  520 of the gate. Between each pair on a straight run, a Holidays pennant rope (the two
+  colourways) is swagged in two mirrored halves, as the lane crossings are: 32 halves hung
+  with 78 Holidays lanterns.
+- **B. Plants:** 81, as candidates along a strip 110-190 inside the wall and just past
+  the lanes' edges, each kept only where the market's fit check passes and clear of NPCs.
+  - Mostly tundra shrubs, Reach ferns and tundra scrub.
+  - A quarter are flowers: lavender, the mountain flowers and tundra cotton. These can be
+    picked, like vanilla's.
+  - Few spots along the lanes passed; the market is full there.
+  - Plants cut no navmesh and hide no one from the culling (`navmesh.ignoreBases`).
+- **C. Grass:** the grass texture's copy now carries FieldGrass02 (with flowers) and
+  TundraGrass03 on top of its TundraGrass01/04. **But this profile only loads grass from a
+  cache** (`bAllowCreateGrass=0`, set by Grass Cache Helper NG), and there's no cache for
+  `SkyrimFairWorld`, so no grass will show until one is generated. See "To test".
+- **D. Props:** 17 groups, all placed:
+  - a goat pen of 8 Whiterun fence pieces with hay and a bucket (at about (0, 3500), on
+    the open west ground), with a haystack, a feed store and a tool corner beside it
+  - three pelt-drying lines: two hitching posts, a rope, pelts draped over it and garlic
+    hanging from it (at the east edge, the north-east camps and the north-west)
+  - five lantern posts: a farm banner post with two Holidays lanterns hung from its
+    crossbar (356-376)
+  - three tool corners: a pitchfork, shovel and broom leant on a barrel, with a bucket and
+    an axe
+  - three produce piles by the cook fires: a food barrel, baskets, cabbages, potatoes,
+    apples and a sack
+  - Vanilla has no laundry line, so the drying lines stand in for it.
+- **E. Smoke:** `FXSmokeChimney01` at 0.6 scale over the 5 cook and social fires.
+- **G. Animals:** fair copies of vanilla creatures, invulnerable, with the SkyrimFairNPC
+  keyword (the SPID exclusions), switched by the crowd culling (184 switchable, was 173):
+  - 6 chickens in pairs by the three south cook fires
+  - 3 goats in the goat pen (vanilla's 512 sandbox; the pen's fences keep them in)
+  - 2 dogs by the camps: unaggressive, in CreatureFaction only (not DogFaction), on the
+    creature sandbox
+  - All 244 actors are on the navmesh.
+- The culling table: mean 128 on at a spot, 138 of 184 at the square (the same share as
+  before).
+
+**To test (Barry):**
+- Look along the palisade, from the square and near the wall:
+  - Do the banners hang against the logs, not floating off them or sunk into them? (`out`
+    34, `bannerDrop` 70)
+  - Do the ropes swag between them, with the lanterns on the curve?
+- Do the plants look right by the wall and the lanes, not in anyone's way?
+- Check the new props:
+  - The goat pen: do the goats stay in?
+  - The pelt lines: are the pelts draped over the rope, not beside it?
+  - The lantern posts: do the lanterns hang from the crossbar?
+  - The tool corners: are the tools leant on the barrel, not away from it or into it?
+  - The produce piles
+- The smoke: is the chimney plume right over a campfire, or too big? (0.6 scale)
+- Do the chickens and dogs wander near their spots without fighting?
+- Is the frame rate still fine?
+- **Grass, a quick test:** in `Grass Cache Helper NG`'s ini set `SetGrassLoadCreate = 0`.
+  In the profile's `skyrim.ini` [Grass], set `bAllowCreateGrass=1`. Go to the fair and
+  see if grass grows. Put both back after.
+  - If it looks good, keeping it needs a grass cache for `SkyrimFairWorld` (a precache
+    run), or those settings left on.
+  - Shipping a cache is a release question (`docs/RELEASE.md`): it depends on the user's
+    grass mods.
+
+## Previous pass: audit, "more life" in the fair (2026-09-24, research only)
 
 Barry confirmed: the children and the seated visitors "look great"; the folk pair is fine at
 a distance. **The singers don't walk the deck** (that isn't built yet). He asked for the

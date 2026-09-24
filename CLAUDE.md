@@ -62,6 +62,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
   - `FairArchery.cs`
   - `FairTowers.cs`
   - `FairAudio.cs`: sound, the stage quest, the band
+  - `FairLife.cs`: palisade banners and ropes, plants, props, smoke, animals, on their own FormID range (`life.formIdBase`)
   - `FairConfig.cs`: every config record
 - `src/Papyrus/*.psc`: the stage audio controller, its player alias, and the pen horse.
 - `tools/`: props, BSA extraction, NIF preview, audio build, Papyrus build, deploy.
@@ -104,6 +105,13 @@ pop-in only when looking for it), **the varied crowd** (the new face pool), **th
 real frame times are unknown.
 
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
+- **more life** (`fairWorld.life`, plugin `904835d8...`): 34 Whiterun banners and pennant
+  ropes with lanterns on the palisade, 81 shrubs/ferns/flowers, a goat pen, pelt lines,
+  lantern posts, tool corners, produce piles, smoke over the 5 fires, 6 chickens, 3 goats
+  and 2 dogs; the grass LTEX has more grass, but this profile shows grass only from a cache
+  (`bAllowCreateGrass=0`). Barry's test list is in `docs/AUDIT.md`. Barry also confirmed
+  the children and the seated visitors; the folk pair is fine at a distance; the singers
+  don't walk yet (not built)
 - the folk-dance keyword fix (last night's build, deployed this morning)
 - **a taller palisade** (confirmed above): scale 4 (560 tall), measured from sightlines to hide the ground
   to ~5,300 past the wall; the gate is 3.6. 59 panels, with 89 FormIDs reserved

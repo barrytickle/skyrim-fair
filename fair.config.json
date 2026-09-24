@@ -278,10 +278,72 @@
       "minIslandCells": 1,
       "debugRaster": "build/navmesh_raster.txt",
       "extraMasters": ["E:/Modlists/Still In Skyrim/mods/Holidays/Holidays.esp"],
+      "ignoreBases": [
+        "000AAE79:Skyrim.esm", "000AAE7A:Skyrim.esm", "000AAE7B:Skyrim.esm", "000AAE7F:Skyrim.esm", "000AAE81:Skyrim.esm", "000AAE83:Skyrim.esm", "000AAE85:Skyrim.esm",
+        "000AAE87:Skyrim.esm", "000B8A6E:Skyrim.esm", "000B8A6F:Skyrim.esm", "000B8A70:Skyrim.esm", "0003A2BC:Skyrim.esm", "0003A2BD:Skyrim.esm", "0003A2BE:Skyrim.esm",
+        "0001BB3D:Skyrim.esm", "000BCF3C:Skyrim.esm", "000BCF3D:Skyrim.esm", "000BCF3A:Skyrim.esm", "000BB947:Skyrim.esm",
+        "000DEE46:Skyrim.esm", "000DEE4F:Skyrim.esm", "000B09E4:Skyrim.esm"
+      ],
       "infoMap": "00012FB4:Skyrim.esm",
       "infoMapSeeds": [
         "000A3F44:Skyrim.esm", "0010377B:Skyrim.esm", "00098776:Skyrim.esm", "00100F4B:Skyrim.esm", "00105E9A:Skyrim.esm",
         "000B87DF:Skyrim.esm", "001030CB:Skyrim.esm", "00079BBF:Skyrim.esm", "00103120:Skyrim.esm", "000E88CC:Skyrim.esm"
+      ]
+    },
+    "life": {
+      "enabled": true,
+      "formIdBase": 131072,
+      "palisade": {
+        "banners": ["000DEE46:Skyrim.esm", "000DEE4F:Skyrim.esm"],
+        "bannerDrop": 70,
+        "out": 34,
+        "every": 2,
+        "gateClear": 520,
+        "ropes": ["00A7A1:Holidays.esp", "00A7B0:Holidays.esp"],
+        "ropeDrop": 95,
+        "lanterns": ["035D0D:Holidays.esp", "035D12:Holidays.esp", "035D13:Holidays.esp", "035D14:Holidays.esp", "035D15:Holidays.esp", "035D16:Holidays.esp"],
+        "lanternSpacing": 150
+      },
+      "dressing": [
+        {"module": "goat_pen", "x": 0, "y": 3500, "yaw": 0, "searchRadius": 700},
+        {"module": "haystack", "x": -400, "y": 3650, "yaw": 30, "searchRadius": 400},
+        {"module": "feed_store", "x": 350, "y": 3150, "yaw": 0, "searchRadius": 400},
+        {"module": "tool_lean", "x": -250, "y": 3100, "yaw": 0, "searchRadius": 400},
+        {"module": "pelt_line", "x": 5000, "y": 150, "yaw": 100, "searchRadius": 600},
+        {"module": "pelt_line", "x": 5150, "y": 3450, "yaw": 10, "searchRadius": 900},
+        {"module": "pelt_line", "x": -350, "y": 4700, "yaw": 60, "searchRadius": 400},
+        {"module": "lantern_post", "x": 4450, "y": -350, "yaw": 20, "searchRadius": 400},
+        {"module": "lantern_post", "x": 4750, "y": 3950, "yaw": 0, "searchRadius": 400},
+        {"module": "lantern_post", "x": -150, "y": 4400, "yaw": 60, "searchRadius": 400},
+        {"module": "lantern_post", "x": 650, "y": 2400, "yaw": 90, "searchRadius": 400},
+        {"module": "lantern_post", "x": 5000, "y": 1800, "yaw": 90, "searchRadius": 400},
+        {"module": "tool_lean", "x": 1650, "y": -1150, "yaw": 30, "searchRadius": 800},
+        {"module": "tool_lean", "x": 700, "y": 500, "yaw": 0, "searchRadius": 400},
+        {"module": "produce_pile", "x": 1450, "y": -550, "yaw": 0, "searchRadius": 300},
+        {"module": "produce_pile", "x": 1550, "y": 1750, "yaw": 90, "searchRadius": 300},
+        {"module": "produce_pile", "x": 1600, "y": 3350, "yaw": 180, "searchRadius": 300}
+      ],
+      "plants": {
+        "pieces": ["000AAE79:Skyrim.esm", "000AAE7A:Skyrim.esm", "000AAE7B:Skyrim.esm", "000AAE7F:Skyrim.esm", "000AAE81:Skyrim.esm", "000AAE83:Skyrim.esm", "000AAE85:Skyrim.esm", "000AAE87:Skyrim.esm", "000B8A6E:Skyrim.esm", "000B8A6F:Skyrim.esm", "000B8A70:Skyrim.esm", "0003A2BC:Skyrim.esm", "0003A2BD:Skyrim.esm", "0003A2BE:Skyrim.esm"],
+        "flowers": ["0001BB3D:Skyrim.esm", "000BCF3C:Skyrim.esm", "000BCF3D:Skyrim.esm", "000BCF3A:Skyrim.esm", "000BB947:Skyrim.esm"],
+        "flowerShare": 0.25,
+        "wallInset": [110, 190],
+        "wallSpacing": 170,
+        "wallChance": 0.75,
+        "laneSpacing": 300,
+        "laneBeyond": 40,
+        "laneChance": 0.45,
+        "scale": [0.6, 1.1]
+      },
+      "smoke": {"piece": "000B09E4:Skyrim.esm", "fires": ["00035F4B:Skyrim.esm"], "z": 20, "scale": 0.6},
+      "animals": [
+        {"editorId": "SkyrimFairChicken", "base": "000A91A0:Skyrim.esm",
+         "at": [[1450, -620, 30], [1500, -560, 200], [1500, 1350, 80], [1560, 1420, 300], [1600, 3000, 10], [1650, 3080, 150]]},
+        {"editorId": "SkyrimFairGoat", "base": "0004359C:Skyrim.esm", "near": "goat_pen",
+         "at": [[-150, 60, 30], [80, -100, 200], [180, 120, 110]]},
+        {"editorId": "SkyrimFairDog", "base": "00023A92:Skyrim.esm", "unaggressive": true,
+         "factions": ["00000013:Skyrim.esm"], "packages": ["0010F7A5:Skyrim.esm"],
+         "at": [[4550, -500, 120], [4800, 3950, 250]]}
       ]
     },
     "mountains": {
@@ -1166,6 +1228,82 @@
             {"name": "CartFurnStatic01", "piece": "00104F6F:Skyrim.esm", "x": 0, "y": -110},
             {"piece": "@PropSackLarge", "x": -120, "y": -150, "z": 28, "yaw": 25, "optional": true},
             {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 120, "y": -200, "z": 24, "yaw": -15, "optional": true}
+          ]
+        },
+        {
+          "name": "goat_pen",
+          "width": 600,
+          "depth": 600,
+          "pieces": [
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": -128.0, "y": -256.0, "z": 53, "yaw": 90.0, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": 128.0, "y": -256.0, "z": 53, "yaw": 90.0, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": 128.0, "y": 256.0, "z": 53, "yaw": -90.0, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": -128.0, "y": 256.0, "z": 53, "yaw": -90.0, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": 271.0, "y": -128.0, "z": 53, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": 271.0, "y": 128.0, "z": 53, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": -271.0, "y": 128.0, "z": 53, "yaw": 180.0, "exact": true},
+            {"piece": "0006EAAD:Skyrim.esm", "name": "WRFenceStr01", "x": -271.0, "y": -128.0, "z": 53, "yaw": 180.0, "exact": true},
+            {"piece": "00019B19:Skyrim.esm", "x": -60, "y": 40},
+            {"piece": "0005B198:Skyrim.esm", "x": -150, "y": -150},
+            {"piece": "@PropBucket", "x": 160, "y": 160, "yaw": 30}
+          ]
+        },
+        {
+          "name": "pelt_line",
+          "width": 460,
+          "depth": 90,
+          "pieces": [
+            {"name": "NorHitchPost01", "piece": "00036AEF:Skyrim.esm", "x": -200, "y": 0, "z": 16, "exact": true},
+            {"piece": "00036AEF:Skyrim.esm", "x": 200, "y": 0, "z": 16, "yaw": 180, "exact": true},
+            {"name": "MineScaffoldRopeLong04", "piece": "000455DD:Skyrim.esm", "x": -200, "y": 0, "z": 108, "exact": true},
+            {"piece": "@PropGoatPelt", "x": -110, "y": 0, "z": 91, "rotX": 90, "exact": true},
+            {"piece": "@PropWolfPelt", "x": 5, "y": 0, "z": 80, "rotX": 90, "exact": true},
+            {"piece": "@PropGoatPelt", "x": 115, "y": 0, "z": 91, "yaw": 180, "rotX": 90, "exact": true},
+            {"piece": "@PropHangingGarlic", "x": -55, "y": 0, "z": 86, "exact": true},
+            {"piece": "@PropHangingGarlic", "x": 60, "y": 0, "z": 86, "exact": true},
+            {"piece": "@PropLinenPile", "x": 40, "y": 45, "z": 7, "yaw": 80},
+            {"piece": "@PropBasket02", "x": -60, "y": 45}
+          ]
+        },
+        {
+          "name": "lantern_post",
+          "width": 180,
+          "depth": 60,
+          "pieces": [
+            {"name": "FarmBannerPost01", "piece": "001083D7:Skyrim.esm", "x": 0, "y": 0, "exact": true},
+            {"piece": "035D0D:Holidays.esp", "x": -68, "y": 0, "z": 350, "exact": true},
+            {"piece": "035D13:Holidays.esp", "x": 68, "y": 0, "z": 350, "exact": true}
+          ]
+        },
+        {
+          "name": "tool_lean",
+          "width": 200,
+          "depth": 150,
+          "pieces": [
+            {"name": "Barrel02Static", "piece": "0010C0E3:Skyrim.esm", "x": 0, "y": 0, "exact": true},
+            {"piece": "@PropPitchfork", "x": 34, "y": -6, "z": 48, "rotY": -14, "exact": true},
+            {"piece": "@PropShovel", "x": -32, "y": 12, "z": 52, "rotY": 14, "exact": true},
+            {"piece": "@PropBroom", "x": 6, "y": 34, "z": 58, "rotX": 14, "exact": true},
+            {"piece": "@PropBucket", "x": 70, "y": 40, "yaw": 30},
+            {"piece": "@PropWoodAxe", "x": -60, "y": -40, "z": 2, "yaw": 50},
+            {"piece": "00019B15:Skyrim.esm", "x": 0, "y": -40, "optional": true}
+          ]
+        },
+        {
+          "name": "produce_pile",
+          "width": 200,
+          "depth": 150,
+          "pieces": [
+            {"piece": "@PropBarrelFood", "x": -55, "y": 10},
+            {"piece": "@PropBasket01", "x": 20, "y": 25, "exact": true},
+            {"piece": "@PropCabbage", "x": 20, "y": 25, "z": 26, "exact": true},
+            {"piece": "@PropBasket02", "x": 55, "y": -25},
+            {"piece": "@PropCabbage", "x": 5, "y": -35, "z": 11, "yaw": 40},
+            {"piece": "@PropCabbage", "x": 25, "y": -45, "z": 11, "yaw": 110},
+            {"piece": "@PropPotato", "x": -10, "y": -50, "z": 8},
+            {"piece": "@PropPotato", "x": -20, "y": -42, "z": 8, "yaw": 70},
+            {"piece": "@PropApple01", "x": 35, "y": 55},
+            {"piece": "@PropSackLarge", "x": 80, "y": 50, "z": 28, "yaw": 20}
           ]
         }
       ],
@@ -3324,7 +3462,7 @@
       "enabled": true,
       "editorIdPrefix": "SkyrimFairGround",
       "textures": [
-        {"role": "grass", "source": "00013428:Skyrim.esm"},
+        {"role": "grass", "source": "00013428:Skyrim.esm", "grasses": ["001098CA:Skyrim.esm", "0002ACD3:Skyrim.esm"]},
         {"role": "dirtGrass", "source": "000134B7:Skyrim.esm"},
         {"role": "dirt", "source": "00000C16:Skyrim.esm"},
         {"role": "path", "source": "000B424C:Skyrim.esm"},
