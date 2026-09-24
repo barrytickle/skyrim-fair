@@ -2,7 +2,46 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: a taller palisade and gate, stage lanterns and flags, packing gear, parked wagons, more SPID exclusions (2026-09-24)
+## Current pass: can the crowd be switched off where it can't be seen? (analysis, 2026-09-24)
+
+Barry confirmed the palisade, the lanterns and the stage in game. Performance is
+"stable", but with a frame-generation mod on. He asked for the optimisation (plan step 3).
+Nothing was built; this is the measurement the plan asked for first.
+
+- **The actors (read from the plugin), 233 in all:**
+
+  | Area | Actors | Of which |
+  |---|---|---|
+  | Square and stage | 90 | 43 dancers, 20 standing visitors, 15 performers, 8 seated |
+  | East market | 86 | 59 stall-keepers, 13 standing, 11 seated |
+  | Avenue | 35 | 20 standing, 11 seated |
+  | West field | 22 | 8 archery spectators, 4 archers, 3 horses |
+
+  24 stay on regardless (performers, archers, folk pair, horses: script-driven and
+  confirmed), leaving 209 that could be switched.
+- **Method** (throwaway, in the scratchpad):
+  - every placed object voxelised from its navmesh footprint (16-unit cells, 16-unit
+    height bands to 448)
+  - from 610 standing spots (256 grid, eye 150), rays to each actor at 60 and 150
+  - an actor counts as seen if any ray is clear
+- **Results** (switchable actors on, at a typical spot, of 209):
+
+  | Scheme | Mean | p90 | Pops in view |
+  |---|---|---|---|
+  | perfect per-actor visibility, no margin | 70 | 118 | yes, while moving |
+  | per-actor, 768 margin (one 2 s update at a sprint) | 138 | 164 | no |
+  | 10 zones, 768 margin | 200 | 209 | no |
+  | 24 zones, 768 margin | 177 | 199 | no |
+  | distance only, 3,000 | 94 | 147 | ~25 visible actors vanish per spot |
+
+- **Conclusion:** the zone plan as written saves under 10%. The fair is open and the
+  stage is in view the whole length of the avenue. Without visible popping, the ceiling
+  is about a third of the actors, and only with per-actor switching (209 markers and a
+  generated visibility table). Whether that's worth building depends on what the cost is.
+  Plan step 1's three readings (layers on / `SkyrimFairCrowdLayers 0` / `tai`, frame
+  generation off) decide it.
+
+## Previous pass: a taller palisade and gate, stage lanterns and flags, packing gear, parked wagons, more SPID exclusions (2026-09-24)
 
 First, the folk-dance fix from last night (`e166ad79...`) is **deployed**: the plugin and both
 OAR `config.json` files, byte-checked.

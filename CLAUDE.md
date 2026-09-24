@@ -87,9 +87,13 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 Plugin `e3e982d8c3f76baa...`, deployed. The detail is in `docs/AUDIT.md`, newest first.
 
+**Confirmed in game by Barry (2026-09-24):** the taller palisade and gate, the stage
+lanterns and the stage. Performance "stable", but he has a frame-generation mod on, so
+real frame times are unknown.
+
 **Built and deployed on 2026-09-24, not yet confirmed in game:**
 - the folk-dance keyword fix (last night's build, deployed this morning)
-- **a taller palisade**: scale 4 (560 tall), measured from sightlines to hide the ground
+- **a taller palisade** (confirmed above): scale 4 (560 tall), measured from sightlines to hide the ground
   to ~5,300 past the wall; the gate is 3.6. 59 panels, with 89 FormIDs reserved
   (`reservedPanels`), so nothing renumbered
 - **late-built dressing** (`market.lateDressing`): 18 Holidays lanterns hung 3 into the
@@ -145,7 +149,10 @@ repo.
    Check the new Papyrus log for other per-NPC scripts too (the footprints mod's
    `footprintsFootstepsScriptHuman` appears).
 3. **Only run the crowd where the player is (Claude, the big one; plan first, then
-   build).** Depends on step 1's numbers.
+   build).** Depends on step 1's numbers. **Measured 2026-09-24 (`docs/AUDIT.md`):**
+   zone switching saves almost nothing (the fair is too open); even per-actor switching
+   with a safe margin only takes 233 actors to about 160. Waiting on Barry's three fps
+   readings, with frame generation off, before choosing.
    - All nine cells stay loaded, so every actor runs AI all the time.
    - Give each zone its own crowd layers: the dance floor, the market seats, the archery
      range, the wanderers.
