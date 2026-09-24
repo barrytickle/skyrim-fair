@@ -112,8 +112,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 ## Where we are (end of 2026-09-24)
 
 Plugin `eed0547ce3b3aff8...`, committed (`66190a8`) and deployed. The day's detail is in
-`docs/AUDIT.md`, newest first. Everything below the navmesh line of the old plan is done
-or listed here.
+`docs/AUDIT.md`, newest first.
 
 **Confirmed in game by Barry today:**
 - the taller palisade (scale 4) and gate, and the stage lanterns and Whiterun flags
