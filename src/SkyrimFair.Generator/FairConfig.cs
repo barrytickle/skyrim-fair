@@ -2553,6 +2553,9 @@ internal sealed record StageAudioConfig
     /// <summary>Seconds before a song's end its cheer starts; the song finishes under it.</summary>
     public float CheerLead { get; init; } = 1f;
 
+    /// <summary>The idle the drummers play (vanilla IdleDrumStart): they rest in a song's calm sections.</summary>
+    public string DrumIdle { get; init; } = "00096F8B:Skyrim.esm";
+
     /// <summary>The ambience's level during a song, as a share of normal.</summary>
     public float DuckAmbience { get; init; } = 0.75f;
 
@@ -2619,6 +2622,14 @@ internal sealed record StageSong
 
     /// <summary>The cheer after it (a <see cref="StageCheer.Name"/>); empty for none.</summary>
     public string Cheer { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The song's sections, each [start seconds, drums, crowd]: drums calm (the drummers
+    /// rest), normal or intense (they play); crowd dance, clap or cheer. Seeded from the
+    /// stems by tools/bards/build_sections.py, then tuned by hand. None: drums and dancing
+    /// throughout.
+    /// </summary>
+    public List<System.Text.Json.JsonElement[]> Sections { get; init; } = new();
 }
 
 internal sealed record StageCheer
@@ -3063,6 +3074,17 @@ internal sealed record CrowdsConfig
 
     /// <summary>Each dance idle's clip length in seconds (vanilla idles play once; the script replays them).</summary>
     public List<float> DanceLengths { get; init; } = new();
+
+    /// <summary>
+    /// A song section's "clap": these idles, replayed as each ends (clip lengths read from
+    /// the archive). A "cheer" section plays <see cref="CheerIdles"/> the same way, with
+    /// <see cref="CheerLengths"/>.
+    /// </summary>
+    public List<string> ClapIdles { get; init; } = new();
+
+    public List<float> ClapLengths { get; init; } = new();
+
+    public List<float> CheerLengths { get; init; } = new();
 
     public ChildrenConfig Children { get; init; } = new();
 }

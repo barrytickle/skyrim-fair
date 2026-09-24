@@ -3312,7 +3312,8 @@
       "sitPackage": "000ECEEB:Skyrim.esm",
       "seats": {"000A4AD6:Skyrim.esm": 2, "0002E6CF:Skyrim.esm": 2, "00074EC6:Skyrim.esm": 1},
       "danceIdles": ["000F7C8A:Skyrim.esm", "000F7C8B:Skyrim.esm"], "danceLengths": [6.667, 6.0],
-      "cheerIdles": ["000D8730:Skyrim.esm", "000F7C8C:Skyrim.esm", "000D8731:Skyrim.esm"],
+      "cheerIdles": ["000D8730:Skyrim.esm", "000F7C8C:Skyrim.esm", "000D8731:Skyrim.esm"], "cheerLengths": [7.333, 4.767, 7.133],
+      "clapIdles": ["000D8730:Skyrim.esm", "000D8731:Skyrim.esm", "000D8732:Skyrim.esm", "000D8733:Skyrim.esm"], "clapLengths": [7.333, 7.133, 9.0, 6.333],
       "children": {"name": "Fair Child", "race": "0002C65B:Skyrim.esm", "templates": ["000B94A3:Skyrim.esm", "000B94A9:Skyrim.esm", "0009F839:Skyrim.esm", "000274A5:Skyrim.esm", "00013385:Skyrim.esm", "00013668:Skyrim.esm"], "outfits": ["0006D92E:Skyrim.esm", "000958AC:Skyrim.esm", "000958C1:Skyrim.esm"]},
       "animals": [
         {"name": "brown horse", "base": "00068D5B:Skyrim.esm", "near": "horse_pen", "at": [-150, 60, 80], "script": "SkyrimFairPenHorse"},
@@ -3388,15 +3389,10 @@
         "hardEndLevel": 300,
         "hardEndFade": 1.5,
         "songs": [
-          {"name": "RoundTheGreen", "source": "music/mono/Round the Green.wav", "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav", "cheer": "cheer"},
-          {"name": "HeyHoSkyrim", "source": "music/mono/Hey-Ho, Skyrim.wav", "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav", "cheer": "cheer"},
-          {"name": "Fiddle", "source": "music/mono/Fiddle.wav", "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav", "cheer": "cheer"},
-          {
-            "name": "DragonbornApproved",
-            "source": "music/mono/Dragonborn-Approved.wav",
-            "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
-            "cheer": "cheer"
-          }
+          {"name": "RoundTheGreen", "source": "music/mono/Round the Green.wav", "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav", "cheer": "cheer", "sections": [[0.0, "normal", "dance"], [2.5, "calm", "clap"], [15.0, "intense", "dance"], [20.0, "calm", "clap"], [32.5, "intense", "dance"], [50.0, "normal", "dance"], [72.5, "calm", "clap"], [77.5, "intense", "dance"], [97.5, "normal", "dance"], [105.0, "calm", "clap"], [112.5, "normal", "dance"], [122.5, "calm", "clap"], [135.0, "intense", "dance"]]},
+          {"name": "HeyHoSkyrim", "source": "music/mono/Hey-Ho, Skyrim.wav", "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav", "cheer": "cheer", "sections": [[0.0, "normal", "dance"], [10.0, "calm", "clap"], [15.0, "intense", "dance"], [20.0, "normal", "dance"], [35.0, "intense", "dance"], [50.0, "calm", "clap"], [55.0, "normal", "dance"], [62.5, "intense", "dance"], [110.0, "normal", "dance"], [125.0, "intense", "dance"], [140.0, "normal", "dance"], [165.0, "calm", "clap"], [170.0, "normal", "dance"], [180.0, "intense", "dance"]]},
+          {"name": "Fiddle", "source": "music/mono/Fiddle.wav", "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav", "cheer": "cheer", "sections": [[0.0, "calm", "clap"], [22.5, "intense", "dance"], [37.5, "calm", "clap"], [50.0, "intense", "dance"], [65.0, "calm", "clap"], [77.5, "intense", "dance"], [97.5, "calm", "clap"], [102.5, "normal", "dance"], [117.5, "calm", "clap"], [122.5, "intense", "dance"], [137.5, "calm", "clap"], [145.0, "normal", "dance"], [150.0, "calm", "clap"], [162.5, "intense", "dance"], [182.5, "calm", "clap"], [187.5, "intense", "dance"]]},
+          {"name": "DragonbornApproved", "source": "music/mono/Dragonborn-Approved.wav", "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav", "cheer": "cheer", "sections": [[0.0, "calm", "clap"], [7.5, "normal", "dance"], [15.0, "calm", "clap"], [27.5, "intense", "dance"], [40.0, "normal", "dance"], [52.5, "intense", "dance"], [72.5, "normal", "dance"], [85.0, "intense", "dance"], [95.0, "normal", "dance"], [157.5, "intense", "dance"], [180.0, "normal", "dance"], [195.0, "intense", "dance"], [202.5, "normal", "dance"], [207.5, "calm", "clap"], [217.5, "intense", "dance"]]}
         ],
         "cheers": [
           {

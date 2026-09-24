@@ -202,6 +202,45 @@ internal static class FairAudio
             bandIdles.Add(FormKeyHelper.Parse(member.Idle));
         }
 
+        // ---- the songs' sections: drums and crowd, from each song's start ------------------
+        IEnumerable<(float Start, int Drums, int Crowd)> SongSections(StageSong song)
+        {
+            var last = -1f;
+            foreach (var section in song.Sections)
+            {
+                var start = section[0].GetSingle();
+                if (start <= last)
+                {
+                    throw new InvalidOperationException($"audio.stage.songs {song.Name}: sections must start in order ({start} after {last})");
+                }
+
+                last = start;
+                var drums = Array.IndexOf(new[] { "calm", "normal", "intense" }, section[1].GetString());
+                var crowd = Array.IndexOf(new[] { "dance", "clap", "cheer" }, section[2].GetString());
+                if (drums < 0 || crowd < 0)
+                {
+                    throw new InvalidOperationException($"audio.stage.songs {song.Name}: section at {start} needs drums calm/normal/intense and crowd dance/clap/cheer");
+                }
+
+                yield return (start, drums, crowd);
+            }
+        }
+
+        List<(float Start, int Drums, int Crowd)> Sections() => config.Stage.Songs.SelectMany(SongSections).ToList();
+        List<(int First, int Count)> SectionIndex()
+        {
+            var index = new List<(int, int)>();
+            var at = 0;
+            foreach (var song in config.Stage.Songs)
+            {
+                var n = SongSections(song).Count();
+                index.Add((n == 0 ? -1 : at, n));
+                at += n;
+            }
+
+            return index;
+        }
+
         // ---- the stage script ------------------------------------------------------------
         ScriptObjectProperty Obj(string name, FormKey key) => new() { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
         ScriptFloatProperty Float(string name, float value) => new() { Name = name, Data = value };
@@ -218,6 +257,12 @@ internal static class FairAudio
             Float("FirstSongDelay", config.Stage.FirstSongDelay),
             Float("PauseAfterCheer", config.Stage.PauseAfterCheer),
             Float("CheerLead", config.Stage.CheerLead),
+            new ScriptFloatListProperty { Name = "SectionStarts", Data = Sections().Select(x => x.Start).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionDrums", Data = Sections().Select(x => x.Drums).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionCrowd", Data = Sections().Select(x => x.Crowd).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongFirstSection", Data = SectionIndex().Select(x => x.First).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongSectionCount", Data = SectionIndex().Select(x => x.Count).ToExtendedList() },
+            Obj("DrumIdle", FormKeyHelper.Parse(config.Stage.DrumIdle)),
             Float("DuckDuringSong", config.Stage.DuckAmbience),
             Obj("AmbienceCategory", ambienceCategory.FormKey),
             Obj("AmbienceEnabled", ambienceEnabled.FormKey),

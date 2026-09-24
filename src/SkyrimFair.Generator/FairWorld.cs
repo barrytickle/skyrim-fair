@@ -649,6 +649,13 @@ internal static class FairWorld
             script.Properties.Add(new ScriptFloatListProperty { Name = "DanceLengths", Data = config.Crowds.DanceLengths.ToExtendedList() });
             script.Properties.Add(new ScriptObjectListProperty
             {
+                Name = "ClapIdles",
+                Objects = config.Crowds.ClapIdles.Select(i => Obj(FormKeyHelper.Parse(i))).ToExtendedList(),
+            });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "ClapLengths", Data = config.Crowds.ClapLengths.ToExtendedList() });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "CheerIdleLengths", Data = config.Crowds.CheerLengths.ToExtendedList() });
+            script.Properties.Add(new ScriptObjectListProperty
+            {
                 Name = "CheerIdles",
                 Objects = config.Crowds.CheerIdles.Select(i => Obj(FormKeyHelper.Parse(i))).ToExtendedList(),
             });

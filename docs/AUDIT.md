@@ -2,7 +2,43 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the stage show, B2: the stage walls can't be vaulted (2026-09-24)
+## Current pass: the stage show, B3 and B4: drums and crowd follow each song's sections (2026-09-24)
+
+Barry chose per-song sections, set in the config.
+
+- **Sections** (`audio.stage.songs[].sections`, each `[start s, drums, crowd]`):
+  - drums: `calm` (the drummers rest), `normal` or `intense` (they play)
+  - crowd: `dance`, `clap` or `cheer`
+  - Seeded by a new tool, `tools/bards/build_sections.py` (Blender's Python, ffmpeg).
+    It reads the drums' intensity from each song's instrumental stem with
+    `build_vocals.intensity` (2.5 s steps, blips under 5 s merged) and makes no singer
+    lines. All four songs have stems now.
+  - The seed claps where the drums are calm and dances elsewhere: Round the Green 13
+    sections (5 calm), Hey-Ho 14 (3), Fiddle 16 (8), Dragonborn-Approved 15 (3). Fiddle's
+    seed matches its `cues.json`.
+  - **Tune by hand.** `--write` only fills songs that have none; `--force` reseeds.
+- **Script** (`SkyrimFairAudioScript`, new properties, so old saves get them):
+  - `Sections(now)` applies each section whose start has come, timed from the song's own
+    start, and the update wakes for the next one.
+  - Drums calm: every bard whose idle is `DrumIdle` (vanilla `IdleDrumStart`) is given
+    `IdleStop` and skipped by `PlayAll` until the drums return.
+  - A crowd change clears each dancer's clip, so they switch at once. `Dance()` picks the
+    mode's idles:
+    - dance: `DanceIdles`
+    - clap: `ClapIdles`, Applaud 2-5, 7.333 / 7.133 / 9.0 / 6.333 s
+    - cheer: `CheerIdles`, Applaud 2, Civil War cheer, Applaud 3, 7.333 / 4.767 / 7.133 s
+  - Each clip is replayed as it ends, as the dances are. Lengths read from the archive
+    with the vendored HKX codec (it reads the Cicero dance as 6.667, which matches).
+  - Traces: `SkyrimFairAudio: drums N at X s`, `crowd N at X s`.
+- Plugin `4f698904e36a7f52...`, deterministic; all 3,892 records keep FormID identity;
+  58 sections read back. Deployed with the scripts.
+- **Next (B3b):** faster, livelier instrument loops in the intense sections (retimed
+  copies of the vanilla loops through OAR). Not started.
+- **To test:** watch a song through. Do the drummers stop and restart with the drums? Do
+  the dancers switch to clapping in the calm parts? Does anything restart visibly
+  mid-clip?
+
+## Previous pass: the stage show, B2: the stage walls can't be vaulted (2026-09-24)
 
 Barry could get onto the stage "from vaulting on the walls round the back and sides, and
 jumping on the stairs from a different angle".

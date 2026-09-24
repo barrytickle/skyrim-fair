@@ -72,6 +72,11 @@ Float[] Property DanceLengths Auto
 {Each dance's clip length in seconds. A vanilla idle plays its clip once, so each dancer
 is given the next dance the moment the last one ends.}
 Idle[] Property CheerIdles Auto
+Float[] Property CheerIdleLengths Auto
+{Each cheer idle's clip length: a song's "cheer" sections replay them as each ends.}
+Idle[] Property ClapIdles Auto
+Float[] Property ClapLengths Auto
+{A song's "clap" sections: the dancers applaud, each clip replayed as it ends.}
 Int Property DanceEvery = 2 Auto
 {Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
 
@@ -85,6 +90,18 @@ Float[] Property SingerStarts Auto
 Int[] Property SongFirstLine Auto
 {For each song, its first line in SingerTopics, or -1 for a song with no singing.}
 Int[] Property SongLineCount Auto
+
+Float[] Property SectionStarts Auto
+{Every song's sections, song by song: each one's start in seconds from its song's start.}
+Int[] Property SectionDrums Auto
+{0 calm (the drummers rest), 1 normal, 2 intense.}
+Int[] Property SectionCrowd Auto
+{0 the dancers dance, 1 they clap, 2 they cheer.}
+Int[] Property SongFirstSection Auto
+{For each song, its first section, or -1 for a song without (drums and dancing throughout).}
+Int[] Property SongSectionCount Auto
+Idle Property DrumIdle Auto
+{The drummers' idle: a bard with it rests while the drums are calm.}
 
 GlobalVariable Property AtFair Auto
 {1 while the player is at the fair: the compatibility patches switch other mods' per-NPC
@@ -150,6 +167,11 @@ Int songsPlayed = 0
 Float songStarted = 0.0
 Int nextLine = -1
 Int endLine = -1
+; The song's sections: the next to apply, the end of its run, and what's in force.
+Int nextSection = -1
+Int endSection = -1
+Int drumLevel = 1
+Int crowdMode = 0
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -244,6 +266,7 @@ Event OnUpdate()
 	EndIf
 	SetAmbience(phase == 2)
 	If phase == 2
+		Sections(now)
 		PlayBand()
 		Dance()
 		FolkDance(now)
@@ -262,6 +285,13 @@ Event OnUpdate()
 	If phase != 2 && bandOn && bandUntil > now && Seconds(bandUntil - now) < left
 		; Wake as the song's last note ends, to put the instruments away.
 		left = Seconds(bandUntil - now)
+	EndIf
+	If phase == 2 && nextSection >= 0 && nextSection < endSection
+		; Wake for the next section.
+		Float toSection = SectionStarts[nextSection] - Seconds(now - songStarted)
+		If toSection < left
+			left = toSection
+		EndIf
 	EndIf
 	If phase == 2 && nextLine >= 0 && nextLine < endLine
 		; Wake for the next sung line.
@@ -299,6 +329,14 @@ Function Advance(Float now)
 		songStarted = now
 		nextLine = -1
 		endLine = -1
+		drumLevel = 1
+		crowdMode = 0
+		nextSection = -1
+		endSection = -1
+		If track < SongFirstSection.Length && SongFirstSection[track] >= 0
+			nextSection = SongFirstSection[track]
+			endSection = nextSection + SongSectionCount[track]
+		EndIf
 		If track < SongFirstLine.Length && SongFirstLine[track] >= 0
 			nextLine = SongFirstLine[track]
 			endLine = nextLine + SongLineCount[track]
@@ -383,7 +421,8 @@ EndFunction
 Function PlayAll(Actor[] players, Idle[] idles, Bool[] playing)
 	Int i = 0
 	While i < players.Length && i < playing.Length && i < idles.Length
-		If !playing[i] && players[i] && players[i].Is3DLoaded()
+		; The drummers rest while the drums are calm.
+		If !playing[i] && players[i] && players[i].Is3DLoaded() && (drumLevel > 0 || idles[i] != DrumIdle)
 			playing[i] = players[i].PlayIdle(idles[i])
 		EndIf
 		i += 1
@@ -439,11 +478,66 @@ Function ApplyCrowdLayers()
 	Debug.Trace("SkyrimFairAudio: crowd layers on: " + want)
 EndFunction
 
+; Every section whose start has come is applied, from the song's own start (so timer error
+; never adds up). The drummers put their sticks down when the drums go calm and take them up
+; again after; a change of crowd mode gives each dancer the new mode's idle straight away.
+Function Sections(Float now)
+	If nextSection < 0
+		Return
+	EndIf
+	Float into = Seconds(now - songStarted)
+	Int drums = drumLevel
+	Int crowd = crowdMode
+	While nextSection < endSection && nextSection < SectionStarts.Length && SectionStarts[nextSection] <= into + 0.05
+		drums = SectionDrums[nextSection]
+		crowd = SectionCrowd[nextSection]
+		nextSection += 1
+	EndWhile
+	If (drums > 0) != (drumLevel > 0)
+		Debug.Trace("SkyrimFairAudio: drums " + drums + " at " + into + " s")
+		If drums == 0
+			RestDrums(Band, BandIdles, bandPlaying)
+			RestDrums(Orchestra, OrchestraIdles, orchestraPlaying)
+		EndIf
+	EndIf
+	drumLevel = drums
+	If crowd != crowdMode
+		Debug.Trace("SkyrimFairAudio: crowd " + crowd + " at " + into + " s")
+		crowdMode = crowd
+		Int i = 0
+		While i < dancing.Length
+			dancing[i] = False
+			i += 1
+		EndWhile
+	EndIf
+EndFunction
+
+Function RestDrums(Actor[] players, Idle[] idles, Bool[] playing)
+	Int i = 0
+	While i < players.Length && i < playing.Length && i < idles.Length
+		If idles[i] == DrumIdle && playing[i] && players[i] && players[i].Is3DLoaded()
+			players[i].PlayIdle(BandStop)
+			playing[i] = False
+		EndIf
+		i += 1
+	EndWhile
+EndFunction
+
 ; Each dancer starts a dance when the song starts (as soon as their 3D is there), and the
 ; next as each one ends: a vanilla idle plays its clip once, and re-sending one mid-clip
 ; restarts it visibly. Dancers take the dances in turn, offset, so the floor varies.
 Function Dance()
-	If DanceIdles.Length == 0
+	; The section's crowd mode picks the idles: dance, clap or cheer.
+	Idle[] idles = DanceIdles
+	Float[] lengths = DanceLengths
+	If crowdMode == 1 && ClapIdles.Length > 0
+		idles = ClapIdles
+		lengths = ClapLengths
+	ElseIf crowdMode == 2 && CheerIdles.Length > 0
+		idles = CheerIdles
+		lengths = CheerIdleLengths
+	EndIf
+	If idles.Length == 0
 		Return
 	EndIf
 	If dancing.Length < Dancers.Length
@@ -457,13 +551,13 @@ Function Dance()
 	Int i = 0
 	While i < Dancers.Length && i < dancing.Length
 		If (!dancing[i] || now >= danceEnds[i]) && Dancers[i] && Dancers[i].Is3DLoaded()
-			Int which = (i + dancePlays[i]) % DanceIdles.Length
-			If Dancers[i].PlayIdle(DanceIdles[which])
+			Int which = (i + dancePlays[i]) % idles.Length
+			If Dancers[i].PlayIdle(idles[which])
 				dancing[i] = True
 				dancePlays[i] = dancePlays[i] + 1
 				Float clipSeconds = 6.0
-				If which < DanceLengths.Length
-					clipSeconds = DanceLengths[which]
+				If which < lengths.Length
+					clipSeconds = lengths[which]
 				EndIf
 				danceEnds[i] = now + clipSeconds * perSecond
 			EndIf
