@@ -2,7 +2,34 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the singers cheer while they sing and clap while they rest (2026-09-24)
+## Current pass: an arrangement of Dragonborn-Approved, from its stems (2026-09-24)
+
+Barry: "are you able to break the song down and have a go at it for the entry "dragonborn
+approved"".
+
+- **Analysis:**
+  - the instrumental stem in 2.5 s steps, level against the song's 90th percentile, in
+    three bands: 40-150 Hz (drums), 200-1500 (lute), 1500-5000 (flute)
+  - tempo about 146 bpm (bass-band onset autocorrelation)
+  - the sung lines from `cues.json`: vocals 0:06 to the end, gaps 2:33.4-2:58.5 (the
+    instrumental break) and 4:07.7-4:14.1
+- **The shape it shows:** intro; a quiet verse 0:15-0:25 (the drums all but gone); build
+  0:27; chorus 0:45-1:12; verse 2 1:15-1:45 (flute low); chorus 1:50-2:17; the drums
+  drop out 2:17-2:32; the loud instrumental break 2:32-2:57; a near-silent breakdown
+  3:25-3:37; a finale building to the loudest point.
+- **Arrangement** (entries 0.1 s early):
+  - drums rest in the quiet parts and go fast in the choruses, the break and the finale
+  - the lute holds in the quiet verse and the breakdown, and goes fast in the break and
+    from 3:55
+  - the flute sits out verse 2 and the dropout, and goes fast in the break and at 4:05
+  - singers: rest in the intro, the break and before the last shout
+  - crowd: claps in the intro, the quiet verse and the breakdown; cheers into the break
+    (2:32) and at the end (4:07)
+- The built schedule (27 sections) matches an independent merge. Plugin
+  `4ae0152ad3d78c45...`, deterministic, FormIDs unchanged. Deployed.
+- **To hear it:** `set SkyrimFairAudioFirstTrack to 3`.
+
+## Previous pass: the singers cheer while they sing and clap while they rest (2026-09-24)
 
 Barry: "can we have a civilwarcheer emote for the bards as they're singing?", then "can we
 just bind cheer to "sing" clap to "rest"".

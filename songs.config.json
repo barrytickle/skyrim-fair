@@ -185,38 +185,70 @@
       "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
       "cheer": "cheer",
       "lute": [
-        [0.0, "normal"]
+        [0.0, "normal"],
+        [15.0, "rest"],
+        [25.0, "normal"],
+        [40.0, "rest"],
+        [42.4, "normal"],
+        [105.0, "rest"],
+        [109.9, "normal"],
+        [152.4, "fast"],
+        [178.4, "normal"],
+        [202.4, "rest"],
+        [217.4, "normal"],
+        [234.9, "fast"]
       ],
       "drum": [
         [0.0, "rest"],
-        [7.5, "normal"],
+        [2.4, "normal"],
+        [5.0, "rest"],
+        [7.4, "normal"],
         [15.0, "rest"],
-        [27.5, "fast"],
-        [40.0, "normal"],
-        [52.5, "fast"],
-        [72.5, "normal"],
-        [85.0, "fast"],
-        [95.0, "normal"],
-        [157.5, "fast"],
-        [180.0, "normal"],
-        [195.0, "fast"],
-        [202.5, "normal"],
-        [207.5, "rest"],
-        [217.5, "fast"]
+        [27.4, "fast"],
+        [40.0, "rest"],
+        [42.4, "normal"],
+        [47.4, "fast"],
+        [72.4, "rest"],
+        [74.9, "normal"],
+        [105.0, "rest"],
+        [109.9, "fast"],
+        [137.4, "rest"],
+        [152.4, "fast"],
+        [178.4, "normal"],
+        [202.4, "rest"],
+        [217.4, "fast"]
       ],
       "flute": [
-        [0.0, "normal"]
+        [0.0, "normal"],
+        [15.0, "rest"],
+        [44.9, "normal"],
+        [72.4, "rest"],
+        [109.9, "normal"],
+        [137.4, "rest"],
+        [152.4, "fast"],
+        [178.4, "normal"],
+        [202.4, "rest"],
+        [217.4, "normal"],
+        [244.9, "fast"]
       ],
       "singers": [
-        [0.0, "sing"]
+        [0.0, "rest"],
+        [5.9, "sing"],
+        [153.4, "rest"],
+        [178.4, "sing"],
+        [247.7, "rest"],
+        [254.0, "sing"]
       ],
       "crowd": [
         [0.0, "clap"],
-        [7.5, "dance"],
+        [7.4, "dance"],
         [15.0, "clap"],
-        [27.5, "dance"],
-        [207.5, "clap"],
-        [217.5, "dance"]
+        [27.4, "dance"],
+        [152.4, "cheer"],
+        [157.4, "dance"],
+        [202.4, "clap"],
+        [217.4, "dance"],
+        [247.7, "cheer"]
       ]
     }
   ],
