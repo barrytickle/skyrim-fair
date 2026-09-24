@@ -77,6 +77,23 @@ Float[] Property CheerIdleLengths Auto
 Idle[] Property ClapIdles Auto
 Float[] Property ClapLengths Auto
 {A song's "clap" sections: the dancers applaud, each clip replayed as it ends.}
+Float[] Property DanceStyleLengths Auto
+{The dance styles' clip lengths (Professional Dancer's, through OAR): while dancing, each
+dancer takes the styles in turn, by setting DanceStyleValue before playing DanceStyleIdle.}
+Idle Property DanceStyleIdle Auto
+String Property DanceStyleValue = "Variable10" Auto
+
+ObjectReference[] Property FireworkSites Auto
+{Where the fireworks go up from, as each song ends.}
+String Property FireworkPlugin = "Fireworks.esp" Auto
+Int[] Property FireworkIds Auto
+{The launchers set off after each song, one per site in turn (FormIDs in FireworkPlugin).}
+Int[] Property FireworkNightIds Auto
+{At night, a flare too, from the middle site.}
+Float Property FireworkStagger = 0.6 Auto
+GlobalVariable Property FireworksOn Auto
+{set SkyrimFairFireworks to 0 to stop them.}
+
 Float Property FaceStageSteps = 3.0 Auto
 {Clapping and cheering dancers turn to the stage in this many steps (0.06 s apart), not a snap.}
 Int Property DanceEvery = 2 Auto
@@ -213,6 +230,9 @@ Int crowdMode = 0
 Float[] singerNext
 Int[] singerPlays
 Float singerWake = 0.0
+; Whether Fireworks.esp is loaded (looked up once a load).
+Bool fireworksChecked = False
+Bool fireworksFound = False
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
@@ -238,6 +258,7 @@ Function Recover()
 	orchestraPlaying = new Bool[32]
 	appliedTier = -1
 	folkNext = 0.0
+	fireworksChecked = False
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
 EndFunction
@@ -424,6 +445,7 @@ Function Advance(Float now)
 			Debug.Trace("SkyrimFairAudio: cheer " + cheer + " at " + Seconds(now - songStarted) + " s into song " + track + " (" + SongLengths[track] + " s long, lead " + lead + ")")
 			Enter(3, CheerLengths[cheer], now)
 			Cheer()
+			Fireworks()
 		Else
 			Enter(4, lead + PauseAfterCheer, now)
 		EndIf
@@ -655,6 +677,7 @@ Function Sections(Float now)
 		; drifts into it rather than stopping as one.
 		Debug.Trace("SkyrimFairAudio: crowd " + crowd + " at " + into + " s")
 		crowdMode = crowd
+		CapDances(now)
 	EndIf
 EndFunction
 
@@ -667,6 +690,59 @@ Function SetTempo(Int level)
 		EndIf
 		k += 1
 	EndWhile
+EndFunction
+
+; A dance style's clip runs up to half a minute: at a change, each dancer's move in hand is
+; cut short to a few staggered seconds from now (0-3.5 s by dancer), so the floor changes
+; within moments of the section, but not as one.
+Function CapDances(Float now)
+	Float perSecond = TimeScale.GetValue() / 86400.0
+	Int i = 0
+	While i < Dancers.Length && i < danceEnds.Length
+		Float cap = now + (i % 8) * 0.5 * perSecond
+		If danceEnds[i] > cap
+			danceEnds[i] = cap
+		EndIf
+		i += 1
+	EndWhile
+EndFunction
+
+; As a song ends: a launcher at each site in turn, and a flare at night. Fireworks.esp's
+; launchers fire themselves once placed (straight up, bursting about 4 s later) and clean up;
+; looked up by FormID, so nothing happens when the plugin isn't loaded.
+Function Fireworks()
+	If !FireworksOn || FireworksOn.GetValue() < 0.5 || FireworkSites.Length == 0 || FireworkIds.Length == 0
+		Return
+	EndIf
+	If !fireworksChecked
+		fireworksChecked = True
+		fireworksFound = Game.GetFormFromFile(FireworkIds[0], FireworkPlugin) != None
+		Debug.Trace("SkyrimFairAudio: fireworks " + FireworkPlugin + " loaded: " + fireworksFound)
+	EndIf
+	If !fireworksFound
+		Return
+	EndIf
+	Int k = 0
+	While k < FireworkSites.Length
+		Form launcher = Game.GetFormFromFile(FireworkIds[k % FireworkIds.Length], FireworkPlugin)
+		If launcher && FireworkSites[k]
+			FireworkSites[k].PlaceAtMe(launcher)
+		EndIf
+		k += 1
+		If k < FireworkSites.Length
+			Utility.Wait(FireworkStagger)
+		EndIf
+	EndWhile
+	Float t = Utility.GetCurrentGameTime()
+	Float hour = (t - Math.Floor(t)) * 24.0
+	If (hour >= 20.0 || hour < 5.0) && FireworkNightIds.Length > 0
+		Form flare = Game.GetFormFromFile(FireworkNightIds[0], FireworkPlugin)
+		ObjectReference middle = FireworkSites[FireworkSites.Length / 2]
+		If flare && middle
+			middle.PlaceAtMe(flare)
+		EndIf
+	EndIf
+	Debug.Trace("SkyrimFairAudio: fireworks after song " + track)
 EndFunction
 
 ; Whether a musician with this idle plays now: an instrument with a timeline follows it.
@@ -762,7 +838,20 @@ Function Dance()
 	While i < Dancers.Length && i < dancing.Length
 		If (!dancing[i] || now >= danceEnds[i]) && Dancers[i] && Dancers[i].Is3DLoaded()
 			Int which = (i + dancePlays[i]) % idles.Length
-			If Dancers[i].PlayIdle(idles[which])
+			Idle move = idles[which]
+			Float clipSeconds = 6.0
+			If which < lengths.Length
+				clipSeconds = lengths[which]
+			EndIf
+			; Dancing, with dance styles: each dancer takes the styles in turn, chosen by an
+			; actor value Open Animation Replacer reads (its clip for the Cicero dance).
+			If crowdMode == 0 && DanceStyleIdle && DanceStyleLengths.Length > 0
+				Int style = (i * 2 + dancePlays[i]) % DanceStyleLengths.Length
+				Dancers[i].SetActorValue(DanceStyleValue, style + 1)
+				move = DanceStyleIdle
+				clipSeconds = DanceStyleLengths[style]
+			EndIf
+			If Dancers[i].PlayIdle(move)
 				; Into clap or cheer from another mode: this dancer turns to the stage.
 				If crowdMode > 0 && danceMode[i] != crowdMode
 					turning[i] = True
@@ -771,10 +860,6 @@ Function Dance()
 				danceMode[i] = crowdMode
 				dancing[i] = True
 				dancePlays[i] = dancePlays[i] + 1
-				Float clipSeconds = 6.0
-				If which < lengths.Length
-					clipSeconds = lengths[which]
-				EndIf
 				danceEnds[i] = now + clipSeconds * perSecond
 			EndIf
 		EndIf
@@ -841,6 +926,7 @@ Function Cheer()
 	; The floor cheers as each dancer's move ends (Dance runs through the cheer too).
 	If CheerIdles.Length > 0
 		crowdMode = 2
+		CapDances(Utility.GetCurrentGameTime())
 	EndIf
 	nextLine = -1
 	; The folk pair stops, and starts afresh with the next song.

@@ -2,7 +2,53 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: audits of Professional Dancer and Fireworks (2026-09-24, research only)
+## Current pass: dance styles from Professional Dancer; fireworks after every song (2026-09-24)
+
+Barry: "Yeah that sounds good for dancer. And for fireworks yeah let's use the lighter ones
+:) as long as we can just automatically trigger them. Maybe they go off after the end of
+each song?"
+
+### Dance styles
+- `songs.config.json` `danceStyles`: the five steady clips from the audit: dance1 25.367,
+  dance3 15.233, dance4 9.4, dance8 21.767, dance9 15.633 s. The big-sway dance2/5/7/10 and
+  the short dance6 are left out.
+- `tools/bards/build_dances.py` copies each clip from the installed mod (a mods folder
+  named `*Professional Dancer*`) or else from its archive in `external/` (py7zr). It
+  writes `OpenAnimationReplacer/SkyrimFairDances/StyleNN/special_cicerodance1.hkx` and
+  checks each length with the HKX codec. Git-ignored, never shipped (the clips are
+  Mixamo's).
+- The generator writes each submod's `config.json`: `HasKeyword SkyrimFairNPC` plus
+  `CompareValues` actor value 77 (**Variable10**, not read by anything in Barry's list;
+  checked), `"actorValueType": "Value"`, == N. Priority 1900000002. The format is from
+  OAR's `SharedTypes.cpp`.
+- Script: while dancing, each dancer takes the styles in turn (`SetActorValue("Variable10",
+  N)` then `PlayIdle(IdleCiceroDance1)`), replayed at the style's length
+  (`DanceStyleLengths`).
+- **Mode changes:** the long clips mean a dancer could otherwise take up to 25 s to
+  switch, so `CapDances` cuts each dancer's move to 0-3.5 s from the change (staggered by
+  dancer). Also at the song-end cheer.
+
+### Fireworks
+- `songs.config.json` `fireworks`: plugin `Fireworks.esp`; `afterSong` =
+  FWSkyBursterMultiActivator 029EBD, FWSkyBursterSingleActivator 009417, 029EBD (one per
+  site); `atNight` = FWWhiteFlareSingleActivator 03915F; three sites behind the palisade
+  at (1450, 6600), (2048, 6650), (2650, 6600), 200-380 from the nearest tree; stagger 0.6
+  s. The IDs were checked against the plugin.
+- Generator, last of all: persistent XMarkers `SkyrimFairFireworkSite01-03`
+  (`175E`-`1760`), global `SkyrimFairFireworks` (`1761`, 1 = on), and script properties.
+- Script `Fireworks()`, as each song ends (with the cheer):
+  - `Game.GetFormFromFile` finds whether the plugin is loaded, once per load. Missing:
+    nothing happens.
+  - `PlaceAtMe` places a launcher at each site in turn. The launchers fire themselves,
+    burst about 4 s later during the cheer, and delete themselves.
+  - Between 20:00 and 05:00, a flare from the middle site as well.
+- Plugin `238c94af132ae392...`, deterministic; only those 4 records added. Deployed with
+  the scripts, the dance clips and their configs.
+- **Barry to install:** Professional Dancer (Dance.esp can stay off; `build_dances.py`
+  then reads the install instead of the archive) and Fireworks with `Fireworks.esp` on
+  (check its Nexus permissions). Then test from a clean start.
+
+## Previous pass: audits of Professional Dancer and Fireworks (2026-09-24, research only)
 
 ### Professional Dancer 1.5.0 (Nexus 124608), `external/`
 - An FNIS behaviour mod: `FNIS_Dance_List.txt` makes events `Dance1`-`Dance14`

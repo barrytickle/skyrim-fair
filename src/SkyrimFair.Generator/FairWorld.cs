@@ -1241,6 +1241,98 @@ internal static class FairWorld
             Console.WriteLine($"  tempo: {string.Join(", ", config.Audio.Stage.Fast.Select(kv => $"{kv.Key} x{kv.Value}"))}; OAR submods in {config.Audio.Stage.TempoOarFolder}");
         }
 
+        // ---- the dancers' styles and the fireworks, last of all so nothing renumbers ----------------
+        if (audio is not null)
+        {
+            var show = config.Audio.Stage;
+            var stageScript = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            var npcKeyword = mod.Keywords.First(k => k.EditorID == config.NpcKeyword);
+            object Form(FormKey key) => new Dictionary<string, string> { ["pluginName"] = mod.ModKey.FileName, ["formID"] = key.ID.ToString("X") };
+            var json = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+
+            // Dance styles: OAR swaps Professional Dancer's clip N in for the Cicero dance while a
+            // fair NPC's Variable10 is N (the script sets it before each dance).
+            if (show.DanceStyles.Count > 0)
+            {
+                var folder = Path.IsPathRooted(show.DanceStylesOarFolder) ? show.DanceStylesOarFolder : Path.Combine(FairPaths.ConfigDirectory, show.DanceStylesOarFolder);
+                Directory.CreateDirectory(folder);
+                File.WriteAllText(Path.Combine(folder, "config.json"), System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    name = "Skyrim Fair dance styles",
+                    author = "Skyrim Fair (clips: Professional Dancer, Nexus 124608)",
+                    description = "The fair's dancers only: Professional Dancer's dances in place of the Cicero dance, one per style, picked by the stage script.",
+                }, json));
+                for (var n = 1; n <= show.DanceStyles.Count; n++)
+                {
+                    var sub = Path.Combine(folder, $"Style{n:00}");
+                    Directory.CreateDirectory(sub);
+                    File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+                    {
+                        ["name"] = $"Style {n}: {show.DanceStyles[n - 1].Name}",
+                        ["description"] = $"{show.DanceStyles[n - 1].Clip} ({show.DanceStyles[n - 1].Length} s) while {show.DanceStyleValue} is {n}.",
+                        ["priority"] = 1900000002,
+                        ["conditions"] = new object[]
+                        {
+                            new Dictionary<string, object>
+                            {
+                                ["condition"] = "HasKeyword",
+                                ["requiredVersion"] = "1.0.0.0",
+                                ["Keyword"] = new Dictionary<string, object> { ["form"] = Form(npcKeyword.FormKey) },
+                            },
+                            new Dictionary<string, object>
+                            {
+                                ["condition"] = "CompareValues",
+                                ["requiredVersion"] = "1.0.0.0",
+                                ["Value A"] = new Dictionary<string, object> { ["actorValue"] = show.DanceStyleValueIndex, ["actorValueType"] = "Value" },
+                                ["Comparison"] = "==",
+                                ["Value B"] = new Dictionary<string, object> { ["value"] = (double)n },
+                            },
+                        },
+                    }, json));
+                }
+
+                stageScript.Properties.Add(new ScriptFloatListProperty { Name = "DanceStyleLengths", Data = show.DanceStyles.Select(d => d.Length).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptObjectProperty { Name = "DanceStyleIdle", Object = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse(show.DanceStyleIdle)) });
+                stageScript.Properties.Add(new ScriptStringProperty { Name = "DanceStyleValue", Data = show.DanceStyleValue });
+                Console.WriteLine($"  dance styles: {string.Join(", ", show.DanceStyles.Select(d => $"{d.Name} {d.Length}s"))}; OAR submods in {show.DanceStylesOarFolder}");
+            }
+
+            // Fireworks: persistent launch markers, a switch, and the launchers' FormIDs.
+            var fw = show.Fireworks;
+            if (fw.AfterSong.Count > 0 && fw.Sites.Count > 0)
+            {
+                var sites = new List<FormKey>();
+                for (var n = 0; n < fw.Sites.Count; n++)
+                {
+                    var (sx, sy) = (fw.Sites[n][0], fw.Sites[n][1]);
+                    var site = new PlacedObject(mod)
+                    {
+                        EditorID = $"SkyrimFairFireworkSite{n + 1:00}",
+                        MajorRecordFlagsRaw = PersistentRecordFlag,
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("0000003B:Skyrim.esm")),
+                        Placement = new Placement { Position = new P3Float(sx, sy, plan.Height(sx, sy)), Rotation = new P3Float(0f, 0f, 0f) },
+                    };
+                    topCell.Persistent.Add(site);
+                    sites.Add(site.FormKey);
+                }
+
+                var on = new GlobalFloat(mod) { EditorID = "SkyrimFairFireworks", Data = 1f };
+                mod.Globals.Add(on);
+                int Hex(string id) => Convert.ToInt32(id, 16);
+                stageScript.Properties.Add(new ScriptObjectListProperty
+                {
+                    Name = "FireworkSites",
+                    Objects = sites.Select(k => new ScriptObjectProperty { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) }).ToExtendedList(),
+                });
+                stageScript.Properties.Add(new ScriptStringProperty { Name = "FireworkPlugin", Data = fw.Plugin });
+                stageScript.Properties.Add(new ScriptIntListProperty { Name = "FireworkIds", Data = fw.AfterSong.Select(Hex).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptIntListProperty { Name = "FireworkNightIds", Data = fw.AtNight.Select(Hex).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptFloatProperty { Name = "FireworkStagger", Data = fw.Stagger });
+                stageScript.Properties.Add(new ScriptObjectProperty { Name = "FireworksOn", Object = new FormLink<ISkyrimMajorRecordGetter>(on.FormKey) });
+                Console.WriteLine($"  fireworks: {fw.AfterSong.Count} launchers after each song at {fw.Sites.Count} sites, {fw.AtNight.Count} more at night ({fw.Plugin}, looked up at runtime)");
+            }
+        }
+
         mod.Worldspaces.Add(worldspace);
 
         return new FairWorldResult(

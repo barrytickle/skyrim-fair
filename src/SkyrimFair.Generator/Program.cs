@@ -81,6 +81,8 @@ try
                         SingerCheer = show.SingerMoves.GetValueOrDefault("cheer") ?? new CrowdMove(),
                         SingerEnd = show.SingerMoves.GetValueOrDefault("end") ?? new CrowdMove(),
                         SingerGap = show.SingerGap,
+                        DanceStyles = show.DanceStyles,
+                        Fireworks = show.Fireworks,
                     },
                 },
                 Crowds = config.FairWorld.Crowds with

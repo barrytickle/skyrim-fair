@@ -1,5 +1,5 @@
 {
-  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | normal | fast | away] (whoever plays that instrument follows it: rest holds it, still; fast plays its loop faster, by FAST's speed; away puts it away), singers [second, sing | rest] (singing, they make the 'sing' moves, the Civil War cheer; resting, their lines are skipped and they make the 'rest' moves, clapping) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. FAST: how many times faster each instrument's loop plays in a 'fast' stretch (tools/bards/build_tempo.py makes the clips). BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. SINGER MOVES: the singers' gestures while they sing, while they rest (a 'rest' stretch in their timeline), and the one they make at a song's end ('end'), with clip lengths; SINGER GAP is the seconds each stands between moves. 'names' are labels only. Rebuild after editing.",
+  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has a timeline per part of the show, in seconds from the song's start, an entry where it changes: lute, drum and flute [second, rest | normal | fast | away] (whoever plays that instrument follows it: rest holds it, still; fast plays its loop faster, by FAST's speed; away puts it away), singers [second, sing | rest] (singing, they make the 'sing' moves, the Civil War cheer; resting, their lines are skipped and they make the 'rest' moves, clapping) and crowd [second, dance | clap | cheer]. Before a timeline's first entry, the instruments play, the singers sing and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. FAST: how many times faster each instrument's loop plays in a 'fast' stretch (tools/bards/build_tempo.py makes the clips). BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. SINGER MOVES: the singers' gestures while they sing, while they rest (a 'rest' stretch in their timeline), and the one they make at a song's end ('end'), with clip lengths; SINGER GAP is the seconds each stands between moves. 'names' are labels only. Rebuild after editing. DANCE STYLES: the dancers' dances while dancing (Professional Dancer's clips, through OAR; tools/bards/build_dances.py copies them from your install): each dancer takes them in turn; a length is the clip's, in seconds. FIREWORKS (Fireworks.esp, if loaded): as each song ends, the afterSong launchers go up from the sites, one per site in turn, 'stagger' seconds apart; at night (20:00-05:00) the atNight ones too. set SkyrimFairFireworks to 0 to stop them.",
   "songs": [
     {
       "name": "RoundTheGreen",
@@ -360,5 +360,19 @@
       "lengths": [2.033]
     }
   },
-  "singerGap": 2.0
+  "singerGap": 2.0,
+  "danceStyles": [
+    {"name": "dance1", "clip": "dance1.hkx", "length": 25.367},
+    {"name": "dance3", "clip": "dance3.hkx", "length": 15.233},
+    {"name": "dance4", "clip": "dance4.hkx", "length": 9.4},
+    {"name": "dance8", "clip": "dance8.hkx", "length": 21.767},
+    {"name": "dance9", "clip": "dance9.hkx", "length": 15.633}
+  ],
+  "fireworks": {
+    "plugin": "Fireworks.esp",
+    "afterSong": ["029EBD", "009417", "029EBD"],
+    "atNight": ["03915F"],
+    "sites": [[1450, 6600], [2048, 6650], [2650, 6600]],
+    "stagger": 0.6
+  }
 }

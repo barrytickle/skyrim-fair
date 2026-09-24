@@ -98,7 +98,7 @@ def write_songs(doc):
             lines.append(f'  {j(k)}: {{')
             lines += [f'    {j(a)}: {j(b)}' + (',' if i < len(items) - 1 else '') for i, (a, b) in enumerate(items)]
             lines.append('  }')
-        elif k in ('band', 'orchestra'):
+        elif k in ('band', 'orchestra', 'danceStyles'):
             lines.append(f'  {j(k)}: [')
             lines += ['    ' + j(m, ensure_ascii=False) + (',' if i < len(v) - 1 else '') for i, m in enumerate(v)]
             lines.append('  ]')
@@ -111,6 +111,11 @@ def write_songs(doc):
                 lines += [f'      {j(a)}: [' + ', '.join(j(x) for x in b) + ']' + (',' if n2 < len(fields) - 1 else '')
                           for n2, (a, b) in enumerate(fields)]
                 lines.append('    }' + (',' if i < len(moves) - 1 else ''))
+            lines.append('  }')
+        elif k == 'fireworks':
+            items = list(v.items())
+            lines.append(f'  {j(k)}: {{')
+            lines += [f'    {j(a)}: {j(b)}' + (',' if i < len(items) - 1 else '') for i, (a, b) in enumerate(items)]
             lines.append('  }')
         else:
             lines.append(f'  {j(k)}: {j(v, ensure_ascii=False)}')

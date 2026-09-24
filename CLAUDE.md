@@ -22,7 +22,8 @@ hand-made: a C#/Mutagen generator reads `fair.config.json` and writes `dist/Skyr
 ```
 python tools/make_static_props.py --data "E:/Modlists/Still In Skyrim/stock/Data"   # only when props change
 python tools/build_audio.py                                                          # music/, sound-effects/ -> assets/sound/
-python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast instrument loops (when a speed changes)
+python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast and held instrument loops (when a speed changes)
+python tools/bards/build_dances.py                                                   # dance styles from Professional Dancer (git-ignored, never shipped)
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
 # after a layout change, for the navmesh's obstacle footprints (then run the generator again):
 python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"

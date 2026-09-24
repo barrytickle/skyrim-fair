@@ -2586,6 +2586,20 @@ internal sealed record StageAudioConfig
 
     public float SingerGap { get; init; } = 2f;
 
+    public List<DanceStyle> DanceStyles { get; init; } = new();
+
+    public FireworksShow Fireworks { get; init; } = new();
+
+    /// <summary>Where the dance styles' OAR submods live, and the actor value that picks one (Variable10, 77).</summary>
+    public string DanceStylesOarFolder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairDances";
+
+    public string DanceStyleValue { get; init; } = "Variable10";
+
+    public int DanceStyleValueIndex { get; init; } = 77;
+
+    /// <summary>The idle the styles replace the clip of (vanilla IdleCiceroDance1).</summary>
+    public string DanceStyleIdle { get; init; } = "000F7C8A:Skyrim.esm";
+
     /// <summary>Where the fast clips and their OAR submods live.</summary>
     public string TempoOarFolder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairTempo";
 
@@ -3391,6 +3405,40 @@ internal sealed record StageShowFile
 
     /// <summary>Seconds each singer stands between moves.</summary>
     public float SingerGap { get; init; } = 2f;
+
+    /// <summary>The dancers' styles: Professional Dancer's clips through OAR (tools/bards/build_dances.py).</summary>
+    public List<DanceStyle> DanceStyles { get; init; } = new();
+
+    /// <summary>Fireworks after each song (Fireworks.esp, looked up at runtime; nothing if it isn't loaded).</summary>
+    public FireworksShow Fireworks { get; init; } = new();
+}
+
+internal sealed record DanceStyle
+{
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>The clip, in Professional Dancer's animations/Dance folder.</summary>
+    public string Clip { get; init; } = string.Empty;
+
+    /// <summary>Its length in seconds (the build tool checks it against the clip).</summary>
+    public float Length { get; init; }
+}
+
+internal sealed record FireworksShow
+{
+    public string Plugin { get; init; } = "Fireworks.esp";
+
+    /// <summary>Launcher activators (FormIDs in the plugin, hex), one per site in turn, set off as each song ends.</summary>
+    public List<string> AfterSong { get; init; } = new();
+
+    /// <summary>Also at night (20:00-05:00), at the middle site: a flare.</summary>
+    public List<string> AtNight { get; init; } = new();
+
+    /// <summary>Launch sites, [x, y]: in the open, away from people and trees.</summary>
+    public List<float[]> Sites { get; init; } = new();
+
+    /// <summary>Seconds between one site's launch and the next.</summary>
+    public float Stagger { get; init; } = 0.6f;
 }
 
 internal sealed record CrowdMove
