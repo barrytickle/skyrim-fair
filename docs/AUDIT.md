@@ -2,7 +2,19 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: "rest" holds the instrument; "away" puts it away (2026-09-24)
+## Current pass: Barry's own arrangement of Round the Green (2026-09-24)
+
+- Barry wrote Round the Green's five timelines by hand (lute 19 entries, drum 32, flute 8,
+  singers 11, crowd dancing throughout).
+- Checked before building: 12 missing commas and 5 trailing commas were fixed; one drum
+  time out of order (`127` after `145`) is `147` on Barry's word. Every word is valid and
+  every time is inside the song (149.6 s). The file was rewritten in the tool's layout.
+- The built plugin's Round the Green schedule (55 sections) matches an independent merge
+  of the file exactly. Plugin `0049791a4dbb7da6...`, deterministic, FormIDs unchanged.
+  Deployed.
+- **To hear it:** `set SkyrimFairAudioFirstTrack to 0` (it's the first song anyway).
+
+## Previous pass: "rest" holds the instrument; "away" puts it away (2026-09-24)
 
 Barry: "is there a way we can use "rest" to just have them idle with the instrument there?
 That way they're not putting the instrument away every 30s mid song".
