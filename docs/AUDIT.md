@@ -2,7 +2,37 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the stage show, B3 and B4: drums and crowd follow each song's sections (2026-09-24)
+## Current pass: a solid invisible wall round the stage; the crowd faces the stage to clap and cheer (2026-09-24)
+
+Barry: "the invisible wall stuff still happens... I can just walk up the stairs as well".
+"When the crowd clap or cheer, can we get them to look towards the stage?"
+
+- **The CollisionMarker primitives don't stop the player.** On L_TRANSPARENT he walked
+  straight through them. Before that, SkyParkour's highest climb is 250
+  (`HardcodedVariables.h`), so the 400-high boxes can't have been what he mantled. He
+  must have been climbing the stage itself (the deck is 134).
+- **Now a real static:** `tools/make_collision_wall.py` writes
+  `meshes/SkyrimFair/Collision/StageWall.nif` with PyNifly (Blender's Python). It has no
+  geometry, BSXFlags Havok, and a `bhkBoxShape` 256 x 16 x 400, centred. Its 250-byte
+  rigid body is the kit's working stair collider's, byte for byte, but for its own shape
+  link: layer STATIC, mass 0, fixed motion. Deterministic (`524c2c5f...`), committed
+  (project-authored), deployed.
+- `collisionWalls[].solid: true` on all 8 stage walls. The 29 pieces keep their FormIDs:
+  at the very end (after the navmesh and the culling global) their base becomes the new
+  STAT `SkyrimFairStageWall` (`175A`), the primitive is dropped, and they turn -90 degrees
+  (the mesh is long on local X). The navmesh and the visibility table are made first, from
+  the same boxes, so they're unchanged (7,515 triangles).
+- At 400 high, the walls are above SkyParkour's climb limit.
+- **Facing the stage:** `FaceStage()` turns every loaded dancer toward the stage speaker
+  (`GetHeadingAngle`) in 3 steps 0.06 s apart (`FaceStageSteps`), not a snap, when a
+  section switches the crowd to clap or cheer, and at the song-end cheer. Dancers within
+  10 degrees stay put.
+- Against the deployed plugin: 29 wall pieces change base, 1 STAT added, nothing else.
+  Plugin `34f72fd94733297d...`, deterministic, deployed with the mesh and scripts.
+- **To test:** walk, jump and vault at the steps, sides and back. Clap and cheer
+  sections: does everyone turn to the stage smoothly?
+
+## Previous pass: the stage show, B3 and B4: drums and crowd follow each song's sections (2026-09-24)
 
 Barry chose per-song sections, set in the config.
 

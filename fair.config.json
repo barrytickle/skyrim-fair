@@ -252,6 +252,7 @@
         {"prefix": "SkyrimFairFolkDancer", "races": ["ImperialRace"], "heightTolerance": 0.001}
       ]
     },
+    "solidWall": {"editorId": "SkyrimFairStageWall", "model": "SkyrimFair\\Collision\\StageWall.nif", "width": 256, "depth": 16, "height": 200, "minZ": -200},
     "crowdCulling": {
       "enabled": true,
       "script": "SkyrimFairCrowdCull",
@@ -3355,14 +3356,14 @@
       "centreWear": 0.2
     },
     "collisionWalls": [
-      {"name": "stage steps foot", "from": [1661, 4523], "to": [2435, 4523], "layer": 3},
-      {"name": "stage steps west", "from": [1661, 4523], "to": [1661, 5073], "layer": 3},
-      {"name": "stage steps east", "from": [2435, 4523], "to": [2435, 5073], "layer": 3},
-      {"name": "stage front west", "from": [1158, 5073], "to": [1661, 5073], "layer": 3},
-      {"name": "stage front east", "from": [2435, 5073], "to": [2938, 5073], "layer": 3},
-      {"name": "stage west", "from": [1158, 5073], "to": [1158, 6015], "layer": 3},
-      {"name": "stage east", "from": [2938, 5073], "to": [2938, 6015], "layer": 3},
-      {"name": "stage back", "from": [1158, 6015], "to": [2938, 6015], "layer": 3}
+      {"name": "stage steps foot", "from": [1661, 4523], "to": [2435, 4523], "solid": true},
+      {"name": "stage steps west", "from": [1661, 4523], "to": [1661, 5073], "solid": true},
+      {"name": "stage steps east", "from": [2435, 4523], "to": [2435, 5073], "solid": true},
+      {"name": "stage front west", "from": [1158, 5073], "to": [1661, 5073], "solid": true},
+      {"name": "stage front east", "from": [2435, 5073], "to": [2938, 5073], "solid": true},
+      {"name": "stage west", "from": [1158, 5073], "to": [1158, 6015], "solid": true},
+      {"name": "stage east", "from": [2938, 5073], "to": [2938, 6015], "solid": true},
+      {"name": "stage back", "from": [1158, 6015], "to": [2938, 6015], "solid": true}
     ],
     "stallDirectory": "docs/STALLS.md",
     "audio": {

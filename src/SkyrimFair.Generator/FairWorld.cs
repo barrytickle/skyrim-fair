@@ -319,6 +319,7 @@ internal static class FairWorld
 
         // ---- invisible walls ------------------------------------------------------------
         var wallBoxes = 0;
+        var solidWallPieces = new List<(PlacedObject Ref, CollisionWall Wall)>();
         foreach (var wall in config.CollisionWalls)
         {
             var (ax, ay, bx, by) = (wall.From[0], wall.From[1], wall.To[0], wall.To[1]);
@@ -329,7 +330,7 @@ internal static class FairWorld
             {
                 var t = (i + 0.5f) / pieces;
                 var (cx, cy) = (ax + (bx - ax) * t, ay + (by - ay) * t);
-                Put(new PlacedObject(mod)
+                var box = new PlacedObject(mod)
                 {
                     Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("00000021:Skyrim.esm")),
                     CollisionLayer = wall.Layer,
@@ -346,7 +347,13 @@ internal static class FairWorld
                         Position = new P3Float(cx, cy, plan.Height(cx, cy) + wall.Height / 2f),
                         Rotation = new P3Float(0f, 0f, heading),
                     },
-                });
+                };
+                Put(box);
+                if (wall.Solid)
+                {
+                    solidWallPieces.Add((box, wall));
+                }
+
                 wallBoxes++;
             }
         }
@@ -1126,6 +1133,34 @@ internal static class FairWorld
             {
                 Console.WriteLine($"    {name}: {on} of {cull.Actors} on");
             }
+        }
+
+        // ---- solid invisible walls: the primitives turned into a real collider's static --------------
+        // Last of all, so its STAT renumbers nothing (not even the navmesh or the culling global);
+        // the pieces keep their FormIDs and only change base. The navmesh and the visibility table
+        // were made from the primitives, which are the same boxes.
+        if (solidWallPieces.Count > 0)
+        {
+            var wallStat = AddStatic(mod, config.SolidWall);
+            foreach (var (piece, wall) in solidWallPieces)
+            {
+                // The mesh's box is centred on its origin, as the primitive was.
+                var span = config.SolidWall.Height - config.SolidWall.MinZ;
+                if (MathF.Abs(wall.Height - span) > 0.5f)
+                {
+                    throw new InvalidOperationException($"collisionWalls {wall.Name}: a solid wall is {span} high (the mesh's); set height to match");
+                }
+
+                piece.Base = new FormLinkNullable<IPlaceableObjectGetter>(wallStat.FormKey);
+                piece.Primitive = null;
+                piece.CollisionLayer = null;
+
+                // The mesh's box runs along its local X; the primitive's ran along local Y.
+                var r = piece.Placement!.Rotation;
+                piece.Placement.Rotation = new P3Float(r.X, r.Y, r.Z - MathF.PI / 2f);
+            }
+
+            Console.WriteLine($"  solid walls: {solidWallPieces.Count} pieces of {config.SolidWall.EditorId} ({config.SolidWall.Model})");
         }
 
         mod.Worldspaces.Add(worldspace);

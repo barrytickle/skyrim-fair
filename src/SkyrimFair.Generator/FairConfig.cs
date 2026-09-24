@@ -132,6 +132,13 @@ internal sealed record FairWorldConfig
     /// <summary>The faces the fair's face lists are filled with (see <see cref="FacePoolConfig"/>).</summary>
     public FacePoolConfig Faces { get; init; } = new();
 
+    /// <summary>
+    /// The invisible collision wall solid <see cref="CollisionWall"/>s are built from
+    /// (tools/make_collision_wall.py: a box 256 x 16 x 400, centred, long along local X).
+    /// Its STAT is made late, so nothing renumbers.
+    /// </summary>
+    public ProjectStaticConfig SolidWall { get; init; } = new();
+
     /// <summary>Unseen crowd switched off where the player is (see <see cref="CrowdCullingConfig"/>).</summary>
     public CrowdCullingConfig CrowdCulling { get; init; } = new();
 
@@ -3203,12 +3210,16 @@ internal sealed record CollisionWall
     /// <summary>Longest single box; longer segments are split.</summary>
     public float PieceLength { get; init; } = 256f;
 
-    /// <summary>
-    /// The box's collision layer index, or none for the default (CollisionBox). 3,
-    /// L_TRANSPARENT, blocks the player and NPCs but not arrows, and SkyParkour won't climb
-    /// onto it (its ledge check excludes Transparent), so it can't be vaulted.
-    /// </summary>
+    /// <summary>The primitive box's collision layer index, or none for the default.</summary>
     public uint? Layer { get; init; }
+
+    /// <summary>
+    /// Built from <see cref="FairWorldConfig.SolidWall"/>, an invisible static with a real
+    /// box collider, instead of a CollisionMarker primitive: in game the primitives didn't
+    /// stop the player (2026-09-24). Each piece takes the static's full length (256), so
+    /// shorter pieces overlap their neighbours and reach a little past the segment's ends.
+    /// </summary>
+    public bool Solid { get; init; }
 }
 
 /// <summary>

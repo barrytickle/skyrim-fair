@@ -77,6 +77,8 @@ Float[] Property CheerIdleLengths Auto
 Idle[] Property ClapIdles Auto
 Float[] Property ClapLengths Auto
 {A song's "clap" sections: the dancers applaud, each clip replayed as it ends.}
+Float Property FaceStageSteps = 3.0 Auto
+{Clapping and cheering dancers turn to the stage in this many steps (0.06 s apart), not a snap.}
 Int Property DanceEvery = 2 Auto
 {Each dancer is given a dance every this many updates during a song (an update is 2 s at most).}
 
@@ -509,7 +511,46 @@ Function Sections(Float now)
 			dancing[i] = False
 			i += 1
 		EndWhile
+		If crowd > 0
+			FaceStage()
+		EndIf
 	EndIf
+EndFunction
+
+; Every loaded dancer turns to face the stage (its speaker), over a few quick steps. A
+; dancer already facing it (within 10 degrees) stays as they are.
+Function FaceStage()
+	If !StageSpeaker
+		Return
+	EndIf
+	Float[] start = new Float[128]
+	Float[] turn = new Float[128]
+	Int i = 0
+	While i < Dancers.Length && i < 128
+		If Dancers[i] && Dancers[i].Is3DLoaded()
+			start[i] = Dancers[i].GetAngleZ()
+			turn[i] = Dancers[i].GetHeadingAngle(StageSpeaker)
+		EndIf
+		i += 1
+	EndWhile
+	Int steps = FaceStageSteps as Int
+	If steps < 1
+		steps = 1
+	EndIf
+	Int k = 1
+	While k <= steps
+		i = 0
+		While i < Dancers.Length && i < 128
+			If (turn[i] > 10.0 || turn[i] < -10.0) && Dancers[i] && Dancers[i].Is3DLoaded()
+				Dancers[i].SetAngle(0.0, 0.0, start[i] + turn[i] * k / steps)
+			EndIf
+			i += 1
+		EndWhile
+		If k < steps
+			Utility.Wait(0.06)
+		EndIf
+		k += 1
+	EndWhile
 EndFunction
 
 Function RestDrums(Actor[] players, Idle[] idles, Bool[] playing)
@@ -610,11 +651,12 @@ Function FolkDance(Float now)
 	folkNext = now + FolkClipLength * TimeScale.GetValue() / 86400.0
 EndFunction
 
-; The song's end: the floor claps and cheers with the crowd.
+; The song's end: the floor turns to the stage and claps and cheers with the crowd.
 Function Cheer()
 	If CheerIdles.Length == 0
 		Return
 	EndIf
+	FaceStage()
 	Int i = 0
 	While i < Dancers.Length
 		If Dancers[i] && Dancers[i].Is3DLoaded()
