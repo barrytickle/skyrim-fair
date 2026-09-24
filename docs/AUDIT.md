@@ -2,7 +2,30 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the show keeps time with the music (a real-time clock) (2026-09-24)
+## Current pass: audit, "more life" in the fair (2026-09-24, research only)
+
+Barry confirmed: the children and the seated visitors "look great"; the folk pair is fine at
+a distance. **The singers don't walk the deck** (that isn't built yet). He asked for the
+audit (plan item 5) plus **"banners and flags stuck to the wooden fencing around the area"**.
+Nothing is built. Surveyed from `Skyrim.esm` with Mutagen and from the modlist's folders.
+
+Every option below is **built last** (appended after the fireworks), so no FormID moves.
+
+| # | Option | What (vanilla records) | Cost | Risk |
+|---|---|---|---|---|
+| A | **Banners on the palisade** | Wall-hung Whiterun banners `CityBannerWhiterun01Inside` 0DEE46, `02Inside` 0DEE4F, `01InsideTall` 0DEE54 (already on the towers), cloth-sim MSTTs. Poles: `FarmBannerPost01` 1083D7, `SBannerPost01` 0A6E56, `CivilWarBanner01` 060166. Placed every Nth panel from the palisade's own panel positions, inner face, alternating heights | small (static refs; a dozen or two MSTTs sway) | low; check the gate and corners |
+| B | **Shrubs and ferns** in the walls and along the paths | `TreeTundraShrub01`-`10` 0AAE79-0AAE8B, `TreeReachFern01`-`03` 0B8A6E-70, `TreeFallForestFernCluster01`-`04` 0B8A6A-6D (not harvestable). Flowers are all harvestable ingredients (`TreeFloraLavender01`, the mountain flowers, tundra cotton): fine as picking flavour, or skip | small | low; keep them off the navmesh paths (footprints) |
+| C | **Grass on the ground** | `FieldGrass02` 1098CA (with flowers), `ForestGrass02` 0F69A4, `FallForestGrass02` 05B5A8 on the fair's LTEX copies | small (GPU) | **high**: the modlist loads grass from a cache (Grass Cache Helper NG, `UseCGID=1`, and it switches off live grass creation when not precaching). A new worldspace has no cache, so probably no grass shows until a precache run covers `SkyrimFairWorld`. Test one LTEX first |
+| D | **More props**: laundry, lanterns, hay, bunting, tools, food | Laundry: vanilla has only `WRHerbDryingRack01` 0B9BEA; lines would be a rope plus hung clothes (misc items, statics). Lanterns: the Holidays runs already exist, so more is config. Hay, tools, food: the existing modules | small per piece | low |
+| E | **Smoke from the cook fires** | `FXSmokeChimney01`/`02` 0B09E4/0B09ED, `FXSmokeWispsLgVolAdjust` 01643C, `FXSmokeSmokeLg1x1` 0B9496 at each cook fire and camp | small (a few particle systems) | low |
+| F | **The fair's sounds** | `AMBTavernExteriorLP` 100F8B (a murmur by the food), `NPCHumanBlacksmithRepairHammer` 0EA51D (Distant 0EA51E), `NPCHumanWoodChop` 06D1CA, `FXFireMedium01LP` 0DDE3C at the cook fires, `NPCDogBark` 05B37D/Distant 05B37C, the cow sounds by the pens | tiny | low; keep them under the stage's levels (confirmed, don't change) |
+| G | **Small animals** | `EncChicken` 0A91A0, `EncDog` 023A92, `EncGoatDomestic` 04359C, `EncCow` 023A90 | **real AI cost** per animal; culling only switches the fair's own records, so each would be a duplicated fair NPC (culled) with a sandbox package in a pen or a yard | medium: dogs pick fights with other creatures; wandering chickens block paths |
+
+**Recommended order:** A (asked for), E and F (cheap, big effect), B, then D. G: a few
+penned animals (chickens by the food, goats in the pen), duplicated and culled. C only after
+a one-LTEX test, since the grass cache likely hides it.
+
+## Previous pass: the show keeps time with the music (a real-time clock) (2026-09-24)
 
 Barry: **"we got new dances!!"** (Professional Dancer through Pandora: confirmed), but
 "there's a big delay, like 10-20s between the song ending, the cheer & firework starting".
