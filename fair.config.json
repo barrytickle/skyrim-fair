@@ -3387,7 +3387,6 @@
         "hardEndLevel": 300,
         "hardEndFade": 1.5,
         "songsFile": "songs.config.json",
-        "performersFile": "performers.config.json",
         "cheers": [
           {
             "name": "cheer",

@@ -29,46 +29,30 @@ try
         return 1;
     }
 
-    // The stage songs live in a file of their own (songs.config.json), next to the config.
+    // The stage show lives in a file of its own (songs.config.json, next to the config): the
+    // songs and their timelines, the instruments, the musicians and the crowd's moves.
     var stageAudio = config.FairWorld.Audio.Stage;
     if (stageAudio.SongsFile.Length > 0)
     {
-        var songsPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(configPath))!, stageAudio.SongsFile);
-        var songsFile = JsonSerializer.Deserialize<SongsFile>(
-            await File.ReadAllTextAsync(songsPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        var showPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(configPath))!, stageAudio.SongsFile);
+        var show = JsonSerializer.Deserialize<StageShowFile>(
+            await File.ReadAllTextAsync(showPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
             ?? throw new InvalidOperationException($"{stageAudio.SongsFile} could not be parsed.");
-        config = config with
-        {
-            FairWorld = config.FairWorld with
-            {
-                Audio = config.FairWorld.Audio with { Stage = stageAudio with { Songs = songsFile.Songs } },
-            },
-        };
-    }
-
-    // The musicians and the crowd's moves live in performers.config.json.
-    stageAudio = config.FairWorld.Audio.Stage;
-    if (stageAudio.PerformersFile.Length > 0)
-    {
-        var performersPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(configPath))!, stageAudio.PerformersFile);
-        var performers = JsonSerializer.Deserialize<PerformersFile>(
-            await File.ReadAllTextAsync(performersPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-            ?? throw new InvalidOperationException($"{stageAudio.PerformersFile} could not be parsed.");
-        string Named(string key) => performers.Instruments.TryGetValue(key, out var form)
+        string Named(string key) => show.Instruments.TryGetValue(key, out var form)
             ? form
-            : throw new InvalidOperationException($"{stageAudio.PerformersFile}: instruments has no \"{key}\"");
+            : throw new InvalidOperationException($"{stageAudio.SongsFile}: instruments has no \"{key}\"");
         List<BandMember> Players(List<BandMember> players) =>
             players.Select(m => m with { Idle = m.Idle.Contains(':') ? m.Idle : Named(m.Idle) }).ToList();
         (List<string> Idles, List<float> Lengths) Move(string kind)
         {
-            if (!performers.CrowdMoves.TryGetValue(kind, out var move))
+            if (!show.CrowdMoves.TryGetValue(kind, out var move))
             {
                 return (new List<string>(), new List<float>());
             }
 
             if (move.Lengths.Count != move.Idles.Count)
             {
-                throw new InvalidOperationException($"{stageAudio.PerformersFile}: crowdMoves.{kind} has {move.Idles.Count} idles but {move.Lengths.Count} lengths");
+                throw new InvalidOperationException($"{stageAudio.SongsFile}: crowdMoves.{kind} has {move.Idles.Count} idles but {move.Lengths.Count} lengths");
             }
 
             return (move.Idles, move.Lengths);
@@ -85,8 +69,9 @@ try
                 {
                     Stage = stageAudio with
                     {
-                        Band = Players(performers.Band),
-                        Orchestra = Players(performers.Orchestra),
+                        Songs = show.Songs,
+                        Band = Players(show.Band),
+                        Orchestra = Players(show.Orchestra),
                         BandStop = Named("putAway"),
                         BandPackage = Named("holdPackage"),
                         DrumIdle = Named("drum"),

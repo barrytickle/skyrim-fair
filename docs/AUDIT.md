@@ -2,7 +2,26 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the musicians and the crowd's moves in performers.config.json (2026-09-24)
+## Current pass: one stage-show file, and drums and crowd on timelines of their own (2026-09-24)
+
+Barry: "can we integrate the performers into the songs.config?" and "ideally i want at
+second [0] crowd does X, also at second [0] drums start."
+
+- `songs.config.json` now holds the whole show: songs, instruments, band, orchestra and
+  crowd moves. `performers.config.json` is gone. Program.cs reads it as `StageShowFile`.
+- Each song's `sections` became two timelines, an entry a line where it changes:
+  - `drums: [second, "rest" | "play" | "intense"]`
+  - `crowd: [second, "dance" | "clap" | "cheer"]`
+  - Before its first entry, the drums play and the crowd dances.
+  - `FairAudio.SongSections` merges them: a section at every second where either
+    changes, carrying the other's last value. The script and its properties are
+    unchanged.
+- Converted from the old sections (calm -> rest, normal -> play, intense -> intense;
+  repeats dropped). **The plugin is byte-identical** (`34f72fd94733297d...`).
+- `build_sections.py` seeds and writes the timelines, and keeps the rest of the file (one
+  formatter for all of it; round-trip byte-identical).
+
+## Previous pass: the musicians and the crowd's moves in performers.config.json (2026-09-24)
 
 Barry: "could we combine the instrument config with the crowd config?"
 

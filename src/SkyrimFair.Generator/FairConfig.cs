@@ -2574,17 +2574,12 @@ internal sealed record StageAudioConfig
     public List<StageSong> Songs { get; init; } = new();
 
     /// <summary>
-    /// A file of its own holding <see cref="Songs"/> (songs.config.json, next to the fair
-    /// config), so the songs and their sections are easy to find and edit. Program.cs reads it.
+    /// The stage show's own file (songs.config.json, next to the fair config): the songs and
+    /// their timelines, the instruments, the musicians (<see cref="Band"/>, <see cref="Orchestra"/>)
+    /// and the crowd's moves, so they're easy to find and edit. Program.cs reads it.
     /// </summary>
     public string SongsFile { get; init; } = string.Empty;
 
-    /// <summary>
-    /// A file of its own holding the musicians and the crowd's moves (performers.config.json):
-    /// <see cref="Band"/>, <see cref="Orchestra"/>, <see cref="BandStop"/>, <see cref="BandPackage"/>,
-    /// <see cref="DrumIdle"/>, and the crowds' dance, clap and cheer idles. Program.cs reads it.
-    /// </summary>
-    public string PerformersFile { get; init; } = string.Empty;
 
     public List<StageCheer> Cheers { get; init; } = new();
 
@@ -2644,12 +2639,14 @@ internal sealed record StageSong
     public string Cheer { get; init; } = string.Empty;
 
     /// <summary>
-    /// The song's sections, each [start seconds, drums, crowd]: drums calm (the drummers
-    /// rest), normal or intense (they play); crowd dance, clap or cheer. Seeded from the
-    /// stems by tools/bards/build_sections.py, then tuned by hand. None: drums and dancing
-    /// throughout.
+    /// The drums' timeline: [second, "rest" | "play" | "intense"], from the song's start,
+    /// an entry where they change. Whoever plays the drum rests in a "rest" stretch. None:
+    /// they play throughout.
     /// </summary>
-    public List<System.Text.Json.JsonElement[]> Sections { get; init; } = new();
+    public List<System.Text.Json.JsonElement[]> Drums { get; init; } = new();
+
+    /// <summary>The crowd's timeline: [second, "dance" | "clap" | "cheer"]. None: they dance throughout.</summary>
+    public List<System.Text.Json.JsonElement[]> Crowd { get; init; } = new();
 }
 
 internal sealed record StageCheer
@@ -3337,15 +3334,12 @@ internal sealed record FixedFace
     public float HeightTolerance { get; init; } = 1f;
 }
 
-/// <summary>songs.config.json: the stage songs, in playlist order (see <see cref="StageAudioConfig.SongsFile"/>).</summary>
-internal sealed record SongsFile
+/// <summary>songs.config.json: the stage show (see <see cref="StageAudioConfig.SongsFile"/>).</summary>
+internal sealed record StageShowFile
 {
+    /// <summary>The songs, in playlist order.</summary>
     public List<StageSong> Songs { get; init; } = new();
-}
 
-/// <summary>performers.config.json: the musicians and the crowd's moves (see <see cref="StageAudioConfig.PerformersFile"/>).</summary>
-internal sealed record PerformersFile
-{
     /// <summary>Named idles and forms: lute, drum, flute (a musician's idle may be one of these names), putAway, holdPackage.</summary>
     public Dictionary<string, string> Instruments { get; init; } = new();
 

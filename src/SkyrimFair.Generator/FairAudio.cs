@@ -203,26 +203,44 @@ internal static class FairAudio
         }
 
         // ---- the songs' sections: drums and crowd, from each song's start ------------------
+        // The drums' and the crowd's timelines, merged: a section at every second either
+        // changes, carrying the other's last value (drums play and the crowd dances before
+        // their first entry).
+        List<(float At, int Value)> Timeline(StageSong song, string what, List<System.Text.Json.JsonElement[]> entries, string[] words)
+        {
+            var list = new List<(float, int)>();
+            var last = -1f;
+            foreach (var entry in entries)
+            {
+                var at = entry[0].GetSingle();
+                var value = Array.IndexOf(words, entry[1].GetString());
+                if (at <= last)
+                {
+                    throw new InvalidOperationException($"songs {song.Name}: {what} must be in order ({at} after {last})");
+                }
+
+                if (value < 0)
+                {
+                    throw new InvalidOperationException($"songs {song.Name}: {what} at {at} must be {string.Join(", ", words)}");
+                }
+
+                list.Add((at, value));
+                last = at;
+            }
+
+            return list;
+        }
+
         IEnumerable<(float Start, int Drums, int Crowd)> SongSections(StageSong song)
         {
-            var last = -1f;
-            foreach (var section in song.Sections)
+            var drums = Timeline(song, "drums", song.Drums, new[] { "rest", "play", "intense" });
+            var crowd = Timeline(song, "crowd", song.Crowd, new[] { "dance", "clap", "cheer" });
+            var (d, c) = (1, 0);
+            foreach (var at in drums.Select(x => x.At).Concat(crowd.Select(x => x.At)).Distinct().OrderBy(x => x))
             {
-                var start = section[0].GetSingle();
-                if (start <= last)
-                {
-                    throw new InvalidOperationException($"audio.stage.songs {song.Name}: sections must start in order ({start} after {last})");
-                }
-
-                last = start;
-                var drums = Array.IndexOf(new[] { "calm", "normal", "intense" }, section[1].GetString());
-                var crowd = Array.IndexOf(new[] { "dance", "clap", "cheer" }, section[2].GetString());
-                if (drums < 0 || crowd < 0)
-                {
-                    throw new InvalidOperationException($"audio.stage.songs {song.Name}: section at {start} needs drums calm/normal/intense and crowd dance/clap/cheer");
-                }
-
-                yield return (start, drums, crowd);
+                foreach (var x in drums.Where(x => x.At == at)) d = x.Value;
+                foreach (var x in crowd.Where(x => x.At == at)) c = x.Value;
+                yield return (at, d, c);
             }
         }
 

@@ -42,12 +42,13 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 
 ## Code map
 
-- **`songs.config.json`**: the stage songs alone, in playlist order, with each song's
-  sections (`[start, drums, crowd]`, a line each). `fair.config.json` points to it
-  (`fairWorld.audio.stage.songsFile`). Barry edits the sections here.
-- **`performers.config.json`**: the musicians (band and orchestra: instrument by name,
-  position, outfit) and the crowd's moves (the dance, clap and cheer idles with their clip
-  lengths). `fair.config.json` points to it (`fairWorld.audio.stage.performersFile`).
+- **`songs.config.json`**: the whole stage show, pointed to by `fair.config.json`
+  (`fairWorld.audio.stage.songsFile`). Barry edits it:
+  - the songs in playlist order, each with two timelines, an entry a line:
+    `drums: [second, rest|play|intense]` and `crowd: [second, dance|clap|cheer]`
+  - the instruments by name
+  - the band and orchestra
+  - the crowd's moves: the dance, clap and cheer idles with their clip lengths
 
 - `src/SkyrimFair.Generator/`:
   - `FairWorld.cs`: worldspace, terrain and ground painting

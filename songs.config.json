@@ -1,25 +1,38 @@
 {
-  "about": "The stage songs, in playlist order. fair.config.json points here (fairWorld.audio.stage.songsFile). Each section is [start in seconds, drums, crowd]: drums calm (the drummers rest), normal or intense (they play); crowd dance, clap or cheer. Edit freely, keep the starts in order, then rebuild. tools/bards/build_sections.py --force re-seeds a song's sections from its stems (overwriting your edits).",
+  "about": "The stage show: the songs and their performers. fair.config.json points here (fairWorld.audio.stage.songsFile). SONGS, in playlist order. Each has two timelines, in seconds from the song's start, an entry where something changes: drums [second, rest | play | intense] (whoever plays the drum rests in a 'rest' stretch) and crowd [second, dance | clap | cheer]. Before a timeline's first entry the drums play and the crowd dances. Keep each timeline in order. tools/bards/build_sections.py --force re-seeds a song's timelines from its stems (overwriting your edits). INSTRUMENTS: names for the idles and forms below. BAND and ORCHESTRA: 'idle' is the instrument (an instruments name, or an idle's FormID); 'at' is [x, y, height, facing]. CROWD MOVES: the idles the dancers play in a dance, clap or cheer stretch, each with its clip length in seconds (vanilla idles play once; the stage script replays each as it ends). The cheer moves also play once at every song's end. 'names' are labels only. Rebuild after editing.",
   "songs": [
     {
       "name": "RoundTheGreen",
       "source": "music/mono/Round the Green.wav",
       "file": "SkyrimFair\\Music\\Stage\\RoundTheGreen.wav",
       "cheer": "cheer",
-      "sections": [
-        [0.0, "normal", "dance"],
-        [2.5, "calm", "clap"],
-        [15.0, "intense", "dance"],
-        [20.0, "calm", "clap"],
-        [32.5, "intense", "dance"],
-        [50.0, "normal", "dance"],
-        [72.5, "calm", "clap"],
-        [77.5, "intense", "dance"],
-        [97.5, "normal", "dance"],
-        [105.0, "calm", "clap"],
-        [112.5, "normal", "dance"],
-        [122.5, "calm", "clap"],
-        [135.0, "intense", "dance"]
+      "drums": [
+        [0.0, "play"],
+        [2.5, "rest"],
+        [15.0, "intense"],
+        [20.0, "rest"],
+        [32.5, "intense"],
+        [50.0, "play"],
+        [72.5, "rest"],
+        [77.5, "intense"],
+        [97.5, "play"],
+        [105.0, "rest"],
+        [112.5, "play"],
+        [122.5, "rest"],
+        [135.0, "intense"]
+      ],
+      "crowd": [
+        [0.0, "dance"],
+        [2.5, "clap"],
+        [15.0, "dance"],
+        [20.0, "clap"],
+        [32.5, "dance"],
+        [72.5, "clap"],
+        [77.5, "dance"],
+        [105.0, "clap"],
+        [112.5, "dance"],
+        [122.5, "clap"],
+        [135.0, "dance"]
       ]
     },
     {
@@ -27,21 +40,30 @@
       "source": "music/mono/Hey-Ho, Skyrim.wav",
       "file": "SkyrimFair\\Music\\Stage\\HeyHoSkyrim.wav",
       "cheer": "cheer",
-      "sections": [
-        [0.0, "normal", "dance"],
-        [10.0, "calm", "clap"],
-        [15.0, "intense", "dance"],
-        [20.0, "normal", "dance"],
-        [35.0, "intense", "dance"],
-        [50.0, "calm", "clap"],
-        [55.0, "normal", "dance"],
-        [62.5, "intense", "dance"],
-        [110.0, "normal", "dance"],
-        [125.0, "intense", "dance"],
-        [140.0, "normal", "dance"],
-        [165.0, "calm", "clap"],
-        [170.0, "normal", "dance"],
-        [180.0, "intense", "dance"]
+      "drums": [
+        [0.0, "play"],
+        [10.0, "rest"],
+        [15.0, "intense"],
+        [20.0, "play"],
+        [35.0, "intense"],
+        [50.0, "rest"],
+        [55.0, "play"],
+        [62.5, "intense"],
+        [110.0, "play"],
+        [125.0, "intense"],
+        [140.0, "play"],
+        [165.0, "rest"],
+        [170.0, "play"],
+        [180.0, "intense"]
+      ],
+      "crowd": [
+        [0.0, "dance"],
+        [10.0, "clap"],
+        [15.0, "dance"],
+        [50.0, "clap"],
+        [55.0, "dance"],
+        [165.0, "clap"],
+        [170.0, "dance"]
       ]
     },
     {
@@ -49,23 +71,41 @@
       "source": "music/mono/Fiddle.wav",
       "file": "SkyrimFair\\Music\\Stage\\Fiddle.wav",
       "cheer": "cheer",
-      "sections": [
-        [0.0, "calm", "clap"],
-        [22.5, "intense", "dance"],
-        [37.5, "calm", "clap"],
-        [50.0, "intense", "dance"],
-        [65.0, "calm", "clap"],
-        [77.5, "intense", "dance"],
-        [97.5, "calm", "clap"],
-        [102.5, "normal", "dance"],
-        [117.5, "calm", "clap"],
-        [122.5, "intense", "dance"],
-        [137.5, "calm", "clap"],
-        [145.0, "normal", "dance"],
-        [150.0, "calm", "clap"],
-        [162.5, "intense", "dance"],
-        [182.5, "calm", "clap"],
-        [187.5, "intense", "dance"]
+      "drums": [
+        [0.0, "rest"],
+        [22.5, "intense"],
+        [37.5, "rest"],
+        [50.0, "intense"],
+        [65.0, "rest"],
+        [77.5, "intense"],
+        [97.5, "rest"],
+        [102.5, "play"],
+        [117.5, "rest"],
+        [122.5, "intense"],
+        [137.5, "rest"],
+        [145.0, "play"],
+        [150.0, "rest"],
+        [162.5, "intense"],
+        [182.5, "rest"],
+        [187.5, "intense"]
+      ],
+      "crowd": [
+        [0.0, "clap"],
+        [22.5, "dance"],
+        [37.5, "clap"],
+        [50.0, "dance"],
+        [65.0, "clap"],
+        [77.5, "dance"],
+        [97.5, "clap"],
+        [102.5, "dance"],
+        [117.5, "clap"],
+        [122.5, "dance"],
+        [137.5, "clap"],
+        [145.0, "dance"],
+        [150.0, "clap"],
+        [162.5, "dance"],
+        [182.5, "clap"],
+        [187.5, "dance"]
       ]
     },
     {
@@ -73,23 +113,71 @@
       "source": "music/mono/Dragonborn-Approved.wav",
       "file": "SkyrimFair\\Music\\Stage\\DragonbornApproved.wav",
       "cheer": "cheer",
-      "sections": [
-        [0.0, "calm", "clap"],
-        [7.5, "normal", "dance"],
-        [15.0, "calm", "clap"],
-        [27.5, "intense", "dance"],
-        [40.0, "normal", "dance"],
-        [52.5, "intense", "dance"],
-        [72.5, "normal", "dance"],
-        [85.0, "intense", "dance"],
-        [95.0, "normal", "dance"],
-        [157.5, "intense", "dance"],
-        [180.0, "normal", "dance"],
-        [195.0, "intense", "dance"],
-        [202.5, "normal", "dance"],
-        [207.5, "calm", "clap"],
-        [217.5, "intense", "dance"]
+      "drums": [
+        [0.0, "rest"],
+        [7.5, "play"],
+        [15.0, "rest"],
+        [27.5, "intense"],
+        [40.0, "play"],
+        [52.5, "intense"],
+        [72.5, "play"],
+        [85.0, "intense"],
+        [95.0, "play"],
+        [157.5, "intense"],
+        [180.0, "play"],
+        [195.0, "intense"],
+        [202.5, "play"],
+        [207.5, "rest"],
+        [217.5, "intense"]
+      ],
+      "crowd": [
+        [0.0, "clap"],
+        [7.5, "dance"],
+        [15.0, "clap"],
+        [27.5, "dance"],
+        [207.5, "clap"],
+        [217.5, "dance"]
       ]
     }
-  ]
+  ],
+  "instruments": {
+    "lute": "00096F8D:Skyrim.esm",
+    "drum": "00096F8B:Skyrim.esm",
+    "flute": "00096F8C:Skyrim.esm",
+    "putAway": "000E4242:Skyrim.esm",
+    "holdPackage": "00025BFC:Skyrim.esm"
+  },
+  "band": [
+    {"name": "Lute", "title": "Fair Bard", "idle": "lute", "at": [2048, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Drum", "title": "Fair Bard", "idle": "drum", "at": [2048, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Flute", "title": "Fair Bard", "idle": "flute", "at": [1948, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
+  ],
+  "orchestra": [
+    {"name": "Lute02", "title": "Fair Bard", "idle": "lute", "at": [1648, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Lute03", "title": "Fair Bard", "idle": "lute", "at": [1848, 5250, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Lute04", "title": "Fair Bard", "idle": "lute", "at": [2248, 5250, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
+    {"name": "Lute05", "title": "Fair Bard", "idle": "lute", "at": [2448, 5250, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Flute02", "title": "Fair Bard", "idle": "flute", "at": [1748, 5440, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Flute03", "title": "Fair Bard", "idle": "flute", "at": [2148, 5440, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"},
+    {"name": "Flute04", "title": "Fair Bard", "idle": "flute", "at": [2348, 5440, 134, 180], "look": "Male", "outfit": "0009593C:Skyrim.esm"},
+    {"name": "Drum02", "title": "Fair Bard", "idle": "drum", "at": [1848, 5630, 134, 180], "look": "Male", "outfit": "0002D75E:Skyrim.esm"},
+    {"name": "Drum03", "title": "Fair Bard", "idle": "drum", "at": [2248, 5630, 134, 180], "look": "Male", "outfit": "00037C50:Skyrim.esm"}
+  ],
+  "crowdMoves": {
+    "dance": {
+      "idles": ["000F7C8A:Skyrim.esm", "000F7C8B:Skyrim.esm"],
+      "names": ["IdleCiceroDance1", "IdleCiceroDance2"],
+      "lengths": [6.667, 6.0]
+    },
+    "clap": {
+      "idles": ["000D8730:Skyrim.esm", "000D8731:Skyrim.esm", "000D8732:Skyrim.esm", "000D8733:Skyrim.esm"],
+      "names": ["IdleApplaud2", "IdleApplaud3", "IdleApplaud4", "IdleApplaud5"],
+      "lengths": [7.333, 7.133, 9.0, 6.333]
+    },
+    "cheer": {
+      "idles": ["000D8730:Skyrim.esm", "000F7C8C:Skyrim.esm", "000D8731:Skyrim.esm"],
+      "names": ["IdleApplaud2", "IdleCivilWarCheer", "IdleApplaud3"],
+      "lengths": [7.333, 4.767, 7.133]
+    }
+  }
 }
