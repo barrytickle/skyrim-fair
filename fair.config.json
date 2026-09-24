@@ -1,5 +1,5 @@
 {
-    "spidPatches": [{"source": "E:/Modlists/Still In Skyrim/mods/Stealth Detection Fixes/StealthKillDetectionFix_Attack_DISTR.ini", "spells": ["0x817~StealthKillDetectionFix.esp"]}, {"source": "E:/Modlists/Still In Skyrim/mods/Maximum Destruction/MaximumDestruction_DISTR.ini", "spells": ["0x8E6289~MaximumDestruction.esp"]}],
+    "spidPatches": [{"source": "E:/Modlists/Still In Skyrim/mods/Stealth Detection Fixes/StealthKillDetectionFix_Attack_DISTR.ini", "spells": ["0x817~StealthKillDetectionFix.esp"]}, {"source": "E:/Modlists/Still In Skyrim/mods/Maximum Destruction/MaximumDestruction_DISTR.ini", "spells": ["0x8E6289~MaximumDestruction.esp"]}, {"source": "E:/Modlists/Still In Skyrim/mods/Stealth Detection Fixes/StealthKillDetectionFix_DISTR.ini", "spells": ["0x80B~StealthKillDetectionFix.esp"]}, {"source": "E:/Modlists/Still In Skyrim/mods/Stealth Detection Fixes/StealthKillDetectionFix_Killmove_DISTR.ini", "spells": ["0x819~StealthKillDetectionFix.esp"]}, {"source": "E:/Modlists/Still In Skyrim/mods/Strange Runes/StrangeRunes_DISTR.ini", "spells": ["0x68855~StrangeRunes.esp"]}],
   "pluginName": "SkyrimFair.esp",
   "outputDirectory": "dist",
   "identity": {"name": "Skyrim Fair", "workingLocation": "Whiterun tundra", "author": "BarryRim Event Planner"},
@@ -56,7 +56,8 @@
       "width": 138.97,
       "depth": 11.29,
       "height": 140.0,
-      "scale": 2.5,
+      "scale": 4.0,
+      "reservedPanels": 89,
       "overlap": 0.06,
       "cornerExtension": 48,
       "gateTuck": 32,
@@ -72,7 +73,7 @@
       "width": 181.44,
       "depth": 43.52,
       "height": 175.45,
-      "scale": 2.5,
+      "scale": 3.6,
       "yawOffsetDegrees": 0,
       "sink": 4
     },
@@ -237,7 +238,7 @@
     "navmesh": {
       "enabled": true,
       "resolution": 32,
-      "wallMargin": 48,
+      "wallMargin": 56,
       "actorRadius": 24,
       "minObstacleHeight": 20,
       "headHeight": 160,
@@ -1068,6 +1069,73 @@
             {"piece": "@PropBucket", "x": -70, "y": 40},
             {"piece": "00074EC6:Skyrim.esm", "x": 70, "y": -40, "yaw": 20}
           ]
+        },
+        {
+          "name": "stage_lanterns",
+          "width": 1600,
+          "depth": 1100,
+          "pieces": [
+            {"piece": "035D0D:Holidays.esp", "x": -780, "y": -360, "z": 664.4, "yaw": 0, "scale": 1.5, "exact": true},
+            {"piece": "035D12:Holidays.esp", "x": -780, "y": 0, "z": 666.7, "yaw": 47, "scale": 1.5, "exact": true},
+            {"piece": "035D13:Holidays.esp", "x": -780, "y": 360, "z": 663.1, "yaw": 94, "scale": 1.5, "exact": true},
+            {"piece": "035D14:Holidays.esp", "x": -520, "y": -180, "z": 667.4, "yaw": 141, "scale": 1.5, "exact": true},
+            {"piece": "035D15:Holidays.esp", "x": -520, "y": 180, "z": 667.4, "yaw": 188, "scale": 1.5, "exact": true},
+            {"piece": "035D16:Holidays.esp", "x": -260, "y": -360, "z": 663.0, "yaw": 235, "scale": 1.5, "exact": true},
+            {"piece": "035D0D:Holidays.esp", "x": -260, "y": 0, "z": 666.4, "yaw": 282, "scale": 1.5, "exact": true},
+            {"piece": "035D12:Holidays.esp", "x": -260, "y": 360, "z": 665.7, "yaw": 329, "scale": 1.5, "exact": true},
+            {"piece": "035D13:Holidays.esp", "x": 0, "y": -180, "z": 670.2, "yaw": 16, "scale": 1.5, "exact": true},
+            {"piece": "035D14:Holidays.esp", "x": 0, "y": 180, "z": 670.2, "yaw": 63, "scale": 1.5, "exact": true},
+            {"piece": "035D15:Holidays.esp", "x": 260, "y": -360, "z": 670.2, "yaw": 110, "scale": 1.5, "exact": true},
+            {"piece": "035D16:Holidays.esp", "x": 260, "y": 0, "z": 666.8, "yaw": 157, "scale": 1.5, "exact": true},
+            {"piece": "035D0D:Holidays.esp", "x": 260, "y": 360, "z": 670.9, "yaw": 204, "scale": 1.5, "exact": true},
+            {"piece": "035D12:Holidays.esp", "x": 520, "y": -180, "z": 670.7, "yaw": 251, "scale": 1.5, "exact": true},
+            {"piece": "035D13:Holidays.esp", "x": 520, "y": 180, "z": 670.7, "yaw": 298, "scale": 1.5, "exact": true},
+            {"piece": "035D14:Holidays.esp", "x": 780, "y": -360, "z": 668.8, "yaw": 345, "scale": 1.5, "exact": true},
+            {"piece": "035D15:Holidays.esp", "x": 780, "y": 0, "z": 663.0, "yaw": 32, "scale": 1.5, "exact": true},
+            {"piece": "035D16:Holidays.esp", "x": 780, "y": 360, "z": 664.7, "yaw": 79, "scale": 1.5, "exact": true}
+          ]
+        },
+        {
+          "name": "stage_flags",
+          "width": 1400,
+          "depth": 200,
+          "pieces": [
+            {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": -602, "y": -560, "yaw": 90, "exact": true},
+            {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": -599, "y": -560, "z": 395, "yaw": 90, "exact": true},
+            {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 0, "y": -560, "yaw": 90, "exact": true},
+            {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 3, "y": -560, "z": 395, "yaw": 90, "exact": true},
+            {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 602, "y": -560, "yaw": 90, "exact": true},
+            {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 605, "y": -560, "z": 395, "yaw": 90, "exact": true}
+          ]
+        },
+        {
+          "name": "range_packing",
+          "width": 300,
+          "depth": 360,
+          "pieces": [
+            {"name": "ChestOpen", "piece": "000FC597:Skyrim.esm", "x": 0, "y": 0, "yaw": -8},
+            {"name": "CrateSmallLong03", "piece": "0007A60D:Skyrim.esm", "x": 95, "y": 5, "z": 24, "exact": true},
+            {"piece": "@PropIronArrow", "x": 87, "y": 33, "z": 52, "yaw": -2, "exact": true},
+            {"piece": "@PropIronArrow", "x": 91, "y": 36, "z": 52, "yaw": 1, "exact": true},
+            {"piece": "@PropIronArrow", "x": 95, "y": 31, "z": 52, "yaw": 0, "exact": true},
+            {"piece": "@PropIronArrow", "x": 99, "y": 35, "z": 52, "yaw": 2, "exact": true},
+            {"piece": "@PropIronArrow", "x": 103, "y": 32, "z": 52, "yaw": -1, "exact": true},
+            {"name": "CrateSmall04", "piece": "0007A619:Skyrim.esm", "x": -100, "y": 35, "z": 24, "yaw": 15},
+            {"piece": "@PropSackLarge", "x": -95, "y": -55, "z": 28, "yaw": 30},
+            {"piece": "@PropSackSmall", "x": -45, "y": -80, "z": 25, "yaw": -20, "optional": true},
+            {"piece": "@PropSatchel", "x": 45, "y": -55, "yaw": 40},
+            {"name": "Bedroll01Static", "piece": "00094AC6:Skyrim.esm", "x": 10, "y": -130, "yaw": 85}
+          ]
+        },
+        {
+          "name": "wagon_parked",
+          "width": 230,
+          "depth": 580,
+          "pieces": [
+            {"name": "CartFurnStatic01", "piece": "00104F6F:Skyrim.esm", "x": 0, "y": -110},
+            {"piece": "@PropSackLarge", "x": -120, "y": -150, "z": 28, "yaw": 25, "optional": true},
+            {"name": "CrateSmall01", "piece": "0007A603:Skyrim.esm", "x": 120, "y": -200, "z": 24, "yaw": -15, "optional": true}
+          ]
         }
       ],
       "fixed": [
@@ -1137,6 +1205,15 @@
         },
         {"name": "EastEntry", "points": [[2250, -1650], [3050, -1300], [3780, -850]], "halfWidths": [[0, 200], [1700, 200]], "mix": []},
         {"name": "EastCross", "points": [[2300, 1000], [3780, 1000]], "halfWidths": [[0, 210], [1500, 210]], "mix": []}
+      ],
+      "lateDressing": [
+        {"module": "stage_lanterns", "x": 2048, "y": 5544, "yaw": 180, "force": true},
+        {"module": "stage_flags", "x": 2048, "y": 5544, "yaw": 180, "force": true},
+        {"module": "range_packing", "x": -950, "y": 1750, "yaw": 0, "searchRadius": 300},
+        {"module": "wagon_parked", "x": 5150, "y": 4450, "yaw": 150, "searchRadius": 500},
+        {"module": "wagon_parked", "x": 650, "y": -1250, "yaw": 113, "searchRadius": 400},
+        {"module": "wagon_parked", "x": 3500, "y": -1300, "yaw": 67, "searchRadius": 400},
+        {"module": "wagon_parked", "x": 750, "y": -250, "yaw": 10, "searchRadius": 600}
       ],
       "backFill": [],
       "backFillThemes": [],

@@ -145,6 +145,7 @@ internal static class FairNavmesh
                 }
 
                 var scale = r.Scale ?? 1f;
+                var isStatic = false;
                 float lx0, ly0, lz0, lx1, ly1, lz1;
                 if (r.Primitive is { } prim)
                 {
@@ -173,12 +174,17 @@ internal static class FairNavmesh
                             continue;  // lights, sounds, markers, plants, grass, trees
                         }
 
+                        isStatic = baseRecord is IStaticGetter;
                         var b = ((IObjectBoundedGetter)baseRecord).ObjectBounds;
                         (lx0, ly0, lz0, lx1, ly1, lz1) = (b.First.X, b.First.Y, b.First.Z, b.Second.X, b.Second.Y, b.Second.Z);
                     }
                 }
 
-                if (MathF.Max(lx1 - lx0, ly1 - ly0) * scale < config.MinFootprint)
+                // A static with unset bounds (all zero, as vanilla's CartFurnStatic01 has) says
+                // nothing about its size, so it's cut by its model's footprint below, never
+                // skipped. Moveable statics (the banners' cloth, zero too) stay as they were.
+                var unsetBounds = isStatic && lx0 == 0f && ly0 == 0f && lz0 == 0f && lx1 == 0f && ly1 == 0f && lz1 == 0f;
+                if (!unsetBounds && MathF.Max(lx1 - lx0, ly1 - ly0) * scale < config.MinFootprint)
                 {
                     continue;  // small clutter an actor steps round
                 }
@@ -208,6 +214,11 @@ internal static class FairNavmesh
                 {
                     fromFootprints++;
                     cut = CutFootprint(free, ix0, iy0, res, p.X, p.Y, p.Z, r.Placement.Rotation.Z, scale, fp, footprints, config.ActorRadius, Blocks);
+                }
+                else if (unsetBounds)
+                {
+                    unknown.Add($"{r.Base.FormKey} (no bounds, no footprint: run tools/make_footprints.py)");
+                    continue;
                 }
                 else
                 {

@@ -232,15 +232,20 @@ Their FaceGen head meshes and tint textures are vanilla files, copied under the 
 FormIDs. The singers' voice files are built from Barry's song stems (see the music's
 provenance above).
 
-## Compatibility patches (Maximum Destruction, Stealth Detection Fixes)
+## Compatibility patches (Maximum Destruction, Stealth Detection Fixes, Strange Runes)
 
-`SkyrimFair - Maximum Destruction Patch.esp` and `SkyrimFair - Stealth Detection Fixes Patch.esp`
-each override one spell from their mod, adding a single condition, so it's inactive
-inside the fair's worldspace. They master those mods and copy no files from them.
-- Maximum Destruction: Nexus Mods, Skyrim SE
-- Stealth Detection Fixes: Nexus Mods, Skyrim SE, mod 145336
+The SPID exclusion patches (`dist/spid/`, built by the generator's `spidPatches`) are
+**copies of these mods' own `_DISTR.ini` files**, with `-SkyrimFairNPC` added to the lines
+that give every NPC a cloak, ability or script (`docs/RELEASE.md`). Each copy carries the
+mod's other lines unchanged, so shipping them needs each author's permission:
+- Maximum Destruction: Nexus Mods, Skyrim SE (`MaximumDestruction_DISTR.ini`)
+- Stealth Detection Fixes: Nexus Mods, Skyrim SE, mod 145336 (`StealthKillDetectionFix_Attack_DISTR.ini`,
+  `StealthKillDetectionFix_DISTR.ini`, `StealthKillDetectionFix_Killmove_DISTR.ini`)
+- Strange Runes: Nexus Mods, Skyrim SE (`StrangeRunes_DISTR.ini`)
 
-Credit both mods' authors on release, and check they allow patches (most do).
+The earlier ESP condition patches (`SkyrimFair - Maximum Destruction Patch.esp`,
+`SkyrimFair - Stealth Detection Fixes Patch.esp`) didn't work and aren't shipped.
+Alternatively, ask the authors to add `-SkyrimFairNPC` upstream.
 
 ## Paired folk dance (Astra)
 

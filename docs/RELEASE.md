@@ -60,6 +60,14 @@ the music stops, and the performers freeze.
   - Rebuild the patches whenever either mod changes its ini. Or ask both authors to add
     `-SkyrimFairNPC` upstream, which is harmless to them and makes the patches
     unnecessary.
+- **Also excluded (2026-09-24), per-NPC extras that do nothing on invulnerable fair NPCs:**
+  - `StealthKillDetectionFix_DISTR.ini`: `0x80B`, `madStealthKillFixSpellSleep`
+  - `StealthKillDetectionFix_Killmove_DISTR.ini`: `0x819`, `madStealthKillFixSpellKillmove`
+  - `StrangeRunes_DISTR.ini` (Strange Runes): `0x68855`, `po3_RUNE_DetectCastNPCAbility`, a
+    script on every NPC that runs on each equip
+
+  So a release ships five patched files, grouped per mod (Stealth Detection Fixes three,
+  Maximum Destruction one, Strange Runes one); each needs its author's permission.
 - **Other mods like these:** any mod whose SPID line gives *every* NPC a cloak or a
   per-effect script. Add `-SkyrimFairNPC` the same way, and list the mod here.
 

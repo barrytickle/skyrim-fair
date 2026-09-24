@@ -197,6 +197,20 @@ internal static class FairWorld
             Put(placed);
         }
 
+        if (config.Palisade.ReservedPanels > 0)
+        {
+            if (panels.Count > config.Palisade.ReservedPanels)
+            {
+                throw new InvalidOperationException(
+                    $"The palisade needs {panels.Count} panels, more than its {config.Palisade.ReservedPanels} reserved FormIDs; every later record would renumber.");
+            }
+
+            for (var i = panels.Count; i < config.Palisade.ReservedPanels; i++)
+            {
+                mod.GetNextFormKey();
+            }
+        }
+
         // ---- the main stage ---------------------------------------------------------
         var stage = config.Stage.Enabled ? FairStage.Build(mod, config, plan.Height, Put) : null;
 
@@ -997,6 +1011,18 @@ internal static class FairWorld
                     },
                 },
             }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        }
+
+        // ---- late dressing: after every other record, so nothing before it renumbers -------------
+        if (market is not null && config.Market.LateDressing.Count > 0)
+        {
+            var actors = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedNpc>())
+                .Concat(topCell.Persistent.OfType<PlacedNpc>())
+                .Select(n => (n.Placement!.Position.X, n.Placement.Position.Y))
+                .ToList();
+            var late = market.PlaceLate(actors);
+            Console.WriteLine($"  late dressing: {late.Count(p => p is not null)} of {late.Count} placed"
+                + string.Concat(late.Select((p, i) => p is { } q ? "" : $"; refused {config.Market.LateDressing[i].Module} at ({config.Market.LateDressing[i].X:0}, {config.Market.LateDressing[i].Y:0})")));
         }
 
         // The mod's own counter must stay below the crowd figures' range.

@@ -83,10 +83,21 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - **Archery (Solitude package):** needs a persistent target linked ref, plus an unkeyed
   linked ref to a persistent `PatrolIdleMarker`.
 
-## Where we are (end of 2026-09-23)
+## Where we are (2026-09-24, morning pass)
 
-Plugin `497f5fd2d8ad0198...`, committed (`54a7b97`) and deployed. The day's detail is in
-`docs/AUDIT.md`, newest first.
+Plugin `e3e982d8c3f76baa...`, deployed. The detail is in `docs/AUDIT.md`, newest first.
+
+**Built and deployed on 2026-09-24, not yet confirmed in game:**
+- the folk-dance keyword fix (last night's build, deployed this morning)
+- **a taller palisade**: scale 4 (560 tall), measured from sightlines to hide the ground
+  to ~5,300 past the wall; the gate is 3.6. 59 panels, with 89 FormIDs reserved
+  (`reservedPanels`), so nothing renumbered
+- **late-built dressing** (`market.lateDressing`): 18 Holidays lanterns hung 3 into the
+  stage rafters, three Whiterun flags behind the back bays, packing gear north of
+  `range_storage`, and four parked Helgen carts (gate forecourt x2, north-east camps,
+  stables; no room by the south-east camps)
+- SPID exclusions for Stealth Detection Fixes' sleep and killmove and Strange Runes'
+  rune detection (plan step 2, done)
 
 **Confirmed in game by Barry:**
 - the stage set: songs, cheer, next song, and the audio levels (don't change them)
@@ -123,7 +134,7 @@ repo.
 
    Every earlier reading was taken during the script flood, so this is the first true
    measure. It says whether the cost is AI, rendering or scripts.
-2. **Exclude more per-NPC extras (Claude, small).** Add them to `spidPatches`, the same
+2. **Done 2026-09-24.** ~~Exclude more per-NPC extras (Claude, small).~~ Add them to `spidPatches`, the same
    generated patch; SPID's log shows every fair NPC getting them:
    - Stealth Detection Fixes' sleep (`0x80B`, `StealthKillDetectionFix_DISTR.ini`) and
      killmove (`0x819`, `_Killmove_DISTR.ini`) abilities, which are pointless on
@@ -146,7 +157,9 @@ repo.
    - Do the singers' lips move with Fiddle?
    - Do the children look right?
    - Do the seated NPCs sit?
-5. **Immersion (Barry, added at the end of the day):**
+5. **Immersion (Barry, added at the end of the day).** The palisade, gate, packing gear
+   and carts were built on 2026-09-24 (see above; the palisade used reserved FormIDs, not
+   the visual-scale idea below). The more-life audit is still to do:
    - **A taller palisade, to hide the hills beyond.**
      - It's `fairWorld.palisade.scale` 2.5 now: 350 units tall.
      - **Don't just raise `scale`:** pieces are spaced by width × scale, so their number
@@ -251,7 +264,7 @@ repo.
      - `IdleApplaud2`, `3` and `IdleCivilWarCheer` are already the dancers' `CheerIdles`
      - These are one-shot clips like the dances: replay each as it ends (read the clips'
        lengths from the archive, as for the Cicero dances)
-8. **Stage dressing (Barry, 2026-09-23 night):**
+8. **Built 2026-09-24.** Stage dressing (Barry, 2026-09-23 night):
    - **Holidays' lanterns hanging from the stage roof:**
      - the same lanterns as the overhead runs: `035D0D`, `035D12`–`035D16`, from
        `Holidays.esp`

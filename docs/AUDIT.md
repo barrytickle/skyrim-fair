@@ -2,7 +2,130 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: why Astra's folk dance never played (fix built, not deployed) (2026-09-23)
+## Current pass: a taller palisade and gate, stage lanterns and flags, packing gear, parked wagons, more SPID exclusions (2026-09-24)
+
+First, the folk-dance fix from last night (`e166ad79...`) is **deployed**: the plugin and both
+OAR `config.json` files, byte-checked.
+
+### The palisade: tall enough not to see over
+
+Barry: "we just need it tall enough to not be able to see over them".
+
+- **Measured, not guessed.** A throwaway Mutagen dump of the built LAND (121 cells) and
+  the placed panels, then sightlines from 1,280 interior points (192 grid, 96+ from the
+  wall, eye 125). Only cells within two of the eye's cell count (no LOD), and the gate
+  opening doesn't block. The wall height that hides the ground out to a given distance past
+  the wall:
+
+  | Hidden to | Wall needed | Ground there rises to |
+  |---|---|---|
+  | 2,500 | 140 | 144 |
+  | 3,500 | 290 | 360 |
+  | 4,500 | 441 | 632 |
+  | 6,000 | 622 | 1,072 |
+  | everything drawn | 780 (819 at eye 200) | ~1,500 |
+
+- **Barry chose scale 4**: panels 556 wide x 560 tall (were 347 x 350). The gate is 3.6:
+  628 tall and 653 wide, still about 70 over the wall as before.
+- **Last night's plan was changed:** keeping the 2.5 spacing and scaling only the look would
+  overlap neighbours by about 40%, and flat panels overlapping that much z-fight. Instead
+  the panels are spaced by their real width (6% overlap as before), so there are 59, and
+  `palisade.reservedPanels: 89` keeps the other 30 FormIDs (`B5A`-`B77`) unused. The
+  generator throws if a wall ever needs more than it reserves.
+- **Verified** (the wall-closure method from the worldspace pass, rerun):
+  - outline: 3,218 points every 8 units, all inside a panel or the gate (worst 14.2 inside)
+  - 20,160 sightline rays from seven interior points: 0 slip through
+  - no panel footprint inside a zone; the gate's inner face meets the Entrance zone, by
+    design, as before
+  - crests 523 to 571 (sink and scale jitter); the lowest still hides the ground to about
+    5,200 past the wall
+- `navmesh.wallMargin` 48 -> 56: the panel is 44 deep now (was 28), so the walkable edge
+  keeps its old clearance from the thicker wall.
+
+### Late-built dressing (`market.lateDressing`)
+
+A new list, placed after every other record but the navmesh, so nothing before it
+renumbers. `FairMarket.Build` hands back its dressing placer (`MarketResult.PlaceLate`):
+the same fit checks and spiral search as `market.dressing`, plus a 40 clearance from every
+placed NPC (the crowds are already down by then). `force: true` places a group exactly with
+no checks (the stage roof). Seeds are `1800 + index`, so the list is append-only.
+
+- **Stage lanterns** (`stage_lanterns`, at the stage origin (2048, 5544), yaw 180, which
+  is the stage's own u/v frame): 18 Holidays swinging lanterns (`035D0D`,
+  `035D12`-`035D16`), cycling colours, scale 1.5, three under each even rafter
+  (v -360/0/360) and two under each odd one (v -180/180). They are `MSTT`s with **no
+  light**, so the real-light count doesn't change. Each lantern's height was set from the
+  built rafters: every rafter log's height jitters by up to 5, so each lantern's top
+  (+6 x scale above its origin) is now exactly **3 into the log above it** (read back, all
+  18).
+- **Whiterun flags** (`stage_flags`): three `CivilWarBanner01` poles with
+  `CityBannerWhiterun01`, as `banner_whiterun` hangs them, behind the back posts at
+  v -560 (y 6104), one in each back bay (u -602 / 0 / 602). Crossbars run along world X,
+  so they face the square, as the avenue's banners face the avenue. From the square they
+  show between the deck (134) and the back beam (380).
+- **Packing gear by the range** (`range_packing`, at (-950, 1750), north of
+  `range_storage`): an open chest (vanilla `ChestOpen`), a long crate carrying a bundle of
+  five iron arrows, a small crate, two sacks, a satchel and a laid-out bedroll. There's no
+  vanilla static closed chest or sack; the sacks are the existing props. New props would
+  have renumbered records, because prop STATs are made early, sorted by name.
+- **Parked wagons** (`wagon_parked`): vanilla `CartFurnStatic01` (`104F6F`), the empty
+  Helgen horse cart (180 x 553, shaft resting on the ground), with an optional sack and
+  crate. Four placed, each lengthwise along the free space: gate forecourt west (650,
+  -1250) and east (3500, -1300), by the north-east camps (5150, 4450), and by the
+  stables (750, -250).
+  - **Not placed by the south-east camps:** between the tents, East Wall Walk's end and
+    the wall corner there's no pocket 580 long (checked on a map drawn from the plugin).
+  - `VendorCartStatic01` was rejected: its shafts float level.
+- **Navmesh fix:** `CartFurnStatic01` has an all-zero OBND, and the navmesh skipped
+  anything under 12 in its bounds before looking up its model's footprint, so the wagons
+  were walkable. Now a *static* with unset bounds is cut by its model footprint (and
+  listed as unknown if there isn't one). Moveable statics, such as the banner cloth, which
+  is also zero, are unchanged.
+
+### SPID exclusions: three more lines
+
+`spidPatches` now also rebuilds `StealthKillDetectionFix_DISTR.ini` (`0x80B`,
+`madStealthKillFixSpellSleep`), `StealthKillDetectionFix_Killmove_DISTR.ini` (`0x819`,
+`madStealthKillFixSpellKillmove`) and `StrangeRunes_DISTR.ini` (`0x68855`,
+`po3_RUNE_DetectCastNPCAbility`). The records were read from each mod's ESP. Skyrim Fair is
+first in MO2's priority, so the copies win.
+
+- **Nothing else per-NPC in last night's `Papyrus.0.log` (22:44):**
+  - Footprints switched to its SKSE mode, so it runs no Papyrus per NPC.
+  - Conditional Expressions has no `_DISTR.ini`; its 13 lines are one `[None]` effect
+    ending.
+- The log's bulk (27,750 of 141,553 lines) is the vanilla Dwemer thresher trap `078307`
+  firing without 3D, outside the fair. It isn't ours, but it's script load during the fps
+  baseline.
+- As before, SPID additions stay in a save: test from a clean state.
+
+### Verification
+
+- Release build: 0 warnings. Generator run twice: identical SHA256 `e3e982d8c3f76baa...`
+  (767,789 bytes). Deployed; byte-identical in the mod folder, plus the three new
+  `_DISTR.ini` files.
+- **FormIDs against last night's plugin:** all 3,836 earlier records keep their FormID,
+  type, EditorID and base. The only differences:
+  - the 30 reserved panel IDs, now unused
+  - the navmesh, which now comes after the 38 new dressing references (`1722`-`174F`),
+    as it always follows appended records
+- Navmesh: 9 meshes, 7,515 triangles; all 233 actors on the mesh; footprints refreshed
+  (`tools/make_footprints.py`: chest, bedroll, small sack, cart).
+- `docs/STALLS.md` unchanged: 33 stalls.
+- **Not verified in game:** everything above.
+
+### What Barry should test in game
+
+1. From the square, the market and the archery field: can you see ground over the wall?
+   (Mountains, ridges and treetops should still show.) Check the corners and the gate
+   join.
+2. Does the thicker wall look right up close (its logs are 1.6x as thick)?
+3. The stage: lanterns hanging from the rafters (not floating, not sunk), their size, and
+   the three flags at the back.
+4. The packing gear by the range, and the four wagons: nobody walks through them.
+5. Performance baseline (the plan's step 1), from a clean save.
+
+## Previous pass: why Astra's folk dance never played (deployed 2026-09-24) (2026-09-23)
 
 - OAR's condition was `IsActorBase` on the folk dancers' records. They're templated, so in
   game they run on runtime copies (`FF0021C1`, `FF0012B0` in SPID's log), and OAR never

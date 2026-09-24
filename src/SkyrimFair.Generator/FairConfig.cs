@@ -571,6 +571,13 @@ internal sealed record PalisadeConfig : ProjectStaticConfig
 
     /// <summary>Chance a panel is turned round, so the same face does not repeat along the wall.</summary>
     public float FlipChance { get; init; } = 0.5f;
+
+    /// <summary>
+    /// FormIDs the wall holds. Bigger panels need fewer; the rest are left unused, so a
+    /// change of scale or gate width never renumbers the records built after the wall.
+    /// 89 is the count at scale 2.5. 0 reserves nothing.
+    /// </summary>
+    public int ReservedPanels { get; init; }
 }
 
 internal sealed record GatePieceConfig : ProjectStaticConfig
@@ -2172,6 +2179,13 @@ internal sealed record MarketConfig
     /// <summary>Hand-placed dressing that marks the lane structure, such as banner posts at the crossing.</summary>
     public List<MarketDressing> Dressing { get; init; } = new();
 
+    /// <summary>
+    /// Dressing built after every other record but the navmesh, so adding to it never moves
+    /// another FormID. Placed as <see cref="Dressing"/> is, and also kept clear of every
+    /// placed NPC. Append only: an entry's position in the list is part of its seed.
+    /// </summary>
+    public List<MarketDressing> LateDressing { get; init; } = new();
+
     /// <summary>Small reusable scenes (a cheese board, a sack pile, a sign on its post) that kits place.</summary>
     public List<MarketVignette> Vignettes { get; init; } = new();
 
@@ -2365,6 +2379,12 @@ internal sealed record MarketDressing
     public float Z { get; init; }
 
     public float Yaw { get; init; }
+
+    /// <summary>
+    /// Place the module exactly at its point, with no fit check or search: for dressing
+    /// fixed to a structure (the stage roof's lanterns), where keep-outs don't apply.
+    /// </summary>
+    public bool Force { get; init; }
 }
 
 /// <summary>

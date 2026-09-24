@@ -22,6 +22,9 @@ internal static class FairMarket
     /// <summary>How far to slide along the lane after a stall is refused.</summary>
     private const float RetryStep = 30f;
 
+    /// <summary>How far late dressing keeps from anyone already standing there.</summary>
+    private const float ActorClearance = 40f;
+
     private sealed record Lane(
         MarketLane Config, int Index, (float X, float Y)[] Points, float[] Arc, float Length, float Phase,
         List<(float X, float Y, float Tx, float Ty, float Half)> Samples);
@@ -553,15 +556,23 @@ internal static class FairMarket
         }
 
         // ---- hand-placed dressing that marks the lane structure ---------------------
-        for (var di = 0; di < market.Dressing.Count; di++)
+        // The late list (built at the end, FairWorld) comes through here too, also kept clear
+        // of the NPCs placed by then; it returns where the group stood, or null if refused.
+        (float X, float Y)? PlaceDressing(MarketDressing d, int seed, IReadOnlyList<(float X, float Y)> actors)
         {
-            var d = market.Dressing[di];
             if (d.Module.Length > 0)
             {
                 exempt = d.ExemptKeepOut;
                 var group = modules[d.Module];
+                string? Fits(float x, float y)
+                {
+                    if (WhyNot(group, x, y, d.Yaw, wallMargin: 60f, keepFrontages: true) is { } why) return why;
+                    var body = new Placed(x, y, d.Yaw, group.Width / 2f + ActorClearance, group.Depth / 2f + ActorClearance);
+                    return actors.Any(a => Overlap(body, new Placed(a.X, a.Y, 0f, 1f, 1f))) ? "an NPC" : null;
+                }
+
                 var (gx, gy) = (d.X, d.Y);
-                var why = WhyNot(group, gx, gy, d.Yaw, wallMargin: 60f, keepFrontages: true);
+                var why = d.Force ? null : Fits(gx, gy);
 
                 // Spiral out from the requested point until the group fits.
                 for (var r = 60f; why is not null && r <= d.SearchRadius; r += 60f)
@@ -569,27 +580,24 @@ internal static class FairMarket
                     for (var a = 0; a < 360 && why is not null; a += 30)
                     {
                         var (tx, ty) = (d.X + r * MathF.Sin(a * Deg), d.Y + r * MathF.Cos(a * Deg));
-                        if (WhyNot(group, tx, ty, d.Yaw, wallMargin: 60f, keepFrontages: true) is null)
+                        if (Fits(tx, ty) is null)
                         {
                             (gx, gy, why) = (tx, ty, null);
                         }
                     }
                 }
 
+                exempt = Array.Empty<string>();
                 if (why is null)
                 {
-                    CommitDressing(group, gx, gy, d.Yaw, 800 + di, 1);
+                    CommitDressing(group, gx, gy, d.Yaw, seed, 1);
                     seats++;
                     dressingRuns[$"group {d.Module}"] = dressingRuns.GetValueOrDefault($"group {d.Module}") + 1;
-                }
-                else
-                {
-                    dressingRefusals[$"group {d.Module} at ({d.X:0}, {d.Y:0}): {why.Split(" at ")[0]}"] = 1;
+                    return (gx, gy);
                 }
 
-                exempt = Array.Empty<string>();
-
-                continue;
+                dressingRefusals[$"group {d.Module} at ({d.X:0}, {d.Y:0}): {why.Split(" at ")[0]}"] = 1;
+                return null;
             }
 
             put(new PlacedObject(mod)
@@ -602,6 +610,12 @@ internal static class FairMarket
                 },
             });
             pieceCount++;
+            return (d.X, d.Y);
+        }
+
+        for (var di = 0; di < market.Dressing.Count; di++)
+        {
+            PlaceDressing(market.Dressing[di], 800 + di, Array.Empty<(float X, float Y)>());
         }
 
         // ---- back-to-back infill ------------------------------------------------------
@@ -785,6 +799,17 @@ internal static class FairMarket
             Lights = lights,
             Crossings = crossings,
             Footprints = footprints,
+            PlaceLate = actors =>
+            {
+                var at = new List<(string Module, float X, float Y)?>();
+                for (var li = 0; li < market.LateDressing.Count; li++)
+                {
+                    var d = market.LateDressing[li];
+                    at.Add(PlaceDressing(d, 1800 + li, actors) is { } p ? (d.Module.Length > 0 ? d.Module : d.Piece, p.X, p.Y) : null);
+                }
+
+                return at;
+            },
         };
     }
 
@@ -902,6 +927,13 @@ internal sealed record MarketResult(
 
     /// <summary>Every stall, dressing group and pole footprint, for the crowds and the ground's wear.</summary>
     public IReadOnlyList<MarketFootprint> Footprints { get; init; } = Array.Empty<MarketFootprint>();
+
+    /// <summary>
+    /// Places <see cref="MarketConfig.LateDressing"/>, clear of the given NPC positions, with the
+    /// market's own fit checks. Called once, at the end of the build: where each entry stood, or null.
+    /// </summary>
+    public Func<IReadOnlyList<(float X, float Y)>, IReadOnlyList<(string Module, float X, float Y)?>> PlaceLate { get; init; } =
+        _ => Array.Empty<(string, float, float)?>();
 }
 
 /// <summary>A placed rectangle: half-extents along the thing's own X (width) and Y (depth).</summary>

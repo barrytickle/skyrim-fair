@@ -62,7 +62,7 @@ Rules for this direction:
   review**; once he accepts it, this becomes the permanent boundary):
   - `SkyrimFairPalisade` panels are laid along the approved outline by
     `Plan.WallPanels` in `FairWorld.cs`, from the `fairWorld.palisade` config: scale
-    2.5, 6% overlap, runs carried 48 past every vertex, and small hashed jitter.
+    4 (560 tall, 2026-09-24: measured so the ground beyond can't be seen over it), 6% overlap, runs carried 48 past every vertex, and small hashed jitter.
   - The closed `SkyrimFairPalisadeGate` stands at the gate point facing the Stage
     marker. If its front is on the wrong side, `gatePiece.yawOffsetDegrees` flips it.
   - The temporary banner posts are gone. The verification method that proves the wall
@@ -654,6 +654,11 @@ Project-owned mesh work is code-first and reproducible.
 - the cobbles use the Whiterun Mossy Wet Stonefloor textures copied to `textures\SkyrimFair\Ground\Cobble01*.dds` (git-ignored; restore from `external/` before deploying)
 - `fairWorld.overhead` swags festival lines across lanes (poles inside the corridor edge, two mirrored `SRopefestivalLine01` halves, lanterns along the curve); `fairWorld.crowds` places visitor groups by theme, point or dressing module; `fairWorld.ground` paints the worn ground after everything is placed (fair-owned LTEX/TXST copies with parallax height slots, cobbled avenue), keeping LAND FormIDs by allocating LAND with the cells
 - the festival light towers (`fairWorld.towers`, `FairTowers.cs`) are Barry's `barry_scaffold\scaffold.nif` at scale 2 with a 3.5x vanilla candle lantern, a `WRFireLightNS` light and `CityBannerWhiterun01InsideTall` banners; the ladder is the mesh's local -X face, and each footprint is a market keep-out
+- **the palisade reserves its FormIDs** (`palisade.reservedPanels`, 89, the count at scale 2.5): a bigger panel or a wider gate needs fewer panels, and the rest stay unused, so nothing after the wall renumbers. The generator throws if the wall ever needs more. Don't keep the spacing and scale only the look: flat panels overlapping ~40% z-fight. Rerun the wall-closure check (outline coverage, sightline rays, `docs/AUDIT.md`) after any wall change
+- **late-built dressing** (`market.lateDressing`): placed after every record but the navmesh, through the market's own placer (`MarketResult.PlaceLate`): the same fit checks and spiral search, plus clearance from every placed NPC. `force: true` places a group exactly (the stage roof). Seeds are by list position, so append only. Use it for any new dressing: new market modules or `dressing` entries are built early and renumber
+- **new props renumber:** prop STATs (`tools/static_props.json`) are made early, sorted by name. Late dressing should reuse existing props and vanilla statics
+- **a static with an all-zero OBND** (vanilla `CartFurnStatic01`) is cut from the navmesh by its model footprint; without one it's listed as unknown. Run `tools/make_footprints.py` after placing one
+- the stage frame (u across, v toward the audience) is a dressing group at the stage origin (2048, 5544) with yaw 180; the rafters' logs jitter in height, so hang things from them by reading the built rafters back (the lanterns sit 3 into the log)
 - vendors and archers template the fair's own `SkyrimFairFaces*` leveled lists, copied from Skyrim.esm at generation, so mods that edit vanilla commoner lists (Dawi NPC Encounters) cannot change the fair's faces
 
 ### Permanent foundation construction method
