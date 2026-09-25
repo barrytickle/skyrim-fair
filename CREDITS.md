@@ -14,8 +14,7 @@ original author and its redistribution permission are confirmed.
 | --- | --- | --- | --- |
 | Palisade wall | adam127 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Viking Palisade gate | Sereib (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
-| Outdoor Toilet | Stroti; Tamira; Astra | bundled today | modder's resource, **not to be re-uploaded**: being replaced by Strifey7's Outhouse |
-| Outhouse (its replacement) | Strifey7 (Sketchfab) | to be converted and bundled | CC BY 4.0: credit ships |
+| Outhouse | Strifey7 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Stage music, crowd sounds, singers' voices | Barry, made with Suno (Pro) | bundled | Barry owns them (Suno Pro) |
 | Paired folk dance | Barry, made with ChatGPT ("Astra") | bundled (re-based clips) | the project's own |
@@ -27,7 +26,7 @@ original author and its redistribution permission are confirmed.
 | Props, crowd figures, tempo clips, cobbles, singers' faces | Bethesda | built from vanilla files | vanilla-derived, as mods routinely ship |
 | Scripts, parallax map, terrace kit, stage collision | the project | its own work | ours |
 
-Looked at, but **nothing used or shipped**: Medieval Markets, Whiterun Stone Stairs,
+Looked at, but **nothing used or shipped**: Stroti's Outdoor Toilet (used until 2026-09-25), Medieval Markets, Whiterun Stone Stairs,
 Riverwood Has Charm and Walls, Whiterun Mossy Wet Stonefloor (used until 2026-09-25), Crowded
 Streets, Diverse Archery Targets, Fireworks (183953), Incaendo's Banner Resource 2.
 
@@ -62,10 +61,12 @@ Attribution:
 > "Palisade" by adam127, licensed under CC BY 4.0. "Viking Palisade gate" by Sereib,
 > licensed under CC BY 4.0. Converted and modified for Skyrim.
 
-### Stroti's Outdoor Toilet (modder's resource)
+### Stroti's Outdoor Toilet (modder's resource): no longer used
 
-The fair's outhouses are **bundled** in the built mod as `meshes\Stroti\Outdoor Toilet\`
-(`OutdoorToilet.nif`, `ToiletDoor.nif`) and `textures\Stroti\` (six custom DDS files).
+**Replaced on 2026-09-25** by Strifey7's Outhouse (above). The plugin no longer refers to
+it, so `meshes\Stroti\` and `textures\Stroti\` stay out of any package. Until then, the
+outhouses were `meshes\Stroti\Outdoor Toilet\` (`OutdoorToilet.nif`, `ToiletDoor.nif`) and
+`textures\Stroti\` (six custom DDS files).
 
 | Role | Who | Source |
 | --- | --- | --- |
@@ -77,16 +78,14 @@ The original readme's permissions: *"This is a modder's resource. You may use th
 textures for your own mods as long as you give credit and you do not charge money for it. Do
 not upload to other sites."* So:
 - Skyrim Fair must stay free, and this credit must ship with it.
-- **"Do not upload to other sites"** rules out re-uploading it inside the mod on Nexus.
-  **It's being replaced** by Strifey7's Outhouse (above), and leaves the mod when that's in.
+- **"Do not upload to other sites"** rules out re-uploading it inside the mod on Nexus,
+  which is why it was replaced.
 - The files are **not committed to this repository**, so git never uploads them anywhere.
   `.gitignore` excludes `assets/meshes/Stroti/` and `assets/textures/Stroti/`. To restore
   them, unzip the `meshes/` and `textures/` folders of Astra's zip into `assets/`.
 - The resource also uses six vanilla textures (Whiterun floorboards, Solitude roof slate, a
   torn page). Skyrim supplies them, and they're not redistributed.
 
-The fair places both as plain statics: the outhouse can't be sat in, and the door doesn't
-open.
 
 Attribution:
 
@@ -110,11 +109,25 @@ Attribution:
 
 > "scaffold" by Js_TuruokaJunpei, licensed under CC BY 4.0. Converted and modified for Skyrim.
 
-### Outhouse (Sketchfab, CC BY 4.0): replacing Stroti's
+### Outhouse (Sketchfab, CC BY 4.0)
 
-Stroti's Outdoor Toilet can't be re-uploaded (below), so Barry is replacing it with this
-model, converted in Blender to a Skyrim NIF. Once it's in, the Stroti files leave the mod,
-and this section records the files and the changes made.
+The fair's six outhouses (two rows of three), **bundled** as `meshes\barry_outhouse\outhouse.nif`
+and `textures\barry_outhouse\` (`outhouse_d.dds`, `outhouse_n.dds`, `outhouse_gloss_n.dds`).
+It replaced Stroti's Outdoor Toilet on 2026-09-25, because Stroti's can't be re-uploaded.
+Barry's package, with the Blender file, FBX, source textures and build scripts, is
+`assets/Skyrim_Outhouse_Assets/`.
+
+**Changes made** (Barry, with ChatGPT; the package's CREDITS): "scale and origin adjusted,
+materials adapted for Skyrim, normal-map convention converted, DDS mipmaps generated, static
+collision added". In detail, from its README:
+- converted from GLB to an SE NIF, with all 1,118 triangles kept
+- the origin centred at ground level
+- one fixed box collider
+- the PBR materials adapted to Skyrim's shader, the normal map's green channel inverted
+- DDS with mipmaps
+
+The door is part of the model, and doesn't open. The plugin places it at scale 2.2, about
+192 units tall, like Skyrim's doors.
 
 | Model | Author | Source | Licence |
 | --- | --- | --- | --- |

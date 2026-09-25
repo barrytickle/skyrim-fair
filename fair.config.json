@@ -712,12 +712,12 @@
           "depth": 130,
           "vendorSpots": [],
           "pieces": [
-            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": -115, "y": 39, "yaw": 180},
-            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "x": -96.9, "y": 57.8, "yaw": 180},
-            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": 0, "y": 39, "yaw": 180},
-            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "x": 18.1, "y": 57.8, "yaw": 180},
-            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": 115, "y": 39, "yaw": 180},
-            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "x": 133.1, "y": 57.8, "yaw": 180}
+            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": -115, "y": 0, "yaw": 0, "scale": 2.2},
+            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "reserve": true},
+            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": 0, "y": 0, "yaw": 0, "scale": 2.2},
+            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "reserve": true},
+            {"name": "Outhouse", "piece": "@SkyrimFairOuthouse", "x": 115, "y": 0, "yaw": 0, "scale": 2.2},
+            {"name": "OuthouseDoor", "piece": "@SkyrimFairOuthouseDoor", "reserve": true}
           ]
         },
         {
@@ -3242,8 +3242,8 @@
       "backstopZ": 0
     },
     "projectStatics": [
-      {"editorId": "SkyrimFairOuthouse", "model": "Stroti\\Outdoor Toilet\\OutdoorToilet.nif", "width": 100, "depth": 126, "height": 195},
-      {"editorId": "SkyrimFairOuthouseDoor", "model": "Stroti\\Outdoor Toilet\\ToiletDoor.nif", "width": 72, "depth": 9, "height": 141}
+      {"editorId": "SkyrimFairOuthouse", "model": "barry_outhouse\\outhouse.nif", "width": 49, "depth": 59, "height": 88, "minZ": -1},
+      {"editorId": "SkyrimFairOuthouseDoor", "model": "barry_outhouse\\outhouse.nif", "width": 49, "depth": 59, "height": 88, "minZ": -1}
     ],
     "towers": {
       "enabled": true,
