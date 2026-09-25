@@ -71,6 +71,13 @@ the air beside her stool, another in the air with her stool behind her.
   - `seatLayoutDone` records it, so bumping the version re-runs it everywhere
 - Plugin `a26ee022ef557f8c`, deterministic, no FormID change. Deployed. **2.0.1.2**
   repackaged.
+- Barry, after layout 1: the chairs faced their tables and one visitor sat properly, but another
+  sat beside his chair. He was already seated when his chair was turned under him, and a sitting
+  NPC keeps his old seat's transform. **Layout 2:** `Reseat()` now disables the seated first,
+  then turns the chairs, then moves each back to his seat, `Enable()`s him and runs
+  `EvaluatePackage`, so he sits fresh (the culling re-hides any it doesn't want shown). The
+  version bump re-runs it in saves that ran layout 1. Plugin `d959dfe43d9e3a1b`. Deployed,
+  **2.0.1.2** repackaged.
 
 ### Later: the lip sync decision: SSE Engine Fixes
 

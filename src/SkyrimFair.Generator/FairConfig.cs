@@ -666,7 +666,7 @@ internal sealed record SeatSwapConfig
     /// The seat layout's version: the stage script re-seats every save once per version (chairs
     /// turned to face their tables, visitors back to their seats). Bump it when the seats change.
     /// </summary>
-    public int LayoutVersion { get; init; } = 1;
+    public int LayoutVersion { get; init; } = 2;
 }
 
 internal sealed record HolidaysFreeConfig

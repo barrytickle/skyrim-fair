@@ -836,17 +836,29 @@ EndFunction
 ; stools' angles and the visitors' old spots, so they sat facing away, leaning on nothing
 ; (a Nexus player's screenshot, 2026-09-25).
 Function Reseat()
+	; The seated first taken out: one already sitting keeps his old seat's transform if his chair
+	; is turned under him (layout 1 left one sitting beside his chair, 2026-09-25).
 	Int i = 0
+	While i < Sitters.Length
+		If Sitters[i] && !Sitters[i].IsDead()
+			Sitters[i].Disable()
+		EndIf
+		i += 1
+	EndWhile
+	i = 0
 	While i < SeatChairs.Length && i < SeatYaw.Length
 		If SeatChairs[i]
 			SeatChairs[i].SetAngle(0.0, 0.0, SeatYaw[i])
 		EndIf
 		i += 1
 	EndWhile
+	; Then back at their seats, to sit down fresh in the turned chairs. (The culling switches off
+	; again any it doesn't want shown.)
 	i = 0
 	While i < Sitters.Length
 		If Sitters[i] && !Sitters[i].IsDead()
 			Sitters[i].MoveToMyEditorLocation()
+			Sitters[i].Enable()
 			Sitters[i].EvaluatePackage()
 		EndIf
 		i += 1
