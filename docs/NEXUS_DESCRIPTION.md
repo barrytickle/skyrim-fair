@@ -68,6 +68,7 @@ save you intend to keep playing.
 - A varied crowd of visitors, including children and people sat taking it all in.
 - Archers practising at the range.
 - Goats, chickens and dogs, and a horse in the pen.
+- Paper lanterns in two shapes and six colours, glowing at night along every rope.
 - Two travellers you might meet more than once: **Garrick Sol V** and **Claudius Vale**,
   both fully voiced.
 - The Fair Inspector's notices on the palisade, regarding an ongoing investigation.
@@ -83,7 +84,7 @@ save you intend to keep playing.
 **Required**
 - Skyrim Special Edition or Anniversary Edition
 - **[Holidays](https://www.nexusmods.com/skyrimspecialedition/mods/1533)**: the fair's
-  festival rope lines, lanterns and some props are its records.
+  festival rope lines and some props are its records.
 
 **Recommended**
 - **Open Animation Replacer** (needs **SKSE**): the folk dance, the band's fast and held
@@ -110,7 +111,7 @@ edit to each mod's own file: see the Compatibility section.
   Inspector's notices, with new artwork
 
 **Mods the fair builds on**
-- **Holidays** (Nexus 1533): the festival decorations
+- **Holidays** (Nexus 1533): the festival bunting and props
 - **Open Animation Replacer**, and **SKSE**
 - **Professional Dancer** by contentcat and davidgilbertking
 - **Terrain Parallax**
