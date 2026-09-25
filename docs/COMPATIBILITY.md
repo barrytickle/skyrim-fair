@@ -20,7 +20,7 @@ The fix is one word per line: `-SkyrimFairNPC`. It tells SPID to skip anyone at 
 (every fair NPC carries the `SkyrimFairNPC` keyword). Nothing changes anywhere else in
 your game.
 
-**The easy way:** download the optional **SPID Patcher** file, and run
+**The easy way:** download the optional **Compatibility** file (these instructions and the SPID Patcher), and run
 `skyrimfair_spid_patcher.py` (it needs [Python](https://www.python.org/downloads/) 3.8 or newer).
 Point it at your MO2 `mods` folder, or at Skyrim's `Data` folder for Vortex. It makes the edits
 below for you, keeps a backup of each file, and can put them back with `--undo`.

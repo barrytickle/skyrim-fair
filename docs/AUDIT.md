@@ -4,6 +4,23 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the Compatibility download, and the description in BBCode
+
+Barry: "can you also have a compatibility.md as an optional download as well as the py? It
+doesn't seem to convert properly on nexus."
+- The optional download is now **`SkyrimFair-<version>-Compatibility.zip`**, in place of the
+  patcher-only zip. It holds `COMPATIBILITY.md` (the players' instructions, as on the page),
+  `skyrimfair_spid_patcher.py` and its `README.txt`. The page and `COMPATIBILITY.md` call it
+  the **Compatibility** download.
+- The cause of the conversion trouble: Nexus's description box takes BBCode, not Markdown.
+  `tools/package.py` now also writes **`NEXUS_DESCRIPTION.bbcode.txt`** with its own small
+  converter (`bbcode()`):
+  - headings become `[size][b]`
+  - `**bold**`, links, inline code (Courier New) and code blocks (`[code]`) are converted
+  - lists become `[list]` / `[list=1]`
+  - each paragraph and list item goes on one line, since Nexus keeps line breaks
+  - checked: no Markdown left over
+
 ### Later: the SPID Patcher for players
 
 Barry: "could we make a py file for the compatibility stuff?" (a patcher for players).

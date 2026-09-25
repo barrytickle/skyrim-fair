@@ -103,6 +103,81 @@ def masters(plugin: pathlib.Path) -> list[str]:
     return out
 
 
+def bbcode(md: str) -> str:
+    """The description's Markdown as Nexus BBCode: headings, bold, links, code, lists, paragraphs.
+
+    Covers what the fair's pages use. Nexus keeps every line break, so a paragraph's wrapped
+    lines are joined into one, and a list item's continuation lines into its item."""
+    def inline(text):
+        text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"[url=\2]\1[/url]", text)
+        text = re.sub(r"\*\*(.+?)\*\*", r"[b]\1[/b]", text)
+        text = re.sub(r"(?<![\w*])\*([^*\n]+)\*(?![\w*])", r"[i]\1[/i]", text)
+        return re.sub(r"`([^`]+)`", r"[font=Courier New]\1[/font]", text)
+
+    out, para, items, kind = [], [], [], None
+    in_code, code = False, []
+
+    def flush_para():
+        if para:
+            out.append(inline(" ".join(p.strip() for p in para)))
+            out.append("")
+            para.clear()
+
+    def flush_list():
+        nonlocal kind
+        if items:
+            out.append("[list=1]" if kind == "ol" else "[list]")
+            out.extend(f"[*]{inline(i)}" for i in items)
+            out.append("[/list]")
+            out.append("")
+            items.clear()
+        kind = None
+
+    sizes = {1: 6, 2: 5, 3: 4, 4: 3}
+    for line in md.splitlines():
+        if line.startswith("```"):
+            if in_code:
+                out.append("[code]" + "\n".join(code) + "[/code]")
+                out.append("")
+                code.clear()
+                in_code = False
+            else:
+                flush_para(); flush_list()
+                in_code = True
+            continue
+        if in_code:
+            code.append(line)
+            continue
+        heading = re.match(r"^(#{1,4}) (.+)$", line)
+        bullet = re.match(r"^- (.+)$", line)
+        number = re.match(r"^\d+\. (.+)$", line)
+        if heading:
+            flush_para(); flush_list()
+            level = len(heading.group(1))
+            out.append(f"[size={sizes[level]}][b]{inline(heading.group(2))}[/b][/size]")
+            out.append("")
+        elif bullet or number:
+            flush_para()
+            new_kind = "ul" if bullet else "ol"
+            if kind and kind != new_kind:
+                flush_list()
+            kind = new_kind
+            items.append((bullet or number).group(1).strip())
+        elif line.strip() == "":
+            flush_para(); flush_list()
+        elif line.startswith("  ") and items:
+            items[-1] += " " + line.strip()
+        elif line.strip() == "---":
+            flush_para(); flush_list()
+            out.append("[line]")
+            out.append("")
+        else:
+            flush_list()
+            para.append(line)
+    flush_para(); flush_list()
+    return "\n".join(out).strip() + "\n"
+
+
 def records(data: bytes, start: int, end: int):
     """(signature, body) of every record in a plugin (GRUPs walked, compressed bodies inflated)."""
     p = start
@@ -201,10 +276,13 @@ def main() -> None:
     # COMPATIBILITY.md's first part is a note for us; the page takes what follows its first rule.
     compat = (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
 
-    # The optional SPID Patcher (tools/compat): the player's patcher and a readme, zipped on
-    # their own, for the mod page's optional files. Not a mod: nothing to install in MO2.
-    patcher_dir = top / "SPID-Patcher"
+    # The optional Compatibility download: the players' instructions (COMPATIBILITY.md, as the
+    # page has them), the SPID Patcher (tools/compat) and its readme, zipped on their own for the
+    # mod page's optional files. Not a mod: nothing to install in MO2.
+    patcher_dir = top / "Compatibility"
     patcher_dir.mkdir()
+    (patcher_dir / "COMPATIBILITY.md").write_text(
+        "# The Wanderer's Fair: compatibility\n\n" + compat + "\n", encoding="utf-8")
     patcher = ROOT / "tools" / "compat" / "skyrimfair_spid_patcher.py"
     sys.path.insert(0, str(patcher.parent))
     import skyrimfair_spid_patcher as spid  # noqa: E402
@@ -214,8 +292,8 @@ def main() -> None:
     shutil.copyfile(patcher, patcher_dir / patcher.name)
     doc = patcher.read_text(encoding="utf-8").split('"""', 2)[1].strip()
     (patcher_dir / "README.txt").write_text(doc.replace("\\\\", "\\") + "\n", encoding="utf-8")
-    patcher_zip = shutil.make_archive(str(top / f"{name}-SPID-Patcher"), "zip", root_dir=patcher_dir)
-    print(f"optional SPID Patcher {pathlib.Path(patcher_zip).relative_to(ROOT)}")
+    patcher_zip = shutil.make_archive(str(top / f"{name}-Compatibility"), "zip", root_dir=patcher_dir)
+    print(f"optional Compatibility download {pathlib.Path(patcher_zip).relative_to(ROOT)} (the instructions and the SPID Patcher)")
     size = sum(f.stat().st_size for f in data_dir.rglob("*") if f.is_file())
 
     # The mod page and what's still open.
@@ -232,6 +310,8 @@ def main() -> None:
     if embedded != compat:
         sys.exit("docs/NEXUS_DESCRIPTION.md's Compatibility section differs from docs/COMPATIBILITY.md: copy it across")
     (top / "NEXUS_DESCRIPTION.md").write_text(description, encoding="utf-8")
+    # Nexus's description box takes BBCode, not Markdown: the same text, ready to paste.
+    (top / "NEXUS_DESCRIPTION.bbcode.txt").write_text(bbcode(description), encoding="utf-8")
     todo = [f"# {name}: still open before uploading", ""]
     todo += [f"- [ ] {item}" for item in OPEN]
     todo += ["", "## Left out of the package", ""]
