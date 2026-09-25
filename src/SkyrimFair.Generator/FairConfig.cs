@@ -471,6 +471,31 @@ internal sealed record CameosConfig
     public string Package { get; init; } = "0010F587:Skyrim.esm";
 
     public List<CameoMember> Members { get; init; } = new();
+
+    /// <summary>A horse on the stage roof (the recurring "horse on a roof").</summary>
+    public RoofHorseConfig RoofHorse { get; init; } = new();
+}
+
+internal sealed record RoofHorseConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The vanilla horse copied: its looks, with the fair's package and script.</summary>
+    public string Horse { get; init; } = "00068D5B:Skyrim.esm";
+
+    /// <summary>DefaultStayAtEditorLocation; the script also holds it still (SetDontMove).</summary>
+    public string Package { get; init; } = "00025BFC:Skyrim.esm";
+
+    public string Script { get; init; } = "SkyrimFairRoofHorse";
+
+    /// <summary><c>[x, y, z, yaw]</c>, world: where it stands, on the platform.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    /// <summary>The platform's planks: StockadeScaffoldTop0Sided01, 248 x 262, 19 thick.</summary>
+    public string DeckPiece { get; init; } = "000533C0:Skyrim.esm";
+
+    /// <summary>Each plank's <c>[x, y, z, yaw]</c>, world.</summary>
+    public List<float[]> Deck { get; init; } = new();
 }
 
 internal sealed record CameoMember

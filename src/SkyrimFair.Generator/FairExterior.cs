@@ -203,7 +203,8 @@ internal static class FairExterior
         var fairRefs = fairCells.SelectMany(c => c.Temporary.OfType<PlacedObject>())
             .Concat(fairWorld.TopCell!.Persistent.OfType<PlacedObject>())
             .Where(o => o.Primitive is null && o.EnableParent is null && (o.MajorRecordFlagsRaw & InitiallyDisabledFlag) == 0
-                && o.TeleportDestination is null && !skip.Contains(o.Base.FormKey))
+                && o.TeleportDestination is null && !skip.Contains(o.Base.FormKey)
+                && !(o.EditorID ?? "").StartsWith(fw.Cameos.EditorIdPrefix, StringComparison.Ordinal))
             .OrderBy(o => o.FormKey.ID)
             .ToList();
         var anchors = new Dictionary<string, ((float X, float Y) At, float Z, float Cx, float Cy)>();

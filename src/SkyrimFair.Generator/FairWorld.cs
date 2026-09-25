@@ -1102,7 +1102,7 @@ internal static class FairWorld
             }
 
             mod.ModHeader.Stats.NextFormID = config.Cameos.FormIdBase;
-            var cameos = FairCameos.Build(mod, config.Cameos, master, audio.Quest, config.NpcKeyword, PutPersistentNpc);
+            var cameos = FairCameos.Build(mod, config.Cameos, config.Singers, master, audio.Quest, config.NpcKeyword, PutPersistentNpc, Put);
             Console.WriteLine($"  cameos: {cameos} ({string.Join(", ", config.Cameos.Members.Select(m => m.Name))}); "
                 + $"FormIDs 0x{config.Cameos.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;

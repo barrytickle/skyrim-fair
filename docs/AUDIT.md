@@ -4,6 +4,34 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the cameos' names, and a horse on the stage roof
+
+- **"Change their tag to their name":** in game they showed their face template's label
+  ("Courier", "Breton"). A Traits-templated NPC shows the template's name. **No template
+  now:**
+  - Each copies the vanilla face field by field (race, voice, head parts, morphs, tints),
+    and its FaceGen head and tint come from Bethesda's archives under his own FormID
+    (`FairSingers.CopyFace`, as the singers'). All four files are byte-identical to
+    Bethesda's.
+  - So they're "Garrick Sol V" and "Claudius Vale". Same records, same FormIDs.
+- **A horse on the stage roof** (Barry: "several cameo references to a horse being on a
+  roof"), `cameos.roofHorse`:
+  - The stage has no solid roof, just 7 rafter logs at z 690, 260 apart. So a little
+    platform of two `StockadeScaffoldTop0Sided01` planks (248 x 262, 19 thick) lies across
+    the middle rafters (u 0 and 260), at x 1918, y 5413/5675, z 723, resting on the logs'
+    tops (about 708).
+  - On it stands a copy of `EncHorseBrown` at (1918, 5544, 729), facing the crowd. Its
+    package is `DefaultStayAtEditorLocation`, and it's Invulnerable, with `SkyrimFairNPC`.
+    `SkyrimFairRoofHorse.psc` blocks activation (no riding it down) and holds it still
+    (`SetDontMove`, on every load): there's no navmesh up there.
+  - It has 4 records in the cameos' range (`0x60006`-`0x60009`). The exterior's silhouette
+    copy now skips the cameos' objects, so its records don't move.
+- Plugin `1ea844d83258391b...`, deterministic, deployed with the new script.
+- **To test:**
+  - Do Garrick and Claudius show their names?
+  - Is the horse on the roof, standing on its planks, not falling or sliding?
+  - Can it be seen from the dance floor?
+
 ### Later: two new songs, two cameos, the dog, the floating grass
 
 Barry: "the rock has been defeated!" Then:

@@ -253,7 +253,13 @@
           ],
           "every": [25, 50]
         }
-      ]
+      ],
+      "roofHorse": {
+        "enabled": true,
+        "horse": "00068D5B:Skyrim.esm",
+        "at": [1918, 5544, 729, 180],
+        "deck": [[1918, 5413, 723, 180], [1918, 5675, 723, 180]]
+      }
     },
     "singers": {"enabled": true, "name": "Singer", "questEditorId": "SkyrimFairSingers", "emotionValue": 50, "cuesDir": "build/bards", "songs": {"Fiddle": "fiddle", "DragonbornApproved": "dragonbornapproved"}, "faceArchives": ["E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"], "members": [{"id": "lead", "voiceType": "SkyrimFairSingerLead", "face": "00039CF6:Skyrim.esm", "outfit": "0009593C:Skyrim.esm", "at": [2048, 5140, 134, 180]}, {"id": "left", "voiceType": "SkyrimFairSingerLeft", "face": "00039CFF:Skyrim.esm", "outfit": "0002D75E:Skyrim.esm", "at": [1848, 5160, 134, 185]}, {"id": "right", "voiceType": "SkyrimFairSingerRight", "face": "00039D17:Skyrim.esm", "outfit": "00037C50:Skyrim.esm", "at": [2248, 5160, 134, 175]}], "anchor": {"at": [2048, 5544, 0], "scale": 0.5, "formIdBase": 262144}},
     "folkDance": {"enabled": true, "centre": [2048, 4420], "heading": 0, "idle": "000F7C8A:Skyrim.esm", "length": 57.6, "name": "Folk Dancer", "oarFolder": "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairFolk", "dancers": [{"submod": "Male", "look": "SkyrimFairVisitorMale01", "at": [26, 0, 270]}, {"submod": "Female", "look": "SkyrimFairVisitorFemale01", "at": [-26, 0, 90]}]},

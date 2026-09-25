@@ -21,8 +21,8 @@ namespace SkyrimFair.Generator;
 /// </summary>
 internal static class FairCameos
 {
-    public static int Build(SkyrimMod mod, CameosConfig config, ISkyrimModGetter master, FormKey stageQuest,
-        string npcKeyword, Action<PlacedNpc> putPersistent)
+    public static int Build(SkyrimMod mod, CameosConfig config, SingersConfig faces, ISkyrimModGetter master, FormKey stageQuest,
+        string npcKeyword, Action<PlacedNpc> putPersistent, Action<PlacedObject> put)
     {
         var sandbox = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.Package));
         var keyword = mod.Keywords.FirstOrDefault(k => k.EditorID == npcKeyword);
@@ -43,21 +43,28 @@ internal static class FairCameos
 
             mod.Packages.Add(package);
 
-            var template = master.Npcs.First(n => n.FormKey == FormKeyHelper.Parse(c.Template));
+            // His face is the vanilla NPC's, copied field by field with its FaceGen head and tint
+            // (as the singers'): a Traits template would show the template's name in game.
+            var face = master.Npcs.First(n => n.FormKey == FormKeyHelper.Parse(c.Template));
             var npc = new Npc(mod)
             {
                 EditorID = $"{config.EditorIdPrefix}{c.Id}",
                 Name = c.Name,
                 ShortName = c.ShortName.Length > 0 ? c.ShortName : null,
-                Race = new FormLink<IRaceGetter>(template.Race.FormKey),
-                Template = new FormLinkNullable<INpcSpawnGetter>(template.FormKey),
-                Class = new FormLink<IClassGetter>(template.Class.FormKey),
+                Race = new FormLink<IRaceGetter>(face.Race.FormKey),
+                Voice = new FormLinkNullable<IVoiceTypeGetter>(face.Voice.FormKey),
+                Class = new FormLink<IClassGetter>(face.Class.FormKey),
                 DefaultOutfit = new FormLinkNullable<IOutfitGetter>(FormKeyHelper.Parse(c.Outfit)),
+                HeadTexture = new FormLinkNullable<ITextureSetGetter>(face.HeadTexture.FormKey),
+                HairColor = new FormLinkNullable<IColorRecordGetter>(face.HairColor.FormKey),
+                TextureLighting = face.TextureLighting,
+                FaceMorph = face.FaceMorph?.DeepCopy(),
+                FaceParts = face.FaceParts?.DeepCopy(),
                 Configuration = new NpcConfiguration
                 {
                     Flags = NpcConfiguration.Flag.AutoCalcStats | NpcConfiguration.Flag.Protected
-                        | NpcConfiguration.Flag.Invulnerable | NpcConfiguration.Flag.Unique,
-                    TemplateFlags = NpcConfiguration.TemplateFlag.Traits,
+                        | NpcConfiguration.Flag.Invulnerable | NpcConfiguration.Flag.Unique
+                        | (face.Configuration.Flags & NpcConfiguration.Flag.Female),
                     Level = new NpcLevel { Level = 5 },
                     CalcMinLevel = 5,
                     CalcMaxLevel = 5,
@@ -75,9 +82,20 @@ internal static class FairCameos
                 ObjectBounds = new ObjectBounds { First = new P3Int16(-22, -14, 0), Second = new P3Int16(22, 14, 128) },
                 // DNAM: every vanilla NPC has it (Mutagen leaves it out unless set).
                 PlayerSkills = new PlayerSkills(),
-                Height = 1f,
-                Weight = 50f,
+                Height = face.Height,
+                Weight = face.Weight,
             };
+            foreach (var part in face.HeadParts)
+            {
+                npc.HeadParts.Add(new FormLink<IHeadPartGetter>(part.FormKey));
+            }
+
+            foreach (var tint in face.TintLayers)
+            {
+                npc.TintLayers.Add(tint.DeepCopy());
+            }
+
+            FairSingers.CopyFace(faces, master, face.FormKey, mod, npc.FormKey);
             npc.Packages.Add(new FormLink<IPackageGetter>(package.FormKey));
             if (keyword is not null)
             {
@@ -104,6 +122,49 @@ internal static class FairCameos
                 idles.Add(FormKeyHelper.Parse(idle.Idle));
                 holds.Add(idle.Hold);
             }
+        }
+
+        // ---- a horse on the stage roof, on a little plank platform across two rafters
+        var roof = config.RoofHorse;
+        if (roof.Enabled && roof.At.Length == 4)
+        {
+            var a = roof.At[3] * MathF.PI / 180f;
+            var k = 0;
+            foreach (var deck in roof.Deck)
+            {
+                put(new PlacedObject(mod)
+                {
+                    EditorID = $"{config.EditorIdPrefix}RoofDeck{++k}",
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(roof.DeckPiece)),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(deck[0], deck[1], deck[2]),
+                        Rotation = new P3Float(0f, 0f, deck[3] * MathF.PI / 180f),
+                    },
+                });
+            }
+
+            var horseFrom = master.Npcs.First(n => n.FormKey == FormKeyHelper.Parse(roof.Horse));
+            var horse = horseFrom.Duplicate(mod.GetNextFormKey());
+            horse.EditorID = $"{config.EditorIdPrefix}RoofHorse";
+            horse.Packages.Clear();
+            horse.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(roof.Package)));
+            horse.Configuration.Flags |= NpcConfiguration.Flag.Invulnerable | NpcConfiguration.Flag.Protected;
+            horse.VirtualMachineAdapter = new VirtualMachineAdapter();
+            horse.VirtualMachineAdapter.Scripts.Add(new ScriptEntry { Name = roof.Script });
+            if (keyword is not null)
+            {
+                horse.Keywords ??= new ExtendedList<IFormLinkGetter<IKeywordGetter>>();
+                horse.Keywords.Add(new FormLink<IKeywordGetter>(keyword.FormKey));
+            }
+
+            mod.Npcs.Add(horse);
+            putPersistent(new PlacedNpc(mod)
+            {
+                EditorID = $"{horse.EditorID}Ref",
+                Base = new FormLinkNullable<INpcGetter>(horse.FormKey),
+                Placement = new Placement { Position = new P3Float(roof.At[0], roof.At[1], roof.At[2]), Rotation = new P3Float(0f, 0f, a) },
+            });
         }
 
         // ---- the stage script's schedule for their idles

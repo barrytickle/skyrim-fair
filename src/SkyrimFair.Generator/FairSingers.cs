@@ -295,6 +295,24 @@ internal static class FairSingers
         return (singers.Count, topics.Count, files);
     }
 
+    /// <summary>
+    /// A vanilla NPC's FaceGen head and tint, copied from the game's archives
+    /// (<see cref="SingersConfig.FaceArchives"/>) under another NPC's FormID.
+    /// </summary>
+    internal static void CopyFace(SingersConfig config, ISkyrimModGetter master, FormKey from, SkyrimMod mod, FormKey to)
+    {
+        var archives = config.FaceArchives
+            .Select(d => Path.IsPathRooted(d) ? d : Path.Combine(FairPaths.ConfigDirectory, d))
+            .Where(Directory.Exists)
+            .SelectMany(d => Directory.GetFiles(d, "*.bsa").OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
+            .ToList();
+        var (f, t) = ($"{from.ID:x8}", $"{to.ID:X8}");
+        CopyFromArchives(archives, $@"meshes\actors\character\facegendata\facegeom\{master.ModKey.FileName.String.ToLowerInvariant()}\{f}.nif",
+            Out(config.MeshesOut, $@"actors\character\FaceGenData\FaceGeom\{mod.ModKey.FileName}\{t}.nif"));
+        CopyFromArchives(archives, $@"textures\actors\character\facegendata\facetint\{master.ModKey.FileName.String.ToLowerInvariant()}\{f}.dds",
+            Out(config.TexturesOut, $@"actors\character\FaceGenData\FaceTint\{mod.ModKey.FileName}\{t}.dds"));
+    }
+
     private static string Out(string root, string rel)
     {
         var baseDir = Path.IsPathRooted(root) ? root : Path.Combine(FairPaths.ConfigDirectory, root);
