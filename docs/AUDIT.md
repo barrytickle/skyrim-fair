@@ -4,6 +4,18 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the roof horse kept moving
+
+Barry: "something keeps making the roof horse move around". Once it was on the stage,
+another time "5ft in the air".
+- Likely cause: its AI package. There's no navmesh on the roof, and an actor whose package
+  paths with no navmesh can be warped to the nearest navmesh (the stage). The put-back script
+  then moved it home and caught it mid-drop.
+- `SkyrimFairRoofHorse.psc`: once it's home, `EnableAI(False)`, so no package can move it and
+  it stays where it's put in its standing idle. The put-back is tighter (20 up or down, 40
+  across). Script only; the plugin is unchanged (`e23aecf5d412566b`). Deployed.
+- **To test:** the horse stays on its planks, and still looks alive, not frozen mid-step.
+
 ### Later: fair prices, every shop showing its stock, rarer gear
 
 Barry: all the shops work now, but the candle and tallow maker's is empty. He asked for prices
@@ -34,7 +46,7 @@ Barry: all the shops work now, but the candle and tallow maker's is empty. He as
   - fletcher: elven, glass and ebony arrows, elven, orcish and dwarven bows
   - rare: an ebony dagger, sword and helmet, a glass bow and cuirass
 - Plugin `e23aecf5d412566b`, deterministic. The FormID diff against the deployed plugin
-  shows only the new perk. Not deployed yet: the game had the plugin open.
+  shows only the new perk. Deployed (after the game was closed).
 - **To test:**
   - Prices at the fair are 50 times the usual. Outside they're normal.
   - The candle maker, pottery, toys, bard and woodworker shops show their goods.
