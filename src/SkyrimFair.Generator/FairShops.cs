@@ -31,6 +31,7 @@ internal static class FairShops
         SkyrimMod mod, ShopsConfig config, string keeperPrefix, ISkyrimModGetter master, Worldspace world)
     {
         var keeperNpcs = new List<Npc>();
+        var factionOf = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
         var byEditorId = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
         foreach (var r in master.EnumerateMajorRecords())
         {
@@ -110,6 +111,7 @@ internal static class FairShops
             // caravans' values, as theirs is the pattern. No ranks, as theirs.
             faction.CrimeValues = crimeFrom.CrimeValues?.DeepCopy();
             mod.Factions.Add(faction);
+            factionOf[theme] = faction.FormKey;
             shops++;
 
             // Its keepers: the trade's faction, and the merchants' job faction for the barter line.
@@ -235,6 +237,29 @@ internal static class FairShops
                 RunOnTabIndex = 0,
                 Conditions = { new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = inFair } },
             });
+            // The merchant (tab 1, the speaker) in one of the priced trades' factions: OR'd.
+            var priced = config.PricedTrades.Select(t => factionOf.TryGetValue(t, out var f)
+                ? f
+                : throw new InvalidOperationException($"shops pricedTrades: no trade '{t}'")).ToList();
+            if (priced.Count > 0)
+            {
+                var speaker = new PerkCondition { RunOnTabIndex = 1 };
+                for (var i = 0; i < priced.Count; i++)
+                {
+                    var inFaction = new GetInFactionConditionData { RunOnType = Condition.RunOnType.Subject };
+                    inFaction.Faction.Link.SetTo(priced[i]);
+                    speaker.Conditions.Add(new ConditionFloat
+                    {
+                        CompareOperator = CompareOperator.EqualTo,
+                        ComparisonValue = 1f,
+                        Flags = i < priced.Count - 1 ? Condition.Flag.OR : 0,
+                        Data = inFaction,
+                    });
+                }
+
+                effect.Conditions.Add(speaker);
+            }
+
             perk.Effects.Add(effect);
             mod.Perks.Add(perk);
         }

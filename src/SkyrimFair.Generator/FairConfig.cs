@@ -515,6 +515,14 @@ internal sealed record ShopsConfig
     public float PriceMultiplier { get; init; } = 50f;
 
     /// <summary>
+    /// The trades the multiplier applies to (the armour and gear stalls, Barry, 2026-09-25: 50x
+    /// everywhere was too much); the rest sell at normal prices. Empty: every trade. The perk
+    /// conditions on the merchant (tab 1, the speaker) being in one of their factions, as
+    /// vanilla's MGArchMageVendorPerk does.
+    /// </summary>
+    public List<string> PricedTrades { get; init; } = new();
+
+    /// <summary>
     /// A merchant shows only the chest's items its buy list allows, and many goods (pottery,
     /// instruments, tools, beeswax, soups) have no vendor keyword at all, so themed lists hid
     /// them (the candle maker's shop was empty, 2026-09-25). True: every list is inverted and

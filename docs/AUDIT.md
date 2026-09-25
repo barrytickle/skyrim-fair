@@ -4,6 +4,20 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: fair prices only at the gear stalls, 40x
+
+Barry: 50x is "too expensive". Instead, "apply 80% of that to just the armor and gear stalls".
+- `shops.priceMultiplier` 40 (80% of 50), and `shops.pricedTrades`: imperial, stormcloak,
+  smith, elven, dwemer, fletcher, hunter, rare. Every other stall is back to normal prices.
+- The perk keeps its tab-0 condition (the player in the fair's worldspace) and adds a tab-1
+  condition, on the merchant (the speaker): in one of those trades' factions, OR'd.
+  - ModBuyPrices has only these two tabs (perk owner and speaker), so it can't condition on
+    the item.
+  - Checked against vanilla MGArchMageVendorPerk (`10F9DB`), which conditions tab 1 on a
+    faction the same way.
+- Plugin `b5908a82a9ab83f0`, deterministic; no FormID changed. Deployed.
+- **To test:** gear stalls cost 40x and the food and goods stalls normal prices.
+
 ### Later: the roof horse kept moving
 
 Barry: "something keeps making the roof horse move around". Once it was on the stage,

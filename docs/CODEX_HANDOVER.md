@@ -658,7 +658,9 @@ Project-owned mesh work is code-first and reproducible.
 - **a merchant shows only what its buy list allows**: chest items outside the list stay
   hidden, and many goods have no vendor keyword at all. The fair's lists are inverted and
   exclude only `VendorNoSale` (`shops.tradeAnything`). Prices go up through a hidden player
-  perk (ModBuyPrices, conditioned on GetInWorldspace), not item values
+  perk (ModBuyPrices, conditioned on GetInWorldspace), not item values. ModBuyPrices has two
+  condition tabs, the perk owner (0) and the speaker (1), and none for the item; per-stall
+  prices condition tab 1 on the stall's faction (`shops.pricedTrades`)
 - **finding a templated NPC's reference**: a reference whose NPC templates a leveled list
   runs on a copy of the record made at load, so searches by base
   (`FindClosestReferenceOfTypeFromRef`) miss it. Keep the reference's FormID and use
