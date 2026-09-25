@@ -23,6 +23,7 @@ herbalist: "the sign is misaligned, and the herbalist is stood too far from the 
   `seatSwap.resetBases` (the Angeline's sign), to its plugin position and heading (`ResetRefs`,
   `ResetTransforms`: x, y, z, degrees). Plugin `bc8b978e8cf83941`, no FormID change. Deployed,
   **2.0.1.2** repackaged.
+- **Confirmed in game by Barry:** "it looks good!!" (the sign; 2.0.1.2 is ready for Nexus).
 
 ### Later: 2.0.1.2: the music ducks when you talk to anyone at the fair
 
