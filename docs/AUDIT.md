@@ -59,10 +59,9 @@ you interact with them".
   - It has 4 records in the cameos' range (`0x60006`-`0x60009`). The exterior's silhouette
     copy now skips the cameos' objects, so its records don't move.
 - Plugin `1ea844d83258391b...`, deterministic, deployed with the new script.
+- **Barry, in game: the roof horse "looks fantastic and safe".** Confirmed.
 - **To test:**
   - Do Garrick and Claudius show their names?
-  - Is the horse on the roof, standing on its planks, not falling or sliding?
-  - Can it be seen from the dance floor?
 
 ### Later: two new songs, two cameos, the dog, the floating grass
 
