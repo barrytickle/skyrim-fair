@@ -362,7 +362,7 @@
   },
   "singerGap": 2.0,
   "singerSteps": {
-    "offsets": [0, -200, 0, 200],
+    "offsets": [],
     "every": 8.0,
     "stepSeconds": 3.0,
     "firstStep": 6.0,

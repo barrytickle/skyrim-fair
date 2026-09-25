@@ -2443,6 +2443,9 @@ internal sealed record MarketDressing
     /// fixed to a structure (the stage roof's lanterns), where keep-outs don't apply.
     /// </summary>
     public bool Force { get; init; }
+
+    /// <summary>A single piece that places nothing but keeps the FormID it had (the road sign, moved outside).</summary>
+    public bool Reserve { get; init; }
 }
 
 /// <summary>
@@ -3691,6 +3694,12 @@ internal sealed record ExteriorConfig
     public ExteriorApproach Approach { get; init; } = new();
 
     public ExteriorGateFlags GateFlags { get; init; } = new();
+
+    /// <summary>The Whiterun road sign beside the path, out from the gate.</summary>
+    public ExteriorRoadSign RoadSign { get; init; } = new();
+
+    /// <summary>How far under the ground a cleared large reference is sunk (they aren't disabled: see FairExterior).</summary>
+    public float SinkLarge { get; init; } = 3000f;
 }
 
 /// <summary>
@@ -3721,6 +3730,21 @@ internal sealed record ExteriorApproach
 }
 
 /// <summary>A flag either side of the gate, <see cref="Out"/> along the wall and <see cref="Forward"/> in front of it.</summary>
+internal sealed record ExteriorRoadSign
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>1: on the gate's right as you come out; -1: its left.</summary>
+    public float Side { get; init; } = 1f;
+
+    public float Out { get; init; } = 280f;
+
+    public float Forward { get; init; } = 320f;
+
+    /// <summary>The post and its arms: each piece's z above the ground, and its world yaw in degrees.</summary>
+    public List<MarketPiece> Pieces { get; init; } = new();
+}
+
 internal sealed record ExteriorGateFlags
 {
     public bool Enabled { get; init; } = true;

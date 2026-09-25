@@ -4,6 +4,63 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Barry's review, and fixes
+
+Barry, in game: "it's looking really good". The outhouses were fine. Then:
+
+- **The singers' steps are off:** "they got stuck at the back of the stage... just keep
+  them static, just flailing their arms around".
+  - `singerSteps.offsets` is `[]`, so the anchor isn't built (`0x40000`, `0x40001` are
+    gone; that range is otherwise unused).
+  - Their gestures carry on. On load, the script lets go of any offset (`SingersStand`),
+    so in a save where they were stuck, their package walks them back to their marks.
+  - The step code stays, for another try.
+- **The clothes sign floated** (by the woodworker; it's the Clothing stall's, #26).
+  - The plugin placed it as designed: composing the real meshes (`nif_preview`, the
+    root's 180° turn applied) puts the board between the posts, its hooks on the
+    `StockadeWoodbeamShort01`.
+  - But in game the beam wasn't there. SMIM's board and USSEP's beam have the same
+    extents, so the cause is still unknown.
+  - Barry's fix, taken: **the honey sign's layout**, a board that carries its own bar. No
+    vanilla clothes board has one, so it's the general goods sign (`0010704F`). The beam
+    is `reserve`, so no FormID moves.
+- **The palisade's banners, inside and out, are the towers' tall ones:**
+  `CityBannerWhiterun01InsideTall` (`000DEE54`) at 1.25, as on the towers, where the
+  wall had the short `DEE46`/`DEE4F`. On the exterior they're at its 60% (0.75, drop 42).
+  Same counts, same FormIDs.
+- **More rocks in front of the exterior gate:** every vanilla object there was already
+  disabled, and no plugin in the load order places anything there. **The cause: large
+  references.**
+  - The flat slab (`023362`, `DirtCliffs01FieldGrass01`) is on Tamriel's large-reference
+    list (RNAM). The engine shows a large reference's LOD model until the reference itself
+    is loaded and showing, and a disabled one never is. So its LOD stood there.
+  - **Fix:** cleared large references are no longer disabled. They're left enabled and sunk
+    3,000 under the ground (`exterior.sinkLarge`), so the engine loads them and hides the
+    LOD. Three are: `023362`, `039159` and `0CB03D`.
+  - Barry's DynDOLOD output dates from 2026-09-14, before the exterior. Re-running it
+    would also give the compound LOD.
+- **The Whiterun road sign is outside now:** it stood inside, squeezed between a tower's
+  legs. Barry chose "outside, by the gate".
+  - The inside pair is `reserve`: single dressing pieces now take `reserve: true` too.
+  - The new sign is `exterior.roadSign`: the post and the Whiterun arm, 280 to the right
+    of the path and 320 out from the gate, the arm pointing east along the road
+    (`0x30143`, `0x30144`, appended to the exterior's range).
+- Plugin `10285b9fc2a971e4...`, deterministic. Against `b173d103...`:
+  - 5 records gone: the beam, the inside road sign pair, the anchor pair
+  - 2 added: the outside road sign
+  - 3 vanilla overrides changed: the sunk large references
+  - nothing renumbered
+
+  The footprints lost the road sign and Solitude board. The market places 1,720 pieces.
+- **To test:**
+  - Are the singers back on their marks, gesturing?
+  - Does the Clothing stall's sign hang from its post?
+  - The tall banners on the palisade, inside and out: do they clear the ground, and sit
+    against the logs?
+  - Outside:
+    - Is the slab in front of the gate gone?
+    - Is the road sign beside the path, pointing along the road?
+
 ### Later: Stroti's outhouse replaced by Strifey7's (CC BY 4.0)
 
 Barry: "our skyrim outhouse is also ready... install the Nif". GPT's conversion of

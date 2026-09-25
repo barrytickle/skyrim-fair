@@ -126,8 +126,14 @@ internal static class FairExterior
         result.Panels = panels.Count;
         if (ext.Decorate && fw.Life.Palisade.Banners.Count > 0)
         {
+            // The wall is at the exterior's scale, so its banners are too.
+            var outerFace = fw.Life.Palisade with
+            {
+                BannerScale = fw.Life.Palisade.BannerScale * ext.Scale,
+                BannerDrop = fw.Life.Palisade.BannerDrop * ext.Scale,
+            };
             (result.Banners, result.Ropes, result.Lanterns) = FairLife.DecoratePalisade(
-                mod, fw.Life.Palisade, fw.Palisade, new[] { gx, gy }, panels, (ox, oy), true, PutObject);
+                mod, outerFace, fw.Palisade, new[] { gx, gy }, panels, (ox, oy), true, PutObject);
         }
 
         // ---- the gate: a load door each side ------------------------------------------------------
@@ -237,6 +243,12 @@ internal static class FairExterior
         var scenery = FairPluginGenerator.CollectClearableBases(master);
         var names = master.Statics.ToDictionary(st => st.FormKey, st => st.EditorID);
 
+        // Large references (the worldspace's RNAM list) keep their LOD model in view while they
+        // aren't loaded and showing, and a disabled one never is: its LOD stood in front of the
+        // gate (2026-09-25). Those are left enabled and sunk out of sight instead, so the engine
+        // loads them and hides the LOD.
+        var large = vanilla.LargeReferences.SelectMany(l => l.References).Select(r => r.Reference.FormKey).ToHashSet();
+
         // The approach: from just out of the gate to the road, cleared and paved.
         var (ofx, ofy) = (-flip * MathF.Sin(innerYaw), -flip * MathF.Cos(innerYaw));
         var app = ext.Approach;
@@ -319,7 +331,16 @@ internal static class FairExterior
 
                     if (!hit) continue;
                     var off = (PlacedObject)o.DeepCopy();
-                    off.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+                    if (large.Contains(o.FormKey))
+                    {
+                        off.Placement!.Position = new P3Float(p.Position.X, p.Position.Y, p.Position.Z - ext.SinkLarge);
+                        result.Sunk++;
+                    }
+                    else
+                    {
+                        off.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+                    }
+
                     CellAt(cx, cy).Temporary.Add(off);
                     result.Disabled++;
                 }
@@ -530,6 +551,28 @@ internal static class FairExterior
             }
         }
 
+        // The Whiterun road sign, beside the path just out from the gate (it stood inside, 2026-09-25).
+        if (ext.RoadSign.Enabled && ext.RoadSign.Pieces.Count > 0)
+        {
+            var rs = ext.RoadSign;
+            var (rx, ry) = (ofy, -ofx);
+            var (sx, sy) = (gx + rx * rs.Side * rs.Out + ofx * rs.Forward, gy + ry * rs.Side * rs.Out + ofy * rs.Forward);
+            var z = Ground(sx, sy);
+            foreach (var piece in rs.Pieces)
+            {
+                PutObject(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece.Piece)),
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(sx, sy, z + piece.Z),
+                        Rotation = new P3Float(0f, 0f, piece.Yaw * MathF.PI / 180f),
+                    },
+                });
+                result.Signs++;
+            }
+        }
+
         // ---- file the cells ------------------------------------------------------------------------
         var grid = new ExteriorCellGrid(tamriel);
         foreach (var ((cx, cy), cell) in cells.OrderBy(c => c.Key.Y).ThenBy(c => c.Key.X))
@@ -565,6 +608,10 @@ internal sealed class ExteriorResult
     public int Path { get; set; }
 
     public int Flags { get; set; }
+
+    public int Sunk { get; set; }
+
+    public int Signs { get; set; }
 
     public List<(int X, int Y)> Cells { get; set; } = new();
 

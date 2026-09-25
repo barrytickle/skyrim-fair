@@ -600,6 +600,12 @@ internal static class FairMarket
                 return null;
             }
 
+            if (d.Reserve)
+            {
+                mod.GetNextFormKey();
+                return null;
+            }
+
             put(new PlacedObject(mod)
             {
                 Base = new FormLinkNullable<IPlaceableObjectGetter>(resolve(d.Piece)),

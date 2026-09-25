@@ -294,7 +294,8 @@
       "enabled": true,
       "formIdBase": 131072,
       "palisade": {
-        "banners": ["000DEE46:Skyrim.esm", "000DEE4F:Skyrim.esm"],
+        "banners": ["000DEE54:Skyrim.esm"],
+        "bannerScale": 1.25,
         "bannerDrop": 70,
         "out": 34,
         "every": 2,
@@ -1387,8 +1388,8 @@
       "backFill": [],
       "backFillThemes": [],
       "dressing": [
-        {"name": "RoadSignPost", "piece": "0003AF9D:Skyrim.esm", "x": 2360, "y": -1650},
-        {"name": "RoadSignWhiterun01", "piece": "0003AF9A:Skyrim.esm", "x": 2360, "y": -1650, "z": 230, "yaw": 180},
+        {"name": "RoadSignPost", "piece": "0003AF9D:Skyrim.esm", "reserve": true},
+        {"name": "RoadSignWhiterun01", "piece": "0003AF9A:Skyrim.esm", "reserve": true},
         {"module": "camp", "x": 4300, "y": -880, "yaw": 200, "searchRadius": 600},
         {"module": "camp", "x": 4800, "y": -700, "yaw": 215, "searchRadius": 600},
         {"module": "camp", "x": 4450, "y": 3760, "yaw": 0, "searchRadius": 600},
@@ -2370,8 +2371,8 @@
           "pieces": [
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
-            {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 162, "scale": 0.8, "exact": true},
-            {"piece": "000F0A1A:Skyrim.esm", "x": 0, "y": 52.5, "z": 168, "exact": true},
+            {"reserve": true},
+            {"piece": "0010704F:Skyrim.esm", "x": 0, "y": 49.0, "z": 168, "yaw": 180, "exact": true},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },
@@ -3604,6 +3605,15 @@
       "pieces": [
         {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 0, "y": 0},
         {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 0, "y": 3, "z": 395}
+      ]
+    },
+    "roadSign": {
+      "side": 1,
+      "out": 280,
+      "forward": 320,
+      "pieces": [
+        {"name": "RoadSignPost", "piece": "0003AF9D:Skyrim.esm"},
+        {"name": "RoadSignWhiterun01", "piece": "0003AF9A:Skyrim.esm", "z": 230, "yaw": 180}
       ]
     },
     "show": {
