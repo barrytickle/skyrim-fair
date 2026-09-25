@@ -17,9 +17,18 @@ the air beside her stool, another in the air with her stool behind her.
   bench places up to 23 apart as before), still facing the table. Positions only; no FormID
   change.
 - (The four "PatrolIdleMarker seats" were the archers' idle markers, correctly linked.)
-- Plugin `0dc3c7324d386ae1`, deterministic. Deployed. **2.0.1.2** packaged.
-- **To test:** the seated visitors on their stools and benches, including after walking away
-  and back.
+- Barry's next screenshot: the two still sat forward of their stools, "they've got a leaning
+  animation, but they're not leaning on anything". **WoodenBarStool** (`074EC6`) gives the
+  bar-counter lean, and there's no counter. So **`fairWorld.seatSwap`**, last of all (FormIDs
+  stay):
+  - every WoodenBarStool becomes **CommonChair02** (`0B9C04`), a plain chair with the normal
+    sit and drink poses
+  - each chair turns to face its table: front = local +Y, as 33 vanilla CommonChair02s sit at
+    tables. 12 face a table, 2 their sitter's way, 11 spares keep their angle.
+- Plugin `bd03edbc07fb2f28`, deterministic, no FormID change. Deployed. **2.0.1.2** packaged
+  (the seats on start, and the chairs).
+- **To test:** the seated visitors upright on chairs at the tables, drinking, not leaning on
+  thin air.
 
 ### Later: the lip sync decision: SSE Engine Fixes
 

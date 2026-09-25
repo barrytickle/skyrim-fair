@@ -358,6 +358,56 @@ internal static class FairPluginGenerator
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
+        // Bar stools become chairs facing their tables, last of all (their FormIDs stay).
+        var seatSwap = config.FairWorld.SeatSwap;
+        if (config.FairWorld.Enabled && seatSwap.Enabled && master is not null)
+        {
+            var from = FormKeyHelper.Parse(seatSwap.From);
+            var to = FormKeyHelper.Parse(seatSwap.To);
+            var tableBases = master.Statics.Where(s => (s.EditorID ?? "").Contains("Table", StringComparison.OrdinalIgnoreCase)).Select(s => s.FormKey)
+                .Concat(mod.Statics.Where(s => (s.EditorID ?? "").Contains("Table", StringComparison.OrdinalIgnoreCase)).Select(s => s.FormKey))
+                .ToHashSet();
+            var placed = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedObject>()).Where(o => o.Placement is not null).ToList();
+            var tables = placed.Where(o => tableBases.Contains(o.Base.FormKey)).ToList();
+            var sitterYaw = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>())
+                .Where(n => n.Placement is not null && n.LinkedReferences.Any(l => l.KeywordOrReference.IsNull))
+                .GroupBy(n => n.LinkedReferences.First(l => l.KeywordOrReference.IsNull).Reference.FormKey)
+                .ToDictionary(g => g.Key, g => g.First().Placement!.Rotation.Z);
+            var (toTable, toSitter, kept) = (0, 0, 0);
+            foreach (var seat in placed.Where(o => o.Base.FormKey == from).OrderBy(o => o.FormKey.ID))
+            {
+                var p = seat.Placement!.Position;
+                var table = tables
+                    .Select(t => (Ref: t, D: MathF.Sqrt((t.Placement!.Position.X - p.X) * (t.Placement.Position.X - p.X) + (t.Placement.Position.Y - p.Y) * (t.Placement.Position.Y - p.Y))))
+                    .Where(t => t.D > 1f && t.D <= seatSwap.TableReach)
+                    .OrderBy(t => t.D)
+                    .FirstOrDefault();
+                var r = seat.Placement.Rotation;
+                float yaw;
+                if (table.Ref is not null)
+                {
+                    // Its front (local +Y) toward the table: forward is (sin yaw, cos yaw).
+                    yaw = MathF.Atan2(table.Ref.Placement!.Position.X - p.X, table.Ref.Placement.Position.Y - p.Y);
+                    toTable++;
+                }
+                else if (sitterYaw.TryGetValue(seat.FormKey, out var sy))
+                {
+                    yaw = sy;
+                    toSitter++;
+                }
+                else
+                {
+                    yaw = r.Z;
+                    kept++;
+                }
+
+                seat.Base = new FormLinkNullable<IPlaceableObjectGetter>(to);
+                seat.Placement.Rotation = new P3Float(0f, 0f, yaw);
+            }
+
+            Console.WriteLine($"  seats: {toTable + toSitter + kept} bar stools now chairs ({toTable} facing a table, {toSitter} their sitter's way, {kept} as they were)");
+        }
+
         // Empty array properties can't be initialised from a plugin ("cannot be initialized because
         // the value is the incorrect type" in the log); left out, the script sees them empty anyway.
         foreach (var quest in mod.Quests.Where(q => q.VirtualMachineAdapter is not null))

@@ -182,6 +182,13 @@ internal sealed record FairWorldConfig
     /// <summary>The rest of Holidays replaced, so the plugin needs only Skyrim.esm (FairHolidaysFree.cs).</summary>
     public HolidaysFreeConfig HolidaysFree { get; init; } = new();
 
+    /// <summary>
+    /// Seats swapped last of all (their FormIDs stay): a vanilla bar stool gives its sitter the
+    /// bar-counter lean, with no counter at the fair (a Nexus player's screenshot, 2026-09-25),
+    /// so each becomes a chair facing its table, whose sitters sit upright and drink.
+    /// </summary>
+    public SeatSwapConfig SeatSwap { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -623,6 +630,19 @@ internal sealed record PaperLanternsConfig
 /// Holidays' bunting and props replaced (FairHolidaysFree.cs), after the paper lanterns and in
 /// their FormID range. With both, SkyrimFair.esp's only master is Skyrim.esm (Barry, 2026-09-25).
 /// </summary>
+internal sealed record SeatSwapConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The seat replaced (vanilla's WoodenBarStool) and its replacement (CommonChair02).</summary>
+    public string From { get; init; } = "00074EC6:Skyrim.esm";
+
+    public string To { get; init; } = "000B9C04:Skyrim.esm";
+
+    /// <summary>A chair faces the nearest table within this (its front is local +Y, as vanilla places them).</summary>
+    public float TableReach { get; init; } = 160f;
+}
+
 internal sealed record HolidaysFreeConfig
 {
     public bool Enabled { get; init; }
