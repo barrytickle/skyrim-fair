@@ -3607,6 +3607,16 @@
         {"name": "CityBannerWhiterun01", "piece": "000D2025:Skyrim.esm", "x": 0, "y": 3, "z": 395}
       ]
     },
+    "fairSign": {
+      "editorId": "SkyrimFairWelcomeSign",
+      "model": "barry_fair_sign\\fair_sign.nif",
+      "width": 80, "depth": 11, "height": 121,
+      "scale": 2.2,
+      "side": -1,
+      "out": 300,
+      "forward": 480,
+      "turnToPath": 15
+    },
     "roadSign": {
       "side": 1,
       "out": 280,

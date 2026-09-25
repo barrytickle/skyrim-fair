@@ -30,6 +30,13 @@ assets/meshes/actors/
 # The singers' FaceGen tints, copied from the game's archives by the generator
 assets/textures/actors/
 
+# The "Whiterun Fair" welcome sign (Barry's conversion of a Sketchfab Standard-licensed model):
+# not in git until the author confirms it may be redistributed. The package is
+# assets/Skyrim_Fair_Sign_Assets/; its Data/ holds these files.
+assets/meshes/barry_fair_sign/
+assets/textures/barry_fair_sign/
+assets/Skyrim_Fair_Sign_Assets/
+
 # The avenue's cobbles: vanilla wrstonefloor01 (diffuse, normal) and the fair's own parallax
 # map, built output of tools/make_cobble.py --data <Steam's Skyrim SE Data>.
 assets/textures/SkyrimFair/Ground/

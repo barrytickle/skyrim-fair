@@ -573,6 +573,29 @@ internal static class FairExterior
             }
         }
 
+        // The fair's welcome sign, on the path's other side, its lettered face (the model's -Y)
+        // toward arrivals, turned a little toward the path.
+        if (ext.FairSign.Enabled && ext.FairSign.Model.Length > 0)
+        {
+            var fs = ext.FairSign;
+            var sign = FairWorld.AddStatic(mod, fs);
+            var (rx, ry) = (ofy, -ofx);
+            var (sx, sy) = (gx + rx * fs.Side * fs.Out + ofx * fs.Forward, gy + ry * fs.Side * fs.Out + ofy * fs.Forward);
+            // Local +Y points back at the gate, so -Y (the face) points out along the path.
+            var faceYaw = MathF.Atan2(-ofx, -ofy) - fs.Side * fs.TurnToPath * MathF.PI / 180f;
+            PutObject(new PlacedObject(mod)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(sign.FormKey),
+                Scale = fs.Scale == 1f ? null : fs.Scale,
+                Placement = new Placement
+                {
+                    Position = new P3Float(sx, sy, Ground(sx, sy) - fs.Sink),
+                    Rotation = new P3Float(0f, 0f, faceYaw),
+                },
+            });
+            result.Signs++;
+        }
+
         // ---- file the cells ------------------------------------------------------------------------
         var grid = new ExteriorCellGrid(tamriel);
         foreach (var ((cx, cy), cell) in cells.OrderBy(c => c.Key.Y).ThenBy(c => c.Key.X))

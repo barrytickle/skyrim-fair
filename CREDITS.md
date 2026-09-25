@@ -15,6 +15,7 @@ original author and its redistribution permission are confirmed.
 | Palisade wall | adam127 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Viking Palisade gate | Sereib (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Outhouse | Strifey7 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
+| "Whiterun Fair" welcome sign | JeffK (jeffkolada, Sketchfab) | Barry's game only, converted | **Sketchfab Standard, not CC BY: the author's OK needed to ship it** |
 | Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Stage music, crowd sounds, singers' voices | Barry, made with Suno (Pro) | bundled | Barry owns them (Suno Pro) |
 | Paired folk dance | Barry, made with ChatGPT ("Astra") | bundled (re-based clips) | the project's own |
@@ -60,6 +61,38 @@ Attribution:
 
 > "Palisade" by adam127, licensed under CC BY 4.0. "Viking Palisade gate" by Sereib,
 > licensed under CC BY 4.0. Converted and modified for Skyrim.
+
+### The "Whiterun Fair" welcome sign (Sketchfab Standard licence: pending)
+
+The sign beside the path outside the exterior gate: `meshes\barry_fair_sign\fair_sign.nif`,
+`textures\barry_fair_sign\fair_sign_d.dds` and `fair_sign_n.dds`. Barry's package, with the
+Blender file, FBX, source textures and build scripts, is `assets/Skyrim_Fair_Sign_Assets/`.
+
+| Model | Author | Source | Licence |
+| --- | --- | --- | --- |
+| Low-Poly Wooden Sign made of Three Planks | JeffK (https://sketchfab.com/jeffkolada) | https://sketchfab.com/3d-models/low-poly-wooden-sign-made-of-three-planks-12b45a9419734d3e9277564f770f264e | Sketchfab Standard (https://sketchfab.com/licenses) |
+
+**Licence: not settled.**
+- Sketchfab lists the model under its Standard licence. That allows use in a project, but
+  restricts redistributing the model's files, and a mod ships the NIF loose.
+- The author's own description says it's "free to download and use in your works with CC
+  attribution".
+- **Until the author confirms CC BY (or permission) for a free Skyrim mod, it's in Barry's
+  game only.** Its files are git-ignored and stay out of any release package. Record the
+  reply here.
+
+**Changes made** (Barry, with ChatGPT; the package's CREDITS):
+- converted from GLB to an SE NIF, at the source's scale, the origin at ground centre
+- the post and three planks separated, with four fixed wood collision boxes
+- the materials adapted to Skyrim's shaders, with DDS textures and mipmaps
+- "Whiterun" and "Fair" lettering and a jester emblem added to the front texture, with AI
+  image editing from Barry's reference
+
+The plugin places it at scale 2.2 (about 266 tall, like the road-sign post).
+
+Attribution (if it ships):
+
+> "Low-Poly Wooden Sign made of Three Planks" by JeffK. Converted and modified for Skyrim.
 
 ### Stroti's Outdoor Toilet (modder's resource): no longer used
 
@@ -374,6 +407,7 @@ Every file in the deployed mod folder was traced to its source:
 | --- | --- | --- | --- | --- | --- |
 | Palisade wall | `meshes\barry_palisades\palisade.nif`, `textures\barry_palisades\palisade\*.dds` | Palisade (Sketchfab) | adam127 | CC BY 4.0, with attribution | Bundled |
 | Main gate | `meshes\barry_palisades\viking_palisade_gate_closed.nif` (placed), `viking_palisade_gate.nif` (open, not placed), `textures\barry_palisades\viking_palisade_gate\*.dds` | Viking Palisade gate (Sketchfab) | Sereib | CC BY 4.0, with attribution | Bundled |
+| Welcome sign | `meshes\barry_fair_sign\fair_sign.nif`, `textures\barry_fair_sign\*.dds` | Low-Poly Wooden Sign made of Three Planks (Sketchfab) | JeffK | **Sketchfab Standard: pending the author's OK** | Barry's game only; git-ignored |
 | Outhouses | `meshes\barry_outhouse\outhouse.nif`, `textures\barry_outhouse\*.dds` | Outhouse (Sketchfab) | Strifey7 | CC BY 4.0, with attribution | Bundled (since 2026-09-25; Stroti's before, not shipped) |
 | Light towers | `meshes\barry_scaffold\scaffold.nif`, `textures\barry_scaffold\*.dds` | scaffold (Sketchfab) | Js_TuruokaJunpei | CC BY 4.0, with attribution | Bundled |
 | Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | made with Suno (Pro) | Barry | Barry owns them (Suno Pro plan) | Built mod only |

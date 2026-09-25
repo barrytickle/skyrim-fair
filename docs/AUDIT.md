@@ -4,6 +4,32 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the "Whiterun Fair" welcome sign outside the gate
+
+Barry: "could we implement the sign outside the exterior gate?" GPT's conversion of "Low-Poly
+Wooden Sign made of Three Planks" (JeffK, Sketchfab), carved "Whiterun" / "Fair" with a
+jester, was in `Downloads`.
+- **Licence:** Sketchfab Standard, not CC BY (the package's CREDITS says so too). So it's in
+  Barry's game only: git-ignored, out of any package until the author confirms
+  (`CREDITS.md`, `docs/RELEASE.md`).
+- **Copied:** the package to `assets/Skyrim_Fair_Sign_Assets/`, and its game files to
+  `assets/meshes/barry_fair_sign/` and `assets/textures/barry_fair_sign/`. The zip and the
+  folder's `Data/` were byte-identical.
+- **The model:** 80 x 11 x 121, the origin at ground centre, the lettered face on its -Y
+  (the `nif_preview` view from -Y matches GPT's render), and four fixed collision boxes.
+- **Placed** (`exterior.fairSign`), at scale 2.2 (about 266 tall, like the road-sign post):
+  - 300 left of the path and 480 out from the gate: (-6200, -10320), 200 short of the
+    road, just clear of the path's edge stones. The road sign is across the path.
+  - Its face points out toward the road, turned 15° toward the path.
+  - The static and its reference are built with the exterior (`0x30145`, `0x30146`, the
+    end of its range), so nothing renumbers.
+- Plugin `117060471b14cf90...`, deterministic. Against `10285b9f...`, 2 records are added.
+- **To test:**
+  - Is it readable from the road, and turned to face you as you come in?
+  - Is it upright, and sitting on the ground?
+  - Is the lettering the right way round, with no stretching?
+  - Is it solid?
+
 ### Barry's review, and fixes
 
 Barry, in game: "it's looking really good". The outhouses were fine. Then:

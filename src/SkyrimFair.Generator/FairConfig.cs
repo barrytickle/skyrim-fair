@@ -3698,6 +3698,9 @@ internal sealed record ExteriorConfig
     /// <summary>The Whiterun road sign beside the path, out from the gate.</summary>
     public ExteriorRoadSign RoadSign { get; init; } = new();
 
+    /// <summary>The fair's own welcome sign by the path.</summary>
+    public ExteriorFairSign FairSign { get; init; } = new();
+
     /// <summary>How far under the ground a cleared large reference is sunk (they aren't disabled: see FairExterior).</summary>
     public float SinkLarge { get; init; } = 3000f;
 }
@@ -3730,6 +3733,28 @@ internal sealed record ExteriorApproach
 }
 
 /// <summary>A flag either side of the gate, <see cref="Out"/> along the wall and <see cref="Forward"/> in front of it.</summary>
+/// <summary>
+/// The "Whiterun Fair" welcome sign beside the path out from the gate, facing arrivals. Its
+/// static is built with the exterior, in the exterior's FormID range, so nothing renumbers.
+/// </summary>
+internal sealed record ExteriorFairSign : ProjectStaticConfig
+{
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>1: on the gate's right as you come out; -1: its left.</summary>
+    public float Side { get; init; } = -1f;
+
+    public float Out { get; init; } = 300f;
+
+    public float Forward { get; init; } = 480f;
+
+    /// <summary>How far the post's foot goes into the ground, for slopes.</summary>
+    public float Sink { get; init; } = 6f;
+
+    /// <summary>Degrees the face turns from straight out toward the path (+ toward it).</summary>
+    public float TurnToPath { get; init; } = 15f;
+}
+
 internal sealed record ExteriorRoadSign
 {
     public bool Enabled { get; init; } = true;

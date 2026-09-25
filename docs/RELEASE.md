@@ -121,6 +121,10 @@ Permissions and provenance (details in `CREDITS.md`):
 - [x] The music and crowd sounds: made with Suno on the Pro plan (Barry, 2026-09-25), so Barry owns them. Credit "made with Suno" anyway.
 - [x] Stroti's Outdoor Toilet can't be re-uploaded: **replaced** (2026-09-25) by "Outhouse"
       by Strifey7 (Sketchfab, CC BY 4.0), converted by Barry (`meshes\barry_outhouse\`).
+- [ ] **The welcome sign** ("Low-Poly Wooden Sign made of Three Planks" by JeffK, Sketchfab Standard):
+      ask the author to confirm CC BY for a free Skyrim mod. Until then, leave
+      `meshes\barry_fair_sign\` and `textures\barry_fair_sign\` out of the package, and set
+      `exterior.fairSign.enabled` to false for a release build.
 - [ ] Leave `meshes\Stroti\` and `textures\Stroti\` out of the package: the plugin no longer
       uses them (they're still in Barry's deploy folder).
 - [x] The folk dance: Barry's, made with ChatGPT ("Astra"). Nothing to ask.

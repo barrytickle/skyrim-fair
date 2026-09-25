@@ -1446,7 +1446,7 @@ internal static class FairWorld
     /// A STAT for a project mesh, with object bounds taken from its measured size so the
     /// engine culls it correctly.
     /// </summary>
-    private static Static AddStatic(SkyrimMod mod, ProjectStaticConfig piece, FormKey? key = null)
+    internal static Static AddStatic(SkyrimMod mod, ProjectStaticConfig piece, FormKey? key = null)
     {
         var halfWidth = (short)MathF.Ceiling(piece.Width / 2f);
         var halfDepth = (short)MathF.Ceiling(piece.Depth / 2f);
