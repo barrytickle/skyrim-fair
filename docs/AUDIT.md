@@ -34,7 +34,7 @@ Barry: all the shops work now, but the candle and tallow maker's is empty. He as
   - fletcher: elven, glass and ebony arrows, elven, orcish and dwarven bows
   - rare: an ebony dagger, sword and helmet, a glass bow and cuirass
 - Plugin `e23aecf5d412566b`, deterministic. The FormID diff against the deployed plugin
-  shows only the new perk. Deployed.
+  shows only the new perk. Not deployed yet: the game had the plugin open.
 - **To test:**
   - Prices at the fair are 50 times the usual. Outside they're normal.
   - The candle maker, pottery, toys, bard and woodworker shops show their goods.
