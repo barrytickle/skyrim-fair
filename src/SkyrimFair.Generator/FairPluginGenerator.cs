@@ -511,8 +511,16 @@ internal static class FairPluginGenerator
                 var keepers = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>())
                     .Where(n => keeperBases.Contains(n.Base.FormKey)).OrderBy(n => n.FormKey.ID).Select(n => n.FormKey).ToList();
                 stageScript.Properties.Add(new ScriptObjectListProperty { Name = "Keepers", Objects = keepers.Select(Ref).ToExtendedList() });
+                var resetBases = seatSwap.ResetBases.Select(FormKeyHelper.Parse).ToHashSet();
+                var resets = placed.Where(o => resetBases.Contains(o.Base.FormKey)).OrderBy(o => o.FormKey.ID).ToList();
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "ResetRefs", Objects = resets.Select(o => Ref(o.FormKey)).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptFloatListProperty
+                {
+                    Name = "ResetTransforms",
+                    Data = resets.SelectMany(o => new[] { o.Placement!.Position.X, o.Placement.Position.Y, o.Placement.Position.Z, o.Placement.Rotation.Z * 180f / MathF.PI }).ToExtendedList(),
+                });
                 stageScript.Properties.Add(new ScriptIntProperty { Name = "SeatLayoutVersion", Data = seatSwap.LayoutVersion });
-                Console.WriteLine($"  re-seat: {reseatChairs.Count} chairs, {sitters.Count} seated visitors and {keepers.Count} keepers, layout {seatSwap.LayoutVersion}");
+                Console.WriteLine($"  re-seat: {reseatChairs.Count} chairs, {sitters.Count} seated visitors, {keepers.Count} keepers and {resets.Count} pieces put back, layout {seatSwap.LayoutVersion}");
             }
         }
 

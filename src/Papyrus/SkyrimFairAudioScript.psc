@@ -137,6 +137,10 @@ Actor[] Property Sitters Auto
 Actor[] Property Keepers Auto
 {The shopkeepers: sent back to their spots behind their counters once as well (one had wandered
 off beside his stall in a save, 2026-09-25).}
+ObjectReference[] Property ResetRefs Auto
+Float[] Property ResetTransforms Auto
+{Pieces a save may hold in the wrong place (a swaying sign board): each put back to its position
+and heading once, four numbers a piece (x, y, z, heading in degrees).}
 Int Property SeatLayoutVersion Auto
 {Bumped whenever the seat layout changes, so every save re-seats once more.}
 Perk Property FairTalk Auto
@@ -863,6 +867,14 @@ Function Reseat()
 			Sitters[i].MoveToMyEditorLocation()
 			Sitters[i].Enable()
 			Sitters[i].EvaluatePackage()
+		EndIf
+		i += 1
+	EndWhile
+	i = 0
+	While i < ResetRefs.Length && i * 4 + 3 < ResetTransforms.Length
+		If ResetRefs[i]
+			ResetRefs[i].SetPosition(ResetTransforms[i * 4], ResetTransforms[i * 4 + 1], ResetTransforms[i * 4 + 2])
+			ResetRefs[i].SetAngle(0.0, 0.0, ResetTransforms[i * 4 + 3])
 		EndIf
 		i += 1
 	EndWhile

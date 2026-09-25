@@ -17,6 +17,12 @@ herbalist: "the sign is misaligned, and the herbalist is stood too far from the 
   close as a keeper fits. He had drifted in the save. `Reseat()` (layout **3**) now also sends
   all 59 keepers (`Keepers`) back to their spots once, with `EvaluatePackage`.
 - Plugin `9c0fc5e67878dd96`, deterministic, no FormID change. Deployed. **2.0.1.2** repackaged.
+- Barry: the sign was "doing the same thing". Both his installs had `9c0fc5e6`, and in it the
+  board hangs between the posts. So the save held the swaying sign's old transform, as with the
+  chairs. `Reseat()` (layout **4**) also puts back each piece whose base is in
+  `seatSwap.resetBases` (the Angeline's sign), to its plugin position and heading (`ResetRefs`,
+  `ResetTransforms`: x, y, z, degrees). Plugin `bc8b978e8cf83941`, no FormID change. Deployed,
+  **2.0.1.2** repackaged.
 
 ### Later: 2.0.1.2: the music ducks when you talk to anyone at the fair
 

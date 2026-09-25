@@ -666,7 +666,13 @@ internal sealed record SeatSwapConfig
     /// The seat layout's version: the stage script re-seats every save once per version (chairs
     /// turned to face their tables, visitors back to their seats). Bump it when the seats change.
     /// </summary>
-    public int LayoutVersion { get; init; } = 3;
+    public int LayoutVersion { get; init; } = 4;
+
+    /// <summary>
+    /// Bases whose placed pieces the re-seat puts back to their plugin position and heading (a save
+    /// kept the herbalist's swaying Angeline's sign at its old angle, 2026-09-25).
+    /// </summary>
+    public List<string> ResetBases { get; init; } = new() { "000F0A1E:Skyrim.esm" };
 }
 
 internal sealed record HolidaysFreeConfig
