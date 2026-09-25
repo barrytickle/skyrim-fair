@@ -4,6 +4,19 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Barry, in game: the sign "looking good"; the rock still there
+
+- **The welcome sign, "a little" smaller:** scale 2.2 -> 1.8 (about 218 tall). Plugin
+  `2b417b40429a36d1...`, deterministic, deployed.
+- **"Whiterun might be west":** it's east. Whiterun Stables' map marker is at x 18,313,
+  and the gate at -5,900; Rorikstead is west (-84,302). Facing the gate (south), the arm
+  points to the left, east. Left as it is.
+- **The rock in front of the gate is still there**, with the large reference sunk 3,000
+  under the ground. The next test, for Barry: open the console and click the rock.
+  - If it's selectable, its FormID says what it is.
+  - If nothing selects, it's LOD: the DynDOLOD output (2026-09-14) was generated with the
+    rock in place, and only a DynDOLOD re-run removes it.
+
 ### Later: the "Whiterun Fair" welcome sign outside the gate
 
 Barry: "could we implement the sign outside the exterior gate?" GPT's conversion of "Low-Poly

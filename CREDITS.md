@@ -88,7 +88,7 @@ Blender file, FBX, source textures and build scripts, is `assets/Skyrim_Fair_Sig
 - "Whiterun" and "Fair" lettering and a jester emblem added to the front texture, with AI
   image editing from Barry's reference
 
-The plugin places it at scale 2.2 (about 266 tall, like the road-sign post).
+The plugin places it at scale 1.8 (about 218 tall).
 
 Attribution (if it ships):
 

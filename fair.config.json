@@ -3611,7 +3611,7 @@
       "editorId": "SkyrimFairWelcomeSign",
       "model": "barry_fair_sign\\fair_sign.nif",
       "width": 80, "depth": 11, "height": 121,
-      "scale": 2.2,
+      "scale": 1.8,
       "side": -1,
       "out": 300,
       "forward": 480,
