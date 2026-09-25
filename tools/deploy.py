@@ -44,6 +44,7 @@ def main() -> None:
     files = [(ROOT / "dist" / "SkyrimFair.esp", dest / "SkyrimFair.esp")]
     # SPID exclusion patches: other mods' _DISTR.ini files with -SkyrimFairNPC added. At the
     # mod folder's root they override the originals while Skyrim Fair has the higher MO2 priority.
+    # For Barry's own game only: a release never packages them (docs/COMPATIBILITY.md).
     files += [(f, dest / f.name) for f in sorted((ROOT / "dist" / "spid").glob("*_DISTR.ini"))]
     for src, dst, skip in TREES:
         base = ROOT / src

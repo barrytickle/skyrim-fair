@@ -53,11 +53,17 @@ the music stops, and the performers freeze.
     edited.
   - After a mod update, rebuild. If the line has changed shape, the build fails instead
     of shipping a stale copy.
-- **For a release:**
+- **For a release (Barry, 2026-09-25): instructions, not files.** The copies carry the
+  mods' other lines too, so shipping them would redistribute their files. Instead, the mod
+  page tells players which line to edit, word for word: `docs/COMPATIBILITY.md`. The
+  generated copies are for Barry's own game only, and are never packaged.
+  - Before release, check each quoted line against the mod's current file.
+  - Also worth doing: ask the authors to add `-SkyrimFairNPC` upstream. It's harmless to
+    them, and saves players the edit.
+- **Earlier plan (dropped):**
   - Ship each copy as an optional file for users of that mod ("Skyrim Fair – Maximum
     Destruction SPID patch", "… Stealth Detection Fixes SPID patch"), installed with a
     higher priority than the mod.
-  - The copies carry the mods' other lines too, so ask the authors' permission.
   - Rebuild the patches whenever either mod changes its ini. Or ask both authors to add
     `-SkyrimFairNPC` upstream, which is harmless to them and makes the patches
     unnecessary.
@@ -111,14 +117,15 @@ Permissions and provenance (details in `CREDITS.md`):
       before release. Their face meshes are already Bethesda's.
 - [ ] Leave the old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*.dds`) out of
       the package: the plugin doesn't use it, and it's only left over in the deploy folder.
-- [x] The scaffold tower: "scaffold" by Js_TuruokaJunpei (Sketchfab), CC BY 4.0. Credit ships; record the conversion's changes in `CREDITS.md`.
+- [x] The scaffold tower: "scaffold" by Js_TuruokaJunpei (Sketchfab), CC BY 4.0. Credit and the changes made are in `CREDITS.md`.
 - [x] The music and crowd sounds: made with Suno on the Pro plan (Barry, 2026-09-25), so Barry owns them. Credit "made with Suno" anyway.
 - [ ] Stroti's Outdoor Toilet can't be re-uploaded: **being replaced** by "Outhouse" by
       Strifey7 (Sketchfab, CC BY 4.0), converted by Barry. Then drop `meshes\Stroti\` and
       `textures\Stroti\`.
 - [x] The folk dance: Barry's, made with ChatGPT ("Astra"). Nothing to ask.
-- [ ] Maximum Destruction's and Stealth Detection Fixes' authors: permission for any
-      replacement `_DISTR.ini`, or ask them to add `-SkyrimFairNPC` upstream.
+- [x] Stealth Detection Fixes, Maximum Destruction and Strange Runes: no permission needed.
+      Players make the one-word edits themselves, from `docs/COMPATIBILITY.md` on the mod page.
+      Optionally, ask the authors to add `-SkyrimFairNPC` upstream.
 - [ ] Holidays and Open Animation Replacer credited as requirements.
 - [ ] The static crowd figures and `Props/` are rebuilt from vanilla meshes. Confirm that
       shipping them is fine; modified vanilla meshes are common on Nexus, but check.
@@ -128,8 +135,9 @@ Files and packaging:
       its `config.json` files, the singers' FaceGen heads), `textures\` (their FaceGen
       tints), `Sound\` (including `Voice\SkyrimFair.esp\`, the singers' lip files),
       `Scripts\`. `tools/deploy.py` copies exactly this set.
-- [ ] The SPID exclusion patches (`dist/spid/`), shipped as optional files, rebuilt
-      against the mods' current versions.
+- [ ] **Not** the SPID copies (`dist/spid/`, and the `*_DISTR.ini` that `deploy.py` puts at the
+      mod folder's root): they're for Barry's game only. Paste `docs/COMPATIBILITY.md`
+      onto the mod page instead, with its lines checked against the mods' current files.
 - [ ] Remove the retired `SkyrimFairNpcGuard.pex` from the package; nothing uses it now.
 - [ ] The fair's grass cache (`Grass\SkyrimFairWorld*.cgid`), from a precache run, with the
       mod-page note for grass-cache users (see "Grass-cache setups" above).

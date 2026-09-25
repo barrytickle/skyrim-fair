@@ -22,7 +22,7 @@ original author and its redistribution permission are confirmed.
 | Holidays | Nexus 1533 | a master; its records are placed | dependency, nothing copied |
 | Open Animation Replacer | (Nexus) | swaps the folk-dance and tempo clips in | dependency, nothing copied |
 | Professional Dancer | contentcat and davidgilbertking | its dances, when installed | optional, nothing copied |
-| SPID exclusion patches | Maximum Destruction, Stealth Detection Fixes, Strange Runes | copies of their `_DISTR.ini` files | **pending: each author's permission** |
+| SPID exclusions | Maximum Destruction, Stealth Detection Fixes, Strange Runes | players edit one line of each mod's own file (`docs/COMPATIBILITY.md`) | nothing of theirs ships |
 | Terrain Parallax 1.5 | Nexus 54860 | recommended replacer | not bundled |
 | Props, crowd figures, tempo clips, cobbles, singers' faces | Bethesda | built from vanilla files | vanilla-derived, as mods routinely ship |
 | Scripts, parallax map, terrace kit, stage collision | the project | its own work | ours |
@@ -102,8 +102,9 @@ Barry converted it for Skyrim.
 | --- | --- | --- | --- |
 | scaffold | Js_TuruokaJunpei (https://sketchfab.com/Js_TuruokaJunpei) | https://sketchfab.com/3d-models/scaffold-90789439e18c4f3cbdb5c51b6c43b531 | CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) |
 
-CC BY asks that changes be indicated: record what the conversion changed (scale, origin,
-collision, materials) here.
+**Changes made** (Barry, with ChatGPT): "Modified for Skyrim SE/AE: converted from GLB to
+NIF, scaled to approximately 8 metres tall, centred the origin at ground level, added solid
+static collision, and adapted the materials and textures to Skyrim's shader and DDS formats."
 
 Attribution:
 
@@ -265,17 +266,18 @@ Attribution:
 
 ## Compatibility patches (Maximum Destruction, Stealth Detection Fixes, Strange Runes)
 
-The SPID exclusion patches (`dist/spid/`, from the generator's `spidPatches`) are **copies
-of these mods' own `_DISTR.ini` files**. `-SkyrimFairNPC` is added to the lines that give
-every NPC a cloak, an ability or a script (`docs/RELEASE.md`). Each copy carries the mod's
-other lines unchanged, so **shipping them needs each author's permission**:
+These mods' SPID lines give every NPC a cloak, an ability or a script, which freezes the
+game at the fair's crowd size. The fix adds `-SkyrimFairNPC` to those lines. **Players make
+the edit themselves**, from the instructions on the mod page (`docs/COMPATIBILITY.md`), so
+**nothing of these mods ships**. The generator's copies of their `_DISTR.ini` files
+(`dist/spid/`, `spidPatches`) are for Barry's own game only, and are never packaged:
 - Maximum Destruction: Nexus Mods, Skyrim SE (`MaximumDestruction_DISTR.ini`)
 - Stealth Detection Fixes: Nexus Mods, Skyrim SE, mod 145336
   (`StealthKillDetectionFix_Attack_DISTR.ini`, `StealthKillDetectionFix_DISTR.ini`,
   `StealthKillDetectionFix_Killmove_DISTR.ini`)
 - Strange Runes: Nexus Mods, Skyrim SE (`StrangeRunes_DISTR.ini`)
 
-The alternative is to ask the authors to add `-SkyrimFairNPC` upstream. The earlier ESP
+Asking the authors to add `-SkyrimFairNPC` upstream would save players the edit. The earlier ESP
 condition patches (`SkyrimFair - Maximum Destruction Patch.esp`,
 `SkyrimFair - Stealth Detection Fixes Patch.esp`) didn't work, and aren't shipped.
 
@@ -372,4 +374,4 @@ Every file in the deployed mod folder was traced to its source:
 | Festival lines, lanterns, festive props | Holidays.esp records | Holidays | (Nexus 1533) | A master, nothing copied | Dependency |
 | Folk dance and tempo swaps | OAR submods | Open Animation Replacer | (Nexus) | Nothing copied | Dependency |
 | Stage dances | Dance.esp's events | Professional Dancer | contentcat and davidgilbertking | CC BY-NC 4.0; nothing copied | Optional dependency |
-| SPID exclusions | `dist/spid/*_DISTR.ini` | Maximum Destruction; Stealth Detection Fixes; Strange Runes | their authors | **Pending** | Optional files |
+| SPID exclusions | instructions (`docs/COMPATIBILITY.md`) | Maximum Destruction; Stealth Detection Fixes; Strange Runes | their authors | Nothing of theirs ships | Players edit their own files |

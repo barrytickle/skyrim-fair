@@ -198,7 +198,7 @@ Plugin `eed0547ce3b3aff8...`, committed (`66190a8`) and deployed. The day's deta
 
 **Open items before any public release** (the full list is `docs/RELEASE.md`; keep it
 current):
-- ship the SPID exclusion patches (`dist/spid/`) as optional files
+- the SPID fix goes on the mod page as instructions (`docs/COMPATIBILITY.md`), never as files
 - a grass cache for the fair's worldspace, with the mod-page note
 - the Tamriel exterior's limits: the navmesh, LOD, and landscape mods in that area
 - Professional Dancer: optional but recommended (Dance.esp, then Pandora); nothing of it ships
