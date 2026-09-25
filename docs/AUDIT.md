@@ -4,7 +4,7 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
-### Later: 1.0.1: the music makes room for talking (the first Nexus feedback)
+### Later: 2.0.1: the music makes room for talking (the first Nexus feedback)
 
 A Nexus comment: "I would recommend lowering the volume of the song a bit though, I found it
 hard to hear the NPCs that were trying to talk to me, and some of their mouths did not move at
@@ -26,8 +26,9 @@ is speaking". He also found "garrick and claudius doesn't lip sync on vanilla".
     `MaleHeadBreton` and his race Breton, so the heads match their races and head parts
   - next: whether they lip-sync in Barry's modlist (which has mfgfix and FaceGen Fixes), to
     tell our files from the plain game
-- Plugin `9cf36fdb0024fc3d`, deterministic, no FormID change. Deployed. **Release 1.0.1**
-  packaged (`dist/release/SkyrimFair-1.0.1/`).
+- Plugin `9cf36fdb0024fc3d`, deterministic, no FormID change. Deployed. **Release 2.0.1**
+  packaged (`dist/release/SkyrimFair-2.0.1/`): the grass-fix upload went to Nexus as version 2,
+  so the numbering carries on from there.
 
 ### Later: released on Nexus
 

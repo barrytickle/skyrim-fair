@@ -125,7 +125,8 @@ python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair
 
 **The Wanderer's Fair is live on Nexus Mods** (uploaded by Barry, 2026-09-25, then an update
 with the grass fix; Vortex updates from Nexus). From now on: bump the version for every release
-(`tools/package.py --version 1.0.1` and so on, matching Nexus), and treat player reports as the
+(`tools/package.py --version 2.0.1` and so on, matching Nexus, where the grass fix went up as
+version 2), and treat player reports as the
 next work.
 
 
