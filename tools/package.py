@@ -198,6 +198,9 @@ def main() -> None:
     # The upload archive: the Data folder's contents at its top level.
     archive = shutil.make_archive(str(top / name), "zip", root_dir=data_dir)
 
+    # COMPATIBILITY.md's first part is a note for us; the page takes what follows its first rule.
+    compat = (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
+
     # The optional SPID Patcher (tools/compat): the player's patcher and a readme, zipped on
     # their own, for the mod page's optional files. Not a mod: nothing to install in MO2.
     patcher_dir = top / "SPID-Patcher"
@@ -216,8 +219,6 @@ def main() -> None:
     size = sum(f.stat().st_size for f in data_dir.rglob("*") if f.is_file())
 
     # The mod page and what's still open.
-    # COMPATIBILITY.md's first part is a note for us; the page takes what follows its first rule.
-    compat = (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
     page = PAGE.format(version=args.version) + "\n\n" + compat + "\n\n---\n\n" + credits.read_text(encoding="utf-8")
     (top / "NEXUS_PAGE.md").write_text(page, encoding="utf-8")
     # The Nexus form's sections (Description, Installation, Features, Requirements, Shout outs),
