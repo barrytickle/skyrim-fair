@@ -292,6 +292,49 @@ internal static class FairSingers
             Console.WriteLine($"  singer steps: offsets [{string.Join(", ", steps.Offsets)}] every {steps.Every} s; anchor {anchorRef.FormKey.ID:X6} at ({a.At[0]}, {a.At[1]}, {a.At[2]})");
         }
 
+        // ---- the singers' own cheer, through OAR (Barry's retargeted Mixamo clip)
+        var oar = config.CheerOar;
+        if (oar.Enabled && oar.Source.Length > 0)
+        {
+            string Rooted(string p) => Path.IsPathRooted(p) ? p : Path.Combine(FairPaths.ConfigDirectory, p);
+            var folder = Rooted(oar.Folder);
+            var sub = Path.Combine(folder, oar.Submod);
+            Directory.CreateDirectory(sub);
+            File.Copy(Rooted(oar.Source), Path.Combine(sub, oar.Clip), overwrite: true);
+            var json = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            File.WriteAllText(Path.Combine(folder, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+            {
+                ["name"] = "Skyrim Fair - the singers' cheer",
+                ["author"] = "Skyrim Fair",
+                ["description"] = "Mixamo's Cheering, retargeted to the Skyrim skeleton, for the fair's stage singers.",
+            }, json));
+            File.WriteAllText(Path.Combine(sub, "config.json"), System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object>
+            {
+                ["name"] = "Fair stage singers - Cheering",
+                ["description"] = "Replaces IdleCivilWarCheer only for the fair's stage singers.",
+                ["priority"] = oar.Priority,
+                ["conditions"] = new object[]
+                {
+                    new Dictionary<string, object>
+                    {
+                        ["condition"] = "OR",
+                        ["requiredVersion"] = "1.0.0.0",
+                        ["Conditions"] = singers.Select(s => (object)new Dictionary<string, object>
+                        {
+                            ["condition"] = "IsActorBase",
+                            ["requiredVersion"] = "1.0.0.0",
+                            ["Actor base"] = new Dictionary<string, object>
+                            {
+                                ["pluginName"] = mod.ModKey.FileName.String,
+                                ["formID"] = $"{s.Ref.Base.FormKey.ID:X}",
+                            },
+                        }).ToArray(),
+                    },
+                },
+            }, json));
+            Console.WriteLine($"  singers' cheer: OAR {oar.Submod} for {string.Join(", ", singers.Select(s => $"{s.Ref.Base.FormKey.ID:X}"))}");
+        }
+
         return (singers.Count, topics.Count, files);
     }
 

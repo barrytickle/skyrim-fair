@@ -427,6 +427,9 @@ internal sealed record SingersConfig
 
     public List<SingerMember> Members { get; init; } = new();
 
+    /// <summary>Their own cheer (a retargeted Mixamo clip) in place of IdleCivilWarCheer's, through OAR.</summary>
+    public SingerCheerOar CheerOar { get; init; } = new();
+
     /// <summary>What the singers keep their offset from as they step (songs.config.json singerSteps).</summary>
     public SingerAnchor Anchor { get; init; } = new();
 }
@@ -736,6 +739,28 @@ internal sealed record CameoIdle
 
     /// <summary>The idle that ends it (a paired exit, as Hadvar's ledger has); empty: the band's stop.</summary>
     public string Stop { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// An OAR submod that swaps a vanilla clip for the singers only: the clip copied from
+/// <see cref="Source"/> into <see cref="Folder"/>/<see cref="Submod"/> under <see cref="Clip"/>'s
+/// name, and its config written with the singers' own records (IsActorBase: the singers
+/// aren't templated, so their base records are theirs in game).
+/// </summary>
+internal sealed record SingerCheerOar
+{
+    public bool Enabled { get; init; }
+
+    public string Source { get; init; } = string.Empty;
+
+    public string Folder { get; init; } = "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairBardSinger";
+
+    public string Submod { get; init; } = "Singers";
+
+    /// <summary>The vanilla clip it replaces: IdleCivilWarCheer's, the singers' "sing" move.</summary>
+    public string Clip { get; init; } = "special_civilwarcheer.hkx";
+
+    public int Priority { get; init; } = 1900000100;
 }
 
 internal sealed record SingerMember

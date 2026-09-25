@@ -297,6 +297,23 @@ affiliated with or endorsed by Bethesda.
 - An old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*`, 2026-09-21) is
   project-made, but the plugin doesn't use it. Leave it out of any package.
 
+### The singers' cheer (Mixamo)
+
+`...\OpenAnimationReplacer\SkyrimFairBardSinger\Singers\special_civilwarcheer.hkx`: Mixamo's
+"Cheering" animation (Adobe Mixamo), retargeted by Barry with ChatGPT to the vanilla Skyrim
+skeleton in Blender 3.6.23 (99 vanilla bones, unchanged; a 2.9 s loop). Through Open
+Animation Replacer, it replaces IdleCivilWarCheer only for the three stage singers. The
+sources and build notes are in Barry's `character-actors/cheering-retarget/`.
+
+**Licence:** Adobe's Mixamo animations are free to use in personal and commercial
+projects, but not to redistribute as standalone animation files. A mod ships the converted
+clip inside itself, as Skyrim mods commonly do (Professional Dancer, for one, credits
+Mixamo). Check Adobe's current Mixamo terms before release.
+
+Attribution:
+
+> Cheering animation from Mixamo (Adobe), retargeted for Skyrim.
+
 ### Paired folk dance (made with ChatGPT)
 
 **Animation:** `folk_turn_A.hkx` and `folk_turn_B.hkx`, made for Skyrim Fair by Barry with

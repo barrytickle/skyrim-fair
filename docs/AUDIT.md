@@ -4,6 +4,21 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the singers' own cheer (Barry's Mixamo retarget)
+
+Barry: "help me install that zip packaged with the mod" (`character-actors/cheering-retarget/`,
+Mixamo's Cheering retargeted with ChatGPT, a 2.9 s loop on the vanilla skeleton).
+- It ships in the fair's own OAR tree, as the folk dance's and the tempo clips do:
+  `OpenAnimationReplacer\SkyrimFairBardSinger\Singers\special_civilwarcheer.hkx`. So it
+  replaces IdleCivilWarCheer, the singers' "sing" move, only for them.
+- The generator (`singers.cheerOar`) copies the clip from the package, and writes both
+  `config.json` files with the singers' own records (`IsActorBase` 16B2, 16B5, 16B8). The
+  singers aren't templated, so their base records are theirs in game, unlike the folk pair.
+  It's byte-identical to the zip's clip, and the configs match the zip's.
+- The plugin is unchanged (`3d1b5b1f...`). Deployed.
+- **To test:** during a song, do the three singers do the new cheering loop, and the crowd
+  still the vanilla cheer?
+
 ### Later: the stalls are shops
 
 Barry: "we've not actually hooked up the vendors to a shop yet". He chose stock themed to
