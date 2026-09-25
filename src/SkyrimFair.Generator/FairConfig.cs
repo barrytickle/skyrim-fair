@@ -4186,6 +4186,15 @@ internal sealed record ExteriorFairSign : ProjectStaticConfig
 {
     public bool Enabled { get; init; } = true;
 
+    /// <summary>
+    /// Keep the sign's records but not the sign (a release build while its model's licence is
+    /// unconfirmed, tools/package.py): the static takes <see cref="ReserveModel"/> (vanilla's
+    /// XMarker) and its reference starts disabled, so no FormID moves either way.
+    /// </summary>
+    public bool Reserve { get; init; }
+
+    public string ReserveModel { get; init; } = "MarkerX.nif";
+
     /// <summary>1: on the gate's right as you come out; -1: its left.</summary>
     public float Side { get; init; } = -1f;
 

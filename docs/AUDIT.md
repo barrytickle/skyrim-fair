@@ -4,6 +4,36 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the release package (`tools/package.py`)
+
+Barry: "could you generate me a production folder? with everything in there?"
+- **`tools/package.py --version 1.0.0`** writes `dist/release/SkyrimFair-1.0.0/`:
+  - `SkyrimFair-1.0.0/`, the Data folder: 496 game files, 207 MB
+  - `SkyrimFair-1.0.0.zip`, the upload (163 MB), with the Data layout at its top level
+  - `NEXUS_PAGE.md`: the page text, the compatibility instructions and the credits
+  - `RELEASE_TODO.md`: what's still open
+- **The release plugin** is built from a copy of the config with the release switches, into
+  `build/release/plugin`, twice (`fe82576616efb182` both times). `dist/` is untouched.
+  - The one switch, `exterior.fairSign.reserve`: the welcome sign's licence is unconfirmed.
+  - New in `FairExterior`: with `reserve`, the sign's static takes vanilla's `MarkerX.nif`
+    and its reference starts disabled. The FormIDs stay (`030145`/`030146`), and the same
+    4,529 as the deployed plugin.
+- **Left out:**
+  - the welcome sign's mesh and textures
+  - the static crowd figures (the plugin places none)
+  - Stroti's outhouse
+  - the old procedural cobble
+  - `SkyrimFairNpcGuard.pex`
+  - the SPID `_DISTR.ini` copies
+- **Found by its mesh check:** the terrace and stair pieces in `assets/nif/SkyrimFair/`
+  (FloorFill, PaveCap and the rest, 50 placed references). `deploy.py` never copied them:
+  Barry's mod folder had them only from a hand copy, byte-identical. `deploy.py` now copies
+  `assets/nif` into `meshes\` too.
+- The package against the mod folder: everything in the folder but not the package is one of
+  the intended exclusions.
+- **Still open** (`RELEASE_TODO.md`): the welcome sign's licence, the Mixamo terms, the cameo
+  voices' source, the grass cache, the exterior's limits, and checking the SPID lines.
+
 ### Later: Barry's checks pass
 
 Barry: "Yup all good!!!". **Confirmed in game:**

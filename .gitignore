@@ -46,3 +46,6 @@ assets/textures/SkyrimFair/Ground/
 assets/sound/
 assets/scripts/
 build/
+
+# tools/package.py's temporary release config
+fair.release.json

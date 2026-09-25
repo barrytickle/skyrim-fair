@@ -592,7 +592,7 @@ internal static class FairExterior
         if (ext.FairSign.Enabled && ext.FairSign.Model.Length > 0)
         {
             var fs = ext.FairSign;
-            var sign = FairWorld.AddStatic(mod, fs);
+            var sign = FairWorld.AddStatic(mod, fs.Reserve ? fs with { Model = fs.ReserveModel } : fs);
             var (rx, ry) = (ofy, -ofx);
             var (sx, sy) = (gx + rx * fs.Side * fs.Out + ofx * fs.Forward, gy + ry * fs.Side * fs.Out + ofy * fs.Forward);
             // Local +Y points back at the gate, so -Y (the face) points out along the path.
@@ -601,6 +601,7 @@ internal static class FairExterior
             {
                 Base = new FormLinkNullable<IPlaceableObjectGetter>(sign.FormKey),
                 Scale = fs.Scale == 1f ? null : fs.Scale,
+                MajorRecordFlagsRaw = fs.Reserve ? 0x800 : 0,  // reserved: initially disabled
                 Placement = new Placement
                 {
                     Position = new P3Float(sx, sy, Ground(sx, sy) - fs.Sink),

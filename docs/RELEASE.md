@@ -137,7 +137,11 @@ Permissions and provenance (details in `CREDITS.md`):
 - [ ] The static crowd figures and `Props/` are rebuilt from vanilla meshes. Confirm that
       shipping them is fine; modified vanilla meshes are common on Nexus, but check.
 
-Files and packaging:
+Files and packaging: **`python tools/package.py --version <x.y.z>`** builds all of it
+(2026-09-25). It builds a release plugin (the release switches, into `build/release/plugin`,
+twice, compared) and copies the deploy set less `EXCLUDE`. It checks every mesh the plugin names
+from the fair's own folders is in the package, then writes the `.zip` (Data layout at its top
+level), `NEXUS_PAGE.md` and `RELEASE_TODO.md` into `dist/release/SkyrimFair-<version>/`.
 - [ ] `SkyrimFair.esp`, `meshes\` (props, crowd figures, the OAR folk-dance folder with
       its `config.json` files, the singers' FaceGen heads), `textures\` (their FaceGen
       tints), `Sound\` (including `Voice\SkyrimFair.esp\`, the singers' lip files),

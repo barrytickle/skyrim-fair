@@ -653,6 +653,11 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **releasing**: `tools/package.py` builds the upload. Release-only switches go in its
+  `build_plugin` (a config copy, `fair.release.json`, git-ignored and removed after), never in
+  `fair.config.json`. A piece left out of a release must reserve its records (as
+  `exterior.fairSign.reserve`), or everything after it in its range renumbers. Its mesh check
+  fails if the plugin names one of the fair's own meshes the package lacks
 - **an actor off the navmesh** (the roof horse): its package can have the engine warp it to
   the nearest navmesh. For one that must stay put, `EnableAI(False)` once it's in place
 - **a merchant shows only what its buy list allows**: chest items outside the list stay

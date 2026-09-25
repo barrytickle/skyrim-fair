@@ -18,6 +18,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # (source under the repo, destination under the mod folder, subfolders left out)
 TREES = [
     ("assets/meshes", "meshes", set()),
+    # The project-authored terrace and stair pieces (SkyrimFair_FloorFill_1024 and the rest):
+    # the plugin places them, and they were only ever copied by hand (found by package.py).
+    ("assets/nif", "meshes", set()),
     ("assets/textures", "textures", {"source"}),
     ("assets/sound", "Sound", set()),
     ("assets/scripts", "Scripts", set()),

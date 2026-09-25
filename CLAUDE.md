@@ -30,6 +30,7 @@ python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/commo
 python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"
 dotnet run -c Release --project src/SkyrimFair.Generator -- fair.config.json         # run from the repo root
 python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
+python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair-<version>/ (the Data folder, the .zip, NEXUS_PAGE.md, RELEASE_TODO.md)
 ```
 
 - The generator must be deterministic: run it twice and compare the SHA256.
