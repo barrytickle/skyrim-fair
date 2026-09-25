@@ -204,7 +204,8 @@ internal static class FairExterior
             .Concat(fairWorld.TopCell!.Persistent.OfType<PlacedObject>())
             .Where(o => o.Primitive is null && o.EnableParent is null && (o.MajorRecordFlagsRaw & InitiallyDisabledFlag) == 0
                 && o.TeleportDestination is null && !skip.Contains(o.Base.FormKey)
-                && !(o.EditorID ?? "").StartsWith(fw.Cameos.EditorIdPrefix, StringComparison.Ordinal))
+                && !(o.EditorID ?? "").StartsWith(fw.Cameos.EditorIdPrefix, StringComparison.Ordinal)
+                && !(o.EditorID ?? "").StartsWith(fw.Lights.EditorIdPrefix, StringComparison.Ordinal))
             .OrderBy(o => o.FormKey.ID)
             .ToList();
         var anchors = new Dictionary<string, ((float X, float Y) At, float Z, float Cx, float Cy)>();
@@ -494,9 +495,8 @@ internal static class FairExterior
         // Tilts follow the ground. Skyrim turns a reference about the world Z, then Y, then X,
         // clockwise (the vanilla road pieces fit that best), so local up is (-sin y, cos y sin x,
         // cos y cos x), and a piece lies on a slope of normal n at y = -asin(nx), x = atan2(ny, nz).
-        P3Float OnGround(float x, float y, float yaw)
+        P3Float OnGround(float x, float y, float yaw, float e = 16f)
         {
-            const float e = 16f;
             var (zx, zy) = ((Ground(x + e, y) - Ground(x - e, y)) / (2f * e), (Ground(x, y + e) - Ground(x, y - e)) / (2f * e));
             var len = MathF.Sqrt(zx * zx + zy * zy + 1f);
             var (nx, ny, nz) = (-zx / len, -zy / len, 1f / len);
@@ -615,7 +615,7 @@ internal static class FairExterior
             {
                 Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(c.Piece)),
                 Scale = c.Scale == 1f ? null : c.Scale,
-                Placement = new Placement { Position = new P3Float(c.X, c.Y, Ground(c.X, c.Y) + c.Z), Rotation = OnGround(c.X, c.Y, c.Yaw * MathF.PI / 180f) },
+                Placement = new Placement { Position = new P3Float(c.X, c.Y, Ground(c.X, c.Y) + c.Z), Rotation = OnGround(c.X, c.Y, c.Yaw * MathF.PI / 180f, 150f) },
             });
         }
 

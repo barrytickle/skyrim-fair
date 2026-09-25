@@ -335,6 +335,14 @@ internal static class FairCrowds
             }
 
             var looks = LooksFor(tier.Package, tier.Children, tier.Suffix);
+            if (tier.Stand)
+            {
+                foreach (var look in looks)
+                {
+                    look.Packages.Clear();
+                    look.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(looksFrom.Package)));
+                }
+            }
             PlaceGroups(mod, tier.Groups, 5000 * (ti + 1), looks, first.Blocked, first.Market, stood, ground, PutChild);
 
             // Seated: a sit package linked (unkeyed) to the seat, stood just outside it, away

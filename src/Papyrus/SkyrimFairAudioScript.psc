@@ -167,6 +167,8 @@ Int[] Property CameoIdleCount Auto
 Float[] Property CameoEveryMin Auto
 Float[] Property CameoEveryMax Auto
 {Seconds between one cameo's idles, at random between the two.}
+GlobalVariable Property CameoDuckUntil Auto
+{Set by each cameo line's begin fragment (SkyrimFairCameoLine): the real time its line ends.}
 Float Property CameoDuck = 0.4 Auto
 {The music's volume, as a share, while the player talks to a cameo (0.4, about 8 dB down).}
 GlobalVariable[] Property CameoSpot Auto
@@ -218,8 +220,9 @@ Float Property FolkClipLength = 57.6 Auto
 {The folk clip's length in seconds: the pair start it again together as it ends.}
 
 GlobalVariable Property FirstTrack Auto
-{For testing: the song to start with on arrival or load (0 = the first), or -1 to carry
-on round the playlist. set SkyrimFairAudioFirstTrack to 2 starts with Fiddle.}
+{For testing: the song to start with on arrival or load (0 = the first). At -1 (the default)
+the show still opens with the first song, The Wanderer's Fair. set SkyrimFairAudioFirstTrack
+to 3 starts with Fiddle.}
 
 FormList Property StripSpells Auto
 {The NPC guard's list (SkyrimFairNpcGuard): filled here from StripPlugins/StripIds.}
@@ -340,6 +343,10 @@ Function Recover()
 	cameoPlays = new Int[8]
 	cameoIdleNow = new Int[8]
 	cameoMoveNext = new Float[8]
+	If CameoDuckUntil
+		; Real time starts again from nothing at each launch: a saved deadline would duck for good.
+		CameoDuckUntil.SetValue(0.0)
+	EndIf
 	SingersStand()
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
@@ -389,6 +396,8 @@ Event OnUpdate()
 	Float show = ShowNow()
 	If phase == 0
 		; Arrived, or loaded at the fair.
+		; The show opens with the first song (The Wanderer's Fair), wherever the save left off.
+		track = 0
 		If FirstTrack && FirstTrack.GetValue() >= 0.0 && (FirstTrack.GetValue() as Int) < Songs.Length
 			track = FirstTrack.GetValue() as Int
 		EndIf
@@ -790,6 +799,9 @@ EndFunction
 
 ; Whether the player is talking to a cameo, and whether one is close enough to be spoken to.
 Bool Function CameoTalking()
+	If CameoDuckUntil && Utility.GetCurrentRealTime() < CameoDuckUntil.GetValue()
+		Return True
+	EndIf
 	Int i = 0
 	While i < Cameos.Length
 		If Cameos[i] && Cameos[i].Is3DLoaded() && Cameos[i].IsInDialogueWithPlayer()

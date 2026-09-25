@@ -233,6 +233,7 @@
       {"editorId": "SkyrimFairCrowdLeaning02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Leaning02.nif", "width": 49, "depth": 77, "height": 126, "collision": [-18, -6, 18, 26, 126]}
     ],
     "companions": {"enabled": true, "slots": 6},
+    "lights": {"enabled": true},
     "cameos": {
       "enabled": true,
       "voiceLoudness": -12,
@@ -242,8 +243,9 @@
           "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "emotion": "Happy",
           "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [1044, 4630, 0, 120], "radius": 2200, "energy": 80,
-          "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 25}],
-          "every": [45, 90],
+          "stand": true, "replaces": "0000149D:SkyrimFair.esp",
+          "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 600}],
+          "every": [2, 4],
           "spots": [[1044, 4630], [1300, 4250], [1044, 4630], [1600, 4000], [1044, 4630], [1250, 3800]],
           "spotRadius": 200,
           "move": [60, 120]
@@ -3501,7 +3503,7 @@
         {"name": "dance floor, back", "role": "dancer", "groups": [{"name": "dancers back west", "at": [1420, 4720, 0], "count": 9, "radius": 220, "arc": 180}, {"name": "dancers back east", "at": [2680, 4720, 0], "count": 9, "radius": 220, "arc": 180}]},
         {"name": "seated in the market", "seats": [{"near": "picnic", "perModule": 3}, {"near": "picnic_busy", "perModule": 3}, {"near": "picnic_mixed", "perModule": 2}, {"near": "social_table", "perModule": 2}, {"near": "social_benches", "perModule": 2}, {"near": "micro_bench", "perModule": 1, "chance": 0.6}]},
         {"name": "archery spectators", "seats": [{"near": "spectator_benches", "perModule": 4}]},
-        {"name": "wanderers", "package": "0010F587:Skyrim.esm", "suffix": "Wanderer", "groups": [{"name": "wanderers avenue", "at": [2048, 1400, 0], "count": 2, "radius": 260, "arc": 180}, {"name": "wanderers east lane", "at": [3780, 2200, 0], "count": 2, "radius": 260, "arc": 180}]},
+        {"name": "wanderers", "package": "0010F587:Skyrim.esm", "suffix": "Wanderer", "stand": true, "groups": [{"name": "wanderers avenue", "at": [2048, 1400, 0], "count": 2, "radius": 260, "arc": 180}, {"name": "wanderers east lane", "at": [3780, 2200, 0], "count": 2, "radius": 260, "arc": 180}]},
         {"name": "children", "children": true, "package": "0010F587:Skyrim.esm", "suffix": "Wander", "groups": [{"name": "children by the dance floor", "at": [1250, 4300, 90], "count": 2, "radius": 160, "arc": 90}, {"name": "children by the sweetrolls", "at": [2048, 2600, 0], "count": 2, "radius": 260, "arc": 180}, {"name": "children at the pen", "at": [300, 500, 180], "count": 2, "radius": 180, "arc": 70}]}
       ],
       "quietPackage": "00025BFC:Skyrim.esm",
@@ -3675,7 +3677,7 @@
       "turnToPath": 15
     },
     "cover": [
-        {"name": "RockPileM02FieldGrass01WR", "piece": "000A3C51:Skyrim.esm", "x": -5665, "y": -10635, "z": -6, "yaw": 90, "scale": 0.55}
+        {"name": "RockPileM02FieldGrass01WR", "piece": "000A3C51:Skyrim.esm", "x": -5655, "y": -10630, "z": -8, "yaw": 0, "scale": 0.8}
       ],
     "roadSign": {
       "side": 1,

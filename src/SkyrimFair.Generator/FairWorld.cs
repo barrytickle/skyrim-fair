@@ -1109,7 +1109,8 @@ internal static class FairWorld
                 .ToList();
             var cameos = FairCameos.Build(mod, config.Cameos, config.Singers, master, audio.Quest, config.NpcKeyword, PutPersistentNpc, Put,
                 o => { o.MajorRecordFlagsRaw |= PersistentRecordFlag; topCell.Persistent.Add(o); },
-                panels, config.Palisade, config.Gate, (config.Perimeter.Average(p => p[0]), config.Perimeter.Average(p => p[1])), bannersAt);
+                panels, config.Palisade, config.Gate, (config.Perimeter.Average(p => p[0]), config.Perimeter.Average(p => p[1])), bannersAt,
+                key => cells.Values.SelectMany(c => c.Temporary.OfType<PlacedNpc>()).Concat(topCell.Persistent.OfType<PlacedNpc>()).FirstOrDefault(n => n.FormKey == key));
             Console.WriteLine($"  cameos: {cameos} ({string.Join(", ", config.Cameos.Members.Select(m => m.Name))}); "
                 + $"FormIDs 0x{config.Cameos.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;
@@ -1162,6 +1163,23 @@ internal static class FairWorld
             stageScript.Properties.Add(new ScriptObjectProperty { Name = "CompanionFinder", Object = new FormLink<ISkyrimMajorRecordGetter>(finder.FormKey) });
             stageScript.Properties.Add(new ScriptIntProperty { Name = "CompanionSlots", Data = cc.Slots });
             Console.WriteLine($"  companions: a finder of {cc.Slots} aliases; FormIDs 0x{cc.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
+        // ---- glow at the lanterns (FairLights.cs): its own FormID range -----------------------------
+        if (config.Lights.Enabled)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            if (saved >= config.Lights.FormIdBase)
+            {
+                throw new InvalidOperationException($"FormIDs reached the lights' range (0x{config.Lights.FormIdBase:X}): raise lights.formIdBase");
+            }
+
+            mod.ModHeader.Stats.NextFormID = config.Lights.FormIdBase;
+            var placedNow = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>()).ToList();
+            var (wallLights, laneLights) = FairLights.Build(mod, config.Lights, placedNow,
+                config.Perimeter.Select(p => (p[0], p[1])).ToList(), config.Life.Palisade.Lanterns, Put);
+            Console.WriteLine($"  lights: {wallLights} along the walls, {laneLights} over the lanes; FormIDs 0x{config.Lights.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;
         }
 

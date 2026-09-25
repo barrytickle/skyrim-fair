@@ -24,7 +24,7 @@ internal static class FairCameos
     public static int Build(SkyrimMod mod, CameosConfig config, SingersConfig faces, ISkyrimModGetter master, FormKey stageQuest,
         string npcKeyword, Action<PlacedNpc> putPersistent, Action<PlacedObject> put, Action<PlacedObject> putPersistentObject,
         IReadOnlyList<WallPanel> panels, PalisadeConfig wall, float[] gate, (float X, float Y) centre,
-        IReadOnlyList<(float X, float Y)> banners)
+        IReadOnlyList<(float X, float Y)> banners, Func<FormKey, PlacedNpc?> findActor)
     {
         var sandbox = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.Package));
         var keyword = mod.Keywords.FirstOrDefault(k => k.EditorID == npcKeyword);
@@ -111,11 +111,20 @@ internal static class FairCameos
             npcs.Add(npc);
 
             var at = c.At;
+            var place = new Placement { Position = new P3Float(at[0], at[1], at[2] + 2f), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) };
+            if (c.Replaces.Length > 0 && findActor(FormKeyHelper.Parse(c.Replaces)) is { } visitor)
+            {
+                // He takes a visitor's place: the visitor is disabled (keeping its FormID), and the
+                // culling leaves disabled actors alone.
+                visitor.MajorRecordFlagsRaw |= 0x800;
+                place = visitor.Placement!.DeepCopy();
+            }
+
             var reference = new PlacedNpc(mod)
             {
                 EditorID = $"{npc.EditorID}Ref",
                 Base = new FormLinkNullable<INpcGetter>(npc.FormKey),
-                Placement = new Placement { Position = new P3Float(at[0], at[1], at[2] + 2f), Rotation = new P3Float(0f, 0f, at[3] * MathF.PI / 180f) },
+                Placement = place,
             };
             putPersistent(reference);
             placed.Add(reference);
@@ -179,6 +188,7 @@ internal static class FairCameos
         // subtype 0x4F, SNAM HELO, priority 50, no branch; each INFO Random, for him only (GetIsID).
         // The voice files come from tools/cameos/build_voices.py (build/cameos/<id>/), copied to
         // Sound\Voice\<plugin>\<voice type>\<quest>__<INFO id>_1.fuz, lowercase (as the singers').
+        var spoken = new List<(DialogResponses Info, float Seconds)>();
         var voiced = config.Members.Select((m, i) => (Member: m, Npc: npcs[i]))
             .Where(x => x.Member.VoiceLines.Length > 0 && x.Member.VoiceType.Length > 0)
             .ToList();
@@ -241,6 +251,7 @@ internal static class FairCameos
                     him.Object.Link.SetTo(npc.FormKey);
                     info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = him });
                     topic.Responses.Add(info);
+                    spoken.Add((info, line.TryGetProperty("seconds", out var len) ? len.GetSingle() : 6f));
 
                     var name = $"{config.QuestEditorId}__{info.FormKey.ID:x8}_1.fuz".ToLowerInvariant();
                     var dst = Path.Combine(voiceRoot, voice.EditorID!, name);
@@ -265,6 +276,11 @@ internal static class FairCameos
             var c = config.Members[i];
             if (c.Spots.Count < 2)
             {
+                if (c.Stand)
+                {
+                    npcs[i].Packages.Insert(0, new FormLink<IPackageGetter>(FormKeyHelper.Parse(config.StandPackage)));
+                }
+
                 spotGlobals.Add(FormKey.Null);
                 spotCounts.Add(0);
                 continue;
@@ -305,6 +321,15 @@ internal static class FairCameos
                 package.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = k, Data = here });
                 mod.Packages.Add(package);
                 own.Add(package);
+            }
+
+            if (c.Stand)
+            {
+                // He stands where he's put (his spot records are kept, so nothing renumbers).
+                npcs[i].Packages.Insert(0, new FormLink<IPackageGetter>(FormKeyHelper.Parse(config.StandPackage)));
+                spotGlobals.Add(FormKey.Null);
+                spotCounts.Add(0);
+                continue;
             }
 
             // His spot packages first (the first whose condition holds runs), the wide sandbox after.
@@ -400,6 +425,33 @@ internal static class FairCameos
             }
         }
 
+        // ---- the music ducked while a cameo speaks: a begin fragment on each line --------------
+        // A greeting from an NPC with no topics never opens the dialogue menu, so the stage script
+        // can't see it. Each line's fragment (SkyrimFairCameoLine.psc) sets DuckUntil to the real
+        // time its line ends; the stage script keeps the music down until then. Vanilla's
+        // fragment VMAD (INFO 0684FF): version 5, object format 2, the script Local, extra bind
+        // data 2 (the fragment itself 1), OnBegin Fragment_0.
+        var duck = new GlobalFloat(mod) { EditorID = $"{config.EditorIdPrefix}DuckUntil", Data = 0f };
+        mod.Globals.Add(duck);
+        foreach (var (info, seconds) in spoken)
+        {
+            var entry = new ScriptEntry { Name = config.LineScript, Flags = ScriptEntry.Flag.Local };
+            entry.Properties.Add(new ScriptObjectProperty { Name = "DuckUntil", Object = new FormLink<ISkyrimMajorRecordGetter>(duck.FormKey) });
+            entry.Properties.Add(new ScriptFloatProperty { Name = "Seconds", Data = seconds + 0.5f });
+            info.VirtualMachineAdapter = new DialogResponsesAdapter
+            {
+                Version = 5,
+                ObjectFormat = 2,
+                ScriptFragments = new ScriptFragments
+                {
+                    ExtraBindDataVersion = 2,
+                    FileName = config.LineScript,
+                    OnBegin = new ScriptFragment { ExtraBindDataVersion = 1, ScriptName = config.LineScript, FragmentName = "Fragment_0" },
+                },
+            };
+            info.VirtualMachineAdapter.Scripts.Add(entry);
+        }
+
         // ---- the stage script's schedule for their idles
         var script = mod.Quests.First(q => q.FormKey == stageQuest).VirtualMachineAdapter!.Scripts[0];
         ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
@@ -415,6 +467,7 @@ internal static class FairCameos
         script.Properties.Add(new ScriptIntListProperty { Name = "CameoSpotCount", Data = spotCounts.ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoMoveMin", Data = config.Members.Select(m => m.Move[0]).ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoMoveMax", Data = config.Members.Select(m => m.Move[1]).ToExtendedList() });
+        script.Properties.Add(new ScriptObjectProperty { Name = "CameoDuckUntil", Object = new FormLink<ISkyrimMajorRecordGetter>(duck.FormKey) });
         Console.WriteLine($"  cameo rounds: {string.Join(", ", config.Members.Select((m, i) => $"{m.Id} {spotCounts[i]} spots"))}; posters: {postersHung} on the palisade");
         return placed.Count;
     }

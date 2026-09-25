@@ -170,6 +170,9 @@ internal sealed record FairWorldConfig
     /// <summary>Bringing the player's companions through the gate (FairWorld, the stage script).</summary>
     public CompanionsConfig Companions { get; init; } = new();
 
+    /// <summary>Glow at the lanterns (FairLights.cs).</summary>
+    public LightsConfig Lights { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -469,6 +472,35 @@ internal sealed record SingerSteps
 /// CurrentFollowerFaction, alive, not told to wait. The stage script restarts it on arriving
 /// at the fair and on leaving, and moves each one it finds to the player.
 /// </summary>
+internal sealed record LightsConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairGlow";
+
+    public uint FormIdBase { get; init; } = 0x80000;
+
+    /// <summary>WRFireLightNS: Whiterun's no-shadow firelight, radius 768.</summary>
+    public string WallLight { get; init; } = "000BBAE5:Skyrim.esm";
+
+    /// <summary>WRLightFireStreet01: Whiterun's street light, radius 512.</summary>
+    public string LaneLight { get; init; } = "0008278A:Skyrim.esm";
+
+    /// <summary>Lanterns within this of the wall line get the wall light.</summary>
+    public float WallBand { get; init; } = 350f;
+
+    public float WallSpacing { get; init; } = 800f;
+
+    public float LaneSpacing { get; init; } = 700f;
+
+    public int MaxWall { get; init; } = 16;
+
+    public int MaxLanes { get; init; } = 14;
+
+    /// <summary>How far under the lantern the light hangs.</summary>
+    public float Below { get; init; } = 40f;
+}
+
 internal sealed record CompanionsConfig
 {
     public bool Enabled { get; init; }
@@ -492,6 +524,12 @@ internal sealed record CameosConfig
 
     /// <summary>Their own FormID range, so nothing renumbers.</summary>
     public uint FormIdBase { get; init; } = 0x60000;
+
+    /// <summary>The begin fragment on each of their lines (it ducks the music).</summary>
+    public string LineScript { get; init; } = "SkyrimFairCameoLine";
+
+    /// <summary>What a standing cameo runs: DefaultStayAtEditorLocation.</summary>
+    public string StandPackage { get; init; } = "00025BFC:Skyrim.esm";
 
     /// <summary>The cameos' dialogue quest; short, so voice file names are never truncated.</summary>
     public string QuestEditorId { get; init; } = "SkyrimFairCameos";
@@ -618,6 +656,12 @@ internal sealed record CameoMember
 
     /// <summary>Seconds between idles: <c>[min, max]</c>.</summary>
     public float[] Every { get; init; } = { 40f, 90f };
+
+    /// <summary>He stands where he's put (his round kept, not walked).</summary>
+    public bool Stand { get; init; }
+
+    /// <summary>A visitor's reference he takes the place of (it's disabled): he stands there.</summary>
+    public string Replaces { get; init; } = string.Empty;
 
     /// <summary>His round: <c>[x, y]</c> spots he walks between, sandboxing at each (2 or more).</summary>
     public List<float[]> Spots { get; init; } = new();
@@ -3443,6 +3487,12 @@ internal sealed record CrowdTier
 
     /// <summary>The groups are the fair's children rather than adult visitors.</summary>
     public bool Children { get; init; }
+
+    /// <summary>
+    /// They stand where they're put: the tier's own records keep its package's place in the
+    /// FormIDs, but run the visitors' stay-put package (Barry traded the walkers for the cameos).
+    /// </summary>
+    public bool Stand { get; init; }
 
     public List<CrowdGroup> Groups { get; init; } = new();
 

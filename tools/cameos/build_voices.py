@@ -19,6 +19,7 @@ its text, and copies each .fuz to the name the engine looks for.
 """
 import json
 import shutil
+import wave
 import subprocess
 import sys
 from pathlib import Path
@@ -75,11 +76,13 @@ def main():
                 except RuntimeError:
                     if attempt == 2:
                         raise
+            with wave.open(str(staging / f'{base}.wav')) as w:
+                seconds = round(w.getnframes() / w.getframerate(), 2)
             if not (staging / f'{base}.lip').exists():
                 raise RuntimeError(f"LipGenerator wrote no lip for {member['id']} {base}")
             run(XWMA, staging / f'{base}.wav', staging / f'{base}.xwm')
             (staging / f'{base}.wav').unlink()
-            made.append({'file': entry['file'], 'text': entry['text'], 'fuz': f'{base}.fuz'})
+            made.append({'file': entry['file'], 'text': entry['text'], 'fuz': f'{base}.fuz', 'seconds': seconds})
         run(LIPFUZER, '-s', staging, '-d', work, '--norec', '-v', 0)
         for m in made:
             fuz = (work / m['fuz']).read_bytes() if (work / m['fuz']).exists() else b''

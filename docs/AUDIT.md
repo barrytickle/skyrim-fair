@@ -4,6 +4,64 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the music ducks for real, Garrick stands in, the wanderers stand, lights, the opening song
+
+Barry, in game:
+- the voices are louder, but the music doesn't dip
+- Garrick "wasn't by the watchtower": replace this visitor with him, "static standing
+  still, with his lute"
+- frame dips, 30-50 against 120 (with frame generation), at the archery and the centre:
+  "sacrifice some vanilla npc's walking for our cameo ones?"
+- The Wanderer's Fair doesn't play
+- brighter lights round the walls and the centre aisle
+- the rock over the floating grass is too small, and doesn't sit on the hill
+
+What changed:
+- **The opening song:** the log said `song 1 playing` on arrival. The script carried the
+  playlist on from the save (at 1, from before the new songs), so The Wanderer's Fair
+  (now 0) came only after Raise Your Cups. Now every arrival or load starts at 0, unless
+  `SkyrimFairAudioFirstTrack` names another. The same log shows **"brought 1 companions to
+  the player"**: the companions work.
+- **The music duck:** a greeting from an NPC with no topics opens no dialogue menu, so
+  `IsInDialogueWithPlayer` never went true.
+  - Each of the cameos' 28 lines now has a begin fragment (`SkyrimFairCameoLine.psc`,
+    `extends TopicInfo`). It sets `SkyrimFairCameoDuckUntil` to the real time the line ends:
+    its length, from `build_voices.py`, plus 0.5 s.
+  - While that holds, the stage script plays the song at 0.4. It's reset on load.
+  - The VMAD is checked byte for byte against vanilla's INFO `0684FF`.
+- **Garrick stands in for the visitor** at the west watchtower (`0x149D`,
+  `SkyrimFairVisitorMale04`, at (604, 5279)):
+  - That visitor is disabled (it keeps its FormID), and the culling skips disabled actors.
+  - Garrick takes its place and facing, with `DefaultStayAtEditorLocation` first, and plays
+    the lute almost without a break (held 600 s, restarted 2-4 s later).
+  - His six spots are kept as records, but he doesn't walk them.
+- **The wanderers stand** (Barry's trade): the four adult wanderers' records
+  (`...Wanderer`) keep their FormIDs but run the visitors' stay-put package
+  (`crowds...stand`). The children still wander.
+  - The real lever for the frame dips is probably the number of actors in view (mean 127
+    at a spot). The test: `set SkyrimFairCrowdLayers to 3` (fewer crowd layers) in the
+    console, and compare.
+- **Lights** (`FairLights.cs`, a new range `0x80000`), at the Holidays lanterns (they have
+  no light of their own), spaced out, 40 under the lantern:
+  - 16 along the walls: `WRFireLightNS`, radius 768, 800 apart
+  - 14 over the lanes: `WRLightFireStreet01`, radius 512, 700 apart
+  - All no-shadow, and the exterior's silhouette skips them.
+- **The rock over the floating grass:** `RockPileM02FieldGrass01WR` is now at 0.8 (about
+  300 x 380), its long side down the slope, at (-5655, -10630).
+  - It's tilted to the ground's mean slope over 150 either way (the cover's `OnGround`),
+    not the 16 at its centre, so it lies on the hill.
+- Plugin `6b4fa8af189ffe07...`, deterministic, deployed with the scripts and the voices.
+  Against `1c3a7a4b...`, 31 records are added (the duck global `0x60057`, and 30 lights at
+  `0x80000`-`0x8001D`). Otherwise only data changed: the visitor disabled, Garrick moved,
+  the packages, the INFO fragments.
+- **To test:**
+  - Does the music dip while Garrick or Claudius speaks?
+  - Does The Wanderer's Fair open the show?
+  - Is Garrick standing at the watchtower, playing?
+  - Is the fair brighter at the walls and over the lanes?
+  - Do the frame dips ease?
+  - Does the rock now hide the floating grass, lying on the slope?
+
 ### Later: louder cameos, Garrick's shady corner, the grass covered, companions through the gate
 
 Barry: "the posters are perfect".
