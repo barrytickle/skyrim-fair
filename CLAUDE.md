@@ -27,6 +27,7 @@ build/texvenv/Scripts/python tools/make_bunting.py --data "E:/SteamLibrary/steam
 build/texvenv/Scripts/python tools/make_lantern_colours.py                                                          # the paper lanterns' colours
 python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast and held instrument loops (when a speed changes)
 python tools/cameos/build_voices.py                                                  # cameos/<name>/mono/*.wav + lines json -> build/cameos/ (.fuz)
+python tools/cameos/borrow_lips.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"   # after build_voices: vanilla lip tracks of the same length (plain SE skips today's lips)
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
 # after a layout change, for the navmesh's obstacle footprints (then run the generator again):
 python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"

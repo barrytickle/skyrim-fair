@@ -4,6 +4,30 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.2: borrowed vanilla lip tracks, the same length as each line
+
+Barry: "could we do it with the fix you used for garrick? Just use another lip sync, i honestly
+didn't notice it was out of sync. The only important caveat is, can it be the same length as
+their voice lines?"
+- First, the Oldrim Creation Kit: with original Skyrim installed (`E:\SteamLibrary\...\Skyrim`),
+  it starts once its four files sit next to `TESV.exe`, and FonixData is in its
+  `Data\Sound\Voice\Processing`. But `-GenerateSingleLip` exits 53 however the audio is given
+  (absolute, relative, inside `Data\Sound\Voice`). The Oldrim CK makes lips only from its
+  dialogue window. The four CK files stay in Barry's Skyrim folder (harmless); the test audio
+  was removed.
+- **`tools/cameos/borrow_lips.py`** (after `build_voices.py`):
+  - each cameo line takes the lip track of the unused vanilla line closest to it in length,
+    from a voice that suits him: `cameos.members[].lipsFrom`, MaleYoungEager (1,922
+    candidates) for Garrick and MaleCondescending (1,568) for Claudius
+  - it reads each length from the xWMA header's last `dpds` entry, with no decoding
+  - the .fuz keeps its own audio, and `lines.json` records the source and both lengths
+  - **all 28 within 12 ms**, most exact
+- Correction: the header word I read as "3 vs 43" varies widely among vanilla's own lips (3,
+  11, 111, 9771...), so it wasn't the tell. The shipped lips are now vanilla's own, byte for
+  byte, which plain SE animated in the LipTest.
+- Plugin unchanged (`877104f8d56febf6`); 28 lip files deployed. **2.0.1.2** packaged for the
+  vanilla test. If they lip-sync, SSE Engine Fixes can come off the page's recommendations.
+
 ### Later: 2.0.1.1: louder cameos, quieter music, and the lip-sync test
 
 Barry: "crank garrick and claudius up volume wise, even with the music down it's still a bit
