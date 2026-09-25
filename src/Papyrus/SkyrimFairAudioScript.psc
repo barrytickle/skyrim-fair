@@ -128,6 +128,9 @@ Idle Property SingerEndMove Auto
 {At a song's end, with the crowd's cheer (a wave).}
 Float Property SingerGap = 2.0 Auto
 {Seconds each singer stands between moves.}
+Perk Property FairPrices Auto
+{The fair's prices (FairShops.cs): a hidden perk, buying at many times the price, only in the
+fair's worldspace. Given to the player at the fair; it does nothing anywhere else.}
 Bool Property SteadyShow Auto
 {Barry, 2026-09-25: everything plays through the whole song. Every instrument at its normal
 loop, the singers singing, and their sing move replayed back to back; the songs' drums and
@@ -420,6 +423,9 @@ Event OnUpdate()
 		BringCompanions()
 	EndIf
 	ResetArchers()
+	If FairPrices && !Game.GetPlayer().HasPerk(FairPrices)
+		Game.GetPlayer().AddPerk(FairPrices)
+	EndIf
 	ApplyCrowdLayers()
 	CameoIdles2(Utility.GetCurrentGameTime())
 

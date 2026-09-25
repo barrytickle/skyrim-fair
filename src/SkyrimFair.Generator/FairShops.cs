@@ -88,7 +88,7 @@ internal static class FairShops
 
             // What they'll buy back: only their own kind of goods.
             var buys = new FormList(mod) { EditorID = $"{config.EditorIdPrefix}{id}Buys" };
-            foreach (var keyword in shop.Buys)
+            foreach (var keyword in config.TradeAnything ? new List<string> { config.NoSaleKeyword } : shop.Buys)
             {
                 buys.Items.Add(new FormLink<ISkyrimMajorRecordGetter>(Find(keyword, theme)));
             }
@@ -102,7 +102,8 @@ internal static class FairShops
                 Flags = Faction.FactionFlag.Vendor | Faction.FactionFlag.CanBeOwner,
                 MerchantContainer = new FormLinkNullable<IPlacedObjectGetter>(chestRef.FormKey),
                 VendorBuySellList = new FormLinkNullable<IFormListGetter>(buys.FormKey),
-                VendorValues = new VendorValues { StartHour = 0, EndHour = 24, Radius = 0, OnlyBuysStolenItems = false, NotSellBuy = false },
+                // NotSellBuy: the list is what they won't trade (TradeAnything).
+                VendorValues = new VendorValues { StartHour = 0, EndHour = 24, Radius = 0, OnlyBuysStolenItems = false, NotSellBuy = config.TradeAnything },
                 VendorLocation = new LocationTargetRadius { Target = new LocationFallback { Type = LocationTargetRadius.LocationType.NearSelf }, Radius = 0 },
             };
             // CRVA: every vanilla vendor faction has it (Mutagen leaves it out unless set); the
@@ -201,6 +202,41 @@ internal static class FairShops
                 piece.VirtualMachineAdapter.Scripts.Add(entry);
                 counters.Add((piece, act.FormKey));
             }
+        }
+
+        // Fair prices: a hidden perk, vanilla Haggling's shape (PRKE entry point ModBuyPrices,
+        // multiply, a condition on the perk owner), only inside the fair's worldspace. Appended.
+        if (config.PriceMultiplier != 1f)
+        {
+            var perk = new Perk(mod)
+            {
+                EditorID = $"{config.EditorIdPrefix}Prices",
+                Name = "Fair Prices",
+                Description = "Everything at the fair costs more.",
+                Trait = false,
+                Level = 0,
+                NumRanks = 1,
+                Playable = false,
+                Hidden = true,
+            };
+            var inFair = new GetInWorldspaceConditionData { RunOnType = Condition.RunOnType.Subject };
+            inFair.WorldspaceOrList.Link.SetTo(world.FormKey);
+            var effect = new PerkEntryPointModifyValue
+            {
+                Rank = 0,
+                Priority = 0,
+                EntryPoint = APerkEntryPointEffect.EntryType.ModBuyPrices,
+                PerkConditionTabCount = 2,
+                Modification = PerkEntryPointModifyValue.ModificationType.Multiply,
+                Value = config.PriceMultiplier,
+            };
+            effect.Conditions.Add(new PerkCondition
+            {
+                RunOnTabIndex = 0,
+                Conditions = { new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = inFair } },
+            });
+            perk.Effects.Add(effect);
+            mod.Perks.Add(perk);
         }
 
         return (shops, keepers, items, counters);

@@ -506,6 +506,25 @@ internal sealed record ShopsConfig
     /// <summary>Theme (as the stalls': cheese, smith...) to its shop.</summary>
     public Dictionary<string, ShopTrade> Trades { get; init; } = new();
 
+    /// <summary>
+    /// Buying at the fair costs this many times the usual price (Barry, 2026-09-25: "so people
+    /// don't use the fair as a cheat"): a hidden perk on the player, vanilla Haggling's entry
+    /// point (ModBuyPrices, multiply), only while they're in the fair's worldspace. Selling is
+    /// unchanged. 1 turns it off.
+    /// </summary>
+    public float PriceMultiplier { get; init; } = 50f;
+
+    /// <summary>
+    /// A merchant shows only the chest's items its buy list allows, and many goods (pottery,
+    /// instruments, tools, beeswax, soups) have no vendor keyword at all, so themed lists hid
+    /// them (the candle maker's shop was empty, 2026-09-25). True: every list is inverted and
+    /// excludes only <see cref="NoSaleKeyword"/>, as a general store's, so each keeper sells
+    /// all their stock (and buys anything, with their little gold). <c>buys</c> is then unused.
+    /// </summary>
+    public bool TradeAnything { get; init; }
+
+    public string NoSaleKeyword { get; init; } = "VendorNoSale";
+
     /// <summary>Each stall's counter opens its keeper's barter menu ("Browse").</summary>
     public ShopCounters Counters { get; init; } = new();
 

@@ -653,6 +653,10 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **a merchant shows only what its buy list allows**: chest items outside the list stay
+  hidden, and many goods have no vendor keyword at all. The fair's lists are inverted and
+  exclude only `VendorNoSale` (`shops.tradeAnything`). Prices go up through a hidden player
+  perk (ModBuyPrices, conditioned on GetInWorldspace), not item values
 - **finding a templated NPC's reference**: a reference whose NPC templates a leveled list
   runs on a copy of the record made at load, so searches by base
   (`FindClosestReferenceOfTypeFromRef`) miss it. Keep the reference's FormID and use

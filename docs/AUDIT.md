@@ -4,6 +4,43 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: fair prices, every shop showing its stock, rarer gear
+
+Barry: all the shops work now, but the candle and tallow maker's is empty. He asked for prices
+"like 50x" ("i don't want people to use the fair as a cheat"), and more and rarer gear:
+"more imperial gear, more stormcloak gear".
+- **Why the candle shop was empty:** a merchant shows only the chest items its buy list
+  allows. The candle maker's list was `VendorItemClutter`, but torches are `VendorItemTorch`
+  and the beeswax is ingredients. Checked across all trades: 84 stock lines were hidden the
+  same way. Many goods (pottery, instruments, tools, beeswax, soups, stews) have no vendor
+  keyword at all, so no themed list can show them.
+- **The fix (`shops.tradeAnything`):** every trade's list is inverted (`VENV` "not sell/buy")
+  and excludes only `VendorNoSale`, as a general store's does. Each keeper sells all their
+  stock. They also buy anything, but only up to their ~100 gold, and at normal price. The
+  `buys` lists stay in the config, unused.
+- **Fair prices (`shops.priceMultiplier` 50):** a hidden perk `SkyrimFairShopPrices`
+  (`0x900BB`, appended to the shops' range) in vanilla Haggling's shape:
+  - entry point ModBuyPrices, multiply by 50
+  - a condition on the perk owner: GetInWorldspace SkyrimFairWorld
+  - the stage script adds it to the player while at the fair (new property `FairPrices`)
+  - it does nothing anywhere else, and selling prices are unchanged
+  - checked subrecord by subrecord against Haggling00 (`0BE128`)
+- **Rarer gear** (49 lines appended to seven trades):
+  - imperial: studded and light sets, the officer's helmet, the Imperial sword
+  - stormcloak: the officer set, the sleeved cuirass, steel axes
+  - smith: steel plate, scaled, some orcish
+  - elven: gilded and light, glass dagger, sword and helmet
+  - dwemer: the dwarven armour set and weapons
+  - fletcher: elven, glass and ebony arrows, elven, orcish and dwarven bows
+  - rare: an ebony dagger, sword and helmet, a glass bow and cuirass
+- Plugin `e23aecf5d412566b`, deterministic. The FormID diff against the deployed plugin
+  shows only the new perk. Deployed.
+- **To test:**
+  - Prices at the fair are 50 times the usual. Outside they're normal.
+  - The candle maker, pottery, toys, bard and woodworker shops show their goods.
+  - The new gear appears. A chest already opened in a save keeps its old stock until the
+    merchant restocks (vanilla: 48 game hours), so wait two days or test on a new save.
+
 ### Later: Browse opened nothing
 
 Barry: at the flagged stalls he gets both "Browse" and "Talk". Browse does nothing, Talk

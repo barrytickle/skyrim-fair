@@ -1199,6 +1199,12 @@ internal static class FairWorld
 
             mod.ModHeader.Stats.NextFormID = config.Shops.FormIdBase;
             (var shopCount, var keeperCount, var itemCount, shopCounters) = FairShops.Build(mod, config.Shops, config.Vendors.EditorIdPrefix, master, worldspace);
+            if (audio is not null && mod.Perks.FirstOrDefault(p => p.EditorID == $"{config.Shops.EditorIdPrefix}Prices") is { } prices)
+            {
+                mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0].Properties.Add(
+                    new ScriptObjectProperty { Name = "FairPrices", Object = new FormLink<ISkyrimMajorRecordGetter>(prices.FormKey) });
+            }
+
             Console.WriteLine($"  shops: {shopCount} trades, {keeperCount} keepers selling, {itemCount} stock lines, {shopCounters.Count} counters to browse; FormIDs 0x{config.Shops.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;
         }
