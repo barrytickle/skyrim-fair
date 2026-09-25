@@ -810,6 +810,12 @@ internal sealed record CameosConfig
     /// <summary>tools/cameos/build_voices.py's output, one folder per cameo id.</summary>
     public string VoiceBuildDir { get; init; } = "build/cameos";
 
+    /// <summary>
+    /// Ship each line as a loose .lip and .xwm (the .fuz unpacked) instead of the .fuz: the packed
+    /// lip track lip-synced only in Barry's modlist, not on an unmodded game (2026-09-25).
+    /// </summary>
+    public bool LooseLip { get; init; } = true;
+
     /// <summary>Barry's lines: {"garrick_sol_v": [{"file", "text"}, ...]} (read by build_voices.py).</summary>
     public string VoiceLinesFile { get; init; } = "cameos/skyrim_fair_voicelines.json";
 
@@ -3159,7 +3165,7 @@ internal sealed record StageAudioConfig
     public float SingerGap { get; init; } = 2f;
 
     /// <summary>The stage music and the cheer, as a share of the music volume (a player found it drowned out the NPCs).</summary>
-    public float MusicMix { get; init; } = 0.8f;
+    public float MusicMix { get; init; } = 0.6f;
 
     /// <summary>The music's share of its mix while anyone speaks (dialogue or barter menu, a cameo's greeting).</summary>
     public float SpeechDuckLevel { get; init; } = 0.05f;

@@ -186,8 +186,10 @@ GlobalVariable Property CameoDuckUntil Auto
 Float Property CameoDuckLevel = 0.2 Auto
 {Retired: SpeechDuckLevel now (a save keeps this one's old value).}
 Float Property MusicMix = 0.8 Auto
-{The stage music and the crowd's cheer, as a share of MusicVolume (0.8). A player found the band
-drowned out the NPCs (Nexus, 2026-09-25).}
+{Retired: MusicMix2 now (saves that ran 2.0.1 keep this one's 0.8).}
+Float Property MusicMix2 = 0.6 Auto
+{The stage music and the crowd's cheer, as a share of MusicVolume (0.6). A player found the band
+drowned out the NPCs (Nexus, 2026-09-25); 0.8 was still loud (Barry).}
 Float Property SpeechDuckLevel = 0.05 Auto
 {The music's volume, as a share of its mix, while anyone speaks: a cameo's greeting, or any
 dialogue or barter menu open (Utility.IsInMenuMode). 0.05, nearly silent.}
@@ -451,9 +453,9 @@ Event OnUpdate()
 	If songInstance != 0
 		If CameoTalking() || Utility.IsInMenuMode()
 			; Someone's speaking (or the player's in a menu): the band all but stops.
-			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix * SpeechDuckLevel)
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix2 * SpeechDuckLevel)
 		Else
-			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix)
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix2)
 		EndIf
 	EndIf
 	SetAmbience(phase == 2)
@@ -580,7 +582,7 @@ Function Advance(Float now)
 			nextLine = SongFirstLine2[track]
 			endLine = nextLine + SongLineCount2[track]
 		EndIf
-		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix)
+		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix2)
 		Enter(2, SongLengths2[track] - Lead(), now)
 	ElseIf phase == 2
 		; The last note is ringing: the crowd cheers, the song finishes under it, then a breath.
@@ -591,7 +593,7 @@ Function Advance(Float now)
 		Int cheer = SongCheers2[track]
 		If cheer >= 0 && cheer < Cheers.Length
 			cheerInstance = Cheers[cheer].Play(StageSpeaker)
-			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue() * MusicMix)
+			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue() * MusicMix2)
 			Debug.Trace("SkyrimFairAudio: cheer " + cheer + " at " + Seconds(now - songStarted) + " s into song " + track + " (" + SongLengths2[track] + " s long, lead " + lead + ")")
 			Enter(3, CheerLengths[cheer], now)
 			Cheer()

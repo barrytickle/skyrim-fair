@@ -4,6 +4,30 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.1: louder cameos, quieter music, and the lip-sync test
+
+Barry: "crank garrick and claudius up volume wise, even with the music down it's still a bit
+loud. Can we put the music down to 60% default?", and "call this one 2.0.1.1". Stopping
+Garrick's idle (`sendanimevent IdleForceDefaultState`) didn't bring the lip sync back on vanilla.
+- **A bug in `tools/cameos/build_voices.py`:** the gain after loudnorm (-12 LUFS) was
+  `volume={-12 - loud}dB`, which is -3 dB for `voiceLoudness` -9, not +3. So the voices sat
+  at about -15.7 LUFS. Now it's `volume={loud + 12}dB`, and `voiceLoudness` is -6: measured
+  -9.6 LUFS, true peak -0.3 dBFS, **6 dB louder**.
+- **The music at 60%:** new property `MusicMix2` 0.6, since saves that ran 2.0.1 keep
+  `MusicMix` 0.8. `MusicMix` is retired.
+- **The lip-sync test** (`cameos.looseLip`, on):
+  - Each cameo line now ships as the `.fuz` unpacked: its lip track as `<name>.lip` and its
+    audio as `<name>.xwm`. That's the classic layout plain Skyrim reads itself; the packed
+    `.fuz` lip-synced only in Barry's modlist.
+  - Ruled out before this: the lip data (present, vanilla's layout), the faces
+    (byte-identical to vanilla `001065EE` and `000457F6`, races matching), and the idles.
+  - The 28 stale cameo `.fuz` files were removed from Barry's MO2 mod folder, which
+    `deploy.py` never cleans.
+- Plugin `877104f8d56febf6`, deterministic, no FormID change. Deployed. **Release 2.0.1.1**
+  packaged (`dist/release/SkyrimFair-2.0.1.1/`).
+- **To test on vanilla:** do Garrick and Claudius lip-sync now? Are they loud enough over the
+  60% music?
+
 ### Later: 2.0.1: the music makes room for talking (the first Nexus feedback)
 
 A Nexus comment: "I would recommend lowering the volume of the song a bit though, I found it

@@ -259,7 +259,22 @@ internal static class FairCameos
                     var name = $"{config.QuestEditorId}__{info.FormKey.ID:x8}_1.fuz".ToLowerInvariant();
                     var dst = Path.Combine(voiceRoot, voice.EditorID!, name);
                     Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
-                    File.Copy(Path.Combine(cues, line.GetProperty("fuz").GetString()!), dst, overwrite: true);
+                    var fuz = File.ReadAllBytes(Path.Combine(cues, line.GetProperty("fuz").GetString()!));
+                    if (config.LooseLip)
+                    {
+                        // The .fuz unpacked: its lip track as a .lip and its audio as a .xwm, the
+                        // layout plain Skyrim reads itself. The packed .fuz lip-synced only in
+                        // Barry's modlist, never on an unmodded game (2026-09-25). A .fuz is
+                        // 'FUZE', a version, the lip size, the lip data, then the xWMA audio.
+                        var lipSize = BitConverter.ToInt32(fuz, 8);
+                        File.WriteAllBytes(Path.ChangeExtension(dst, ".lip"), fuz[12..(12 + lipSize)]);
+                        File.WriteAllBytes(Path.ChangeExtension(dst, ".xwm"), fuz[(12 + lipSize)..]);
+                        File.Delete(dst);
+                    }
+                    else
+                    {
+                        File.WriteAllBytes(dst, fuz);
+                    }
                 }
 
                 mod.DialogTopics.Add(topic);
