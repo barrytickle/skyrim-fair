@@ -374,8 +374,7 @@ Every file in the deployed mod folder was traced to its source:
 | --- | --- | --- | --- | --- | --- |
 | Palisade wall | `meshes\barry_palisades\palisade.nif`, `textures\barry_palisades\palisade\*.dds` | Palisade (Sketchfab) | adam127 | CC BY 4.0, with attribution | Bundled |
 | Main gate | `meshes\barry_palisades\viking_palisade_gate_closed.nif` (placed), `viking_palisade_gate.nif` (open, not placed), `textures\barry_palisades\viking_palisade_gate\*.dds` | Viking Palisade gate (Sketchfab) | Sereib | CC BY 4.0, with attribution | Bundled |
-| Outhouses (today) | `meshes\Stroti\Outdoor Toilet\*.nif`, `textures\Stroti\*.dds` | Stroti's Outdoor Toilet resource | Stroti; Tamira; Barry with ChatGPT | Credit, free, not re-uploaded | **Being replaced** by Strifey7's Outhouse |
-| Outhouses (replacement) | to come | Outhouse (Sketchfab) | Strifey7 | CC BY 4.0, with attribution | To be bundled |
+| Outhouses | `meshes\barry_outhouse\outhouse.nif`, `textures\barry_outhouse\*.dds` | Outhouse (Sketchfab) | Strifey7 | CC BY 4.0, with attribution | Bundled (since 2026-09-25; Stroti's before, not shipped) |
 | Light towers | `meshes\barry_scaffold\scaffold.nif`, `textures\barry_scaffold\*.dds` | scaffold (Sketchfab) | Js_TuruokaJunpei | CC BY 4.0, with attribution | Bundled |
 | Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | made with Suno (Pro) | Barry | Barry owns them (Suno Pro plan) | Built mod only |
 | Folk dance | `...\OpenAnimationReplacer\SkyrimFairFolk\` | the folk turn | Barry, made with ChatGPT | The project's own | Built mod only |

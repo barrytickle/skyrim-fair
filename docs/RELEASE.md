@@ -119,9 +119,10 @@ Permissions and provenance (details in `CREDITS.md`):
       the package: the plugin doesn't use it, and it's only left over in the deploy folder.
 - [x] The scaffold tower: "scaffold" by Js_TuruokaJunpei (Sketchfab), CC BY 4.0. Credit and the changes made are in `CREDITS.md`.
 - [x] The music and crowd sounds: made with Suno on the Pro plan (Barry, 2026-09-25), so Barry owns them. Credit "made with Suno" anyway.
-- [ ] Stroti's Outdoor Toilet can't be re-uploaded: **being replaced** by "Outhouse" by
-      Strifey7 (Sketchfab, CC BY 4.0), converted by Barry. Then drop `meshes\Stroti\` and
-      `textures\Stroti\`.
+- [x] Stroti's Outdoor Toilet can't be re-uploaded: **replaced** (2026-09-25) by "Outhouse"
+      by Strifey7 (Sketchfab, CC BY 4.0), converted by Barry (`meshes\barry_outhouse\`).
+- [ ] Leave `meshes\Stroti\` and `textures\Stroti\` out of the package: the plugin no longer
+      uses them (they're still in Barry's deploy folder).
 - [x] The folk dance: Barry's, made with ChatGPT ("Astra"). Nothing to ask.
 - [x] Stealth Detection Fixes, Maximum Destruction and Strange Runes: no permission needed.
       Players make the one-word edits themselves, from `docs/COMPATIBILITY.md` on the mod page.

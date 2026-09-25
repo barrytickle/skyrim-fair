@@ -4,6 +4,35 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: Stroti's outhouse replaced by Strifey7's (CC BY 4.0)
+
+Barry: "our skyrim outhouse is also ready... install the Nif". GPT's conversion of
+"Outhouse" by Strifey7 (Sketchfab, CC BY 4.0) was in `Downloads`.
+- **Copied:** the package to `assets/Skyrim_Outhouse_Assets/` (untracked, like the
+  palisade's), and its game files to `assets/meshes/barry_outhouse/outhouse.nif` and
+  `assets/textures/barry_outhouse/` (committed; CC BY allows it). The NIF's three texture
+  paths resolve.
+- **The model** (checked with `nif_preview`): 48.5 x 58.5 x 88, origin centred at ground
+  level, door on its -y face and part of the mesh.
+- **Placed as the old one was:**
+  - scale 2.2 (about 192 tall, like Skyrim's doors; Stroti's was 195)
+  - y 0, not 39: its origin is centred, where Stroti's wasn't
+  - yaw 0, not 180: its door faces the other way
+  - The six outhouses keep their FormIDs and positions, and their doors still face the
+    lane.
+- **The separate door pieces are gone**, as `reserve: true`: their six FormIDs stay taken,
+  so nothing renumbers. The door STAT (`SkyrimFairOuthouseDoor`) is kept for its FormID,
+  pointing at the new mesh, and nothing places it.
+- Plugin `b173d10375cebd1b...`, deterministic. Against `e89da4ef...`, the only change is
+  the 6 door references gone (`0x11EA`-`0x11F4`, even IDs). Footprints are regenerated:
+  the outhouse's added, Stroti's two dropped. The market places 1,723 pieces (6 fewer);
+  the navmesh has 7,909 triangles (was 7,916).
+- **To test:** the two outhouse rows (west of the market, and by the east wall walk).
+  - Are the outhouses the right size beside a person?
+  - Do their doors face the lane?
+  - Do they sit on the ground, with solid collision?
+  - How do the textures and the glossy material look?
+
 Barry: the singers should move, "maybe like crab walking style". He chose **the three
 sliding as a line**, **200 units, every 8 s**.
 
