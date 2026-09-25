@@ -121,7 +121,13 @@ python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair
 - **Edit scripts:** write Python edit scripts to the scratchpad with the Write tool.
   Bash heredocs break on apostrophes.
 
-## Where we are (end of 2026-09-25): ready for Nexus
+## Where we are (end of 2026-09-25): released on Nexus
+
+**The Wanderer's Fair is live on Nexus Mods** (uploaded by Barry, 2026-09-25, then an update
+with the grass fix; Vortex updates from Nexus). From now on: bump the version for every release
+(`tools/package.py --version 1.0.1` and so on, matching Nexus), and treat player reports as the
+next work.
+
 
 Plugin `709eeed250ad09a0` (dev and release builds identical), deployed. The day's detail is in
 `docs/AUDIT.md`, newest first. **Release 1.0.0 is packaged and ready to upload**

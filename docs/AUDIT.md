@@ -4,6 +4,13 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: released on Nexus
+
+Barry uploaded The Wanderer's Fair to Nexus Mods (2026-09-25), then the update with the
+grass fix. Vortex on his plain Skyrim saw the update on Nexus and downloaded it: the update
+route works end to end. Next releases: `python tools/package.py --version <x.y.z>`, with the
+version matching Nexus's.
+
 ### Later: a meadow in the fair (plain Skyrim's live grass)
 
 Barry, testing the release zip on a completely vanilla Skyrim: "do you know why there's so
