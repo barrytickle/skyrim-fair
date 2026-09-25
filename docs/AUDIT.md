@@ -8,6 +8,7 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 Barry: "can we change it to 20x". `shops.priceMultiplier` 20 (the perk's EPFD `0000a041`).
 Plugin `18e3b92ce18797d9`, deterministic; no FormID changed. Deployed.
+**Confirmed in game by Barry:** "i think it's good now" (the shops, with the gear stalls at 20x).
 
 ### Later: fair prices only at the gear stalls, 40x
 
