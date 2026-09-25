@@ -4,6 +4,40 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the saved-property trap, crowd layers at 3, the tower banners, Garrick's swap undone
+
+Barry: the music dip "works great"; the walls are brighter; Round the Green still opens;
+Garrick's current spot is "great, so we can axe that change"; `SkyrimFairCrowdLayers` at 3
+helped the frame rate, with little visible difference, so keep it; the rock still doesn't cover
+the floating grass; banners outside "seem to be getting stuck".
+- **Why Round the Green still opens: saved script properties.** The log said
+  `song 0 playing`, so the start-at-0 fix works. But its cheer came at 148.8 s of a 149.6 s
+  song, Round the Green's length. In Barry's save the song list is still the old one.
+  - **Skyrim stores a script's property values in the save** the first time the script
+    runs. Later plugin changes to an *existing* property never reach that save; only *new*
+    properties take the plugin's values.
+  - So in Barry's save these didn't take effect: the new songs, Claudius's ledger, and
+    Garrick's continuous lute (`Songs`, `CameoIdles`, `CameoHolds`...).
+  - These did, being new properties or records: the duck, the companions, the rounds, the
+    posters, the lights.
+  - **To see property changes:** a fresh start (`coc SkyrimFairWorld` from the main menu),
+    or ReSaver (Fallrim Tools) to delete `SkyrimFairAudioScript`'s instance from the save.
+  - For release: updates that change the show's data need a new game or a cleaned save,
+    unless the data moves to properties with new names.
+- **Crowd layers default to 3 of 6** (`crowds.tierDefault`): the dance floor, front and
+  back, and the seated market visitors. The archery spectators, the wanderers and the
+  children are off.
+- **The exterior's tower banners:** the towers are copied whole inside the smaller wall, so
+  their outward banners hung in it. Copies of `DEE54` at the towers' 1.25 within 120 of the
+  wall line are now copied disabled (FormIDs kept): the two by the gate (`0x300F4`,
+  `0x300FC`). The wall's own banners stay.
+- **Garrick's visitor swap undone:** the visitor (`0x149D`) is back. Garrick stands (the
+  stay package, the lute) at his corner, (1044, 4630).
+- **No empty array properties** are written any more: the engine can't initialise them,
+  and logged "incorrect type" for `SingerCheerMoves`, `SingerCheerLengths`, `StripIds` and
+  `StripPlugins`.
+- Plugin `4c8884908ffb115e...`, deterministic, deployed; the same 4,290 records.
+
 ### Later: the music ducks for real, Garrick stands in, the wanderers stand, lights, the opening song
 
 Barry, in game:

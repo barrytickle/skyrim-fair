@@ -619,6 +619,19 @@ internal static class FairExterior
             });
         }
 
+        // The towers' banners the wall runs through: disabled, not removed (their FormIDs stay).
+        var hideBases = ext.HideNearWallBases.Select(FormKeyHelper.Parse).ToHashSet();
+        foreach (var o in cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>())
+            .Where(o => o.FormKey.ModKey == mod.ModKey && hideBases.Contains(o.Base.FormKey) && o.Placement is not null
+                && Math.Abs((o.Scale ?? 1f) - fw.Towers.BannerScale) < 0.01f))
+        {
+            if (WallDistance(o.Placement!.Position.X, o.Placement.Position.Y) < ext.HideNearWall)
+            {
+                o.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+                result.Hidden++;
+            }
+        }
+
         // ---- file the cells ------------------------------------------------------------------------
         var grid = new ExteriorCellGrid(tamriel);
         foreach (var ((cx, cy), cell) in cells.OrderBy(c => c.Key.Y).ThenBy(c => c.Key.X))
@@ -656,6 +669,8 @@ internal sealed class ExteriorResult
     public int Flags { get; set; }
 
     public int Sunk { get; set; }
+
+    public int Hidden { get; set; }
 
     public int Signs { get; set; }
 

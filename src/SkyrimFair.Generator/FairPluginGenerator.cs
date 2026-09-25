@@ -310,8 +310,20 @@ internal static class FairPluginGenerator
             var ext = FairExterior.Build(mod, config, master, vanillaWorldspace, worldspace, persistentCell, mapMarker);
             Console.WriteLine($"  exterior: {ext.Panels} wall panels, {ext.Banners} banners, {ext.Ropes} rope halves, {ext.Lanterns} lanterns; "
                 + $"{ext.Silhouette} pieces of the fair inside; {ext.Disabled} vanilla references cleared ({ext.Sunk} large ones sunk, not disabled); {ext.Songs} songs outside, "
-                + $"{ext.FireworkSites} firework sites; {ext.Path} path pieces, {ext.Flags} gate flag pieces, {ext.Signs} road sign pieces; cells {string.Join(" ", ext.Cells.Select(c => $"({c.X},{c.Y})"))}; "
+                + $"{ext.FireworkSites} firework sites; {ext.Path} path pieces, {ext.Flags} gate flag pieces, {ext.Signs} road sign pieces, {ext.Hidden} tower banners off the wall; cells {string.Join(" ", ext.Cells.Select(c => $"({c.X},{c.Y})"))}; "
                 + $"FormIDs 0x{ext.FormIds.From:X}-0x{ext.FormIds.To:X}");
+        }
+
+        // Empty array properties can't be initialised from a plugin ("cannot be initialized because
+        // the value is the incorrect type" in the log); left out, the script sees them empty anyway.
+        foreach (var quest in mod.Quests.Where(q => q.VirtualMachineAdapter is not null))
+        {
+            foreach (var script in quest.VirtualMachineAdapter!.Scripts)
+            {
+                script.Properties.RemoveAll(p =>
+                    (p is ScriptObjectListProperty o && o.Objects.Count == 0) || (p is ScriptFloatListProperty f && f.Data.Count == 0)
+                    || (p is ScriptIntListProperty n && n.Data.Count == 0) || (p is ScriptStringListProperty s && s.Data.Count == 0));
+            }
         }
 
         var outputPath = Path.Combine(outputDirectory, mod.ModKey.FileName);

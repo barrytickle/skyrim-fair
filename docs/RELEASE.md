@@ -141,6 +141,7 @@ Files and packaging:
       its `config.json` files, the singers' FaceGen heads), `textures\` (their FaceGen
       tints), `Sound\` (including `Voice\SkyrimFair.esp\`, the singers' lip files),
       `Scripts\`. `tools/deploy.py` copies exactly this set.
+- [ ] Updating: script property values are saved in the save, so an update that changes the show's data (songs, idles) needs a new game or a cleaned save. Say so on the mod page, or move such data to new property names per release.
 - [ ] Ship `Seq\SkyrimFair.seq` (generated next to the plugin): without it the cameos' greetings stay dead.
 - [ ] **Not** the SPID copies (`dist/spid/`, and the `*_DISTR.ini` that `deploy.py` puts at the
       mod folder's root): they're for Barry's game only. Paste `docs/COMPATIBILITY.md`

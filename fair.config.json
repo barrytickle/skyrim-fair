@@ -243,7 +243,7 @@
           "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "emotion": "Happy",
           "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [1044, 4630, 0, 120], "radius": 2200, "energy": 80,
-          "stand": true, "replaces": "0000149D:SkyrimFair.esp",
+          "stand": true,
           "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 600}],
           "every": [2, 4],
           "spots": [[1044, 4630], [1300, 4250], [1044, 4630], [1600, 4000], [1044, 4630], [1250, 3800]],
@@ -3498,6 +3498,7 @@
         {"name": "hay bale sitters", "near": "social_hay", "count": 1, "radius": 150, "arc": 180, "chance": 0.6, "retired": true},
         {"name": "stable hand", "near": "stable_shelter", "count": 1, "radius": 150, "arc": 90}
       ],
+      "tierDefault": 3,
       "tiers": [
         {"name": "dance floor, front", "role": "dancer", "groups": [{"name": "dancers front west", "at": [1480, 4300, 0], "count": 7, "radius": 200, "arc": 180}, {"name": "dancers front left", "at": [1860, 4240, 0], "count": 7, "radius": 190, "arc": 180}, {"name": "dancers front right", "at": [2240, 4240, 0], "count": 7, "radius": 190, "arc": 180}, {"name": "dancers front east", "at": [2620, 4300, 0], "count": 7, "radius": 200, "arc": 180}]},
         {"name": "dance floor, back", "role": "dancer", "groups": [{"name": "dancers back west", "at": [1420, 4720, 0], "count": 9, "radius": 220, "arc": 180}, {"name": "dancers back east", "at": [2680, 4720, 0], "count": 9, "radius": 220, "arc": 180}]},
@@ -3676,6 +3677,7 @@
       "forward": 480,
       "turnToPath": 15
     },
+    "hideNearWallBases": ["000DEE54:Skyrim.esm"],
     "cover": [
         {"name": "RockPileM02FieldGrass01WR", "piece": "000A3C51:Skyrim.esm", "x": -5655, "y": -10630, "z": -8, "yaw": 0, "scale": 0.8}
       ],

@@ -3401,8 +3401,11 @@ internal sealed record CrowdsConfig
     /// <summary>Extra layers of visitors, built last and switched live (see <see cref="CrowdTier"/>).</summary>
     public List<CrowdTier> Tiers { get; init; } = new();
 
-    /// <summary>The global the stage script reads: how many layers are on (defaults to all of them).</summary>
+    /// <summary>The global the stage script reads: how many layers are on.</summary>
     public string TierGlobal { get; init; } = "SkyrimFairCrowdLayers";
+
+    /// <summary>How many layers are on to begin with; 0 or less: all of them.</summary>
+    public int TierDefault { get; init; }
 
     /// <summary>
     /// The visitors' package swapped, late, for a copy of this one that only greets the
@@ -3939,6 +3942,15 @@ internal sealed record ExteriorConfig
     public ExteriorApproach Approach { get; init; } = new();
 
     public ExteriorGateFlags GateFlags { get; init; } = new();
+
+    /// <summary>
+    /// Copied pieces of these bases within <see cref="HideNearWall"/> of the wall line are copied
+    /// disabled (FormIDs kept): the towers stand whole inside the smaller wall, so their outward
+    /// banners hung in it (2026-09-25).
+    /// </summary>
+    public List<string> HideNearWallBases { get; init; } = new();
+
+    public float HideNearWall { get; init; } = 120f;
 
     /// <summary>The Whiterun road sign beside the path, out from the gate.</summary>
     public ExteriorRoadSign RoadSign { get; init; } = new();

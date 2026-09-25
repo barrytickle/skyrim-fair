@@ -641,7 +641,11 @@ internal static class FairWorld
                 topCell.Persistent.Add(placed);
             }, PutTemporaryNpc, PutPersistentNpc, (crowdMarker[0], crowdMarker[1], plan.Height(crowdMarker[0], crowdMarker[1]) - 200f),
                 seats, quietSource, FolkKeepClear());
-            var tierGlobal = new GlobalFloat(mod) { EditorID = config.Crowds.TierGlobal, Data = config.Crowds.Tiers.Count };
+            var tierGlobal = new GlobalFloat(mod)
+            {
+                EditorID = config.Crowds.TierGlobal,
+                Data = config.Crowds.TierDefault > 0 ? Math.Min(config.Crowds.TierDefault, config.Crowds.Tiers.Count) : config.Crowds.Tiers.Count,
+            };
             mod.Globals.Add(tierGlobal);
             var script = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
             ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
@@ -666,7 +670,7 @@ internal static class FairWorld
                 Name = "CheerIdles",
                 Objects = config.Crowds.CheerIdles.Select(i => Obj(FormKeyHelper.Parse(i))).ToExtendedList(),
             });
-            Console.WriteLine($"  crowd layers ({config.Crowds.TierGlobal}, all on; {seats.Count} seats, {tiers.Dancers.Count} dancers): "
+            Console.WriteLine($"  crowd layers ({config.Crowds.TierGlobal}, {tierGlobal.Data} of {config.Crowds.Tiers.Count} on; {seats.Count} seats, {tiers.Dancers.Count} dancers): "
                 + string.Join(", ", tiers.Tiers.Select(t => $"{t.Tier} {t.Count}")));
         }
 

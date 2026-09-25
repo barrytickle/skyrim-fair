@@ -638,6 +638,10 @@ Project-owned mesh work is code-first and reproducible.
   (`SkyrimFairCameoLine.psc`). Its VMAD must match vanilla's (INFO `0684FF`): version 5,
   object format 2, the script `Local`, fragments' extra bind data 2 but the fragment's own 1,
   then `Fragment_0`.
+- **script properties are saved**: the first time a script runs in a save, its property values
+  are stored there. Changing an existing property's value in the plugin never reaches that
+  save; only new properties take the plugin's values. Test show-data changes on a fresh start
+  (`coc` from the main menu), or ReSaver the script's instance away.
 - **adding a stage song**: give it `"added": true` in `songs.config.json`. Its sound records (and the exterior's quieter copy) then go in the added-songs range (`FairAddedSongs`, 0x50000), so it can go anywhere in the playlist without renumbering anything. Keep the flag on for good. Songs without timelines play everything and dance throughout
 - **named NPCs** (`FairCameos.cs`): don't use a Traits template for a named NPC: in game it shows the template's name. Copy the vanilla face field by field and its FaceGen files (`FairSingers.CopyFace`); built after the life pass in their own range (0x60000), so they get the `SkyrimFairNPC` keyword by hand (the keyword loop runs earlier); `alwaysOn` has `SkyrimFairCameo` so the culling never switches them off
 - **clearing a large reference** (on the worldspace's RNAM list): don't disable it. Its LOD model stays visible until the reference is loaded and showing, and a disabled one never is. Sink it under the ground, enabled (`exterior.sinkLarge`, `FairExterior`)
