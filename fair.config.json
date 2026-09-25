@@ -3628,7 +3628,7 @@
   "exterior": {
     "enabled": true,
     "formIdBase": 196608,
-    "gate": [-5900, -10800],
+    "gate": [-7050, -10800],
     "rotationDegrees": 180,
     "scale": 0.6,
     "gateName": "The Wanderer's Fair",
@@ -3651,7 +3651,7 @@
     "approach": {
       "pave": false,
       "start": 150,
-      "to": [-5900, -10120],
+      "to": [-7050, -10120],
       "clearHalfWidth": 450,
       "spacing": 170,
       "halfWidth": 200,
@@ -3660,7 +3660,7 @@
       "edgePieces": ["0001814C:Skyrim.esm", "0001812A:Skyrim.esm"]
     },
     "gateFlags": {
-      "out": 450,
+      "out": 260,
       "forward": 110,
       "pieces": [
         {"name": "CivilWarBanner01", "piece": "00060166:Skyrim.esm", "x": 0, "y": 0},
@@ -3678,13 +3678,12 @@
       "turnToPath": 15
     },
     "hideNearWallBases": ["000DEE54:Skyrim.esm"],
-    "cover": [
-        {"name": "RockPileM02FieldGrass01WR", "piece": "000A3C51:Skyrim.esm", "x": -5655, "y": -10630, "z": -8, "yaw": 0, "scale": 0.8}
-      ],
+    "keep": ["00023362:Skyrim.esm"],
+    "cover": [],
     "roadSign": {
-      "side": 1,
-      "out": 280,
-      "forward": 320,
+      "side": -1,
+      "out": 220,
+      "forward": 240,
       "pieces": [
         {"name": "RoadSignPost", "piece": "0003AF9D:Skyrim.esm"},
         {"name": "RoadSignWhiterun01", "piece": "0003AF9A:Skyrim.esm", "z": 230, "yaw": 180}

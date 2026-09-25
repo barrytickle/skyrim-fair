@@ -249,6 +249,7 @@ internal static class FairExterior
         // aren't loaded and showing, and a disabled one never is: its LOD stood in front of the
         // gate (2026-09-25). Those are left enabled and sunk out of sight instead, so the engine
         // loads them and hides the LOD.
+        var keep = ext.Keep.Select(FormKeyHelper.Parse).ToHashSet();
         var large = vanilla.LargeReferences.SelectMany(l => l.References).Select(r => r.Reference.FormKey).ToHashSet();
 
         // The approach: from just out of the gate to the road, cleared and paved.
@@ -309,6 +310,7 @@ internal static class FairExterior
                 foreach (var o in vc.Temporary.OfType<IPlacedObjectGetter>().OrderBy(o => o.FormKey.ID))
                 {
                     if (o.Placement is not { } p) continue;
+                    if (keep.Contains(o.FormKey)) continue;  // left as vanilla has it
                     var (x, y) = (p.Position.X, p.Position.Y);
                     bool hit;
                     if (InApproach(x, y) && FairPluginGenerator.WhyUnsafeToDisable(o, scenery) is null

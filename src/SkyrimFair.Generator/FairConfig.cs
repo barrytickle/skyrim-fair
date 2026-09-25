@@ -3950,6 +3950,12 @@ internal sealed record ExteriorConfig
     /// </summary>
     public List<string> HideNearWallBases { get; init; } = new();
 
+    /// <summary>
+    /// Vanilla references the clearing leaves alone: the big slab (023362) that hides a dip
+    /// where DynDOLOD's terrain underside shows through; the gate was moved clear of it instead.
+    /// </summary>
+    public List<string> Keep { get; init; } = new();
+
     public float HideNearWall { get; init; } = 120f;
 
     /// <summary>The Whiterun road sign beside the path, out from the gate.</summary>

@@ -4,6 +4,35 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the gate moved west, the original slab back over the dip
+
+Barry: "we move the door to the right? and return the original rock. It doesn't need to be
+perfect on the outside, just a way to get in".
+- **The slab** (`023362`, `DirtCliffs01FieldGrass01`) is about 1,750 wide (east-west) and
+  about 420 deep. It lies along the front of the wall, centred on the old gate at
+  (-5887, -10440), and it's what hid the dip where DynDOLOD's underside shows.
+  - It's back as vanilla has it: `exterior.keep` exempts it from clearing, and it's no
+    longer overridden.
+- **The compound moved 1,150 west** (to the right, facing the gate from outside):
+  `exterior.gate` (-7050, -10800), and the approach's road end with it, (-7050, -10120). So
+  the path corridor keeps its length, and its reserved FormIDs their count.
+  - The gateway now opens west of the slab's end (about -6770). Everything outside is placed
+    from the gate, so it moved with it: the wall, the towers, the silhouette, the doors and
+    arrival points, the map marker, the show, the clearing.
+- **Clear of the slab:** the gate flags are 260 either side (were 450; the east one would
+  have stood in the slab). The road sign is on the path's west side (side -1, 220 out, 240
+  forward), near the welcome sign. The small cover rock is gone (it was `0x30147`, the
+  range's last).
+- The clearing now touches cells (-3..-2, -4..-3): 37 vanilla references, 2 large ones sunk.
+  The 28 vanilla overrides that changed are that clearing moving. None of the fair's own
+  records moved, apart from the cover gone.
+- Plugin `d2637a92ca6d2036...`, deterministic, deployed.
+- **To test:**
+  - Walk up from the road: is the gateway clear, with the slab to its left?
+  - Is the floating grass gone?
+  - Do the flags, the road sign and the welcome sign stand clear?
+  - Does the wall sit acceptably at its new spot?
+
 ### Later: the saved-property trap, crowd layers at 3, the tower banners, Garrick's swap undone
 
 Barry: the music dip "works great"; the walls are brighter; Round the Green still opens;
