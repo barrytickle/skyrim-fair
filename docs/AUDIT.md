@@ -38,6 +38,7 @@ Barry: "frame rate is still the same :) And yes please!!" (drop Holidays).
   - The apple baskets (fruit stalls), the mead crates (drinks and mead stalls), the silver
     platters (sweetrolls, prize booth), and the sign stands (score board, prize booth).
   - Optionally, disable Holidays in MO2: the fair should load and look the same.
+- **Confirmed in game by Barry:** "a proper seamless transition" (the bunting and props without Holidays).
 
 ### Later: the paper lanterns replace Holidays'
 
