@@ -24,6 +24,7 @@ Barry: "let's do that :D". Twelve kinds instead of Holidays' six: two shapes in 
   `DNAM` matches every other static in the plugin.
 - Plugin `f7ca9173822b4a47`, deterministic. Deployed, with the two NIFs and 14 textures.
 - Holidays is still a master, for the rope lines and a few props (`docs/RELEASE.md`).
+- **Confirmed in game by Barry:** "these lanterns are incredible".
 - **To test:**
   - The lanterns hang from the ropes and posts where the old ones did, at a good size.
   - Their colours, and the glow at night.
