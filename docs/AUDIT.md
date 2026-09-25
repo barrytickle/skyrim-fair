@@ -4,6 +4,50 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: louder cameos, Garrick's shady corner, the grass covered, companions through the gate
+
+Barry: "the posters are perfect".
+- **The cameos' voices, louder, and the music ducked for them:**
+  - Barry's recordings sat at -17 (Garrick) and -19 (Claudius) LUFS, under the stage songs
+    (-10). `build_voices.py` now runs each line through a 3:1 speech compressor and
+    loudnorm to -12 (about -12.7 in practice, true peak -1): about 6 dB up.
+  - While the player talks to a cameo (`IsInDialogueWithPlayer`), the song plays at 0.4
+    (`CameoDuck`, about -8 dB). With a cameo within 600, the update comes every 0.5 s, so
+    the duck is quick.
+- **"I cannot find Garrick... near the watchtower left of the stage, so he looks shady":**
+  - He starts at Barry's spot (1044, 4630), by the tower at (798, 5250).
+  - Three of his six spots are that corner, and the others are close (the dance floor's
+    west edge, (1600, 4000), (1250, 3800)), all at radius 200. So he lurks there, and
+    wanders out now and then.
+  - Same records, so no FormIDs move.
+- **The floating grass, covered:** Barry's spot is (-5691, -10621, -5806), 210 east of the
+  gate's centre and 180 out.
+  - It gets `RockPileM02FieldGrass01WR` (a low grassy Whiterun-tundra rock pile) at 0.55,
+    at (-5665, -10635), set 6 into the ground and tilted to the slope (`exterior.cover`).
+  - It's appended to the exterior's range (`0x30147`).
+- **"Game companions can't seem to enter the fair":**
+  - Followers go through a load door only by navmesh door links, and neither side of the
+    gate has any: the fair's generated navmesh, or Tamriel's (not edited, for
+    compatibility).
+  - So there's a finder quest, `SkyrimFairCompanions` (`0x70000`, a new range), of 6
+    optional, allow-reserved aliases matching the player's companions anywhere, not only in
+    the loaded area. The match is `GetPlayerTeammate` OR in `CurrentFollowerFaction`, AND
+    `WaitingForPlayer` 0 AND alive.
+  - The stage script (`BringCompanions`) restarts it on arriving at the fair (and on a load
+    there) and on leaving. Each one it finds that isn't within 1,500 of the player is moved
+    to them, a step behind.
+  - Its aliases were compared with vanilla's `WIDragonKilled` spectators; they drop only
+    those aliases' faction and package extras.
+- Plugin `1c3a7a4bc6b47e4f...`, deterministic, deployed with the scripts and the voices.
+  Against `b8a4381f...`, 2 records are added (`0x30147`, `0x70000`).
+- **To test:**
+  - Are the voices clear over the music, and does the music dip while one talks?
+  - Is Garrick by the watchtower?
+  - Has the floating grass gone under the rocks, without rocks in the gateway?
+  - Does a follower appear beside you a few seconds after you arrive, and again after you
+    leave?
+  - Does a follower told to wait stay put?
+
 ### Later: the cameos walk rounds; the Fair Inspector's posters; the floating grass found
 
 - **The floating grass is DynDOLOD's `Tamriel_UNDERSIDE`** (Barry's click, again), poking up

@@ -628,6 +628,11 @@ Project-owned mesh work is code-first and reproducible.
     DNAM 01, as vanilla's), or he can't be talked to.
   - A start-game-enabled quest with dialogue must be listed in `Seq\<plugin>.seq`. The
     generator writes it (`FairPluginGenerator`), and `deploy.py` copies it.
+- **followers and the fair's gate**: followers walk through a load door only by navmesh door
+  links, and neither side of the gate has any. So the stage script's `BringCompanions`
+  restarts `SkyrimFairCompanions` on arriving and on leaving, and moves whoever it finds to
+  the player. Its optional aliases have no loaded-area limit, so they find persistent
+  companions anywhere: teammates or in `CurrentFollowerFaction`, alive, `WaitingForPlayer` 0.
 - **adding a stage song**: give it `"added": true` in `songs.config.json`. Its sound records (and the exterior's quieter copy) then go in the added-songs range (`FairAddedSongs`, 0x50000), so it can go anywhere in the playlist without renumbering anything. Keep the flag on for good. Songs without timelines play everything and dance throughout
 - **named NPCs** (`FairCameos.cs`): don't use a Traits template for a named NPC: in game it shows the template's name. Copy the vanilla face field by field and its FaceGen files (`FairSingers.CopyFace`); built after the life pass in their own range (0x60000), so they get the `SkyrimFairNPC` keyword by hand (the keyword loop runs earlier); `alwaysOn` has `SkyrimFairCameo` so the culling never switches them off
 - **clearing a large reference** (on the worldspace's RNAM list): don't disable it. Its LOD model stays visible until the reference is loaded and showing, and a disabled one never is. Sink it under the ground, enabled (`exterior.sinkLarge`, `FairExterior`)

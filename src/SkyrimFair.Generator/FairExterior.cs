@@ -608,6 +608,17 @@ internal static class FairExterior
             result.Signs++;
         }
 
+        // Cover for bare ground the clearing left showing (appended, at the end of the range).
+        foreach (var c in ext.Cover)
+        {
+            PutObject(new PlacedObject(mod)
+            {
+                Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(c.Piece)),
+                Scale = c.Scale == 1f ? null : c.Scale,
+                Placement = new Placement { Position = new P3Float(c.X, c.Y, Ground(c.X, c.Y) + c.Z), Rotation = OnGround(c.X, c.Y, c.Yaw * MathF.PI / 180f) },
+            });
+        }
+
         // ---- file the cells ------------------------------------------------------------------------
         var grid = new ExteriorCellGrid(tamriel);
         foreach (var ((cx, cy), cell) in cells.OrderBy(c => c.Key.Y).ThenBy(c => c.Key.X))

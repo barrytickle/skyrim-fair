@@ -147,6 +147,13 @@ Float Property SingerFollow = 12.0 Auto
 Float[] Property SingerStarts Auto
 {Each line's start, in seconds from its song's start.}
 
+Quest Property CompanionFinder Auto
+{Optional aliases that find the player's companions anywhere (teammates or followers, alive,
+not waiting). Followers don't come through the fair's gate by themselves: its load door has
+no navmesh door links on either side. So on arriving and on leaving, the finder is restarted
+and each companion it finds is moved to the player.}
+Int Property CompanionSlots = 6 Auto
+
 Actor[] Property Cameos Auto
 {The named ambient characters (Garrick Sol V, Claudius Vale; FairCameos.cs). They wander on their
 own sandbox; every so often, when free, each plays his next idle and stops it after its hold.}
@@ -160,6 +167,8 @@ Int[] Property CameoIdleCount Auto
 Float[] Property CameoEveryMin Auto
 Float[] Property CameoEveryMax Auto
 {Seconds between one cameo's idles, at random between the two.}
+Float Property CameoDuck = 0.4 Auto
+{The music's volume, as a share, while the player talks to a cameo (0.4, about 8 dB down).}
 GlobalVariable[] Property CameoSpot Auto
 Int[] Property CameoSpotCount Auto
 Float[] Property CameoMoveMin Auto
@@ -368,6 +377,8 @@ Event OnUpdate()
 		If phase != 0
 			StopAll()
 			phase = 0
+			; Just left the fair: companions left inside come out too.
+			BringCompanions()
 		EndIf
 		RegisterForSingleUpdate(IdlePoll)
 		Return
@@ -384,6 +395,8 @@ Event OnUpdate()
 		Enter(1, FirstSongDelay, show)
 		StopBand(True)
 		QueueArchers()
+		; Arrived (or loaded here): companions left outside come in.
+		BringCompanions()
 	EndIf
 	ResetArchers()
 	ApplyCrowdLayers()
@@ -400,7 +413,11 @@ Event OnUpdate()
 	EndIf
 
 	If songInstance != 0
-		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
+		If CameoTalking()
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * CameoDuck)
+		Else
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
+		EndIf
 	EndIf
 	SetAmbience(phase == 2)
 	If phase == 2
@@ -435,6 +452,10 @@ Event OnUpdate()
 	EndIf
 	If cameoWake > now && Seconds(cameoWake - now) < left
 		left = Seconds(cameoWake - now)
+	EndIf
+	If left > 0.5 && CameoNear()
+		; A cameo close by: look again soon, so the music ducks as soon as he's spoken to.
+		left = 0.5
 	EndIf
 	If phase != 2 && bandOn && bandUntil > show && Seconds(bandUntil - show) < left
 		; Wake as the song's last note ends, to put the instruments away.
@@ -734,6 +755,61 @@ Function SingerGestures(Float now)
 		EndIf
 		i += 1
 	EndWhile
+EndFunction
+
+; Every companion the finder turns up that isn't already near the player is moved to them,
+; a step behind and to the side. The finder is stopped again after.
+Function BringCompanions()
+	If !CompanionFinder
+		Return
+	EndIf
+	CompanionFinder.Stop()
+	If !CompanionFinder.Start()
+		Return
+	EndIf
+	Actor player = Game.GetPlayer()
+	Int brought = 0
+	Int i = 0
+	While i < CompanionSlots
+		ReferenceAlias slot = CompanionFinder.GetAlias(i) as ReferenceAlias
+		Actor mate = None
+		If slot
+			mate = slot.GetActorRef()
+		EndIf
+		If mate && mate != player && (mate.GetWorldSpace() != player.GetWorldSpace() || mate.GetDistance(player) > 1500.0)
+			mate.MoveTo(player, 70.0 * ((brought % 3) - 1), -90.0 - 40.0 * (brought / 3), 0.0)
+			brought += 1
+		EndIf
+		i += 1
+	EndWhile
+	CompanionFinder.Stop()
+	If brought > 0
+		Debug.Trace("SkyrimFairAudio: brought " + brought + " companions to the player")
+	EndIf
+EndFunction
+
+; Whether the player is talking to a cameo, and whether one is close enough to be spoken to.
+Bool Function CameoTalking()
+	Int i = 0
+	While i < Cameos.Length
+		If Cameos[i] && Cameos[i].Is3DLoaded() && Cameos[i].IsInDialogueWithPlayer()
+			Return True
+		EndIf
+		i += 1
+	EndWhile
+	Return False
+EndFunction
+
+Bool Function CameoNear()
+	Actor player = Game.GetPlayer()
+	Int i = 0
+	While i < Cameos.Length
+		If Cameos[i] && Cameos[i].Is3DLoaded() && Cameos[i].GetDistance(player) < 600.0
+			Return True
+		EndIf
+		i += 1
+	EndWhile
+	Return False
 EndFunction
 
 ; The cameos' idles. Each waits a random while (CameoEveryMin..Max), then, if he's loaded and

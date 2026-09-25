@@ -1115,6 +1115,56 @@ internal static class FairWorld
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
+        // ---- the companions' finder (its own FormID range, one quest) -----------------------------
+        if (config.Companions.Enabled && audio is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            if (saved >= config.Companions.FormIdBase)
+            {
+                throw new InvalidOperationException($"FormIDs reached the companions' range (0x{config.Companions.FormIdBase:X}): raise companions.formIdBase");
+            }
+
+            mod.ModHeader.Stats.NextFormID = config.Companions.FormIdBase;
+            var cc = config.Companions;
+            var finder = new Quest(mod)
+            {
+                EditorID = cc.QuestEditorId,
+                Name = "Fair companions",
+                Priority = 0,
+                NextAliasID = (uint)cc.Slots,
+            };
+            for (var i = 0; i < cc.Slots; i++)
+            {
+                // Find Matching Reference, anywhere (not the loaded area only), as vanilla's
+                // WIDragonKilled spectators but for the player's companions.
+                var alias = new QuestAlias
+                {
+                    ID = (uint)i,
+                    Type = QuestAlias.TypeEnum.Reference,
+                    Name = $"Companion{i + 1}",
+                    Flags = QuestAlias.Flag.Optional | QuestAlias.Flag.AllowReserved,
+                };
+                var teammate = new GetPlayerTeammateConditionData { RunOnType = Condition.RunOnType.Subject };
+                var follower = new GetInFactionConditionData { RunOnType = Condition.RunOnType.Subject };
+                follower.Faction.Link.SetTo(FormKeyHelper.Parse(cc.FollowerFaction));
+                var waiting = new GetActorValueConditionData { RunOnType = Condition.RunOnType.Subject, ActorValue = ActorValue.WaitingForPlayer };
+                var dead = new GetDeadConditionData { RunOnType = Condition.RunOnType.Subject };
+                // (teammate OR follower) AND not waiting AND alive: an OR binds to the next condition.
+                alias.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = teammate, Flags = Condition.Flag.OR });
+                alias.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = follower });
+                alias.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = waiting });
+                alias.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = dead });
+                finder.Aliases.Add(alias);
+            }
+
+            mod.Quests.Add(finder);
+            var stageScript = mod.Quests.First(q => q.FormKey == audio.Quest).VirtualMachineAdapter!.Scripts[0];
+            stageScript.Properties.Add(new ScriptObjectProperty { Name = "CompanionFinder", Object = new FormLink<ISkyrimMajorRecordGetter>(finder.FormKey) });
+            stageScript.Properties.Add(new ScriptIntProperty { Name = "CompanionSlots", Data = cc.Slots });
+            Console.WriteLine($"  companions: a finder of {cc.Slots} aliases; FormIDs 0x{cc.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // The mod's own counter must stay below the crowd figures' range.
         var counter = mod.ModHeader.Stats.NextFormID;
         if (counter >= config.CrowdFormIdBase)

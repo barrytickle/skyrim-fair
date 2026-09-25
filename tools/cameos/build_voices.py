@@ -6,6 +6,9 @@ Reads cameos/skyrim_fair_voicelines.json ({"garrick_sol_v": [{"file": "01.wav", 
 and each cameo's recordings in cameos/<folder>/mono/ (mono 44.1 kHz 16-bit), as fair.config.json's
 cameos.members say (voiceLines: the json key, voiceDir: the folder). For each line:
 
+- ffmpeg brings the line to the voices' loudness: a gentle speech compressor (3:1 over
+  -24 dB), then loudnorm to `cameos.voiceLoudness` LUFS (-12; true peak -1; about -12.7 in
+  practice): Barry's recordings sat at -17 to -19, 7-9 dB under the stage songs (-10)
 - LipGenerator (Bethesda's, command line) writes the lip track from the audio and the line's
   text (the text improves the mouth shapes; curly quotes are straightened for it)
 - xwmaencode makes the xWMA audio, and LIPFuzer packs both into a .fuz
@@ -62,7 +65,9 @@ def main():
             if not wav.exists():
                 sys.exit(f"{member['id']}: {wav} is missing")
             base = f"{k:02d}"
-            shutil.copyfile(wav, staging / f'{base}.wav')
+            loud = cameos.get('voiceLoudness', -12)
+            run('ffmpeg', '-v', 'error', '-y', '-i', wav, '-af', f'acompressor=threshold=-24dB:ratio=3:attack=5:release=80:makeup=6,loudnorm=I={loud}:TP=-1.0:LRA=7',
+                '-ar', '44100', '-ac', '1', '-c:a', 'pcm_s16le', staging / f'{base}.wav')
             for attempt in range(3):  # LipGenerator now and then exits 1 on a file it accepts on a rerun
                 try:
                     run(LIPGEN, staging / f'{base}.wav', plain(entry['text']), f'-OutputFileName:{staging / (base + ".lip")}')

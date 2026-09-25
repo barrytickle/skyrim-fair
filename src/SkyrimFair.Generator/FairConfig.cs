@@ -167,6 +167,9 @@ internal sealed record FairWorldConfig
     /// <summary>Named ambient characters, the creators' cameos (FairCameos.cs).</summary>
     public CameosConfig Cameos { get; init; } = new();
 
+    /// <summary>Bringing the player's companions through the gate (FairWorld, the stage script).</summary>
+    public CompanionsConfig Companions { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -456,6 +459,29 @@ internal sealed record SingerSteps
     public float CatchUpRadius { get; init; } = 1000f;
 
     public float FollowRadius { get; init; } = 12f;
+}
+
+/// <summary>
+/// The player's companions, brought through the fair's gate. Followers walk through a load
+/// door only by navmesh door links, which neither the fair's generated navmesh nor Tamriel's
+/// has at the new gate. So a quest of optional aliases finds the player's companions anywhere
+/// (their persistent references, not only the loaded area): teammates or in
+/// CurrentFollowerFaction, alive, not told to wait. The stage script restarts it on arriving
+/// at the fair and on leaving, and moves each one it finds to the player.
+/// </summary>
+internal sealed record CompanionsConfig
+{
+    public bool Enabled { get; init; }
+
+    public string QuestEditorId { get; init; } = "SkyrimFairCompanions";
+
+    /// <summary>How many companions it brings at most.</summary>
+    public int Slots { get; init; } = 6;
+
+    public string FollowerFaction { get; init; } = "0005C84E:Skyrim.esm";
+
+    /// <summary>Its own FormID range: one quest record.</summary>
+    public uint FormIdBase { get; init; } = 0x70000;
 }
 
 internal sealed record CameosConfig
@@ -3869,6 +3895,13 @@ internal sealed record ExteriorConfig
 
     /// <summary>The fair's own welcome sign by the path.</summary>
     public ExteriorFairSign FairSign { get; init; } = new();
+
+    /// <summary>
+    /// Vanilla pieces over ground the clearing left bare where it shows through: <c>at</c> is
+    /// <c>[x, y, yaw]</c>, world; set into the ground by <c>z</c> (negative sinks it). The dip the
+    /// big slab covered showed DynDOLOD's terrain underside (2026-09-25).
+    /// </summary>
+    public List<MarketPiece> Cover { get; init; } = new();
 
     /// <summary>How far under the ground a cleared large reference is sunk (they aren't disabled: see FairExterior).</summary>
     public float SinkLarge { get; init; } = 3000f;
