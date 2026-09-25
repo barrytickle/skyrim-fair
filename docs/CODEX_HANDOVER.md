@@ -653,6 +653,9 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **a new activator**: don't copy a static's `MODT` onto it (the texture hashes crashed the
+  game at startup, 2026-09-25). Copy the model and set `Model.Data = null`, and set
+  `MarkerColor` (PNAM) and `Flags` (FNAM) explicitly, as vanilla's
 - **the steady show** (`songs.config.json` `steady`): the timelines' drums and singers
   levels are ignored, and the singers' sing move replays at `singerLoop` with no gap
 - **adding a stage song**: give it `"added": true` in `songs.config.json`. Its sound records (and the exterior's quieter copy) then go in the added-songs range (`FairAddedSongs`, 0x50000), so it can go anywhere in the playlist without renumbering anything. Keep the flag on for good. Songs without timelines play everything and dance throughout

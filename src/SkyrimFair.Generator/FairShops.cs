@@ -176,9 +176,15 @@ internal static class FairShops
                         EditorID = $"{config.EditorIdPrefix}{trade}Counter{made.Keys.Count(k => k.Trade == trade) + 1}",
                         Name = npc.Name?.String,
                         ObjectBounds = stat.ObjectBounds.DeepCopy(),
+                        // The model path only: the static's MODT (texture hashes) on an
+                        // activator crashed the game while loading (2026-09-25); many vanilla
+                        // activators have none. PNAM and FNAM as vanilla's (Mutagen omits them).
                         Model = stat.Model?.DeepCopy(),
                         ActivateTextOverride = config.Counters.Verb,
+                        MarkerColor = System.Drawing.Color.FromArgb(0, 0xCC, 0x4C, 0x33),
+                        Flags = 0,
                     };
+                    act.Model!.Data = null;  // no MODT
                     mod.Activators.Add(act);
                     made[(trade, piece.Base.FormKey)] = act;
                 }

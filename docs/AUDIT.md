@@ -4,6 +4,20 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the startup crash on the counters' activators
+
+Barry: a crash on startup (CrashLogger: `EXCEPTION_ACCESS_VIOLATION` at `SkyrimSE.exe+0D066F4`
+during `InitTESThread`, with `TESObjectACTI "Imperial Armourer" 0x90084` on the stack twice).
+- Our activators carried the static's `MODT` (texture hashes, 96 bytes). The stack held
+  `0x736464` ("dds", the extension hash inside `MODT` entries) next to the activator, so the
+  game died reading them.
+- Now the activators have no `MODT` (about 100 vanilla activators with a model have none),
+  plus `PNAM` (cc4c3300, vanilla's usual) and `FNAM` 0, which Mutagen leaves out unless set.
+  They are `EDID OBND FULL MODL PNAM RNAM FNAM`, vanilla's order.
+- Plugin `a2d47692d712a82d`, deterministic over two builds; no FormID changed. Deployed.
+- **If it still crashes:** set `shops.counters.enabled` to false in `fair.config.json` and
+  rebuild. That puts the counters back as statics and leaves everything else.
+
 ### Later: a steady show, counters you can browse, keepers kept at their spots
 
 Barry: "have all instruments and singing and animations for singing playing constantly. I
