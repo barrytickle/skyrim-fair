@@ -25,6 +25,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import re
 import shutil
 import struct
 import subprocess
@@ -203,8 +204,17 @@ def main() -> None:
     compat = (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
     page = PAGE.format(version=args.version) + "\n\n" + compat + "\n\n---\n\n" + credits.read_text(encoding="utf-8")
     (top / "NEXUS_PAGE.md").write_text(page, encoding="utf-8")
-    # The Nexus form's five sections (Description, Installation, Features, Requirements, Shout outs).
-    shutil.copyfile(ROOT / "docs" / "NEXUS_DESCRIPTION.md", top / "NEXUS_DESCRIPTION.md")
+    # The Nexus form's sections (Description, Installation, Features, Requirements, Shout outs),
+    # with the compatibility instructions at the bottom: they must match COMPATIBILITY.md's (the
+    # one to keep current), headings one level down, or the page would quote stale SPID lines.
+    description = (ROOT / "docs" / "NEXUS_DESCRIPTION.md").read_text(encoding="utf-8")
+    if "\n## Compatibility\n" not in description:
+        sys.exit("docs/NEXUS_DESCRIPTION.md has no Compatibility section")
+    embedded = description.split("\n## Compatibility\n", 1)[1].strip()
+    embedded = re.sub(r"^#(#{2,5}) ", r"\1 ", embedded, flags=re.M)
+    if embedded != compat:
+        sys.exit("docs/NEXUS_DESCRIPTION.md's Compatibility section differs from docs/COMPATIBILITY.md: copy it across")
+    (top / "NEXUS_DESCRIPTION.md").write_text(description, encoding="utf-8")
     todo = [f"# {name}: still open before uploading", ""]
     todo += [f"- [ ] {item}" for item in OPEN]
     todo += ["", "## Left out of the package", ""]

@@ -4,6 +4,20 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the Nexus description, complete
+
+Barry: "generate a new NEXUS_DESCRIPTION ... for the new dependencies" and "incorporate the
+compatibility instructions at the bottom".
+- `docs/NEXUS_DESCRIPTION.md`: the requirements were already Skyrim only. Its requirements
+  note points to a new last section, **Compatibility**: `docs/COMPATIBILITY.md`'s player
+  instructions, their headings one level down.
+- `tools/package.py` stops a release if that section drifts from `COMPATIBILITY.md` (the one
+  to keep current when a mod changes its line), and copies the description into the release
+  folder.
+- The trap: after Barry disabled `00078307` (20:25), its lines stop; the reload at 20:42 has
+  none. The session's fair traces show no errors, the archers queued, and the singers homed
+  once and didn't step again.
+
 ### Later: the singers loop their cheer; the licences settled; the archers' "strike"
 
 Barry: "the archers have gone on strike, same with the bards". Then: "ignore the bard singers
