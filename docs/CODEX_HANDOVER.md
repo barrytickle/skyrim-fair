@@ -642,6 +642,9 @@ Project-owned mesh work is code-first and reproducible.
   are stored there. Changing an existing property's value in the plugin never reaches that
   save; only new properties take the plugin's values. Test show-data changes on a fresh start
   (`coc` from the main menu), or ReSaver the script's instance away.
+- **idles with furniture exits** (Hadvar's ledger, `IdleChairExitStart`) may never end standing:
+  follow the stop idle with `Debug.SendAnimationEvent(actor, "IdleForceDefaultState")` a few
+  seconds on, then `EvaluatePackage`
 - **adding a stage song**: give it `"added": true` in `songs.config.json`. Its sound records (and the exterior's quieter copy) then go in the added-songs range (`FairAddedSongs`, 0x50000), so it can go anywhere in the playlist without renumbering anything. Keep the flag on for good. Songs without timelines play everything and dance throughout
 - **named NPCs** (`FairCameos.cs`): don't use a Traits template for a named NPC: in game it shows the template's name. Copy the vanilla face field by field and its FaceGen files (`FairSingers.CopyFace`); built after the life pass in their own range (0x60000), so they get the `SkyrimFairNPC` keyword by hand (the keyword loop runs earlier); `alwaysOn` has `SkyrimFairCameo` so the culling never switches them off
 - **clearing a large reference** (on the worldspace's RNAM list): don't disable it. Its LOD model stays visible until the reference is loaded and showing, and a disabled one never is. Sink it under the ground, enabled (`exterior.sinkLarge`, `FairExterior`)

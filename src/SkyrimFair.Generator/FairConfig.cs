@@ -525,6 +525,9 @@ internal sealed record CameosConfig
     /// <summary>Their own FormID range, so nothing renumbers.</summary>
     public uint FormIdBase { get; init; } = 0x60000;
 
+    /// <summary>The music's volume, as a share, while one of them speaks.</summary>
+    public float DuckLevel { get; init; } = 0.2f;
+
     /// <summary>The begin fragment on each of their lines (it ducks the music).</summary>
     public string LineScript { get; init; } = "SkyrimFairCameoLine";
 
@@ -3961,6 +3964,9 @@ internal sealed record ExteriorConfig
     /// <summary>The Whiterun road sign beside the path, out from the gate.</summary>
     public ExteriorRoadSign RoadSign { get; init; } = new();
 
+    /// <summary>More on the wall's outer face: banners between the life pass's, and lamp posts.</summary>
+    public ExteriorWallDressing WallDressing { get; init; } = new();
+
     /// <summary>The festival entrance: braziers, banners, lamps and clutter by the gate and path.</summary>
     public List<ExteriorDecor> Decor { get; init; } = new();
 
@@ -4040,6 +4046,28 @@ internal sealed record ExteriorFairSign : ProjectStaticConfig
 /// <see cref="Z"/>, turned <see cref="Yaw"/> degrees from facing out. <see cref="Tilt"/> lays it
 /// on the slope (clutter); posts and lights stand upright.
 /// </summary>
+internal sealed record ExteriorWallDressing
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>A banner on every panel without one within <see cref="BannerClear"/>.</summary>
+    public string Banner { get; init; } = "000DEE54:Skyrim.esm";
+
+    public float BannerClear { get; init; } = 80f;
+
+    /// <summary>A lamp post (arm toward the wall) every this many panels, with a light at its lamp.</summary>
+    public int LampEvery { get; init; } = 3;
+
+    public string Lamp { get; init; } = "001097E7:Skyrim.esm";
+
+    public float LampOut { get; init; } = 110f;
+
+    public string LampLight { get; init; } = "0008278A:Skyrim.esm";
+
+    /// <summary>Nothing within this of the gate (the entrance has its own dressing).</summary>
+    public float GateClear { get; init; } = 450f;
+}
+
 internal sealed record ExteriorDecor
 {
     public string Name { get; init; } = string.Empty;

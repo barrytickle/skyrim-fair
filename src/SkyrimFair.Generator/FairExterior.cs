@@ -643,6 +643,59 @@ internal static class FairExterior
             }
         }
 
+        // More on the wall's outer face (appended): banners on the panels between the life pass's,
+        // and a lamp post every few panels, its arm toward the wall and a light at its lamp.
+        if (ext.WallDressing.Enabled)
+        {
+            var wd = ext.WallDressing;
+            var bannerKey = FormKeyHelper.Parse(wd.Banner);
+            var hung = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>())
+                .Where(o => o.FormKey.ModKey == mod.ModKey && o.Base.FormKey == bannerKey && o.Placement is not null)
+                .Select(o => (o.Placement!.Position.X, o.Placement.Position.Y))
+                .ToList();
+            var pal = fw.Life.Palisade;
+            for (var i = 0; i < panels.Count; i++)
+            {
+                var p = panels[i];
+                if (MathF.Sqrt((p.X - gx) * (p.X - gx) + (p.Y - gy) * (p.Y - gy)) < wd.GateClear) continue;
+                var h = p.Heading * MathF.PI / 180f;
+                var (ux, uy) = (MathF.Cos(h), -MathF.Sin(h));
+                var (nx, ny) = (-uy, ux);
+                if ((ox - p.X) * nx + (oy - p.Y) * ny > 0f) (nx, ny) = (-nx, -ny);  // outward
+                var (bx, by) = (p.X + nx * pal.Out, p.Y + ny * pal.Out);
+                if (!hung.Any(b => (b.X - bx) * (b.X - bx) + (b.Y - by) * (b.Y - by) < wd.BannerClear * wd.BannerClear))
+                {
+                    var top = p.Z + fw.Palisade.Height * p.Scale;
+                    PutObject(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(bannerKey),
+                        Scale = pal.BannerScale * ext.Scale,
+                        Placement = new Placement { Position = new P3Float(bx, by, top - pal.BannerDrop * ext.Scale), Rotation = new P3Float(0f, 0f, MathF.Atan2(ny, -nx)) },
+                    });
+                    hung.Add((bx, by));
+                    result.Decor++;
+                }
+
+                if (wd.LampEvery > 0 && i % wd.LampEvery == 1)
+                {
+                    var (lx, ly) = (p.X + nx * wd.LampOut, p.Y + ny * wd.LampOut);
+                    // The post's arm is its local -Y: turned toward the wall, the lamp hangs over the logs' foot.
+                    PutObject(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(wd.Lamp)),
+                        Placement = new Placement { Position = new P3Float(lx, ly, Ground(lx, ly) - 4f), Rotation = new P3Float(0f, 0f, MathF.Atan2(nx, ny)) },
+                    });
+                    var (qx, qy) = (lx - nx * 95f, ly - ny * 95f);
+                    PutObject(new PlacedObject(mod)
+                    {
+                        Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(wd.LampLight)),
+                        Placement = new Placement { Position = new P3Float(qx, qy, Ground(lx, ly) + 240f), Rotation = new P3Float(0f, 0f, 0f) },
+                    });
+                    result.Decor += 2;
+                }
+            }
+        }
+
         // The towers' banners the wall runs through: disabled, not removed (their FormIDs stay).
         var hideBases = ext.HideNearWallBases.Select(FormKeyHelper.Parse).ToHashSet();
         foreach (var o in cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>())

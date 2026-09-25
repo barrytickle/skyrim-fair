@@ -162,23 +162,23 @@ Actor[] Property Cameos Auto
 {The named ambient characters (Garrick Sol V, Claudius Vale; FairCameos.cs). They wander on their
 own sandbox; every so often, when free, each plays his next idle and stops it after its hold.}
 Idle[] Property CameoIdles2 Auto
-Float[] Property CameoHolds2 Auto
+Float[] Property CameoHolds3 Auto
 Idle[] Property CameoStops2 Auto
 {The idle that ends each of CameoIdles2 (Hadvar's ledger has its own exit); None: BandStop.}
 Int[] Property CameoFirstIdle2 Auto
 Int[] Property CameoIdleCount2 Auto
 {Each cameo's idles are CameoIdles2[CameoFirstIdle2[i] ...], CameoIdleCount2[i] of them, in turn.}
-Float[] Property CameoEveryMin2 Auto
-Float[] Property CameoEveryMax2 Auto
+Float[] Property CameoEveryMin3 Auto
+Float[] Property CameoEveryMax3 Auto
 {Seconds between one cameo's idles, at random between the two.}
 GlobalVariable Property CameoDuckUntil Auto
 {Set by each cameo line's begin fragment (SkyrimFairCameoLine): the real time its line ends.}
-Float Property CameoDuck = 0.4 Auto
-{The music's volume, as a share, while the player talks to a cameo (0.4, about 8 dB down).}
+Float Property CameoDuckLevel = 0.2 Auto
+{The music's volume, as a share, while a cameo speaks (0.2, about 14 dB down).}
 GlobalVariable[] Property CameoSpot Auto
 Int[] Property CameoSpotCount Auto
-Float[] Property CameoMoveMin Auto
-Float[] Property CameoMoveMax Auto
+Float[] Property CameoMoveMin3 Auto
+Float[] Property CameoMoveMax3 Auto
 {Each cameo's round: his spot global (his spot packages each run on one value), how many
 spots, and the seconds before he moves on. Moving on sets the global to another spot and
 re-evaluates his package, so he walks there.}
@@ -317,6 +317,7 @@ Bool[] cameoPlaying
 Int[] cameoPlays
 Int[] cameoIdleNow
 Float[] cameoMoveNext
+Bool[] cameoExiting
 Float cameoWake = 0.0
 Float holdEnds = 0.0
 
@@ -427,7 +428,7 @@ Event OnUpdate()
 
 	If songInstance != 0
 		If CameoTalking()
-			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * CameoDuck)
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * CameoDuckLevel)
 		Else
 			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
 		EndIf
@@ -828,7 +829,7 @@ Bool Function CameoNear()
 	Return False
 EndFunction
 
-; The cameos' idles. Each waits a random while (CameoEveryMin2..Max), then, if he's loaded and
+; The cameos' idles. Each waits a random while (CameoEveryMin3..Max), then, if he's loaded and
 ; free (not sitting, fighting or talking to the player), plays his next idle; after its hold
 ; he's stopped (BandStop) and handed back to his package. Busy, he's tried again in 10 s.
 Function CameoIdles2(Float now)
@@ -847,14 +848,26 @@ Function CameoIdles2(Float now)
 	If cameoMoveNext.Length < 8
 		cameoMoveNext = new Float[8]
 	EndIf
+	If cameoExiting.Length < 8
+		cameoExiting = new Bool[8]
+	EndIf
 	Float perSecond = TimeScale.GetValue() / 86400.0
 	Int i = 0
 	While i < Cameos.Length && i < 8
 		Actor a = Cameos[i]
 		If cameoNext[i] == 0.0
-			cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin2[i], CameoEveryMax2[i]) * perSecond
+			cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin3[i], CameoEveryMax3[i]) * perSecond
 		ElseIf now >= cameoNext[i] && a
-			If cameoPlaying[i]
+			If cameoExiting[i]
+				; Some exits (Hadvar's ledger's is a furniture exit) never fire standing: reset him,
+				; or he stays in the pose and his package can't walk him anywhere.
+				If a.Is3DLoaded()
+					Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+					a.EvaluatePackage()
+				EndIf
+				cameoExiting[i] = False
+				cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin3[i], CameoEveryMax3[i]) * perSecond
+			ElseIf cameoPlaying[i]
 				If a.Is3DLoaded()
 					Idle stop = BandStop
 					Int playing = cameoIdleNow[i]
@@ -865,14 +878,15 @@ Function CameoIdles2(Float now)
 					a.EvaluatePackage()
 				EndIf
 				cameoPlaying[i] = False
-				cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin2[i], CameoEveryMax2[i]) * perSecond
+				cameoExiting[i] = True
+				cameoNext[i] = now + 3.0 * perSecond
 			ElseIf CameoIdleCount2[i] > 0 && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
 				Int k = CameoFirstIdle2[i] + cameoPlays[i] % CameoIdleCount2[i]
 				If a.PlayIdle(CameoIdles2[k])
 					cameoIdleNow[i] = k
 					cameoPlays[i] = cameoPlays[i] + 1
 					cameoPlaying[i] = True
-					cameoNext[i] = now + CameoHolds2[k] * perSecond
+					cameoNext[i] = now + CameoHolds3[k] * perSecond
 				Else
 					cameoNext[i] = now + 5.0 * perSecond
 				EndIf
@@ -886,15 +900,15 @@ Function CameoIdles2(Float now)
 		; His round: when it's time and he isn't mid-idle, on to another spot.
 		If a && i < CameoSpotCount.Length && CameoSpotCount[i] > 1 && i < CameoSpot.Length && CameoSpot[i]
 			If cameoMoveNext[i] == 0.0
-				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin[i], CameoMoveMax[i]) * perSecond
-			ElseIf now >= cameoMoveNext[i] && !cameoPlaying[i]
+				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin3[i], CameoMoveMax3[i]) * perSecond
+			ElseIf now >= cameoMoveNext[i] && !cameoPlaying[i] && !cameoExiting[i]
 				Int count = CameoSpotCount[i]
 				Int spot = ((CameoSpot[i].GetValue() as Int) + 1 + Utility.RandomInt(0, count - 2)) % count
 				CameoSpot[i].SetValue(spot)
 				If a.Is3DLoaded()
 					a.EvaluatePackage()
 				EndIf
-				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin[i], CameoMoveMax[i]) * perSecond
+				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin3[i], CameoMoveMax3[i]) * perSecond
 			EndIf
 			If cameoMoveNext[i] < cameoWake
 				cameoWake = cameoMoveNext[i]

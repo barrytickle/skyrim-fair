@@ -4,6 +4,30 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: Claudius unstuck, louder voices and a deeper dip, the exterior wall fuller
+
+Barry: the vendors aren't hooked up to shops yet (planned next); Claudius seems idle; the
+exterior "seems a bit empty still"; the voices louder, the music lower, or both.
+- **Claudius:** Hadvar's ledger ends with a furniture exit (`IdleChairExitStart`), which
+  may never fire standing. That leaves him in the pose, and his package can't walk him.
+  - Every idle now ends in two steps: its own stop, then 3 s on
+    `IdleForceDefaultState` and a package re-evaluation. He doesn't move on mid-exit.
+  - Fewer idles, and shorter: every 50-90 s, the ledger 12 s. He moves on every 35-60 s.
+  - Under new names, since the old ones are saved: `CameoHolds3`, `CameoEveryMin3/Max3`,
+    `CameoMoveMin3/Max3`.
+- **Louder voices:** after the compressor and loudnorm (-12), +3 dB into a limiter at
+  -1 dB: about -10 LUFS, level with the songs (were about -12.7).
+- **A deeper dip:** the music plays at 0.2 (about -14 dB) while a cameo speaks. That's a new
+  property, `CameoDuckLevel`, because `CameoDuck`'s 0.4 is saved.
+- **The exterior wall fuller** (`exterior.wallDressing`, appended):
+  - a Whiterun banner on every outer panel without one within 80
+  - a Riften lamp post every third panel, its arm toward the wall, with
+    `WRLightFireStreet01` at its lamp
+  - nothing within 450 of the gate
+  - 38 pieces, `0x3015E`-`0x30183`
+- Plugin `dce9957d854439d9...`, deterministic, deployed with the scripts and the voices.
+  Against `a0ad4187...`, 38 records are added, and nothing else changed.
+
 ### Later (wrap-up): the playlist reaches the save, the roof horse held, the exterior dressed
 
 Barry: the moved gate "looks much much better"; three last things: the roof horse has

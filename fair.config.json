@@ -236,7 +236,7 @@
     "lights": {"enabled": true},
     "cameos": {
       "enabled": true,
-      "voiceLoudness": -12,
+      "voiceLoudness": -9,
       "members": [
         {
           "id": "Garrick", "name": "Garrick Sol V", "shortName": "Garrick",
@@ -256,14 +256,14 @@
           "template": "000457F6:Skyrim.esm", "outfit": "000E40DD:Skyrim.esm",
           "at": [2048, 1000, 0, 0], "radius": 2200, "energy": 40,
           "idles": [
-            {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 20, "stop": "0010ACAE:Skyrim.esm"},
+            {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 12, "stop": "0010ACAE:Skyrim.esm"},
             {"idle": "00089975:Skyrim.esm", "name": "IdleNoteRead", "hold": 8},
-            {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 20, "stop": "0010ACAE:Skyrim.esm"},
+            {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 12, "stop": "0010ACAE:Skyrim.esm"},
             {"idle": "00075C3D:Skyrim.esm", "name": "IdleExamine", "hold": 6}
           ],
-          "every": [25, 50],
+          "every": [50, 90],
           "spots": [[3780, 400], [3780, 2800], [5100, 1500], [3000, 1000], [2048, 1000], [3050, -1300]],
-          "move": [60, 120]
+          "move": [35, 60]
         }
       ],
       "posters": {
@@ -3678,6 +3678,7 @@
       "turnToPath": 15
     },
     "hideNearWallBases": ["000DEE54:Skyrim.esm"],
+    "wallDressing": {"enabled": true},
     "decor": [
       {"name": "WHfirebrazier01", "piece": "00093A89:Skyrim.esm", "side": 175, "forward": 190},
       {"name": "FXfireWithEmbersHeavy", "piece": "00033DA4:Skyrim.esm", "side": 169, "forward": 188, "z": 92, "scale": 0.5},
