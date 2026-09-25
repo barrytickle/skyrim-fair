@@ -4,6 +4,11 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the gear stalls at 20x
+
+Barry: "can we change it to 20x". `shops.priceMultiplier` 20 (the perk's EPFD `0000a041`).
+Plugin `18e3b92ce18797d9`, deterministic; no FormID changed. Deployed.
+
 ### Later: fair prices only at the gear stalls, 40x
 
 Barry: 50x is "too expensive". Instead, "apply 80% of that to just the armor and gear stalls".
