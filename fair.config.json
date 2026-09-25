@@ -249,7 +249,7 @@
       "members": [
         {
           "id": "Garrick", "name": "Garrick Sol V", "shortName": "Garrick",
-          "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "lipsFrom": "MaleYoungEager", "lipShare": 0.8, "emotion": "Happy",
+          "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "lipsFrom": "MaleYoungEager", "lipShare": 0.95, "emotion": "Happy",
           "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [1044, 4630, 0, 120], "radius": 2200, "energy": 80,
           "stand": true,

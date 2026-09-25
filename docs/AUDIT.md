@@ -4,6 +4,19 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.4: spoken lines only for the borrowed lips
+
+Barry, on vanilla with 2.0.1.3: "claudius worked, garrick didn't". So the length theory was
+wrong: Claudius's 95% lips animated, Garrick's shorter 80% ones didn't.
+- The difference is the sources. Four of Garrick's twelve lips came from `bardsongs_*` (the
+  bards' sung songs, which vanilla plays through performance scenes). Claudius's, and the bard
+  *poem* lip that worked in the LipTest, all came from spoken dialogue. Headers didn't separate
+  the sets.
+- `borrow_lips.py`: `lipsExclude` (default `["bardsongs"]`), and Garrick at `lipShare` 0.95
+  like Claudius. Garrick's lips now come from spoken lines (CW scenes, general dialogue, one
+  Bards College poem). Claudius's set is unchanged: the one that worked.
+- **2.0.1.4** packaged for the vanilla test.
+
 ### Later: 2.0.1.3: borrowed lips shorter than the line (a threshold test)
 
 Barry: "for some reason 2.0.1.2 didn't work".

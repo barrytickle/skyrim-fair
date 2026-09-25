@@ -65,7 +65,11 @@ def main():
             continue
         prefix = f"sound/voice/skyrim.esm/{voice.lower()}/"
         pool = []
-        for key in sorted(k for k in index if k.startswith(prefix) and k.endswith(".fuz")):
+        # Spoken lines only: the bards' sung songs (bardsongs_*) are performance scenes, and
+        # their lips didn't animate a cameo on plain SE (2.0.1.3, 2026-09-25).
+        exclude = [e.lower() for e in member.get("lipsExclude", ["bardsongs"])]
+        for key in sorted(k for k in index if k.startswith(prefix) and k.endswith(".fuz")
+                          and not any(e in k.rsplit("/", 1)[-1] for e in exclude)):
             try:
                 lip, xwm = fuz_parts(bsa_extract.extract(index[key]))
                 if len(lip) >= 100:
