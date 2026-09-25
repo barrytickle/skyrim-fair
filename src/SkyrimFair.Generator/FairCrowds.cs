@@ -374,7 +374,7 @@ internal static class FairCrowds
                                 var len = MathF.Max(1f, MathF.Sqrt(dx * dx + dy * dy));
                                 (dx, dy) = (dx / len, dy / len);
                                 var along = (n - (seat.Seats - 1) / 2f) * 45f;
-                                var (x, y) = (sp.X + dx * 70f - dy * along, sp.Y + dy * 70f + dx * along);
+                                var (x, y) = (sp.X + dx * config.SitStart - dy * along, sp.Y + dy * config.SitStart + dx * along);
                                 var sitter = new PlacedNpc(mod)
                                 {
                                     Base = new FormLinkNullable<INpcGetter>(sitters[(int)(FairHash.Hash3(salt, k++, 92) * sitters.Count) % sitters.Count].FormKey),

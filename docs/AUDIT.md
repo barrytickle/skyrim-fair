@@ -4,6 +4,23 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.2: seated visitors placed on their seats
+
+A Nexus player's screenshot (Barry): at a round table (`CommonTableRound01`), one visitor sat in
+the air beside her stool, another in the air with her stool behind her.
+- Each stool had one sitter and a vanilla sit package (`defaultSitLinkedRefNoConv`, the seat as
+  an unkeyed linked ref). But **each sitter started 70 units out** from the seat, meant to walk
+  over and sit. Skyrim often snaps a loading NPC straight into the sit pose where it stands,
+  and the crowd culling reloads visitors as the player moves. Both women sat at their start
+  spots.
+- `fairWorld.crowds.sitStart` (default 0): sitters start **on** their seat (stools exactly,
+  bench places up to 23 apart as before), still facing the table. Positions only; no FormID
+  change.
+- (The four "PatrolIdleMarker seats" were the archers' idle markers, correctly linked.)
+- Plugin `0dc3c7324d386ae1`, deterministic. Deployed. **2.0.1.2** packaged.
+- **To test:** the seated visitors on their stools and benches, including after walking away
+  and back.
+
 ### Later: the lip sync decision: SSE Engine Fixes
 
 Barry, on vanilla with 2.0.1.4: "claudius has stopped working", though his lip files were

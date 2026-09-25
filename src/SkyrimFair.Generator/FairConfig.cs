@@ -3762,6 +3762,14 @@ internal sealed record CrowdsConfig
     /// <summary>What seated visitors run: sit in the (unkeyed) linked furniture.</summary>
     public string SitPackage { get; init; } = "000ECEEB:Skyrim.esm";
 
+    /// <summary>
+    /// How far out from their seat a seated visitor is placed. It was 70, for them to walk over
+    /// and sit, but Skyrim often snaps a loading NPC straight into the sit pose where it stands,
+    /// and the culling reloads them as the player moves: they sat in mid-air beside their seats
+    /// (a Nexus player's screenshot, 2026-09-25). 0: on the seat, so any snap lands right.
+    /// </summary>
+    public float SitStart { get; init; }
+
     /// <summary>Furniture bases people can be seated on, and how many each seats.</summary>
     public Dictionary<string, int> Seats { get; init; } = new();
 
