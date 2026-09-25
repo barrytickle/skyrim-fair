@@ -128,6 +128,14 @@ Idle Property SingerEndMove Auto
 {At a song's end, with the crowd's cheer (a wave).}
 Float Property SingerGap = 2.0 Auto
 {Seconds each singer stands between moves.}
+ObjectReference[] Property SeatChairs Auto
+Float[] Property SeatYaw Auto
+{The chairs at the tables and the heading each should face (degrees). A save that met the fair's
+bar stools keeps their old angles, so each is turned to its heading once (SeatLayoutVersion).}
+Actor[] Property Sitters Auto
+{The seated visitors: sent back to their seats (their editor locations) once, to sit down again.}
+Int Property SeatLayoutVersion Auto
+{Bumped whenever the seat layout changes, so every save re-seats once more.}
 Perk Property FairTalk Auto
 {The fair's talk perk (SkyrimFairTalkDuck): pressing E on anyone at the fair ducks the music while
 they answer. Given to the player at the fair; its conditions keep it to the fair.}
@@ -275,6 +283,8 @@ Float Property IdlePoll = 5.0 Auto
 ; 4 the pause before the next song.
 Int phase = 0
 Int track = 0
+; The seat layout this save has been brought to (SeatLayoutVersion).
+Int seatLayoutDone = 0
 Int songInstance = 0
 Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
@@ -444,6 +454,9 @@ Event OnUpdate()
 	EndIf
 	If FairTalk && !Game.GetPlayer().HasPerk(FairTalk)
 		Game.GetPlayer().AddPerk(FairTalk)
+	EndIf
+	If seatLayoutDone < SeatLayoutVersion
+		Reseat()
 	EndIf
 	ApplyCrowdLayers()
 	CameoIdles2(Utility.GetCurrentGameTime())
@@ -816,6 +829,30 @@ Function SingerGestures(Float now)
 		EndIf
 		i += 1
 	EndWhile
+EndFunction
+
+; The seats, once per SeatLayoutVersion: every chair turned to face its table, and every seated
+; visitor back to their seat to sit down again. A save that had been to the fair kept the old
+; stools' angles and the visitors' old spots, so they sat facing away, leaning on nothing
+; (a Nexus player's screenshot, 2026-09-25).
+Function Reseat()
+	Int i = 0
+	While i < SeatChairs.Length && i < SeatYaw.Length
+		If SeatChairs[i]
+			SeatChairs[i].SetAngle(0.0, 0.0, SeatYaw[i])
+		EndIf
+		i += 1
+	EndWhile
+	i = 0
+	While i < Sitters.Length
+		If Sitters[i] && !Sitters[i].IsDead()
+			Sitters[i].MoveToMyEditorLocation()
+			Sitters[i].EvaluatePackage()
+		EndIf
+		i += 1
+	EndWhile
+	seatLayoutDone = SeatLayoutVersion
+	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs and " + Sitters.Length + " visitors (layout " + SeatLayoutVersion + ")")
 EndFunction
 
 ; Every companion the finder turns up that isn't already near the player is moved to them,

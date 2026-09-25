@@ -58,6 +58,19 @@ the air beside her stool, another in the air with her stool behind her.
   (the seats on start, and the chairs).
 - **To test:** the seated visitors upright on chairs at the tables, drinking, not leaning on
   thin air.
+- Barry's next screenshot, in his existing save: the sitters were on the chairs, but the chairs
+  faced away from the table, so the drinking pose rested on nothing. The plugin has them
+  facing their tables: the table at local +Y of each; CommonChair02's backrest on -Y; its
+  furniture marker heading 0 (+Y). **The save kept the old stools' angles and the visitors'
+  old spots.** "the issue is other people will have saves now".
+- **The fix, for every save:** the stage script's `Reseat()` runs once per
+  `seatSwap.layoutVersion` (1), on arriving at the fair:
+  - `SetAngle` turns each of the 25 chairs to its heading (`SeatChairs`, `SeatYaw`)
+  - each of the 39 seated visitors (`Sitters`, the archers excluded) gets
+    `MoveToMyEditorLocation` then `EvaluatePackage`
+  - `seatLayoutDone` records it, so bumping the version re-runs it everywhere
+- Plugin `a26ee022ef557f8c`, deterministic, no FormID change. Deployed. **2.0.1.2**
+  repackaged.
 
 ### Later: the lip sync decision: SSE Engine Fixes
 

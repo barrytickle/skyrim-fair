@@ -453,6 +453,8 @@ internal static class FairPluginGenerator
                 .GroupBy(n => n.LinkedReferences.First(l => l.KeywordOrReference.IsNull).Reference.FormKey)
                 .ToDictionary(g => g.Key, g => g.First().Placement!.Rotation.Z);
             var (toTable, toSitter, kept) = (0, 0, 0);
+            var reseatChairs = new List<FormKey>();
+            var reseatYaw = new List<float>();
             foreach (var seat in placed.Where(o => o.Base.FormKey == from).OrderBy(o => o.FormKey.ID))
             {
                 var p = seat.Placement!.Position;
@@ -482,9 +484,32 @@ internal static class FairPluginGenerator
 
                 seat.Base = new FormLinkNullable<IPlaceableObjectGetter>(to);
                 seat.Placement.Rotation = new P3Float(0f, 0f, yaw);
+                reseatChairs.Add(seat.FormKey);
+                reseatYaw.Add(yaw * 180f / MathF.PI);
             }
 
             Console.WriteLine($"  seats: {toTable + toSitter + kept} bar stools now chairs ({toTable} facing a table, {toSitter} their sitter's way, {kept} as they were)");
+
+            // Saves that met the stools keep their old angles and the visitors' old spots: the stage
+            // script re-seats them once per layout version (Reseat()).
+            var stageQuest = mod.Quests.FirstOrDefault(q => q.VirtualMachineAdapter?.Scripts.Any(s => s.Name == "SkyrimFairAudioScript") == true);
+            if (stageQuest is not null)
+            {
+                var furnitureBases = master.Furniture.Select(f => f.FormKey).ToHashSet();
+                var seatRefs = placed.Where(o => furnitureBases.Contains(o.Base.FormKey) || o.Base.FormKey == to).Select(o => o.FormKey).ToHashSet();
+                var sitters = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>())
+                    .Where(n => n.LinkedReferences.Any(l => l.KeywordOrReference.IsNull && seatRefs.Contains(l.Reference.FormKey)))
+                    .OrderBy(n => n.FormKey.ID)
+                    .Select(n => n.FormKey)
+                    .ToList();
+                ScriptObjectProperty Ref(FormKey k) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(k) };
+                var stageScript = stageQuest.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript");
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "SeatChairs", Objects = reseatChairs.Select(Ref).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptFloatListProperty { Name = "SeatYaw", Data = reseatYaw.ToExtendedList() });
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "Sitters", Objects = sitters.Select(Ref).ToExtendedList() });
+                stageScript.Properties.Add(new ScriptIntProperty { Name = "SeatLayoutVersion", Data = seatSwap.LayoutVersion });
+                Console.WriteLine($"  re-seat: {reseatChairs.Count} chairs and {sitters.Count} seated visitors, layout {seatSwap.LayoutVersion}");
+            }
         }
 
         // Empty array properties can't be initialised from a plugin ("cannot be initialized because
