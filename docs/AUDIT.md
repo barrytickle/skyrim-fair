@@ -27,6 +27,12 @@ Garrick's idle (`sendanimevent IdleForceDefaultState`) didn't bring the lip sync
   packaged (`dist/release/SkyrimFair-2.0.1.1/`).
 - **To test on vanilla:** do Garrick and Claudius lip-sync now? Are they loud enough over the
   60% music?
+- **Barry, on vanilla:** the volume is "perfect on both accounts" (confirmed). The loose
+  `.lip` files didn't bring the lip sync back.
+- Next test, `dist/release/SkyrimFair-LipTest.zip`: one vanilla lip track (from
+  `bardscolle_bardscollegepoe_000e774e_1.fuz`) in place of Garrick's line 01 `.lip`. If his
+  mouth moves, our lip files are what vanilla can't read; if not, it's something about the
+  characters.
 
 ### Later: 2.0.1: the music makes room for talking (the first Nexus feedback)
 
