@@ -334,6 +334,27 @@ internal static class FairPluginGenerator
                 Console.WriteLine($"  holidays-free: {bunting} bunting lines, {props} props ({added} pieces added); FormIDs 0x{from:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             }
 
+            // The grass on the fair's ground: its own sparse, short copies, appended in the same range.
+            var grass = config.FairWorld.Ground.GrassOverride;
+            if (grass.Enabled && master is not null)
+            {
+                var from = mod.ModHeader.Stats.NextFormID;
+                var role = char.ToUpperInvariant(grass.Role[0]) + grass.Role[1..];
+                var ltex = mod.LandscapeTextures.First(l => l.EditorID == $"{config.FairWorld.Ground.EditorIdPrefix}{role}");
+                ltex.Grasses.Clear();
+                foreach (var g in grass.Grasses)
+                {
+                    var source = master.Grasses.First(x => x.FormKey == FormKeyHelper.Parse(g.From));
+                    var copy = source.Duplicate(mod.GetNextFormKey());
+                    copy.EditorID = $"{grass.EditorIdPrefix}{source.EditorID}";
+                    copy.Density = g.Density;
+                    mod.Grasses.Add(copy);
+                    ltex.Grasses.Add(new FormLink<IGrassGetter>(copy.FormKey));
+                }
+
+                Console.WriteLine($"  ground grass: {ltex.EditorID} now grows {string.Join(", ", grass.Grasses.Select(g => $"{g.From} at {g.Density}"))}; FormIDs 0x{from:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            }
+
             mod.ModHeader.Stats.NextFormID = saved;
         }
 

@@ -4,6 +4,28 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: a meadow in the fair (plain Skyrim's live grass)
+
+Barry, testing the release zip on a completely vanilla Skyrim: "do you know why there's so
+much grass???" (a screenshot: tall orange tundra grass everywhere off the cobbles).
+- Barry's modlist loads grass only from a cache (`bAllowCreateGrass=0`), and the fair has
+  none, so no grass had ever shown there. Plain Skyrim grows it live on every ground texture
+  that carries grass. The fair's `SkyrimFairGroundGrass` (a copy of vanilla LTEX 013428)
+  carried TundraGrass01 (71 tall, density 14), TundraGrass04 (19), TundraGrass03 (12) and
+  FieldGrass02 (3): wild tundra, not trampled fairground. Every player without a cache would
+  have seen it.
+- **`fairWorld.ground.grassOverride`**: that texture's list is replaced by the fair's own
+  copies:
+  - TundraGrass04 at 6, TundraGrass03 at 4, FieldGrass02 at 3
+  - TundraGrass01 dropped
+  - built after the holidays-free pieces, in `0xA003D`-`0xA003F`; the LTEX keeps its FormID
+  - the copies match vanilla's GRAS byte for byte, except the density byte
+  - being the fair's own records, grass mods that edit vanilla's grasses can't change them
+- Plugin `a1968d3df1f05d5a`, deterministic; the FormID diff shows only the three grasses.
+  Deployed, and the release package rebuilt.
+- **To test (on plain Skyrim):** scattered short tufts and a few flowers on the fair's ground,
+  not a meadow.
+
 ### Later: the Compatibility download, and the description in BBCode
 
 Barry: "can you also have a compatibility.md as an optional download as well as the py? It

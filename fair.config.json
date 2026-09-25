@@ -3529,6 +3529,11 @@
     "propManifest": "tools/static_props.json",
     "ground": {
       "enabled": true,
+      "grassOverride": {"enabled": true, "grasses": [
+        {"from": "000336FA:Skyrim.esm", "density": 6},
+        {"from": "0002ACD3:Skyrim.esm", "density": 4},
+        {"from": "001098CA:Skyrim.esm", "density": 3}
+      ]},
       "editorIdPrefix": "SkyrimFairGround",
       "textures": [
         {"role": "grass", "source": "00013428:Skyrim.esm", "grasses": ["001098CA:Skyrim.esm", "0002ACD3:Skyrim.esm"]},

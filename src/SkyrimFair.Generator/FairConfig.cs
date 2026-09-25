@@ -3562,9 +3562,38 @@ internal sealed record StallKit
 /// for Terrain Parallax under Community Shaders' Terrain Helper. Wear rises round the
 /// things people walk to, broken by noise into patches.
 /// </summary>
+internal sealed record GroundGrassConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The ground texture's role (as fairWorld.ground.textures' "role").</summary>
+    public string Role { get; init; } = "grass";
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairGrass";
+
+    public List<GroundGrass> Grasses { get; init; } = new();
+}
+
+internal sealed record GroundGrass
+{
+    /// <summary>The vanilla grass copied (FormKey).</summary>
+    public string From { get; init; } = string.Empty;
+
+    /// <summary>Its density, 0-100 (vanilla's tundra grasses are 12-19).</summary>
+    public byte Density { get; init; }
+}
+
 internal sealed record GroundConfig
 {
     public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The grass that grows on one of the fair's ground textures, replacing its list: the fair's
+    /// own copies of vanilla grasses at their own density. Vanilla's tundra grass (TundraGrass01,
+    /// 71 tall) made a meadow of the fair wherever grass grows live (2026-09-25, plain Skyrim).
+    /// Built last, in the paper lanterns' FormID range; the ground texture keeps its FormID.
+    /// </summary>
+    public GroundGrassConfig GrassOverride { get; init; } = new();
 
     public string EditorIdPrefix { get; init; } = "SkyrimFairGround";
 
