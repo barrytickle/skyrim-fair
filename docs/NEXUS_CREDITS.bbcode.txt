@@ -1,0 +1,36 @@
+[b]Models[/b] (converted and modified for Skyrim)
+[list]
+[*][b]Palisade[/b] by [url=https://sketchfab.com/adam127]adam127[/url], [url=https://sketchfab.com/3d-models/palisade-c88f57eb0d734484b010c3f170e48d4a]Sketchfab[/url], licensed under [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url]: the fair's walls
+[*][b]Viking Palisade gate[/b] by [url=https://sketchfab.com/Sereib]Sereib[/url], [url=https://sketchfab.com/3d-models/viking-palisade-gate-9c87007db87c41c9b161dae827ced741]Sketchfab[/url], licensed under [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url]: the gate
+[*][b]scaffold[/b] by [url=https://sketchfab.com/Js_TuruokaJunpei]Js_TuruokaJunpei[/url], [url=https://sketchfab.com/3d-models/scaffold-90789439e18c4f3cbdb5c51b6c43b531]Sketchfab[/url], licensed under [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url]: the light towers
+[*][b]Outhouse[/b] by [url=https://sketchfab.com/Strifey7]Strifey7[/url], [url=https://sketchfab.com/3d-models/outhouse-545355086dbb4b789a9cfe09d0ad5efe]Sketchfab[/url], licensed under [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url]: the outhouses
+[*][b]Poster (Basic & Low Poly)[/b] by [url=https://sketchfab.com/filththemutt]filththemutt[/url], [url=https://sketchfab.com/3d-models/poster-basic-low-poly-eecc7216ab704bdf9c7fb1ef33c23889]Sketchfab[/url], licensed under [url=https://creativecommons.org/licenses/by/4.0/]CC BY 4.0[/url]: the Fair Inspector's notices, with new artwork
+[*][b]Low-Poly Wooden Sign made of Three Planks[/b] by [url=https://sketchfab.com/jeffkolada]JeffK[/url], [url=https://sketchfab.com/3d-models/low-poly-wooden-sign-made-of-three-planks-12b45a9419734d3e9277564f770f264e]Sketchfab[/url], used with permission: the welcome sign
+[/list]
+
+[b]Music, voices and animation[/b]
+[list]
+[*]The soundtrack, the crowd and the singers: made with [url=https://suno.com]Suno[/url]
+[*]The cameo voices: made with [url=https://elevenlabs.io]ElevenLabs[/url]
+[*]The singers' cheer: "Cheering" from [url=https://www.mixamo.com]Adobe Mixamo[/url], retargeted for Skyrim
+[*]The folk dance, the paper lanterns and much of the artwork: made for the fair with ChatGPT ("Astra")
+[*]The plugin, scripts and tools: built with Claude (Anthropic)
+[/list]
+
+[b]Mods[/b]
+[list]
+[*][url=https://www.nexusmods.com/skyrimspecialedition/mods/1533]Holidays[/url]: its festival decorations inspired the fair's lanterns and bunting (nothing of it is used or required)
+[*][url=https://www.nexusmods.com/skyrimspecialedition/mods/92109]Open Animation Replacer[/url] and [url=https://www.nexusmods.com/skyrimspecialedition/mods/30379]SKSE[/url]
+[*][url=https://www.nexusmods.com/skyrimspecialedition/mods/124608]Professional Dancer[/url] by contentcat and davidgilbertking
+[*][url=https://www.nexusmods.com/skyrimspecialedition/mods/54860]Terrain Parallax[/url]
+[*]The authors of [url=https://www.nexusmods.com/skyrimspecialedition/mods/75310]Maximum Destruction[/url], [url=https://www.nexusmods.com/skyrimspecialedition/mods/145336]Stealth Detection Fixes[/url] and Strange Runes, whose mods get along with the fair after a one-word edit
+[/list]
+
+[b]Tools[/b]
+[list]
+[*][url=https://github.com/Mutagen-Modding/Mutagen]Mutagen[/url] by Noggog: the fair's plugin is generated with it
+[*][url=https://github.com/BadDogSkyrim/PyNifly]PyNifly[/url] by Bad Dog: mesh conversion
+[*]Bethesda's Creation Kit (the Papyrus compiler and LipGenerator), and [url=https://www.blender.org]Blender[/url]
+[/list]
+
+And thanks to [b]Bethesda[/b] for Skyrim. The Wanderer's Fair is free, and isn't affiliated with or endorsed by Bethesda.

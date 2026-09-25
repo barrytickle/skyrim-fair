@@ -312,6 +312,8 @@ def main() -> None:
     (top / "NEXUS_DESCRIPTION.md").write_text(description, encoding="utf-8")
     # Nexus's description box takes BBCode, not Markdown: the same text, ready to paste.
     (top / "NEXUS_DESCRIPTION.bbcode.txt").write_text(bbcode(description), encoding="utf-8")
+    # The mod page's Credits box (BBCode, kept by hand in docs/).
+    shutil.copyfile(ROOT / "docs" / "NEXUS_CREDITS.bbcode.txt", top / "NEXUS_CREDITS.bbcode.txt")
     todo = [f"# {name}: still open before uploading", ""]
     todo += [f"- [ ] {item}" for item in OPEN]
     todo += ["", "## Left out of the package", ""]
