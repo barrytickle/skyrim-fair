@@ -22,7 +22,9 @@ namespace SkyrimFair.Generator;
 internal static class FairCameos
 {
     public static int Build(SkyrimMod mod, CameosConfig config, SingersConfig faces, ISkyrimModGetter master, FormKey stageQuest,
-        string npcKeyword, Action<PlacedNpc> putPersistent, Action<PlacedObject> put)
+        string npcKeyword, Action<PlacedNpc> putPersistent, Action<PlacedObject> put, Action<PlacedObject> putPersistentObject,
+        IReadOnlyList<WallPanel> panels, PalisadeConfig wall, float[] gate, (float X, float Y) centre,
+        IReadOnlyList<(float X, float Y)> banners)
     {
         var sandbox = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.Package));
         var keyword = mod.Keywords.FirstOrDefault(k => k.EditorID == npcKeyword);
@@ -250,6 +252,154 @@ internal static class FairCameos
             }
         }
 
+        // ---- their rounds: a spot global each, and a small sandbox at each spot ----------------------
+        // A single wide sandbox left them standing (2026-09-25). Now each has a few spots, a
+        // sandbox package at each (a copy of the same vanilla sandbox, round an XMarker, radius
+        // SpotRadius, energy 100), each on the condition that his spot global holds its number.
+        // The stage script moves the global on every so often and re-evaluates his package, so
+        // he walks across the fair to the next spot. The wide sandbox stays last, as a fallback.
+        var spotGlobals = new List<FormKey>();
+        var spotCounts = new List<int>();
+        for (var i = 0; i < config.Members.Count; i++)
+        {
+            var c = config.Members[i];
+            if (c.Spots.Count < 2)
+            {
+                spotGlobals.Add(FormKey.Null);
+                spotCounts.Add(0);
+                continue;
+            }
+
+            var global = new GlobalShort(mod) { EditorID = $"{config.EditorIdPrefix}{c.Id}Spot", Data = 0 };
+            mod.Globals.Add(global);
+            var own = new List<Package>();
+            for (var k = 0; k < c.Spots.Count; k++)
+            {
+                var at = c.Spots[k];
+                var marker = new PlacedObject(mod)
+                {
+                    EditorID = $"{config.EditorIdPrefix}{c.Id}Spot{k + 1}",
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse("0000003B:Skyrim.esm")),
+                    Placement = new Placement { Position = new P3Float(at[0], at[1], at.Length > 2 ? at[2] : 0f), Rotation = new P3Float(0f, 0f, 0f) },
+                };
+                putPersistentObject(marker);
+
+                var package = sandbox.Duplicate(mod.GetNextFormKey());
+                package.EditorID = $"{config.EditorIdPrefix}{c.Id}Spot{k + 1}Sandbox";
+                if (package.Data.Values.OfType<PackageDataLocation>().FirstOrDefault() is { } where)
+                {
+                    where.Location = new LocationTargetRadius
+                    {
+                        Target = new LocationTarget { Link = new FormLink<IPlacedGetter>(marker.FormKey) },
+                        Radius = (uint)c.SpotRadius,
+                    };
+                }
+
+                foreach (var energy in package.Data.Values.OfType<PackageDataFloat>())
+                {
+                    energy.Data = 100f;
+                }
+
+                var here = new GetGlobalValueConditionData();
+                here.Global.Link.SetTo(global.FormKey);
+                package.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = k, Data = here });
+                mod.Packages.Add(package);
+                own.Add(package);
+            }
+
+            // His spot packages first (the first whose condition holds runs), the wide sandbox after.
+            for (var k = own.Count - 1; k >= 0; k--)
+            {
+                npcs[i].Packages.Insert(0, new FormLink<IPackageGetter>(own[k].FormKey));
+            }
+
+            spotGlobals.Add(global.FormKey);
+            spotCounts.Add(c.Spots.Count);
+        }
+
+        // ---- the Fair Inspector's posters, on the palisade's inner face ------------------------------
+        var posters = config.Posters;
+        var postersHung = 0;
+        if (posters.Enabled && posters.Designs.Count > 0 && panels.Count > 0)
+        {
+            var designs = posters.Designs.ToDictionary(d => d.Id, d =>
+            {
+                var s = FairWorld.AddStatic(mod, new ProjectStaticConfig
+                {
+                    EditorId = $"{config.EditorIdPrefix}Poster{d.Id}",
+                    Model = d.Model,
+                    Width = d.Width,
+                    Depth = d.Depth,
+                    Height = d.Height,
+                    MinZ = -d.Height,
+                });
+                return s.FormKey;
+            });
+
+            // Panels clear of the gate and of the banners, their inward normal and a spot on them.
+            var spots = new List<(int Index, float X, float Y, float Z, float Yaw)>();
+            for (var i = 0; i < panels.Count; i++)
+            {
+                var p = panels[i];
+                if (MathF.Sqrt((p.X - gate[0]) * (p.X - gate[0]) + (p.Y - gate[1]) * (p.Y - gate[1])) < posters.GateClear)
+                {
+                    continue;
+                }
+
+                if (banners.Any(b => MathF.Sqrt((b.X - p.X) * (b.X - p.X) + (b.Y - p.Y) * (b.Y - p.Y)) < posters.BannerClear))
+                {
+                    continue;
+                }
+
+                var h = p.Heading * MathF.PI / 180f;
+                var (ux, uy) = (MathF.Cos(h), -MathF.Sin(h));
+                var (nx, ny) = (-uy, ux);
+                if ((centre.X - p.X) * nx + (centre.Y - p.Y) * ny < 0f)
+                {
+                    (nx, ny) = (-nx, -ny);
+                }
+
+                // The paper's front is its local -Y: turned so that faces the fair.
+                spots.Add((i, p.X + nx * posters.Out, p.Y + ny * posters.Out, p.Z + posters.Height, MathF.Atan2(-nx, -ny)));
+            }
+
+            // The feature poster (Garrick's statement) once, on the free panel nearest its point.
+            var used = new HashSet<int>();
+            void Hang(string design, (int Index, float X, float Y, float Z, float Yaw) at, float scale, int n)
+            {
+                put(new PlacedObject(mod)
+                {
+                    EditorID = $"{config.EditorIdPrefix}Poster{design}{n}",
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(designs[design]),
+                    Scale = scale,
+                    Placement = new Placement { Position = new P3Float(at.X, at.Y, at.Z), Rotation = new P3Float(0f, 0f, at.Yaw) },
+                });
+                used.Add(at.Index);
+                postersHung++;
+            }
+
+            if (posters.Feature.Length > 0 && posters.FeatureNear.Length == 2 && spots.Count > 0)
+            {
+                var near = spots.OrderBy(s => (s.X - posters.FeatureNear[0]) * (s.X - posters.FeatureNear[0]) + (s.Y - posters.FeatureNear[1]) * (s.Y - posters.FeatureNear[1])).First();
+                Hang(posters.Feature, near, posters.FeatureScale, 1);
+            }
+
+            // The rest, every Every-th free panel round the wall, the designs in turn.
+            var cycle = posters.Designs.Select(d => d.Id).Where(id => id != posters.Feature).ToList();
+            var k = 0;
+            foreach (var at in spots.Where(s => !used.Contains(s.Index)).Where((_, j) => j % posters.Every == 0))
+            {
+                if (spots.Any(s => used.Contains(s.Index) && Math.Abs(s.Index - at.Index) <= 1))
+                {
+                    continue;  // not right beside the feature poster
+                }
+
+                var design = cycle[k % cycle.Count];
+                Hang(design, at, posters.Scale, k / cycle.Count + 1);
+                k++;
+            }
+        }
+
         // ---- the stage script's schedule for their idles
         var script = mod.Quests.First(q => q.FormKey == stageQuest).VirtualMachineAdapter!.Scripts[0];
         ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
@@ -261,6 +411,11 @@ internal static class FairCameos
         script.Properties.Add(new ScriptIntListProperty { Name = "CameoIdleCount", Data = count.ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMin", Data = config.Members.Select(m => m.Every[0]).ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMax", Data = config.Members.Select(m => m.Every[1]).ToExtendedList() });
+        script.Properties.Add(new ScriptObjectListProperty { Name = "CameoSpot", Objects = spotGlobals.Select(Obj).ToExtendedList() });
+        script.Properties.Add(new ScriptIntListProperty { Name = "CameoSpotCount", Data = spotCounts.ToExtendedList() });
+        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoMoveMin", Data = config.Members.Select(m => m.Move[0]).ToExtendedList() });
+        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoMoveMax", Data = config.Members.Select(m => m.Move[1]).ToExtendedList() });
+        Console.WriteLine($"  cameo rounds: {string.Join(", ", config.Members.Select((m, i) => $"{m.Id} {spotCounts[i]} spots"))}; posters: {postersHung} on the palisade");
         return placed.Count;
     }
 }

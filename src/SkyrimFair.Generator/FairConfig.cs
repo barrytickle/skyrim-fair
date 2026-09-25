@@ -483,6 +483,53 @@ internal sealed record CameosConfig
 
     /// <summary>A horse on the stage roof (the recurring "horse on a roof").</summary>
     public RoofHorseConfig RoofHorse { get; init; } = new();
+
+    /// <summary>The Fair Inspector's notices on the palisade's inner face.</summary>
+    public PostersConfig Posters { get; init; } = new();
+}
+
+internal sealed record PostersConfig
+{
+    public bool Enabled { get; init; }
+
+    public List<PosterDesign> Designs { get; init; } = new();
+
+    /// <summary>The design hung once (Garrick's statement), on the free panel nearest <see cref="FeatureNear"/>.</summary>
+    public string Feature { get; init; } = string.Empty;
+
+    public float[] FeatureNear { get; init; } = Array.Empty<float>();
+
+    public float FeatureScale { get; init; } = 3f;
+
+    /// <summary>The meshes are 19 x 26 (converted at 40 units a metre); 2.5 makes them about 48 x 65.</summary>
+    public float Scale { get; init; } = 2.5f;
+
+    /// <summary>From the panel's centre line to the paper's back, on the fair's side.</summary>
+    public float Out { get; init; } = 24f;
+
+    /// <summary>The paper's centre above the panel's foot.</summary>
+    public float Height { get; init; } = 150f;
+
+    /// <summary>One poster every this many free panels.</summary>
+    public int Every { get; init; } = 2;
+
+    public float GateClear { get; init; } = 600f;
+
+    /// <summary>No poster on a panel within this of a banner.</summary>
+    public float BannerClear { get; init; } = 100f;
+}
+
+internal sealed record PosterDesign
+{
+    public string Id { get; init; } = string.Empty;
+
+    public string Model { get; init; } = string.Empty;
+
+    public float Width { get; init; } = 20f;
+
+    public float Depth { get; init; } = 2f;
+
+    public float Height { get; init; } = 13f;
 }
 
 internal sealed record RoofHorseConfig
@@ -545,6 +592,14 @@ internal sealed record CameoMember
 
     /// <summary>Seconds between idles: <c>[min, max]</c>.</summary>
     public float[] Every { get; init; } = { 40f, 90f };
+
+    /// <summary>His round: <c>[x, y]</c> spots he walks between, sandboxing at each (2 or more).</summary>
+    public List<float[]> Spots { get; init; } = new();
+
+    public float SpotRadius { get; init; } = 350f;
+
+    /// <summary>Seconds at a spot before he moves on: <c>[min, max]</c>.</summary>
+    public float[] Move { get; init; } = { 60f, 120f };
 }
 
 internal sealed record CameoIdle

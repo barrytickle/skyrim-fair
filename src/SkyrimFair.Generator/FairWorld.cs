@@ -1102,7 +1102,14 @@ internal static class FairWorld
             }
 
             mod.ModHeader.Stats.NextFormID = config.Cameos.FormIdBase;
-            var cameos = FairCameos.Build(mod, config.Cameos, config.Singers, master, audio.Quest, config.NpcKeyword, PutPersistentNpc, Put);
+            var bannerBases = config.Life.Palisade.Banners.Select(FormKeyHelper.Parse).ToHashSet();
+            var bannersAt = cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>())
+                .Where(o => bannerBases.Contains(o.Base.FormKey) && o.Placement is not null)
+                .Select(o => (o.Placement!.Position.X, o.Placement.Position.Y))
+                .ToList();
+            var cameos = FairCameos.Build(mod, config.Cameos, config.Singers, master, audio.Quest, config.NpcKeyword, PutPersistentNpc, Put,
+                o => { o.MajorRecordFlagsRaw |= PersistentRecordFlag; topCell.Persistent.Add(o); },
+                panels, config.Palisade, config.Gate, (config.Perimeter.Average(p => p[0]), config.Perimeter.Average(p => p[1])), bannersAt);
             Console.WriteLine($"  cameos: {cameos} ({string.Join(", ", config.Cameos.Members.Select(m => m.Name))}); "
                 + $"FormIDs 0x{config.Cameos.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;

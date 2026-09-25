@@ -4,6 +4,48 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the cameos walk rounds; the Fair Inspector's posters; the floating grass found
+
+- **The floating grass is DynDOLOD's `Tamriel_UNDERSIDE`** (Barry's click, again), poking up
+  through a dip in the terrain.
+  - The dip was covered by the big slab (`023362`, 360 out from the gate) that Barry
+    first asked to be removed.
+  - DynDOLOD's underside follows the smoothed distant terrain, not the real ground, so a
+    re-run won't change it. Covering the spot will.
+  - Waiting on Barry's `player.getpos x/y/z` at the spot.
+- **"Garrick and Claudius be the rare ones that walk around"** (they stood still in one wide
+  sandbox):
+  - Each has a round of 6 spots, with a spot global (`SkyrimFairCameo<Id>Spot`), an XMarker
+    at each spot, and a sandbox package per spot. That's a copy of the vanilla no-conversation
+    sandbox, round the marker, radius 350, energy 100, on `GetGlobalValue == k`.
+  - The spot packages come first in his list, and the wide sandbox is the fallback.
+  - The stage script (`CameoIdles`) moves the global to another spot every 60-120 s, when
+    he isn't mid-idle, and re-evaluates his package. So he walks across the fair to it.
+  - **Garrick's spots:** the dance floor's west and east edges, the avenue at 3000 and
+    1900, the activity field, the gate forecourt.
+  - **Claudius's spots:** East Lane at 400 and 2800, East Wall Walk, East Cross, the avenue
+    at 1000, the East Entry.
+- **The posters** (Barry's 3 packs, 5 designs, on "Poster (Basic & Low Poly)" by
+  filththemutt, CC BY 4.0), `cameos.posters`:
+  - The game files are copied to `assets/meshes|textures/barry_<design>/`, and the
+    authoring packages to `assets/Skyrim_Poster_Assets/`.
+  - The meshes are 19 x 26 (converted at 40 units a metre), so they're hung at 2.5, and
+    Garrick's at 3.
+  - **Where:** on the palisade's inner face, 24 from the panel's centre line (just proud of
+    the logs), 150 up, facing the fair. Only on panels 600 clear of the gate and 100 clear of
+    a banner, every second free one.
+  - **Garrick's statement once**, on the free panel nearest (2048, 6400): the north wall
+    behind the stage, at (1891, 6273).
+  - The other 12 go round the wall, the four designs in turn.
+  - The exterior's silhouette copy skips them (the cameos' prefix).
+- 44 records appended in the cameos' range (`0x6002B`-`0x60056`); nothing else changed.
+  Plugin `b8a4381fd5313f79...`, deterministic, deployed with the script and the posters.
+- **To test:**
+  - Do Garrick and Claudius walk from place to place every minute or two?
+  - Do the posters sit flat on the logs (not sunk into them, not floating), readable, at
+    eye height?
+  - Is Garrick's statement behind the stage?
+
 ### Later: the cameos couldn't be talked to; Claudius's ledger; the floating grass again
 
 Barry, in game: the horse is "excellent"; "Garrick and Claudius isn't interactable"; the

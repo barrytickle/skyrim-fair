@@ -160,6 +160,13 @@ Int[] Property CameoIdleCount Auto
 Float[] Property CameoEveryMin Auto
 Float[] Property CameoEveryMax Auto
 {Seconds between one cameo's idles, at random between the two.}
+GlobalVariable[] Property CameoSpot Auto
+Int[] Property CameoSpotCount Auto
+Float[] Property CameoMoveMin Auto
+Float[] Property CameoMoveMax Auto
+{Each cameo's round: his spot global (his spot packages each run on one value), how many
+spots, and the seconds before he moves on. Moving on sets the global to another spot and
+re-evaluates his package, so he walks there.}
 Int[] Property SongFirstLine Auto
 {For each song, its first line in SingerTopics, or -1 for a song with no singing.}
 Int[] Property SongLineCount Auto
@@ -293,6 +300,7 @@ Float[] cameoNext
 Bool[] cameoPlaying
 Int[] cameoPlays
 Int[] cameoIdleNow
+Float[] cameoMoveNext
 Float cameoWake = 0.0
 Float holdEnds = 0.0
 
@@ -322,6 +330,7 @@ Function Recover()
 	cameoPlaying = new Bool[8]
 	cameoPlays = new Int[8]
 	cameoIdleNow = new Int[8]
+	cameoMoveNext = new Float[8]
 	SingersStand()
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
@@ -743,6 +752,9 @@ Function CameoIdles(Float now)
 	If cameoIdleNow.Length < 8
 		cameoIdleNow = new Int[8]
 	EndIf
+	If cameoMoveNext.Length < 8
+		cameoMoveNext = new Float[8]
+	EndIf
 	Float perSecond = TimeScale.GetValue() / 86400.0
 	Int i = 0
 	While i < Cameos.Length && i < 8
@@ -778,6 +790,23 @@ Function CameoIdles(Float now)
 		EndIf
 		If cameoWake == 0.0 || cameoNext[i] < cameoWake
 			cameoWake = cameoNext[i]
+		EndIf
+		; His round: when it's time and he isn't mid-idle, on to another spot.
+		If a && i < CameoSpotCount.Length && CameoSpotCount[i] > 1 && i < CameoSpot.Length && CameoSpot[i]
+			If cameoMoveNext[i] == 0.0
+				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin[i], CameoMoveMax[i]) * perSecond
+			ElseIf now >= cameoMoveNext[i] && !cameoPlaying[i]
+				Int count = CameoSpotCount[i]
+				Int spot = ((CameoSpot[i].GetValue() as Int) + 1 + Utility.RandomInt(0, count - 2)) % count
+				CameoSpot[i].SetValue(spot)
+				If a.Is3DLoaded()
+					a.EvaluatePackage()
+				EndIf
+				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin[i], CameoMoveMax[i]) * perSecond
+			EndIf
+			If cameoMoveNext[i] < cameoWake
+				cameoWake = cameoMoveNext[i]
+			EndIf
 		EndIf
 		i += 1
 	EndWhile

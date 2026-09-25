@@ -15,6 +15,7 @@ original author and its redistribution permission are confirmed.
 | Palisade wall | adam127 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Viking Palisade gate | Sereib (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Outhouse | Strifey7 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
+| Fair Inspector posters (5 designs) | filththemutt (Sketchfab) | bundled, converted, new artwork | CC BY 4.0: credit ships |
 | "Whiterun Fair" welcome sign | JeffK (jeffkolada, Sketchfab) | Barry's game only, converted | **Sketchfab Standard, not CC BY: the author's OK needed to ship it** |
 | Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Stage music, crowd sounds, singers' voices | Barry, made with Suno (Pro) | bundled | Barry owns them (Suno Pro) |
@@ -93,6 +94,35 @@ The plugin places it at scale 1.8 (about 218 tall).
 Attribution (if it ships):
 
 > "Low-Poly Wooden Sign made of Three Planks" by JeffK. Converted and modified for Skyrim.
+
+### Poster (Sketchfab, CC BY 4.0): the Fair Inspector's notices
+
+Thirteen notices on the palisade's inner face, in five designs:
+- "Reward" (`meshes\barry_wanted_poster\`)
+- "Witnesses Required" (`barry_witnesses`)
+- "Official Notice" (`barry_official_notice`)
+- "Case Update" (`barry_case_update`)
+- "A Statement from Garrick Sol V" (`barry_garrick_statement`, hung once, behind the stage)
+
+Each design has its textures under `textures\barry_<name>\`. Barry's packages (Blender files, GLBs, source art, prompts) are in `assets/Skyrim_Poster_Assets/`.
+
+| Model | Author | Source | Licence |
+| --- | --- | --- | --- |
+| Poster (Basic & Low Poly) | filththemutt (https://sketchfab.com/filththemutt) | https://sketchfab.com/3d-models/poster-basic-low-poly-eecc7216ab704bdf9c7fb1ef33c23889 | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) |
+
+**Changes made** (Barry, with ChatGPT; the packages' CREDITS):
+- removed the modern tape meshes, and scaled the paper to 65 cm high
+- centred the origin on the rear mounting plane, and projected upright UVs
+- replaced the blank texture with AI-generated medieval notices in Barry's wording (the
+  horse on the stage roof, and a Garrick portrait)
+- adapted the materials to Skyrim's shaders, as DDS with mipmaps
+
+The paper's curvature is kept, and no collision is added. The plugin hangs them at scale 2.5
+(Garrick's at 3).
+
+Attribution:
+
+> "Poster (Basic & Low Poly)" by filththemutt, licensed under CC BY 4.0. Converted and modified for Skyrim, with new artwork.
 
 ### Stroti's Outdoor Toilet (modder's resource): no longer used
 
@@ -424,6 +454,7 @@ Every file in the deployed mod folder was traced to its source:
 | Palisade wall | `meshes\barry_palisades\palisade.nif`, `textures\barry_palisades\palisade\*.dds` | Palisade (Sketchfab) | adam127 | CC BY 4.0, with attribution | Bundled |
 | Main gate | `meshes\barry_palisades\viking_palisade_gate_closed.nif` (placed), `viking_palisade_gate.nif` (open, not placed), `textures\barry_palisades\viking_palisade_gate\*.dds` | Viking Palisade gate (Sketchfab) | Sereib | CC BY 4.0, with attribution | Bundled |
 | Welcome sign | `meshes\barry_fair_sign\fair_sign.nif`, `textures\barry_fair_sign\*.dds` | Low-Poly Wooden Sign made of Three Planks (Sketchfab) | JeffK | **Sketchfab Standard: pending the author's OK** | Barry's game only; git-ignored |
+| Fair Inspector posters | `meshes\barry_{wanted_poster,witnesses,official_notice,case_update,garrick_statement}\*.nif`, their textures | Poster (Basic & Low Poly) (Sketchfab) | filththemutt | CC BY 4.0, with attribution | Bundled |
 | Outhouses | `meshes\barry_outhouse\outhouse.nif`, `textures\barry_outhouse\*.dds` | Outhouse (Sketchfab) | Strifey7 | CC BY 4.0, with attribution | Bundled (since 2026-09-25; Stroti's before, not shipped) |
 | Light towers | `meshes\barry_scaffold\scaffold.nif`, `textures\barry_scaffold\*.dds` | scaffold (Sketchfab) | Js_TuruokaJunpei | CC BY 4.0, with attribution | Bundled |
 | Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | made with Suno (Pro) | Barry | Barry owns them (Suno Pro plan) | Built mod only |

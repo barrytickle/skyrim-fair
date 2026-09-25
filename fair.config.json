@@ -241,7 +241,9 @@
           "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [2048, 3300, 0, 180], "radius": 2200, "energy": 80,
           "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 25}],
-          "every": [45, 90]
+          "every": [45, 90],
+          "spots": [[1300, 4250], [2800, 4250], [2048, 3000], [2048, 1900], [900, 1600], [2048, -1300]],
+          "move": [60, 120]
         },
         {
           "id": "Claudius", "name": "Claudius Vale", "shortName": "Claudius",
@@ -254,9 +256,28 @@
             {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 20, "stop": "0010ACAE:Skyrim.esm"},
             {"idle": "00075C3D:Skyrim.esm", "name": "IdleExamine", "hold": 6}
           ],
-          "every": [25, 50]
+          "every": [25, 50],
+          "spots": [[3780, 400], [3780, 2800], [5100, 1500], [3000, 1000], [2048, 1000], [3050, -1300]],
+          "move": [60, 120]
         }
       ],
+      "posters": {
+        "enabled": true,
+        "designs": [
+          {"id": "Reward", "model": "barry_wanted_poster\\wanted_poster.nif"},
+          {"id": "Witnesses", "model": "barry_witnesses\\witnesses.nif"},
+          {"id": "Notice", "model": "barry_official_notice\\official_notice.nif"},
+          {"id": "CaseUpdate", "model": "barry_case_update\\case_update.nif"},
+          {"id": "GarrickStatement", "model": "barry_garrick_statement\\garrick_statement.nif"}
+        ],
+        "feature": "GarrickStatement",
+        "featureNear": [2048, 6400],
+        "featureScale": 3.0,
+        "scale": 2.5,
+        "out": 24,
+        "height": 150,
+        "every": 2
+      },
       "roofHorse": {
         "enabled": true,
         "horse": "00068D5B:Skyrim.esm",
