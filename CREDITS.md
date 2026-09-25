@@ -18,6 +18,7 @@ original author and its redistribution permission are confirmed.
 | Fair Inspector posters (5 designs) | filththemutt (Sketchfab) | bundled, converted, new artwork | CC BY 4.0: credit ships |
 | "Whiterun Fair" welcome sign | JeffK (jeffkolada, Sketchfab) | Barry's game only, converted | **Sketchfab Standard, not CC BY: the author's OK needed to ship it** |
 | Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
+| Paper lanterns (tall, round) | Barry, made with ChatGPT ("Astra") | built, not yet placed | the project's own |
 | Stage music, crowd sounds, singers' voices | Barry, made with Suno (Pro) | bundled | Barry owns them (Suno Pro) |
 | Paired folk dance | Barry, made with ChatGPT ("Astra") | bundled (re-based clips) | the project's own |
 | Holidays | Nexus 1533 | a master; its records are placed | dependency, nothing copied |
@@ -313,6 +314,20 @@ Mixamo). Check Adobe's current Mixamo terms before release.
 Attribution:
 
 > Cheering animation from Mixamo (Adobe), retargeted for Skyrim.
+
+### Paper lanterns (made with ChatGPT)
+
+**Models:** `meshesarry_paper_lanterns\lantern_tall_red.nif` and `lantern_round_blue.nif`, new
+procedural meshes made for Skyrim Fair by Barry with ChatGPT ("Astra") in Blender 3.6.23
+(2026-09-25). A lantern image Barry supplied was only a visual reference: no source mesh or
+texture was used. The paper art was generated with ChatGPT's image tool; the prompts are in
+`assets/Skyrim_Paper_Lanterns_Authoring/work/`.
+
+**Colours:** the other ten papers (`lantern_<tall|round>_<colour>_d.dds`) are recoloured from
+Astra's two by `tools/make_lantern_colours.py`. The project's own.
+
+Not placed yet: they're the planned replacement for Holidays' lanterns, if the fair drops
+Holidays as a requirement (docs/RELEASE.md).
 
 ### Paired folk dance (made with ChatGPT)
 

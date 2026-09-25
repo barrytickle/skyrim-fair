@@ -4,6 +4,28 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the paper lanterns in six colours
+
+Barry: Astra's lanterns zip, "a round and a tall variant". "Can we add some colour glows?"
+- Astra's two lanterns (original meshes, AI paper art) are in the repo:
+  - `assets/meshes|textures/barry_paper_lanterns/`: the game files, tracked
+  - `assets/Skyrim_Paper_Lanterns_Authoring/`: the authoring package, untracked like the others
+- Each one's paper texture is also its Glow shader's glow map (shader type 2, emission white
+  1.0). So a recoloured paper glows in its own colour.
+- **`tools/make_lantern_colours.py`** (texture venv) makes the other ten papers, red, orange,
+  yellow, green, blue and purple for both shapes, as BC1 DDS with full mips (the same as
+  Astra's: 699,192 bytes, 11 levels):
+  - it moves each pixel toward the new colour by how much of the paper's own colour it
+    carries, so the warm core stays warm and the motifs follow the colour
+  - it keeps the fade bright, so no grey-brown where blue meets the warm core
+  - the round shape gets a colour boost, because Astra's blue is soft
+  - each shape's own colour is Astra's texture, never overwritten (a first run did overwrite
+    both; they were restored from her zip, byte for byte)
+- **`tools/lanterns_preview_blender.py`** renders all six colours headless in Blender 5.2,
+  with Astra's studio lighting (`build/lanterns/lanterns_colours.png`).
+- Not in the plugin yet: nothing places them, and Holidays' lanterns stay. 9,472 and 6,592
+  triangles are heavy for about 222 lanterns; a lighter version would be wise before placing.
+
 ### Later: the release package (`tools/package.py`)
 
 Barry: "could you generate me a production folder? with everything in there?"
