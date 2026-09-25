@@ -4,6 +4,15 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: Barry's checks pass
+
+Barry: "Yup all good!!!". **Confirmed in game:**
+- the steady show (every instrument and the singers' cheer loop through each song)
+- the roof horse staying on its planks with its AI off
+- the keepers kept at their spots (the clothing stall's back behind the counter)
+- Browse on the counters
+- the shops showing all their stock
+
 ### Later: the gear stalls at 20x
 
 Barry: "can we change it to 20x". `shops.priceMultiplier` 20 (the perk's EPFD `0000a041`).
