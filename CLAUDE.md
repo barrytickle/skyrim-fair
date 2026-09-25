@@ -202,7 +202,6 @@ current):
 - a grass cache for the fair's worldspace, with the mod-page note
 - the Tamriel exterior's limits: the navmesh, LOD, and landscape mods in that area
 - Professional Dancer: optional but recommended (Dance.esp, then Pandora); nothing of it ships
-- the singers' face tints, to rebuild from Bethesda's archives (they're Vanilla Remastered's)
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance
 - Stroti can't be re-uploaded (see `CREDITS.md`)

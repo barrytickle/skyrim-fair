@@ -105,7 +105,7 @@ Permissions and provenance (details in `CREDITS.md`):
 - [x] The avenue cobbles no longer use Whiterun Mossy Wet Stonefloor (Nexus 99294):
       they're vanilla `wrstonefloor01` with the fair's own parallax map (2026-09-25,
       `tools/make_cobble.py`). Build them from Bethesda's archives (the Steam install).
-- [ ] **The singers' face tints** (`textures\actors\character\FaceGenData\FaceTint\SkyrimFair.esp\*.dds`)
+- [x] **The singers' face tints** (rebuilt from the Steam install's archives, 2026-09-25; `singers.faceArchives`) (`textures\actors\character\FaceGenData\FaceTint\SkyrimFair.esp\*.dds`)
       are copied from Vanilla Remastered - The New Normal's archives (Nexus 153879), not
       Bethesda's. Rebuild them from the vanilla `Skyrim - Textures*.bsa` (Steam's install)
       before release. Their face meshes are already Bethesda's.

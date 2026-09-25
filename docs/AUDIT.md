@@ -60,8 +60,13 @@ Every file in the deployed folder was traced to its source (the detail is in `CR
 - **New finding: Vanilla Remastered - The New Normal (153879).** The singers' three face
   tints came from its archives. The modlist's `Skyrim - Textures*.bsa` are its, and
   `singers.faceArchives` searched them. The face meshes are Bethesda's.
-  - The fix: point `faceArchives` at the Steam install's `Data` (vanilla), and rebuild.
-    That's Barry's call; not done in this pass.
+  - **Fixed:** `singers.faceArchives` is now the Steam install's `Data` alone. All six
+    FaceGen files are byte-identical to Bethesda's. The plugin is unchanged
+    (`e89da4ef...`), and the three tints are deployed.
+- **CREDITS.md rewritten** around what ships: a summary table, then the bundled
+  third-party assets, the files built from vanilla, the project's own work,
+  dependencies (Holidays, OAR, Professional Dancer), the SPID patches, what was looked at but
+  not used, and the build tools. The ledger is updated.
 - **Still pending, as before:** the scaffold tower's source and licence, the music's
   provenance, Astra's credit, and the SPID `_DISTR.ini` copies' authors (Maximum
   Destruction, Stealth Detection Fixes, Strange Runes).
