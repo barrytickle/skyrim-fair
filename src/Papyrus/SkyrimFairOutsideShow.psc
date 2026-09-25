@@ -1,9 +1,9 @@
 Scriptname SkyrimFairOutsideShow extends ObjectReference
-{The Wanderer's Fair from outside its Tamriel walls: the fair's songs, faintly, one after another,
+{The Wanderer's Fair from outside its Tamriel walls: the fair's Songs2, faintly, one after another,
 and at night a volley of fireworks over it now and then. Runs only while its cell is attached.}
 
-Sound[] Property Songs Auto
-Float[] Property SongLengths Auto
+Sound[] Property Songs2 Auto
+Float[] Property SongLengths2 Auto
 Float Property SongGap = 20.0 Auto
 ObjectReference Property Speaker Auto
 
@@ -63,13 +63,13 @@ Event OnUpdate()
 		Return
 	EndIf
 	Float now = Utility.GetCurrentRealTime()
-	If Songs.Length > 0 && now >= songEnds && (!MusicEnabled || MusicEnabled.GetValue() > 0.5)
+	If Songs2.Length > 0 && now >= songEnds && (!MusicEnabled || MusicEnabled.GetValue() > 0.5)
 		If instance
 			Sound.StopInstance(instance)
 		EndIf
-		instance = Songs[song].Play(Speaker)
-		songEnds = now + SongLengths[song] + SongGap
-		song = (song + 1) % Songs.Length
+		instance = Songs2[song].Play(Speaker)
+		songEnds = now + SongLengths2[song] + SongGap
+		song = (song + 1) % Songs2.Length
 	EndIf
 	If now >= nextVolley
 		nextVolley = now + FireworkEvery * Utility.RandomFloat(0.8, 1.3)

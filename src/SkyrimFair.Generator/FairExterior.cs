@@ -476,8 +476,8 @@ internal static class FairExterior
                 VirtualMachineAdapter = new VirtualMachineAdapter(),
             };
             var script = new ScriptEntry { Name = "SkyrimFairOutsideShow" };
-            script.Properties.Add(List("Songs", songs.Select(s => s.FormKey)));
-            script.Properties.Add(new ScriptFloatListProperty { Name = "SongLengths", Data = lengths.ToExtendedList() });
+            script.Properties.Add(List("Songs2", songs.Select(s => s.FormKey)));
+            script.Properties.Add(new ScriptFloatListProperty { Name = "SongLengths2", Data = lengths.ToExtendedList() });
             script.Properties.Add(new ScriptFloatProperty { Name = "SongGap", Data = show.SongGap });
             script.Properties.Add(Obj("Speaker", speaker.FormKey));
             script.Properties.Add(List("FireworkSites", sites.Select(s => s.FormKey)));
@@ -621,6 +621,28 @@ internal static class FairExterior
             });
         }
 
+        // The festival entrance (appended, after everything else in the range).
+        {
+            var (rx, ry) = (ofy, -ofx);
+            var facing = MathF.Atan2(ofx, ofy);
+            foreach (var d in ext.Decor)
+            {
+                var (dx, dy) = (gx + rx * d.Side + ofx * d.Forward, gy + ry * d.Side + ofy * d.Forward);
+                var yaw = facing + d.Yaw * MathF.PI / 180f;
+                PutObject(new PlacedObject(mod)
+                {
+                    Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(d.Piece)),
+                    Scale = d.Scale == 1f ? null : d.Scale,
+                    Placement = new Placement
+                    {
+                        Position = new P3Float(dx, dy, Ground(dx, dy) + d.Z),
+                        Rotation = d.Tilt ? OnGround(dx, dy, yaw, 60f) : new P3Float(0f, 0f, yaw),
+                    },
+                });
+                result.Decor++;
+            }
+        }
+
         // The towers' banners the wall runs through: disabled, not removed (their FormIDs stay).
         var hideBases = ext.HideNearWallBases.Select(FormKeyHelper.Parse).ToHashSet();
         foreach (var o in cells.Values.SelectMany(c => c.Temporary.OfType<PlacedObject>())
@@ -673,6 +695,8 @@ internal sealed class ExteriorResult
     public int Sunk { get; set; }
 
     public int Hidden { get; set; }
+
+    public int Decor { get; set; }
 
     public int Signs { get; set; }
 

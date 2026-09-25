@@ -188,6 +188,10 @@ Plugin `eed0547ce3b3aff8...`, committed (`66190a8`) and deployed. The day's deta
    - bard animation variants (`docs/BARDS.md`)
    - the release checklist (`docs/RELEASE.md`)
 
+**The show's data carries a 2** (`Songs2`, `CameoIdles2`, ...): a save keeps a script's
+property values, so data under old names never reached Barry's save. Rename again (3) when an
+update must reach saves already playing (`docs/CODEX_HANDOVER.md`).
+
 **Housekeeping to know:**
 - The other agent's `tools/crowd/` changes and `library.json` are uncommitted; they're
   theirs to commit.

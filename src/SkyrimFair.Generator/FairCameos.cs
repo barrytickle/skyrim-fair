@@ -174,6 +174,9 @@ internal static class FairCameos
             }
 
             mod.Npcs.Add(horse);
+            horse.VirtualMachineAdapter.Scripts[0].Properties.Add(new ScriptFloatProperty { Name = "HomeX", Data = roof.At[0] });
+            horse.VirtualMachineAdapter.Scripts[0].Properties.Add(new ScriptFloatProperty { Name = "HomeY", Data = roof.At[1] });
+            horse.VirtualMachineAdapter.Scripts[0].Properties.Add(new ScriptFloatProperty { Name = "HomeZ", Data = roof.At[2] });
             putPersistent(new PlacedNpc(mod)
             {
                 EditorID = $"{horse.EditorID}Ref",
@@ -456,13 +459,13 @@ internal static class FairCameos
         var script = mod.Quests.First(q => q.FormKey == stageQuest).VirtualMachineAdapter!.Scripts[0];
         ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
         script.Properties.Add(new ScriptObjectListProperty { Name = "Cameos", Objects = placed.Select(p => Obj(p.FormKey)).ToExtendedList() });
-        script.Properties.Add(new ScriptObjectListProperty { Name = "CameoIdles", Objects = idles.Select(Obj).ToExtendedList() });
-        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoHolds", Data = holds.ToExtendedList() });
-        script.Properties.Add(new ScriptObjectListProperty { Name = "CameoStops", Objects = stops.Select(Obj).ToExtendedList() });
-        script.Properties.Add(new ScriptIntListProperty { Name = "CameoFirstIdle", Data = first.ToExtendedList() });
-        script.Properties.Add(new ScriptIntListProperty { Name = "CameoIdleCount", Data = count.ToExtendedList() });
-        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMin", Data = config.Members.Select(m => m.Every[0]).ToExtendedList() });
-        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMax", Data = config.Members.Select(m => m.Every[1]).ToExtendedList() });
+        script.Properties.Add(new ScriptObjectListProperty { Name = "CameoIdles2", Objects = idles.Select(Obj).ToExtendedList() });
+        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoHolds2", Data = holds.ToExtendedList() });
+        script.Properties.Add(new ScriptObjectListProperty { Name = "CameoStops2", Objects = stops.Select(Obj).ToExtendedList() });
+        script.Properties.Add(new ScriptIntListProperty { Name = "CameoFirstIdle2", Data = first.ToExtendedList() });
+        script.Properties.Add(new ScriptIntListProperty { Name = "CameoIdleCount2", Data = count.ToExtendedList() });
+        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMin2", Data = config.Members.Select(m => m.Every[0]).ToExtendedList() });
+        script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMax2", Data = config.Members.Select(m => m.Every[1]).ToExtendedList() });
         script.Properties.Add(new ScriptObjectListProperty { Name = "CameoSpot", Objects = spotGlobals.Select(Obj).ToExtendedList() });
         script.Properties.Add(new ScriptIntListProperty { Name = "CameoSpotCount", Data = spotCounts.ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoMoveMin", Data = config.Members.Select(m => m.Move[0]).ToExtendedList() });

@@ -18,10 +18,14 @@ WorldSpace Property FairWorld Auto
 ObjectReference Property StageSpeaker Auto
 {The persistent marker on the stage the music and the cheer come from.}
 
-Sound[] Property Songs Auto
-Float[] Property SongLengths Auto
+; The show's data carries a 2 in its names (2026-09-25): a save keeps a script's property values
+; from the first time it ran, so the new playlist, idles and holds never reached an existing
+; save under the old names. New names take the plugin's values. Rename again (3, ...) when a
+; later update must reach saves already playing.
+Sound[] Property Songs2 Auto
+Float[] Property SongLengths2 Auto
 {Seconds, measured from the files by the generator.}
-Int[] Property SongCheers Auto
+Int[] Property SongCheers2 Auto
 {Index into Cheers played after each song; -1 for none.}
 
 Sound[] Property Cheers Auto
@@ -106,7 +110,7 @@ Actor[] Property Singers Auto
 {The three singers at the front of the deck (docs/BARDS.md). Their lips follow the song:
 each sung line is a topic whose voice file (silent audio, a lip track) differs per
 singer's voice type.}
-Topic[] Property SingerTopics Auto
+Topic[] Property SingerTopics2 Auto
 Idle[] Property SingerMoves Auto
 Float[] Property SingerMoveLengths Auto
 {While they sing, the singers gesture: these idles, in turn, each clip replayed after its
@@ -134,7 +138,7 @@ Float[] Property SingerHomeZ Auto
 Float[] Property SingerFacing Auto
 {Each singer's heading, in degrees from the anchor's.}
 Float[] Property SingerStepOffsets Auto
-{The line's sideways offsets, in turn, one a step (songs.config.json singerSteps). None: they stand.}
+{The line's sideways offsets, in turn, one a step (Songs2.config.json singerSteps). None: they stand.}
 Float Property SingerStepEvery = 8.0 Auto
 {Seconds between steps while they sing.}
 Float Property SingerStepSeconds = 3.0 Auto
@@ -144,7 +148,7 @@ Float Property SingerFirstStep = 6.0 Auto
 Float Property SingerCatchUp = 1000.0 Auto
 Float Property SingerFollow = 12.0 Auto
 {KeepOffsetFromActor's radii: past catch-up they'd run; within follow they stand.}
-Float[] Property SingerStarts Auto
+Float[] Property SingerStarts2 Auto
 {Each line's start, in seconds from its song's start.}
 
 Quest Property CompanionFinder Auto
@@ -157,15 +161,15 @@ Int Property CompanionSlots = 6 Auto
 Actor[] Property Cameos Auto
 {The named ambient characters (Garrick Sol V, Claudius Vale; FairCameos.cs). They wander on their
 own sandbox; every so often, when free, each plays his next idle and stops it after its hold.}
-Idle[] Property CameoIdles Auto
-Float[] Property CameoHolds Auto
-Idle[] Property CameoStops Auto
-{The idle that ends each of CameoIdles (Hadvar's ledger has its own exit); None: BandStop.}
-Int[] Property CameoFirstIdle Auto
-Int[] Property CameoIdleCount Auto
-{Each cameo's idles are CameoIdles[CameoFirstIdle[i] ...], CameoIdleCount[i] of them, in turn.}
-Float[] Property CameoEveryMin Auto
-Float[] Property CameoEveryMax Auto
+Idle[] Property CameoIdles2 Auto
+Float[] Property CameoHolds2 Auto
+Idle[] Property CameoStops2 Auto
+{The idle that ends each of CameoIdles2 (Hadvar's ledger has its own exit); None: BandStop.}
+Int[] Property CameoFirstIdle2 Auto
+Int[] Property CameoIdleCount2 Auto
+{Each cameo's idles are CameoIdles2[CameoFirstIdle2[i] ...], CameoIdleCount2[i] of them, in turn.}
+Float[] Property CameoEveryMin2 Auto
+Float[] Property CameoEveryMax2 Auto
 {Seconds between one cameo's idles, at random between the two.}
 GlobalVariable Property CameoDuckUntil Auto
 {Set by each cameo line's begin fragment (SkyrimFairCameoLine): the real time its line ends.}
@@ -178,15 +182,15 @@ Float[] Property CameoMoveMax Auto
 {Each cameo's round: his spot global (his spot packages each run on one value), how many
 spots, and the seconds before he moves on. Moving on sets the global to another spot and
 re-evaluates his package, so he walks there.}
-Int[] Property SongFirstLine Auto
-{For each song, its first line in SingerTopics, or -1 for a song with no singing.}
-Int[] Property SongLineCount Auto
+Int[] Property SongFirstLine2 Auto
+{For each song, its first line in SingerTopics2, or -1 for a song with no singing.}
+Int[] Property SongLineCount2 Auto
 
-Float[] Property SectionStarts Auto
+Float[] Property SectionStarts2 Auto
 {Every song's sections, song by song: each one's start in seconds from its song's start.}
 Int[] Property SectionDrums Auto
-{Retired (the drums alone): a save keeps its old value; SectionPlay has every instrument now.}
-Int[] Property SectionPlay Auto
+{Retired (the drums alone): a save keeps its old value; SectionPlay2 has every instrument now.}
+Int[] Property SectionPlay2 Auto
 {For each section, each instrument in InstrumentIdles in turn: 0 rest (held, still), 1 normal,
 2 fast, 3 away (put away).}
 Idle[] Property InstrumentIdles Auto
@@ -195,14 +199,14 @@ GlobalVariable[] Property InstrumentTempo Auto
 {Each instrument's tempo global (InstrumentIdles order), held at its level: 0 rest, 1 normal,
 2 fast, 3 away. Open Animation Replacer plays a held loop for the fair's musicians while it's
 0 and a faster one while it's 2.}
-Int[] Property SectionSing Auto
+Int[] Property SectionSing2 Auto
 {For each section: 1 the singers sing (their lines are said), 2 they sing and cheer, 0 they
 rest (lines skipped).}
-Int[] Property SectionCrowd Auto
+Int[] Property SectionCrowd2 Auto
 {0 the dancers dance, 1 they clap, 2 they cheer.}
-Int[] Property SongFirstSection Auto
+Int[] Property SongFirstSection2 Auto
 {For each song, its first section, or -1 for a song without (drums and dancing throughout).}
-Int[] Property SongSectionCount Auto
+Int[] Property SongSectionCount2 Auto
 Idle Property DrumIdle Auto
 {Retired: InstrumentIdles has every instrument now.}
 
@@ -317,7 +321,7 @@ Float cameoWake = 0.0
 Float holdEnds = 0.0
 
 Event OnInit()
-	Debug.Trace("SkyrimFairAudio: started, " + Songs.Length + " songs")
+	Debug.Trace("SkyrimFairAudio: started, " + Songs2.Length + " Songs2")
 	FillStripSpells()
 	RegisterForSingleUpdate(3.0)
 EndEvent
@@ -398,7 +402,7 @@ Event OnUpdate()
 		; Arrived, or loaded at the fair.
 		; The show opens with the first song (The Wanderer's Fair), wherever the save left off.
 		track = 0
-		If FirstTrack && FirstTrack.GetValue() >= 0.0 && (FirstTrack.GetValue() as Int) < Songs.Length
+		If FirstTrack && FirstTrack.GetValue() >= 0.0 && (FirstTrack.GetValue() as Int) < Songs2.Length
 			track = FirstTrack.GetValue() as Int
 		EndIf
 		Enter(1, FirstSongDelay, show)
@@ -409,9 +413,9 @@ Event OnUpdate()
 	EndIf
 	ResetArchers()
 	ApplyCrowdLayers()
-	CameoIdles(Utility.GetCurrentGameTime())
+	CameoIdles2(Utility.GetCurrentGameTime())
 
-	If MusicEnabled.GetValue() < 0.5 || Songs.Length == 0
+	If MusicEnabled.GetValue() < 0.5 || Songs2.Length == 0
 		; Switched off: hold, and start afresh when switched back on.
 		If songInstance != 0 || cheerInstance != 0
 			StopAll()
@@ -472,14 +476,14 @@ Event OnUpdate()
 	EndIf
 	If phase == 2 && nextSection >= 0 && nextSection < endSection
 		; Wake for the next section.
-		Float toSection = SectionStarts[nextSection] - Seconds(show - songStarted)
+		Float toSection = SectionStarts2[nextSection] - Seconds(show - songStarted)
 		If toSection < left
 			left = toSection
 		EndIf
 	EndIf
 	If phase == 2 && nextLine >= 0 && nextLine < endLine
 		; Wake for the next sung line.
-		Float toLine = SingerStarts[nextLine] - Seconds(show - songStarted)
+		Float toLine = SingerStarts2[nextLine] - Seconds(show - songStarted)
 		If toLine < left
 			left = toLine
 		EndIf
@@ -495,14 +499,14 @@ EndEvent
 Function Advance(Float now)
 	If phase == 1 || phase == 4
 		If phase == 4
-			track = (track + 1) % Songs.Length
+			track = (track + 1) % Songs2.Length
 		EndIf
-		If track >= Songs.Length
+		If track >= Songs2.Length
 			track = 0
 		EndIf
 		; The last song's tail ended long ago (its cheer and the pause outlast the lead).
 		tailInstance = 0
-		songInstance = Songs[track].Play(StageSpeaker)
+		songInstance = Songs2[track].Play(StageSpeaker)
 		Debug.Trace("SkyrimFairAudio: song " + track + " playing, instance " + songInstance)
 		songsPlayed += 1
 		dancing = new Bool[128]
@@ -540,27 +544,27 @@ Function Advance(Float now)
 		crowdMode = 0
 		nextSection = -1
 		endSection = -1
-		If track < SongFirstSection.Length && SongFirstSection[track] >= 0
-			nextSection = SongFirstSection[track]
-			endSection = nextSection + SongSectionCount[track]
+		If track < SongFirstSection2.Length && SongFirstSection2[track] >= 0
+			nextSection = SongFirstSection2[track]
+			endSection = nextSection + SongSectionCount2[track]
 		EndIf
-		If track < SongFirstLine.Length && SongFirstLine[track] >= 0
-			nextLine = SongFirstLine[track]
-			endLine = nextLine + SongLineCount[track]
+		If track < SongFirstLine2.Length && SongFirstLine2[track] >= 0
+			nextLine = SongFirstLine2[track]
+			endLine = nextLine + SongLineCount2[track]
 		EndIf
 		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
-		Enter(2, SongLengths[track] - Lead(), now)
+		Enter(2, SongLengths2[track] - Lead(), now)
 	ElseIf phase == 2
 		; The last note is ringing: the crowd cheers, the song finishes under it, then a breath.
 		Float lead = Lead()
 		tailInstance = songInstance
 		songInstance = 0
 		bandUntil = now + lead * TimeScale.GetValue() / 86400.0
-		Int cheer = SongCheers[track]
+		Int cheer = SongCheers2[track]
 		If cheer >= 0 && cheer < Cheers.Length
 			cheerInstance = Cheers[cheer].Play(StageSpeaker)
 			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue())
-			Debug.Trace("SkyrimFairAudio: cheer " + cheer + " at " + Seconds(now - songStarted) + " s into song " + track + " (" + SongLengths[track] + " s long, lead " + lead + ")")
+			Debug.Trace("SkyrimFairAudio: cheer " + cheer + " at " + Seconds(now - songStarted) + " s into song " + track + " (" + SongLengths2[track] + " s long, lead " + lead + ")")
 			Enter(3, CheerLengths[cheer], now)
 			Cheer()
 			Fireworks()
@@ -578,8 +582,8 @@ Float Function Lead()
 	Float lead = CheerLead
 	If lead < 0.0
 		lead = 0.0
-	ElseIf lead > SongLengths[track] / 2.0
-		lead = SongLengths[track] / 2.0
+	ElseIf lead > SongLengths2[track] / 2.0
+		lead = SongLengths2[track] / 2.0
 	EndIf
 	Return lead
 EndFunction
@@ -824,10 +828,10 @@ Bool Function CameoNear()
 	Return False
 EndFunction
 
-; The cameos' idles. Each waits a random while (CameoEveryMin..Max), then, if he's loaded and
+; The cameos' idles. Each waits a random while (CameoEveryMin2..Max), then, if he's loaded and
 ; free (not sitting, fighting or talking to the player), plays his next idle; after its hold
 ; he's stopped (BandStop) and handed back to his package. Busy, he's tried again in 10 s.
-Function CameoIdles(Float now)
+Function CameoIdles2(Float now)
 	cameoWake = 0.0
 	If Cameos.Length == 0
 		Return
@@ -848,27 +852,27 @@ Function CameoIdles(Float now)
 	While i < Cameos.Length && i < 8
 		Actor a = Cameos[i]
 		If cameoNext[i] == 0.0
-			cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin[i], CameoEveryMax[i]) * perSecond
+			cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin2[i], CameoEveryMax2[i]) * perSecond
 		ElseIf now >= cameoNext[i] && a
 			If cameoPlaying[i]
 				If a.Is3DLoaded()
 					Idle stop = BandStop
 					Int playing = cameoIdleNow[i]
-					If playing < CameoStops.Length && CameoStops[playing]
-						stop = CameoStops[playing]
+					If playing < CameoStops2.Length && CameoStops2[playing]
+						stop = CameoStops2[playing]
 					EndIf
 					a.PlayIdle(stop)
 					a.EvaluatePackage()
 				EndIf
 				cameoPlaying[i] = False
-				cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin[i], CameoEveryMax[i]) * perSecond
-			ElseIf CameoIdleCount[i] > 0 && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
-				Int k = CameoFirstIdle[i] + cameoPlays[i] % CameoIdleCount[i]
-				If a.PlayIdle(CameoIdles[k])
+				cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin2[i], CameoEveryMax2[i]) * perSecond
+			ElseIf CameoIdleCount2[i] > 0 && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
+				Int k = CameoFirstIdle2[i] + cameoPlays[i] % CameoIdleCount2[i]
+				If a.PlayIdle(CameoIdles2[k])
 					cameoIdleNow[i] = k
 					cameoPlays[i] = cameoPlays[i] + 1
 					cameoPlaying[i] = True
-					cameoNext[i] = now + CameoHolds[k] * perSecond
+					cameoNext[i] = now + CameoHolds2[k] * perSecond
 				Else
 					cameoNext[i] = now + 5.0 * perSecond
 				EndIf
@@ -1000,15 +1004,15 @@ Function Sections(Float now)
 	Int count = InstrumentIdles.Length
 	Int applied = -1
 	Int crowd = crowdMode
-	While nextSection < endSection && nextSection < SectionStarts.Length && SectionStarts[nextSection] <= into + 0.05
+	While nextSection < endSection && nextSection < SectionStarts2.Length && SectionStarts2[nextSection] <= into + 0.05
 		applied = nextSection
-		crowd = SectionCrowd[nextSection]
+		crowd = SectionCrowd2[nextSection]
 		nextSection += 1
 	EndWhile
 	If applied >= 0
 		Int k = 0
 		While k < count && k < 8
-			Int level = SectionPlay[applied * count + k]
+			Int level = SectionPlay2[applied * count + k]
 			If level != playLevel[k]
 				Debug.Trace("SkyrimFairAudio: instrument " + k + " level " + level + " at " + into + " s")
 			EndIf
@@ -1025,8 +1029,8 @@ Function Sections(Float now)
 			k += 1
 		EndWhile
 		Int mode = 1
-		If applied < SectionSing.Length
-			mode = SectionSing[applied]
+		If applied < SectionSing2.Length
+			mode = SectionSing2[applied]
 		EndIf
 		If mode != singMode
 			Debug.Trace("SkyrimFairAudio: singers " + mode + " at " + into + " s")
@@ -1287,11 +1291,11 @@ Function Sing(Float now)
 		Return
 	EndIf
 	Float into = Seconds(now - songStarted)
-	While nextLine < endLine && nextLine < SingerStarts.Length && SingerStarts[nextLine] <= into + 0.05
+	While nextLine < endLine && nextLine < SingerStarts2.Length && SingerStarts2[nextLine] <= into + 0.05
 		Int i = 0
 		While i < Singers.Length && singing
 			If Singers[i] && Singers[i].Is3DLoaded()
-				Singers[i].Say(SingerTopics[nextLine])
+				Singers[i].Say(SingerTopics2[nextLine])
 			EndIf
 			i += 1
 		EndWhile

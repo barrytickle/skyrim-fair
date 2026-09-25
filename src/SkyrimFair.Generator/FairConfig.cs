@@ -3961,6 +3961,9 @@ internal sealed record ExteriorConfig
     /// <summary>The Whiterun road sign beside the path, out from the gate.</summary>
     public ExteriorRoadSign RoadSign { get; init; } = new();
 
+    /// <summary>The festival entrance: braziers, banners, lamps and clutter by the gate and path.</summary>
+    public List<ExteriorDecor> Decor { get; init; } = new();
+
     /// <summary>The fair's own welcome sign by the path.</summary>
     public ExteriorFairSign FairSign { get; init; } = new();
 
@@ -4029,6 +4032,31 @@ internal sealed record ExteriorFairSign : ProjectStaticConfig
 
     /// <summary>Degrees the face turns from straight out toward the path (+ toward it).</summary>
     public float TurnToPath { get; init; } = 15f;
+}
+
+/// <summary>
+/// A piece of the exterior's dressing, placed in the gate's frame: <see cref="Side"/> along the
+/// wall (+ is the right coming out), <see cref="Forward"/> out from it, on the ground plus
+/// <see cref="Z"/>, turned <see cref="Yaw"/> degrees from facing out. <see cref="Tilt"/> lays it
+/// on the slope (clutter); posts and lights stand upright.
+/// </summary>
+internal sealed record ExteriorDecor
+{
+    public string Name { get; init; } = string.Empty;
+
+    public string Piece { get; init; } = string.Empty;
+
+    public float Side { get; init; }
+
+    public float Forward { get; init; }
+
+    public float Z { get; init; }
+
+    public float Yaw { get; init; }
+
+    public float Scale { get; init; } = 1f;
+
+    public bool Tilt { get; init; }
 }
 
 internal sealed record ExteriorRoadSign

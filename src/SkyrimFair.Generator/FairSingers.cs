@@ -219,10 +219,10 @@ internal static class FairSingers
         var script = mod.Quests.First(q => q.FormKey == stageQuest).VirtualMachineAdapter!.Scripts[0];
         ScriptObjectProperty Obj(FormKey key) => new() { Name = "", Object = new FormLink<ISkyrimMajorRecordGetter>(key) };
         script.Properties.Add(new ScriptObjectListProperty { Name = "Singers", Objects = singers.Select(s => Obj(s.Ref.FormKey)).ToExtendedList() });
-        script.Properties.Add(new ScriptObjectListProperty { Name = "SingerTopics", Objects = topics.Select(Obj).ToExtendedList() });
-        script.Properties.Add(new ScriptFloatListProperty { Name = "SingerStarts", Data = starts.ToExtendedList() });
-        script.Properties.Add(new ScriptIntListProperty { Name = "SongFirstLine", Data = firstLine.ToExtendedList() });
-        script.Properties.Add(new ScriptIntListProperty { Name = "SongLineCount", Data = lineCount.ToExtendedList() });
+        script.Properties.Add(new ScriptObjectListProperty { Name = "SingerTopics2", Objects = topics.Select(Obj).ToExtendedList() });
+        script.Properties.Add(new ScriptFloatListProperty { Name = "SingerStarts2", Data = starts.ToExtendedList() });
+        script.Properties.Add(new ScriptIntListProperty { Name = "SongFirstLine2", Data = firstLine.ToExtendedList() });
+        script.Properties.Add(new ScriptIntListProperty { Name = "SongLineCount2", Data = lineCount.ToExtendedList() });
 
         // ---- the line's steps: an anchor to keep an offset from, in its own FormID range
         var steps = audio.Stage.SingerSteps;

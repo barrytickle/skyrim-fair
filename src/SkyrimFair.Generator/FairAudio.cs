@@ -325,9 +325,9 @@ internal static class FairAudio
         {
             Obj("FairWorld", world.FormKey),
             Obj("StageSpeaker", speaker.FormKey),
-            new ScriptObjectListProperty { Name = "Songs", Objects = songMarkers.Select(s => Obj("", s.FormKey)).ToExtendedList() },
-            new ScriptFloatListProperty { Name = "SongLengths", Data = songs.Select(s => s.Seconds).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SongCheers", Data = songCheers.ToExtendedList() },
+            new ScriptObjectListProperty { Name = "Songs2", Objects = songMarkers.Select(s => Obj("", s.FormKey)).ToExtendedList() },
+            new ScriptFloatListProperty { Name = "SongLengths2", Data = songs.Select(s => s.Seconds).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongCheers2", Data = songCheers.ToExtendedList() },
             new ScriptObjectListProperty { Name = "Cheers", Objects = cheerMarkers.Select(c => Obj("", c.FormKey)).ToExtendedList() },
             new ScriptFloatListProperty { Name = "CheerLengths", Data = cheers.Select(c => c.Seconds).ToExtendedList() },
             Float("FirstSongDelay", config.Stage.FirstSongDelay),
@@ -340,9 +340,9 @@ internal static class FairAudio
             Float("SingerGap", config.Stage.SingerGap),
             new ScriptObjectListProperty { Name = "SingerCheerMoves", Objects = Moves(config.Stage.SingerCheer).Idles },
             new ScriptFloatListProperty { Name = "SingerCheerLengths", Data = Moves(config.Stage.SingerCheer).Lengths },
-            new ScriptFloatListProperty { Name = "SectionStarts", Data = Sections().Select(x => x.Start).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SectionPlay", Data = Sections().SelectMany(x => x.Play).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SectionSing", Data = Sections().Select(x => x.Sing).ToExtendedList() },
+            new ScriptFloatListProperty { Name = "SectionStarts2", Data = Sections().Select(x => x.Start).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionPlay2", Data = Sections().SelectMany(x => x.Play).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionSing2", Data = Sections().Select(x => x.Sing).ToExtendedList() },
             new ScriptObjectListProperty
             {
                 Name = "InstrumentIdles",
@@ -350,9 +350,9 @@ internal static class FairAudio
                     ? idle
                     : throw new InvalidOperationException($"songs.config.json: instruments has no \"{i}\"")))).ToExtendedList(),
             },
-            new ScriptIntListProperty { Name = "SectionCrowd", Data = Sections().Select(x => x.Crowd).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SongFirstSection", Data = SectionIndex().Select(x => x.First).ToExtendedList() },
-            new ScriptIntListProperty { Name = "SongSectionCount", Data = SectionIndex().Select(x => x.Count).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SectionCrowd2", Data = Sections().Select(x => x.Crowd).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongFirstSection2", Data = SectionIndex().Select(x => x.First).ToExtendedList() },
+            new ScriptIntListProperty { Name = "SongSectionCount2", Data = SectionIndex().Select(x => x.Count).ToExtendedList() },
             Float("DuckDuringSong", config.Stage.DuckAmbience),
             Obj("AmbienceCategory", ambienceCategory.FormKey),
             Obj("AmbienceEnabled", ambienceEnabled.FormKey),

@@ -4,6 +4,46 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later (wrap-up): the playlist reaches the save, the roof horse held, the exterior dressed
+
+Barry: the moved gate "looks much much better"; three last things: the roof horse has
+vanished; Round the Green still opens; the exterior "looks a bit like a cultist camp".
+- **The show's data under new names:** Barry's save kept the old property values (see
+  the saved-property trap below). So every playlist, section and line array, and the
+  cameos' idle arrays, now carry a 2:
+  - `Songs2`, `SongLengths2`, `SongCheers2`
+  - `SectionStarts2`, `SectionPlay2`, `SectionSing2`, `SectionCrowd2`, `SongFirstSection2`,
+    `SongSectionCount2`
+  - `SingerTopics2`, `SingerStarts2`, `SongFirstLine2`, `SongLineCount2`
+  - `CameoIdles2`, `CameoHolds2`, `CameoStops2`, `CameoFirstIdle2`, `CameoIdleCount2`,
+    `CameoEveryMin2`, `CameoEveryMax2`
+  - The outside show has `Songs2`, `SongLengths2`.
+  - New names take the plugin's values in an existing save. So The Wanderer's Fair, the
+    six-song list, Claudius's ledger and Garrick's continuous lute reach it.
+  - A later update that must reach running saves renames again (3, ...).
+- **The roof horse held on its planks:** an actor can load before the planks' collision and
+  drop through. Two seconds after each load, and every 15 s while it's loaded,
+  `SkyrimFairRoofHorse` checks it's within 60 across and 40 up or down of its spot (`HomeX/Y/Z`,
+  from the reference). If not, it's put back (`MoveToMyEditorLocation`) and held again.
+- **The exterior dressed as a festival entrance** (`exterior.decor`, in the gate's frame,
+  23 pieces appended at `0x30147`-`0x3015D`):
+  - a lit brazier each side of the gate: `WHfirebrazier01`, an ember fire and
+    `WRFireLightNS`
+  - a Whiterun banner post each side of the path (`FarmBannerPost01`,
+    `CityBannerWhiterun01`)
+  - three Riften lamp posts (`RTLampPost01`), their arms over the path, each with
+    `WRLightFireStreet01`
+  - by the welcome sign: a cart, a hay bale and scatter, a mead barrel, a barrel, two crates,
+    laid on the slope
+- Plugin `a0ad418712664b98...`, deterministic, deployed with the scripts. Against
+  `d2637a92...`, 23 records are added, and nothing else changed.
+- **To test:**
+  - Does The Wanderer's Fair open the show?
+  - Is the horse back on the roof?
+  - Does the outside read as a fair's entrance: fire at the gate, banners and lamps up the
+    path?
+  - Is Claudius using the ledger, and does Garrick keep playing?
+
 ### Later: the gate moved west, the original slab back over the dip
 
 Barry: "we move the door to the right? and return the original rock. It doesn't need to be
