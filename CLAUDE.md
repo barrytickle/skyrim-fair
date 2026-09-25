@@ -23,6 +23,8 @@ hand-made: a C#/Mutagen generator reads `fair.config.json` and writes `dist/Skyr
 python tools/make_static_props.py --data "E:/Modlists/Still In Skyrim/stock/Data"   # only when props change
 python tools/build_audio.py                                                          # music/, sound-effects/ -> assets/sound/
 build/texvenv/Scripts/python tools/make_cobble.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"   # the cobbles (numpy, Pillow)
+build/texvenv/Scripts/python tools/make_bunting.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"  # the bunting's colourways
+build/texvenv/Scripts/python tools/make_lantern_colours.py                                                          # the paper lanterns' colours
 python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast and held instrument loops (when a speed changes)
 python tools/cameos/build_voices.py                                                  # cameos/<name>/mono/*.wav + lines json -> build/cameos/ (.fuz)
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"

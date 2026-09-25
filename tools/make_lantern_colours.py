@@ -89,21 +89,21 @@ def recolour(rgb, base, core, target, boost=1.0):
     return np.clip(mixed, 0.0, 1.0)
 
 
-def dds_bc1_mipped(img: Image.Image) -> bytes:
-    """A BC1 (DXT1) DDS with every mip level down to 1x1, each level encoded by Pillow."""
+def dds_bc1_mipped(img: Image.Image, fourcc: str = "DXT1") -> bytes:
+    """A BC1 (DXT1) DDS, or DXT5 for alpha, with every mip level down to 1x1, each level encoded by Pillow."""
     levels = []
     level = img
     while True:
         buf = io.BytesIO()
-        level.save(buf, "DDS", pixel_format="DXT1")
+        level.save(buf, "DDS", pixel_format=fourcc)
         data = buf.getvalue()
-        levels.append(data[128:])  # Pillow writes a plain 128-byte header for DXT1
+        levels.append(data[128:])  # Pillow writes a plain 128-byte header for DXT1 and DXT5
         if level.size == (1, 1):
             break
         level = level.resize((max(1, level.width // 2), max(1, level.height // 2)), Image.LANCZOS)
     w, h = img.size
     flags = 0x1 | 0x2 | 0x4 | 0x1000 | 0x20000 | 0x80000       # caps, height, width, pixelformat, mipmapcount, linearsize
-    pixel_format = struct.pack("<II4s5I", 32, 0x4, b"DXT1", 0, 0, 0, 0, 0)
+    pixel_format = struct.pack("<II4s5I", 32, 0x4, fourcc.encode(), 0, 0, 0, 0, 0)
     caps = 0x8 | 0x1000 | 0x400000                              # complex, texture, mipmap
     header = struct.pack("<7I44x", 124, flags, h, w, len(levels[0]), 0, len(levels)) + pixel_format + struct.pack("<4I4x", caps, 0, 0, 0)
     assert len(header) == 124

@@ -653,6 +653,10 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **no Holidays**: the plugin's only master is `Skyrim.esm` (`FairHolidaysFree.cs`). Don't
+  place a piece from any other plugin without making it a requirement on purpose;
+  `tools/package.py` stops a release if the masters change. A prop that needs extra pieces
+  keeps its FormID and gains new references in its cell (`holidaysFree.props[].with`)
 - **the paper lanterns** (`FairPaperLanterns.cs`): one NIF per shape, with the colour from a
   texture swap (MODS) of a texture set whose paper is also the glow map. A new colour is
   one entry in `tools/make_lantern_colours.py`'s COLOURS and in `paperLanterns.colours`. The

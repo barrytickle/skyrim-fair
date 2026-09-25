@@ -9,7 +9,11 @@ licence question changes.
 | Requirement | Why |
 | --- | --- |
 | Skyrim Special Edition / Anniversary Edition | `SkyrimFair.esp` masters `Skyrim.esm` |
-| **Holidays** (Nexus Mods SE 1533) | A master of `SkyrimFair.esp`: the festival rope lines and a few festive props are its records (`CREDITS.md`). The lanterns are the fair's own since 2026-09-25 |
+
+Nothing else is required. Holidays (Nexus Mods SE 1533) was a master until 2026-09-25: the
+fair's own lanterns, bunting and props replace everything it used (`fairWorld.paperLanterns`,
+`fairWorld.holidaysFree`). `tools/package.py` stops a release if anything but `Skyrim.esm`
+becomes a master.
 
 The fair's own scripts use vanilla Papyrus only, so SKSE is needed only for Open Animation
 Replacer, below.
@@ -133,7 +137,7 @@ Permissions and provenance (details in `CREDITS.md`):
 - [x] Stealth Detection Fixes, Maximum Destruction and Strange Runes: no permission needed.
       Players make the one-word edits themselves, from `docs/COMPATIBILITY.md` on the mod page.
       Optionally, ask the authors to add `-SkyrimFairNPC` upstream.
-- [ ] Holidays and Open Animation Replacer credited as requirements.
+- [ ] Open Animation Replacer credited as recommended (Holidays is no longer a requirement).
 - [ ] The static crowd figures and `Props/` are rebuilt from vanilla meshes. Confirm that
       shipping them is fine; modified vanilla meshes are common on Nexus, but check.
 

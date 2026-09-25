@@ -345,11 +345,17 @@ and encoded with PyNifly's standalone HKX codec (a build tool only).
 
 ## Dependencies (nothing of theirs is copied)
 
-### Holidays (required master)
+### Holidays (a master until 2026-09-25; no longer used)
 
 **Mod:** Holidays, Nexus Mods (Skyrim SE) 1533, version 2.20 Alpha 1.
 
-Skyrim Fair uses Holidays as a **master**. The fair's festival rope lines are Holidays' own
+**Since 2026-09-25 the fair doesn't use Holidays at all:** its lanterns are Astra's paper
+lanterns, its bunting is vanilla's festival line in the fair's own colourways
+(`tools/make_bunting.py`), and its props are vanilla and fair pieces (`FairHolidaysFree.cs`).
+`SkyrimFair.esp`'s only master is `Skyrim.esm`. Holidays' colourways were only a colour
+reference for the new ones, which are painted afresh on vanilla's texture.
+
+Until then, Skyrim Fair used Holidays as a **master**. The fair's festival rope lines are Holidays' own
 records, placed by reference: its Whiterun, Saturalia, Riften, Windhelm, Imperial and
 Stormcloak colourways of the vanilla Solitude festival line. So are its coloured hanging
 lanterns, and its apple basket, mead crate, silver platter and sign stand. The lanterns also

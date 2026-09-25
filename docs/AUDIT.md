@@ -4,6 +4,41 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: Holidays no longer needed
+
+Barry: "frame rate is still the same :) And yes please!!" (drop Holidays).
+- **The bunting** (`tools/make_bunting.py`, git-ignored output like the cobbles):
+  - Vanilla's festival line maps its nine pennants to three triangles in the Solitude city
+    banner's top-left corner (read from the NIF's UVs).
+  - Each colourway repaints them in its three colours, keeping the weave and the alpha
+    cut-out: Whiterun, Saturalia, Riften, Windhelm, Imperial, Stormcloak. Holidays'
+    colourways were a colour reference only.
+  - DXT5, full mips, as vanilla's.
+- **`FairHolidaysFree.cs`**, appended to the lanterns' range (`0xA0018`-`0xA003C`):
+  - per scheme, a texture set and a static: vanilla's line with the nine `FlagsNN:44` shapes
+    swapped. That's the same `MODS` size as Holidays' (202).
+  - the silver platter: a static of vanilla's own mesh
+  - the props change base, and gain new references in their cell:
+    - the apple basket: the fair's `Basket05` with five apples
+    - the mead crate: vanilla's small crate at 0.6, with four bottles on top
+    - the sign stand: vanilla's Whiterun post at 0.66, with its hanging board (placed as in
+      the market's sign kit)
+  - 84 bunting lines, 9 props, 24 pieces added; every Holidays reference keeps its FormID.
+- **SkyrimFair.esp's only master is `Skyrim.esm`**, with no links into Holidays.
+  - Its own records now carry master index 01 in the file. Saves track plugins by name, and
+    the `.seq` is written after the plugin.
+  - `tools/package.py` now stops a release if the masters are ever anything else.
+- The docs are updated: the requirements in `RELEASE.md`, the Nexus description and the
+  package's page text, plus `CREDITS.md`.
+- Plugin `709eeed250ad09a0`, deterministic. The FormID diff shows only the new records
+  (6 texture sets, 7 statics, 24 references). Deployed. The release package builds and
+  passes both checks.
+- **To test:**
+  - The bunting's colours along the ropes.
+  - The apple baskets (fruit stalls), the mead crates (drinks and mead stalls), the silver
+    platters (sweetrolls, prize booth), and the sign stands (score board, prize booth).
+  - Optionally, disable Holidays in MO2: the fair should load and look the same.
+
 ### Later: the paper lanterns replace Holidays'
 
 Barry: "let's do that :D". Twelve kinds instead of Holidays' six: two shapes in six colours.

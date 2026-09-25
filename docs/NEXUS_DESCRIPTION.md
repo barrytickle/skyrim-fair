@@ -17,9 +17,9 @@ nobody can explain.
 
 ## Installation instructions
 
-1. Install the requirements below. Holidays is a master, so the fair won't load without it.
-2. Install the main file with **Mod Organizer 2** or **Vortex** ("Mod Manager Download").
-3. Enable `SkyrimFair.esp`. It loads anywhere after `Holidays.esp`.
+1. Install the main file with **Mod Organizer 2** or **Vortex** ("Mod Manager Download").
+2. Enable `SkyrimFair.esp`. It needs nothing but Skyrim itself, so it can load anywhere.
+3. Optionally, install the recommended mods below.
 4. **If you use a grass cache** (No Grass In Objects / Grass Cache Helper NG, as most big
    modlists do), also install the **Grass Cache** optional file. Without it, the fair's ground
    has no grass. If you generate your own grass cache, do it with the fair installed and it
@@ -68,7 +68,8 @@ save you intend to keep playing.
 - A varied crowd of visitors, including children and people sat taking it all in.
 - Archers practising at the range.
 - Goats, chickens and dogs, and a horse in the pen.
-- Paper lanterns in two shapes and six colours, glowing at night along every rope.
+- Paper lanterns in two shapes and six colours, glowing at night along every rope, and
+  festival bunting in six colourways.
 - Two travellers you might meet more than once: **Garrick Sol V** and **Claudius Vale**,
   both fully voiced.
 - The Fair Inspector's notices on the palisade, regarding an ongoing investigation.
@@ -82,9 +83,8 @@ save you intend to keep playing.
 ## Requirements
 
 **Required**
-- Skyrim Special Edition or Anniversary Edition
-- **[Holidays](https://www.nexusmods.com/skyrimspecialedition/mods/1533)**: the fair's
-  festival rope lines and some props are its records.
+- Skyrim Special Edition or Anniversary Edition. That's all: the plugin needs only
+  `Skyrim.esm`.
 
 **Recommended**
 - **Open Animation Replacer** (needs **SKSE**): the folk dance, the band's fast and held
@@ -111,7 +111,8 @@ edit to each mod's own file: see the Compatibility section.
   Inspector's notices, with new artwork
 
 **Mods the fair builds on**
-- **Holidays** (Nexus 1533): the festival bunting and props
+- **Holidays** (Nexus 1533): the fair's first festival decorations, which inspired its
+  lanterns and bunting (no longer needed; nothing of it is used)
 - **Open Animation Replacer**, and **SKSE**
 - **Professional Dancer** by contentcat and davidgilbertking
 - **Terrain Parallax**

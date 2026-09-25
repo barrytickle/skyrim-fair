@@ -179,6 +179,9 @@ internal sealed record FairWorldConfig
     /// <summary>The fair's own paper lanterns in place of Holidays' (FairPaperLanterns.cs).</summary>
     public PaperLanternsConfig PaperLanterns { get; init; } = new();
 
+    /// <summary>The rest of Holidays replaced, so the plugin needs only Skyrim.esm (FairHolidaysFree.cs).</summary>
+    public HolidaysFreeConfig HolidaysFree { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -614,6 +617,94 @@ internal sealed record PaperLanternsConfig
 
     /// <summary>Holidays' lantern hangs from a hook this far above its origin; ours hang from theirs.</summary>
     public float HookAbove { get; init; } = 6f;
+}
+
+/// <summary>
+/// Holidays' bunting and props replaced (FairHolidaysFree.cs), after the paper lanterns and in
+/// their FormID range. With both, SkyrimFair.esp's only master is Skyrim.esm (Barry, 2026-09-25).
+/// </summary>
+internal sealed record HolidaysFreeConfig
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The fair's own props' EditorID prefix, for pieces named "@Name".</summary>
+    public string PropPrefix { get; init; } = "SkyrimFairProp";
+
+    public HolidaysFreeBunting Bunting { get; init; } = new();
+
+    /// <summary>Statics made from vanilla records (items) the props need.</summary>
+    public List<HolidaysFreeStatic> Statics { get; init; } = new();
+
+    public List<HolidaysFreeProp> Props { get; init; } = new();
+}
+
+internal sealed record HolidaysFreeBunting
+{
+    public string EditorIdPrefix { get; init; } = "SkyrimFairBunting";
+
+    /// <summary>Vanilla's festival line, and the static its bounds come from.</summary>
+    public string Model { get; init; } = "Architecture\\Solitude\\Clutter\\SRopefestivalLine01.nif";
+
+    public string BoundsFrom { get; init; } = "000FA22B:Skyrim.esm";
+
+    /// <summary>A scheme's pennants ({0} the scheme; tools/make_bunting.py), and vanilla's banner normal.</summary>
+    public string Texture { get; init; } = "SkyrimFair\\Bunting\\bunting_{0}.dds";
+
+    public string Normal { get; init; } = "Clutter\\GenericBanner01_n.dds";
+
+    /// <summary>The NIF's pennant shapes and their 3D indices (the texture swaps' targets).</summary>
+    public List<HolidaysFreeFlag> Flags { get; init; } = new();
+
+    /// <summary>Each Holidays rope line (FormKey) to the scheme it becomes.</summary>
+    public Dictionary<string, string> Replace { get; init; } = new();
+}
+
+internal sealed record HolidaysFreeFlag
+{
+    public string Name { get; init; } = string.Empty;
+
+    public int Index { get; init; }
+}
+
+internal sealed record HolidaysFreeStatic
+{
+    public string EditorId { get; init; } = string.Empty;
+
+    /// <summary>The vanilla record whose model and bounds it takes.</summary>
+    public string From { get; init; } = string.Empty;
+}
+
+internal sealed record HolidaysFreeProp
+{
+    /// <summary>The Holidays piece (FormKey).</summary>
+    public string Replace { get; init; } = string.Empty;
+
+    /// <summary>Its new base: a FormKey, "@Name" (the fair's prop) or "=EditorID" (one of <see cref="HolidaysFreeConfig.Statics"/>).</summary>
+    public string Base { get; init; } = string.Empty;
+
+    public float Scale { get; init; } = 1f;
+
+    /// <summary>Raised by this (a base with its origin at its middle).</summary>
+    public float Z { get; init; }
+
+    /// <summary>New references beside it, in its frame (before its scale).</summary>
+    public List<HolidaysFreePiece> With { get; init; } = new();
+}
+
+internal sealed record HolidaysFreePiece
+{
+    public string Piece { get; init; } = string.Empty;
+
+    public float X { get; init; }
+
+    public float Y { get; init; }
+
+    public float Z { get; init; }
+
+    public float Yaw { get; init; }
+
+    /// <summary>Against the prop's scale (1: the same).</summary>
+    public float Scale { get; init; } = 1f;
 }
 
 internal sealed record PaperLanternShape

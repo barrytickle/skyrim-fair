@@ -40,6 +40,7 @@ assets/Skyrim_Fair_Sign_Assets/
 # The avenue's cobbles: vanilla wrstonefloor01 (diffuse, normal) and the fair's own parallax
 # map, built output of tools/make_cobble.py --data <Steam's Skyrim SE Data>.
 assets/textures/SkyrimFair/Ground/
+assets/textures/SkyrimFair/Bunting/
 
 # Built runtime files: sound from tools/build_audio.py (from Barry's untracked music/ and
 # sound-effects/, provenance still to confirm) and scripts from tools/build_papyrus.py.

@@ -36,6 +36,9 @@ sys.path.insert(0, str(ROOT / "tools"))
 import deploy  # noqa: E402  (the same trees and game-file types as a deploy)
 
 PLUGIN = "SkyrimFair.esp"
+# The plugin may need only these (2026-09-25: Holidays was replaced by the fair's own lanterns,
+# bunting and props). A release stops if anything else becomes a master.
+MASTERS = ["Skyrim.esm"]
 RELEASE_CONFIG = ROOT / "fair.release.json"
 RELEASE_PLUGIN_DIR = "build/release/plugin"
 
@@ -100,6 +103,19 @@ def build_plugin() -> pathlib.Path:
     return out
 
 
+def masters(plugin: pathlib.Path) -> list[str]:
+    """The plugin header's MAST entries, in order."""
+    data = plugin.read_bytes()
+    size = struct.unpack_from("<I", data, 4)[0]
+    body, p, out = data[24:24 + size], 0, []
+    while p + 6 <= len(body):
+        t, n = body[p:p + 4], struct.unpack_from("<H", body, p + 4)[0]
+        if t == b"MAST":
+            out.append(body[p + 6:p + 6 + n].rstrip(b"\x00").decode("latin1"))
+        p += 6 + n
+    return out
+
+
 def records(data: bytes, start: int, end: int):
     """(signature, body) of every record in a plugin (GRUPs walked, compressed bodies inflated)."""
     p = start
@@ -148,6 +164,10 @@ def main() -> None:
     data_dir.mkdir(parents=True)
 
     plugin = build_plugin()
+    found = masters(plugin)
+    if found != MASTERS:
+        sys.exit(f"the release plugin's masters are {found}, not {MASTERS}")
+    print(f"masters: {', '.join(found)}")
 
     # The game files, as deploy.py gathers them, less the exclusions.
     files = [(plugin, PLUGIN)]
@@ -219,8 +239,7 @@ archery, fireworks and a crowd. Version {version}.
 
 ## Requirements
 
-- Skyrim Special Edition or Anniversary Edition
-- **Holidays** (Nexus Mods SE 1533): a master of `SkyrimFair.esp`
+- Skyrim Special Edition or Anniversary Edition. Nothing else: the plugin needs only `Skyrim.esm`.
 
 ## Recommended
 
@@ -233,7 +252,6 @@ archery, fireworks and a crowd. Version {version}.
 ## Installing
 
 Install with Mod Organizer 2 or Vortex ("Mod Manager Download"), and enable `SkyrimFair.esp`.
-It loads after Holidays.
 
 **Grass caches:** if you use a grass cache (NGIO / Grass Cache Helper NG), install the grass
 cache optional file too, or the fair's ground will have no grass. If you regenerate your own

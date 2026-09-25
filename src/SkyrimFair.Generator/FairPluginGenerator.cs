@@ -325,6 +325,15 @@ internal static class FairPluginGenerator
             var swaps = FairPaperLanterns.Build(mod, pl, mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedObject>()));
             Console.WriteLine($"  paper lanterns: {FairPaperLanterns.Apply(swaps)} placed, {swaps.Select(s => s.Base).Distinct().Count()} kinds; "
                 + $"FormIDs 0x{pl.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+
+            // The rest of Holidays (the bunting and the props), appended in the same range.
+            if (config.FairWorld.HolidaysFree.Enabled && master is not null)
+            {
+                var from = mod.ModHeader.Stats.NextFormID;
+                var (bunting, props, added) = FairHolidaysFree.Build(mod, config.FairWorld.HolidaysFree, master);
+                Console.WriteLine($"  holidays-free: {bunting} bunting lines, {props} props ({added} pieces added); FormIDs 0x{from:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            }
+
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
@@ -342,9 +351,9 @@ internal static class FairPluginGenerator
 
         var outputPath = Path.Combine(outputDirectory, mod.ModKey.FileName);
 
-        // Masters are sorted against this order. Holidays.esp (Nexus 1533) supplies the
-        // festival rope lines, lanterns and a few festive props the fair places, so it is a
-        // master too; it lives in the MO2 profile, not the stock game's plugin list.
+        // Masters are sorted against this order; only the ones the plugin links to are written.
+        // Holidays.esp (Nexus 1533) was a master until the fair's own lanterns, bunting and props
+        // replaced its pieces (FairPaperLanterns, FairHolidaysFree): now only Skyrim.esm is.
         mod.BeginWrite
             .ToPath(outputPath)
             .WithLoadOrder(
