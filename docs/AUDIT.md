@@ -4,6 +4,20 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.3: borrowed lips shorter than the line (a threshold test)
+
+Barry: "for some reason 2.0.1.2 didn't work".
+- Checked: the zip's 28 lips are vanilla's own, byte for byte (line 01 = its source), and
+  Vortex deployed all 56 voice files into the game's `Data`, all matching 2.0.1.2. So plain
+  SE read the borrowed vanilla lips and still didn't animate them.
+- The one lip that worked (the bard's, LipTest) lasted **4.69 s on a 6.22 s line**, about 75%.
+  The 2.0.1.2 lips, and our own SE-generated ones, match the audio's length. **Working
+  theory:** plain SE skips a lip that runs as long as its sound (Engine Fixes calls its fix a
+  "desync" fix).
+- `borrow_lips.py` takes `lipShare`: the share of each line's length the borrowed lip should
+  run. **Test: Garrick at 80%, Claudius at 95%** (within 19 and 23 ms).
+- Plugin unchanged; deployed; **2.0.1.3** packaged for the vanilla test.
+
 ### Later: 2.0.1.2: borrowed vanilla lip tracks, the same length as each line
 
 Barry: "could we do it with the fix you used for garrick? Just use another lip sync, i honestly

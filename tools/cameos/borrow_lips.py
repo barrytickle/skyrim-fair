@@ -77,21 +77,27 @@ def main():
         lines = json.loads((work / "lines.json").read_text(encoding="utf-8"))
         used = set()
         worst = 0.0
+        # The share of each line's length the lip should run: plain SE seems to skip a lip that
+        # lasts as long as its sound (a bard's 4.7 s lip animated a 6.2 s line; lips matched to
+        # the full length didn't). cameos.members[].lipShare, 0.95 by default.
+        share = float(member.get("lipShare", 0.95))
         # The longest lines first, as the pool thins out at the long end.
         for line in sorted(lines, key=lambda x: -x["seconds"]):
             fuz_path = work / line["fuz"]
             _lip, audio = fuz_parts(fuz_path.read_bytes())
             ours = xwm_seconds(audio)
-            seconds, key, lip = min((c for c in pool if c[1] not in used), key=lambda c: abs(c[0] - ours))
+            target = ours * share
+            seconds, key, lip = min((c for c in pool if c[1] not in used), key=lambda c: abs(c[0] - target))
             used.add(key)
-            worst = max(worst, abs(seconds - ours))
+            worst = max(worst, abs(seconds - target))
             fuz_path.write_bytes(b"FUZE" + struct.pack("<II", 1, len(lip)) + lip + audio)
             line["lipFrom"] = key
             line["lipSeconds"] = round(seconds, 3)
             line["audioSeconds"] = round(ours, 3)
+            line["lipShare"] = share
         (work / "lines.json").write_text(json.dumps(lines, indent=1, ensure_ascii=False), encoding="utf-8")
-        print(f"  {member['id']}: {len(lines)} lip tracks from {voice} ({len(pool)} candidates), "
-              f"lengths within {worst * 1000:.0f} ms")
+        print(f"  {member['id']}: {len(lines)} lip tracks from {voice} ({len(pool)} candidates) at "
+              f"{share:.0%} of each line's length, within {worst * 1000:.0f} ms")
 
 
 if __name__ == "__main__":
