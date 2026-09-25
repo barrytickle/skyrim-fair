@@ -146,6 +146,18 @@ Float Property SingerFollow = 12.0 Auto
 {KeepOffsetFromActor's radii: past catch-up they'd run; within follow they stand.}
 Float[] Property SingerStarts Auto
 {Each line's start, in seconds from its song's start.}
+
+Actor[] Property Cameos Auto
+{The named ambient characters (Garrick Sol V, Claudius Vale; FairCameos.cs). They wander on their
+own sandbox; every so often, when free, each plays his next idle and stops it after its hold.}
+Idle[] Property CameoIdles Auto
+Float[] Property CameoHolds Auto
+Int[] Property CameoFirstIdle Auto
+Int[] Property CameoIdleCount Auto
+{Each cameo's idles are CameoIdles[CameoFirstIdle[i] ...], CameoIdleCount[i] of them, in turn.}
+Float[] Property CameoEveryMin Auto
+Float[] Property CameoEveryMax Auto
+{Seconds between one cameo's idles, at random between the two.}
 Int[] Property SongFirstLine Auto
 {For each song, its first line in SingerTopics, or -1 for a song with no singing.}
 Int[] Property SongLineCount Auto
@@ -274,6 +286,11 @@ Bool[] inMoreDance
 Bool[] archerPending
 Bool[] archerHeld
 Bool holding = False
+; The cameos: each one's next change (game time), whether an idle is playing, how many he's made.
+Float[] cameoNext
+Bool[] cameoPlaying
+Int[] cameoPlays
+Float cameoWake = 0.0
 Float holdEnds = 0.0
 
 Event OnInit()
@@ -298,6 +315,9 @@ Function Recover()
 	appliedTier = -1
 	folkNext = 0.0
 	moreDancesChecked = False
+	cameoNext = new Float[8]
+	cameoPlaying = new Bool[8]
+	cameoPlays = new Int[8]
 	SingersStand()
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
@@ -354,6 +374,7 @@ Event OnUpdate()
 	EndIf
 	ResetArchers()
 	ApplyCrowdLayers()
+	CameoIdles(Utility.GetCurrentGameTime())
 
 	If MusicEnabled.GetValue() < 0.5 || Songs.Length == 0
 		; Switched off: hold, and start afresh when switched back on.
@@ -398,6 +419,9 @@ Event OnUpdate()
 	EndIf
 	If phase == 2 && SingerStepOffsets.Length > 0 && stepNext > now && Seconds(stepNext - now) < left
 		left = Seconds(stepNext - now)
+	EndIf
+	If cameoWake > now && Seconds(cameoWake - now) < left
+		left = Seconds(cameoWake - now)
 	EndIf
 	If phase != 2 && bandOn && bandUntil > show && Seconds(bandUntil - show) < left
 		; Wake as the song's last note ends, to put the instruments away.
@@ -694,6 +718,53 @@ Function SingerGestures(Float now)
 		EndIf
 		If singerWake == 0.0 || singerNext[i] < singerWake
 			singerWake = singerNext[i]
+		EndIf
+		i += 1
+	EndWhile
+EndFunction
+
+; The cameos' idles. Each waits a random while (CameoEveryMin..Max), then, if he's loaded and
+; free (not sitting, fighting or talking to the player), plays his next idle; after its hold
+; he's stopped (BandStop) and handed back to his package. Busy, he's tried again in 10 s.
+Function CameoIdles(Float now)
+	cameoWake = 0.0
+	If Cameos.Length == 0
+		Return
+	EndIf
+	If cameoNext.Length < 8
+		cameoNext = new Float[8]
+		cameoPlaying = new Bool[8]
+		cameoPlays = new Int[8]
+	EndIf
+	Float perSecond = TimeScale.GetValue() / 86400.0
+	Int i = 0
+	While i < Cameos.Length && i < 8
+		Actor a = Cameos[i]
+		If cameoNext[i] == 0.0
+			cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin[i], CameoEveryMax[i]) * perSecond
+		ElseIf now >= cameoNext[i] && a
+			If cameoPlaying[i]
+				If a.Is3DLoaded()
+					a.PlayIdle(BandStop)
+					a.EvaluatePackage()
+				EndIf
+				cameoPlaying[i] = False
+				cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin[i], CameoEveryMax[i]) * perSecond
+			ElseIf CameoIdleCount[i] > 0 && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
+				Int k = CameoFirstIdle[i] + cameoPlays[i] % CameoIdleCount[i]
+				If a.PlayIdle(CameoIdles[k])
+					cameoPlays[i] = cameoPlays[i] + 1
+					cameoPlaying[i] = True
+					cameoNext[i] = now + CameoHolds[k] * perSecond
+				Else
+					cameoNext[i] = now + 5.0 * perSecond
+				EndIf
+			Else
+				cameoNext[i] = now + 10.0 * perSecond
+			EndIf
+		EndIf
+		If cameoWake == 0.0 || cameoNext[i] < cameoWake
+			cameoWake = cameoNext[i]
 		EndIf
 		i += 1
 	EndWhile

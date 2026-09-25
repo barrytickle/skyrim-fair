@@ -164,6 +164,9 @@ internal sealed record FairWorldConfig
     /// <summary>The stage singers (docs/BARDS.md, "Generator side").</summary>
     public SingersConfig Singers { get; init; } = new();
 
+    /// <summary>Named ambient characters, the creators' cameos (FairCameos.cs).</summary>
+    public CameosConfig Cameos { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -453,6 +456,58 @@ internal sealed record SingerSteps
     public float CatchUpRadius { get; init; } = 1000f;
 
     public float FollowRadius { get; init; } = 12f;
+}
+
+internal sealed record CameosConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairCameo";
+
+    /// <summary>Their own FormID range, so nothing renumbers.</summary>
+    public uint FormIdBase { get; init; } = 0x60000;
+
+    /// <summary>The sandbox each gets a wider copy of: DefaultSandboxEditorLocation1024NoConv.</summary>
+    public string Package { get; init; } = "0010F587:Skyrim.esm";
+
+    public List<CameoMember> Members { get; init; } = new();
+}
+
+internal sealed record CameoMember
+{
+    public string Id { get; init; } = string.Empty;
+
+    public string Name { get; init; } = string.Empty;
+
+    public string ShortName { get; init; } = string.Empty;
+
+    /// <summary>The vanilla NPC whose face, race and voice he takes (a Traits template).</summary>
+    public string Template { get; init; } = string.Empty;
+
+    public string Outfit { get; init; } = string.Empty;
+
+    /// <summary><c>[x, y, z, yaw]</c>: where he starts, and the middle of his sandbox.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    /// <summary>How far from <see cref="At"/> he wanders.</summary>
+    public float Radius { get; init; } = 1500f;
+
+    public int Energy { get; init; } = 50;
+
+    /// <summary>His idles, in turn: each played, then stopped after its hold (seconds).</summary>
+    public List<CameoIdle> Idles { get; init; } = new();
+
+    /// <summary>Seconds between idles: <c>[min, max]</c>.</summary>
+    public float[] Every { get; init; } = { 40f, 90f };
+}
+
+internal sealed record CameoIdle
+{
+    public string Idle { get; init; } = string.Empty;
+
+    public string Name { get; init; } = string.Empty;
+
+    public float Hold { get; init; } = 10f;
 }
 
 internal sealed record SingerMember
@@ -2657,6 +2712,9 @@ internal sealed record StageAudioConfig
 
     public List<StageSong> Songs { get; init; } = new();
 
+    /// <summary>Where the added songs' records go (<see cref="StageSong.Added"/>).</summary>
+    public uint AddedSongsFormIdBase { get; init; } = 0x50000;
+
     /// <summary>
     /// The stage show's own file (songs.config.json, next to the fair config): the songs and
     /// their timelines, the instruments, the musicians (<see cref="Band"/>, <see cref="Orchestra"/>)
@@ -2712,6 +2770,13 @@ internal sealed record BandMember
 internal sealed record StageSong
 {
     public string Name { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Added after the first playlist: its sound records (and the exterior's quieter copy)
+    /// are built in the added-songs range (<see cref="FairAddedSongs"/>), so a song can go
+    /// anywhere in the playlist without renumbering anything.
+    /// </summary>
+    public bool Added { get; init; }
 
     /// <summary>Barry's converted file, for tools/build_audio.py.</summary>
     public string Source { get; init; } = string.Empty;

@@ -400,7 +400,11 @@ internal static class FairExterior
             }
 
             var musicOut = Output("Outside", audio.Stage.OutputModel, show.MusicMinDistance, show.MusicMaxDistance);
-            var songs = audio.Stage.Songs.Select(s => Sound($"OutsideSong{s.Name}", s.File, "Stage", musicOut, false, show.MusicAttenuation)).ToList();
+            var songs = audio.Stage.Songs
+                .Select(s => s.Added
+                    ? FairAddedSongs.Build(mod, () => Sound($"OutsideSong{s.Name}", s.File, "Stage", musicOut, false, show.MusicAttenuation))
+                    : Sound($"OutsideSong{s.Name}", s.File, "Stage", musicOut, false, show.MusicAttenuation))
+                .ToList();
             var lengths = audio.Stage.Songs.Select(s => FairAudio.WavSeconds(Path.Combine(root, s.File.Replace('\\', Path.DirectorySeparatorChar)))).ToList();
 
             var speaker = Persistent(new PlacedObject(mod)

@@ -232,6 +232,29 @@
       {"editorId": "SkyrimFairCrowdLeaning01", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Leaning01.nif", "width": 53, "depth": 77, "height": 126, "collision": [-18, -6, 18, 26, 126]},
       {"editorId": "SkyrimFairCrowdLeaning02", "model": "SkyrimFair\\Crowd\\SkyrimFairCrowd_Leaning02.nif", "width": 49, "depth": 77, "height": 126, "collision": [-18, -6, 18, 26, 126]}
     ],
+    "cameos": {
+      "enabled": true,
+      "members": [
+        {
+          "id": "Garrick", "name": "Garrick Sol V", "shortName": "Garrick",
+          "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
+          "at": [2048, 3300, 0, 180], "radius": 2200, "energy": 80,
+          "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 25}],
+          "every": [45, 90]
+        },
+        {
+          "id": "Claudius", "name": "Claudius Vale", "shortName": "Claudius",
+          "template": "000457F6:Skyrim.esm", "outfit": "000E40DD:Skyrim.esm",
+          "at": [2048, 1000, 0, 0], "radius": 2200, "energy": 40,
+          "idles": [
+            {"idle": "00089975:Skyrim.esm", "name": "IdleNoteRead", "hold": 8},
+            {"idle": "00075C3D:Skyrim.esm", "name": "IdleExamine", "hold": 6},
+            {"idle": "000BB052:Skyrim.esm", "name": "IdleBook_Reading", "hold": 14}
+          ],
+          "every": [25, 50]
+        }
+      ]
+    },
     "singers": {"enabled": true, "name": "Singer", "questEditorId": "SkyrimFairSingers", "emotionValue": 50, "cuesDir": "build/bards", "songs": {"Fiddle": "fiddle", "DragonbornApproved": "dragonbornapproved"}, "faceArchives": ["E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"], "members": [{"id": "lead", "voiceType": "SkyrimFairSingerLead", "face": "00039CF6:Skyrim.esm", "outfit": "0009593C:Skyrim.esm", "at": [2048, 5140, 134, 180]}, {"id": "left", "voiceType": "SkyrimFairSingerLeft", "face": "00039CFF:Skyrim.esm", "outfit": "0002D75E:Skyrim.esm", "at": [1848, 5160, 134, 185]}, {"id": "right", "voiceType": "SkyrimFairSingerRight", "face": "00039D17:Skyrim.esm", "outfit": "00037C50:Skyrim.esm", "at": [2248, 5160, 134, 175]}], "anchor": {"at": [2048, 5544, 0], "scale": 0.5, "formIdBase": 262144}},
     "folkDance": {"enabled": true, "centre": [2048, 4420], "heading": 0, "idle": "000F7C8A:Skyrim.esm", "length": 57.6, "name": "Folk Dancer", "oarFolder": "assets/meshes/actors/character/animations/OpenAnimationReplacer/SkyrimFairFolk", "dancers": [{"submod": "Male", "look": "SkyrimFairVisitorMale01", "at": [26, 0, 270]}, {"submod": "Female", "look": "SkyrimFairVisitorFemale01", "at": [-26, 0, 90]}]},
     "npcGuard": {"enabled": true, "invulnerable": true, "script": "", "stripSpells": []},
@@ -263,7 +286,7 @@
       "targetHeights": [40, 100, 160],
       "poll": 0.5,
       "idlePoll": 5,
-      "alwaysOn": ["SkyrimFairAudioBand", "SkyrimFairSinger", "SkyrimFairArcher", "SkyrimFairFolkDancer"],
+      "alwaysOn": ["SkyrimFairAudioBand", "SkyrimFairSinger", "SkyrimFairArcher", "SkyrimFairFolkDancer", "SkyrimFairCameo"],
       "reportAt": {"square": [2048, 3900], "market east lane": [3780, 2200], "avenue": [2048, 1400], "archery field": [0, 1400], "gate": [2048, -1500]}
     },
     "navmesh": {
@@ -344,7 +367,7 @@
          "at": [[-150, 60, 30], [80, -100, 200], [180, 120, 110]]},
         {"editorId": "SkyrimFairDog", "base": "00023A92:Skyrim.esm", "unaggressive": true,
          "factions": ["00000013:Skyrim.esm"], "packages": ["0010F7A5:Skyrim.esm"],
-         "at": [[4550, -500, 120], [4800, 3950, 250]]}
+         "at": [[4550, -500, 120], [4600, 3830, 250]]}
       ]
     },
     "mountains": {

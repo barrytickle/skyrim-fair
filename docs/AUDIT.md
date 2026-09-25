@@ -4,6 +4,56 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: two new songs, two cameos, the dog, the floating grass
+
+Barry: "the rock has been defeated!" Then:
+- **The floating bush outside the east wall:** Barry's console click went through it and
+  hit DynDOLOD's `Tamriel_UNDERSIDE`, so it isn't a real object.
+  - The plugin has no landscape records in Tamriel, and places no plants outside.
+  - It's most likely stale tree LOD, from Barry's 2026-09-14 DynDOLOD run, of a tundra
+    shrub the exterior disables. The fix is a DynDOLOD re-run (Barry's tool), which also
+    gives the compound LOD. Nothing is changed in the plugin.
+- **The dog on the hay bale (east side):** its spot, (4800, 3950), was 57 from a
+  `HayBale01`. It spawned inside the bale, was pushed on top, and had no navmesh to get
+  down. The spot is now (4600, 3830), about 180 clear of the bale, the tent and the banner
+  post.
+  - An actor keeps its position in a save, so in Barry's save: click the dog in the
+    console and type `moveto player`.
+- **Two new songs:** "The Wanderer's Fair" (238.9 s) is **first** in the playlist, and
+  "Raise Your Cups for Sol and Claude" (197.2 s) is last. They're built by
+  `build_audio.py`, both at the stage's loudness.
+  - They're flagged `"added": true`, so their records go in a new range, **`0x50000`**
+    (`FairAddedSongs`, shared with the exterior's quieter copies): 8 records, and nothing
+    renumbers.
+  - They have no stems, so no timelines: every instrument plays and the crowd dances
+    throughout, until Barry adds timelines. They have no singer lines either, so the
+    singers gesture without lip sync.
+- **The cameos** (`FairCameos.cs`, `fair.config.json` `cameos`), in their own range
+  **`0x60000`** (6 records: a package, an NPC and a reference each):
+  - **Garrick Sol V**, a Bosmer bard: the vanilla road courier's face and voice (young,
+    eager), and fine clothes with a hat. He wanders a 2,200 sandbox from the avenue at
+    (2048, 3300): the stage square, the dance floor and the social areas. Every 45-90 s,
+    when he's free, he strikes up the lute (`IdleLuteStart`) for 25 s.
+  - **Claudius Vale**, a Breton inspector: a vanilla commoner's face and voice, and the
+    plain fine clothes. He wanders a 2,200 sandbox from (2048, 1000): the market lanes and
+    the gate forecourt. Every 25-50 s he reads his notes (`IdleNoteRead`, the parchment),
+    examines things (`IdleExamine`) or reads a ledger (`IdleBook_Reading`), in turn.
+  - Both are Unique, Protected and Invulnerable, carry `SkyrimFairNPC`, and have no
+    conversations (a copy of vanilla's `DefaultSandboxEditorLocation1024NoConv`). The
+    culling never switches them off (`alwaysOn`). The stage script runs their idles
+    (`CameoIdles`): it stops each idle after its hold (`BandStop`) and hands them back to
+    their package.
+- Plugin `5705780cafe9e63c...`, deterministic, deployed with the scripts and the two
+  songs. Against `d1d9fe75...`, 14 records are added (0x50000-0x50007, 0x60000-0x60005),
+  and nothing else changed.
+- **To test:**
+  - Does "The Wanderer's Fair" play first (from a fresh arrival or load)?
+  - Is "Raise Your Cups" last?
+  - Do you find Garrick round the stage and square, now and then playing the lute?
+  - Do you find Claudius in the market, reading his notes and peering at things?
+  - Do their faces look right (no dark face)?
+  - Is the dog off the bale?
+
 ### Barry, in game: the sign "looking good"; the rock still there
 
 - **The welcome sign, "a little" smaller:** scale 2.2 -> 1.8 (about 218 tall). Plugin

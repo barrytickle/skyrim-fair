@@ -21,6 +21,34 @@ namespace SkyrimFair.Generator;
 /// The runtime files come from tools/build_audio.py; their lengths are read here, so the
 /// script's timings always match the files deployed.
 /// </summary>
+/// <summary>
+/// The added songs' FormID range: records made through <see cref="Build"/> take the range's
+/// next FormIDs, and the mod's counter is put back after, so a song added to the playlist
+/// renumbers nothing. The stage and the exterior share it, in build order.
+/// </summary>
+internal static class FairAddedSongs
+{
+    private static uint baseId;
+    private static uint next;
+
+    public static void Reset(uint formIdBase) => (baseId, next) = (formIdBase, formIdBase);
+
+    public static T Build<T>(SkyrimMod mod, Func<T> make)
+    {
+        var saved = mod.ModHeader.Stats.NextFormID;
+        if (saved >= baseId)
+        {
+            throw new InvalidOperationException($"FormIDs reached the added songs' range (0x{baseId:X}): raise audio.stage.addedSongsFormIdBase");
+        }
+
+        mod.ModHeader.Stats.NextFormID = next;
+        var made = make();
+        next = mod.ModHeader.Stats.NextFormID;
+        mod.ModHeader.Stats.NextFormID = saved;
+        return made;
+    }
+}
+
 internal static class FairAudio
 {
     private static readonly FormKey XMarker = FormKey.Factory("00003B:Skyrim.esm");
@@ -121,8 +149,11 @@ internal static class FairAudio
         var cheerVolume = Global("CheerVolume", config.Globals.CheerVolume);
 
         // ---- the stage set --------------------------------------------------------------
+        FairAddedSongs.Reset(config.Stage.AddedSongsFormIdBase);
         var songs = config.Stage.Songs
-            .Select(s => Descriptor($"Song{s.Name}", s.File, stageCategory, stageOutput, false, config.Stage.StaticAttenuation))
+            .Select(s => s.Added
+                ? FairAddedSongs.Build(mod, () => Descriptor($"Song{s.Name}", s.File, stageCategory, stageOutput, false, config.Stage.StaticAttenuation))
+                : Descriptor($"Song{s.Name}", s.File, stageCategory, stageOutput, false, config.Stage.StaticAttenuation))
             .ToList();
         var cheers = config.Stage.Cheers
             .Select(c => Descriptor($"Cheer{char.ToUpperInvariant(c.Name[0])}{c.Name[1..]}", c.File, stageCategory, stageOutput, false, config.Stage.CheerStaticAttenuation))
@@ -141,7 +172,9 @@ internal static class FairAudio
             return s;
         }
 
-        var songMarkers = config.Stage.Songs.Select((s, i) => Marker($"Song{s.Name}", songs[i].Sound)).ToList();
+        var songMarkers = config.Stage.Songs
+            .Select((s, i) => s.Added ? FairAddedSongs.Build(mod, () => Marker($"Song{s.Name}", songs[i].Sound)) : Marker($"Song{s.Name}", songs[i].Sound))
+            .ToList();
         var cheerMarkers = config.Stage.Cheers.Select((c, i) => Marker($"Cheer{char.ToUpperInvariant(c.Name[0])}{c.Name[1..]}", cheers[i].Sound)).ToList();
 
         var songCheers = config.Stage.Songs.Select(s =>

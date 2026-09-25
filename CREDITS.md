@@ -180,6 +180,9 @@ Attribution:
 Barry supplied them. `tools/build_audio.py` converts them to mono 44.1 kHz 16-bit WAV
 under `Sound\SkyrimFair\`.
 
+**The songs added on 2026-09-25:** "The Wanderer's Fair" (first in the playlist) and "Raise
+Your Cups" (last), also made with Suno on the Pro plan.
+
 **The singers' voice files** (`Sound\Voice\SkyrimFair.esp\`, 147 `.fuz`) come from the same
 songs' vocal stems. `tools/bards/build_vocals.py` splits them into lines. The lead's
 lines carry the vocal, and the other two singers' lines carry silence with the same lip
@@ -236,6 +239,10 @@ affiliated with or endorsed by Bethesda.
 
 ## The project's own work
 
+- **The cameos** (`FairCameos.cs`): Garrick Sol V and Claudius Vale, the creators' ambient
+  characters. Their faces, races and voices are vanilla NPCs' (`WERoadCourierWoodElf`,
+  `TreasCorpseCommonerBretonMale`), taken through a Traits template, with vanilla clothes
+  and idles. Nothing is copied.
 - **The plugin** (`SkyrimFair.esp`), made by the project's generator
   (`src/SkyrimFair.Generator/`).
 - **The scripts** (`src/Papyrus/`). They compile against the vanilla Papyrus sources in the

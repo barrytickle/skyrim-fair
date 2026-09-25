@@ -1092,6 +1092,22 @@ internal static class FairWorld
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
+        // ---- the cameos (FairCameos.cs): their own FormID range, before the navmesh and the culling --
+        if (config.Cameos.Enabled && audio is not null && master is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            if (saved >= config.Cameos.FormIdBase)
+            {
+                throw new InvalidOperationException($"FormIDs reached the cameos' range (0x{config.Cameos.FormIdBase:X}): raise cameos.formIdBase");
+            }
+
+            mod.ModHeader.Stats.NextFormID = config.Cameos.FormIdBase;
+            var cameos = FairCameos.Build(mod, config.Cameos, master, audio.Quest, config.NpcKeyword, PutPersistentNpc);
+            Console.WriteLine($"  cameos: {cameos} ({string.Join(", ", config.Cameos.Members.Select(m => m.Name))}); "
+                + $"FormIDs 0x{config.Cameos.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // The mod's own counter must stay below the crowd figures' range.
         var counter = mod.ModHeader.Stats.NextFormID;
         if (counter >= config.CrowdFormIdBase)
