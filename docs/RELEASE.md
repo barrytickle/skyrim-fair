@@ -112,7 +112,7 @@ Permissions and provenance (details in `CREDITS.md`):
 - [ ] Leave the old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*.dds`) out of
       the package: the plugin doesn't use it, and it's only left over in the deploy folder.
 - [x] The scaffold tower: "scaffold" by Js_TuruokaJunpei (Sketchfab), CC BY 4.0. Credit ships; record the conversion's changes in `CREDITS.md`.
-- [ ] The music and crowd sounds are Suno's (Barry, 2026-09-25). **Confirm the plan:** on the free plan, the use must stay non-commercial (opt out of Donation Points) and credit Suno; on Pro or Premier, Barry owns them.
+- [x] The music and crowd sounds: made with Suno on the Pro plan (Barry, 2026-09-25), so Barry owns them. Credit "made with Suno" anyway.
 - [ ] Stroti's Outdoor Toilet can't be re-uploaded: **being replaced** by "Outhouse" by
       Strifey7 (Sketchfab, CC BY 4.0), converted by Barry. Then drop `meshes\Stroti\` and
       `textures\Stroti\`.

@@ -17,7 +17,7 @@ original author and its redistribution permission are confirmed.
 | Outdoor Toilet | Stroti; Tamira; Astra | bundled today | modder's resource, **not to be re-uploaded**: being replaced by Strifey7's Outhouse |
 | Outhouse (its replacement) | Strifey7 (Sketchfab) | to be converted and bundled | CC BY 4.0: credit ships |
 | Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
-| Stage music, crowd sounds, singers' voices | Barry, made with Suno | bundled | non-commercial use at least; **which Suno plan** decides the rest |
+| Stage music, crowd sounds, singers' voices | Barry, made with Suno (Pro) | bundled | Barry owns them (Suno Pro) |
 | Paired folk dance | Barry, made with ChatGPT ("Astra") | bundled (re-based clips) | the project's own |
 | Holidays | Nexus 1533 | a master; its records are placed | dependency, nothing copied |
 | Open Animation Replacer | (Nexus) | swaps the folk-dance and tempo clips in | dependency, nothing copied |
@@ -146,7 +146,8 @@ they were made on:
   Nexus Donation Points and credit Suno.
 - **Pro or Premier plan:** Barry owns them, and may use them commercially.
 
-**Still to confirm:** which plan. Suno also notes that wholly AI-made music may not qualify
+**Made on the Pro plan** (Barry, 2026-09-25), so Barry owns them, and the mod may ship
+them, Donation Points included. Suno also notes that wholly AI-made music may not qualify
 for copyright protection. The sources and the built files are kept out of git.
 
 Attribution:
@@ -361,7 +362,7 @@ Every file in the deployed mod folder was traced to its source:
 | Outhouses (today) | `meshes\Stroti\Outdoor Toilet\*.nif`, `textures\Stroti\*.dds` | Stroti's Outdoor Toilet resource | Stroti; Tamira; Barry with ChatGPT | Credit, free, not re-uploaded | **Being replaced** by Strifey7's Outhouse |
 | Outhouses (replacement) | to come | Outhouse (Sketchfab) | Strifey7 | CC BY 4.0, with attribution | To be bundled |
 | Light towers | `meshes\barry_scaffold\scaffold.nif`, `textures\barry_scaffold\*.dds` | scaffold (Sketchfab) | Js_TuruokaJunpei | CC BY 4.0, with attribution | Bundled |
-| Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | made with Suno | Barry | Non-commercial at least; **confirm the Suno plan** | Built mod only |
+| Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | made with Suno (Pro) | Barry | Barry owns them (Suno Pro plan) | Built mod only |
 | Folk dance | `...\OpenAnimationReplacer\SkyrimFairFolk\` | the folk turn | Barry, made with ChatGPT | The project's own | Built mod only |
 | Market goods (174 props) | `meshes\SkyrimFair\Props\*.nif`, `TowerLantern.nif` | Skyrim | Bethesda | Vanilla meshes, rigid bodies fixed | Built mod only |
 | Crowd figures (off) | `meshes\SkyrimFair\Crowd\*.nif` | Skyrim | Bethesda | Vanilla meshes, posed | Built mod only |
