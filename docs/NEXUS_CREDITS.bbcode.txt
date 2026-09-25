@@ -20,6 +20,7 @@
 [b]Mods[/b]
 [list]
 [*][url=https://www.nexusmods.com/skyrimspecialedition/mods/1533]Holidays[/url]: its festival decorations inspired the fair's lanterns and bunting (nothing of it is used or required)
+[*][url=https://www.nexusmods.com/skyrimspecialedition/mods/17230]SSE Engine Fixes[/url], whose lip-sync fix lets the fair's voiced visitors talk properly
 [*][url=https://www.nexusmods.com/skyrimspecialedition/mods/92109]Open Animation Replacer[/url] and [url=https://www.nexusmods.com/skyrimspecialedition/mods/30379]SKSE[/url]
 [*][url=https://www.nexusmods.com/skyrimspecialedition/mods/124608]Professional Dancer[/url] by contentcat and davidgilbertking
 [*][url=https://www.nexusmods.com/skyrimspecialedition/mods/54860]Terrain Parallax[/url]

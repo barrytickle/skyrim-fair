@@ -29,7 +29,20 @@ Garrick's idle (`sendanimevent IdleForceDefaultState`) didn't bring the lip sync
   60% music?
 - **Barry, on vanilla:** the volume is "perfect on both accounts" (confirmed). The loose
   `.lip` files didn't bring the lip sync back.
-- Next test, `dist/release/SkyrimFair-LipTest.zip`: one vanilla lip track (from
+- **Found:** with the LipTest add-on (a vanilla bard's lip file in place of Garrick's line
+  01), Garrick lip-synced on vanilla. So plain SE rejects our lip files, not the character.
+  - The Creation Kit's own generator (`-GenerateSingleLip`) makes the same header as
+    `LipGenerator.exe`. Vanilla's 2011 lips differ: the sixth header int's high word is 3 in
+    vanilla's, 43 in ours.
+  - The Oldrim CK won't start without the Oldrim game (`0xC0000135`).
+  - Barry's modlist lip-syncs them through **SSE Engine Fixes**' `bLipSync` fix, which
+    turns four conditional jumps in the game's lip function into unconditional ones
+    (`src/fixes/lip_sync.h`). Plain SE runs four checks that today's lip files fail.
+- **Decision:** SSE Engine Fixes (Nexus SE 17230) is recommended on the page, in the credits
+  and in `RELEASE.md`. Without it, the two are heard, with subtitles, but their mouths stay
+  still. `FonixData.cdf` was copied into the SE install's `Data\Sound\Voice\Processing\`
+  (Barry agreed); it's harmless and ready for any future lip builds.
+- The earlier test, `dist/release/SkyrimFair-LipTest.zip`: one vanilla lip track (from
   `bardscolle_bardscollegepoe_000e774e_1.fuz`) in place of Garrick's line 01 `.lip`. If his
   mouth moves, our lip files are what vanilla can't read; if not, it's something about the
   characters.

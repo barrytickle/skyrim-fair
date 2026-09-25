@@ -100,6 +100,10 @@ says so, visit from a new game, or from a save made before you first went to the
 **Required:** Skyrim Special Edition or Anniversary Edition. That's it.
 
 **Recommended:**
+- **[SSE Engine Fixes](https://www.nexusmods.com/skyrimspecialedition/mods/17230)**: lets the
+  fair's two voiced visitors move their lips as they talk. Plain Skyrim has a lip-sync bug that
+  it fixes; without it you'll still hear them clearly, their mouths just stay still. Most
+  modded setups already have it.
 - **Open Animation Replacer** (needs **SKSE**): the folk dance, the band's livelier
   playing and the singers' own cheer. Without it, they use Skyrim's own animations.
 - **[Professional Dancer](https://www.nexusmods.com/skyrimspecialedition/mods/124608)**
