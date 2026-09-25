@@ -3,20 +3,24 @@
 ## Description
 
 **Skyrim has dragons, draugr and a civil war. What it doesn't have is somewhere to just enjoy
-an evening out. So we built it one.**
+an evening out. So I built it one.**
 
-The Wanderer's Fair started with one idea: what if a UK Christmas market turned up in
-medieval Skyrim? The lanterns strung between the stalls, something warm to drink, the smell
-of roasting meat, music drifting over the crowd, and far too many stalls selling far too many
+I wanted somewhere in Skyrim that felt... alive. Somewhere the people who live there do
+something other than wander aimlessly around a town: they dance, they shop, they cheer the
+band, they queue for pies.
+
+The idea that shaped it was simple: what if a UK Christmas market turned up in medieval
+Skyrim? The lanterns strung between the stalls, something warm to drink, the smell of
+roasting meat, music drifting over the crowd, and far too many stalls selling far too many
 things. Warm, handmade, a little chaotic, and busy in the best way.
 
-So that's what we made: a travelling festival that has pitched its walls beside the road
+So that's what I made: a travelling festival that has pitched its walls beside the road
 west of Whiterun, and grown into a little village of its own. There's a stage with a live
 band, a market of 33 stalls, an archery range, folk dancing on the green and fireworks over
 the walls. And there's a crowd of visitors who actually seem to be having a good time.
 
-We wanted it to feel like a real place that happens to be having a very good week, not a
-theme park and not a parody. Most of all, we wanted somewhere you'd want to come back to:
+I wanted it to feel like a real place that happens to be having a very good week, not a
+theme park and not a parody. Most of all, I wanted somewhere you'd want to come back to:
 after a hard day's dragon-slaying, or just because you fancy a sweetroll and a song.
 
 Oh, and there's a horse on the stage roof. Nobody knows how it got up there. The Fair
@@ -74,8 +78,10 @@ says so, visit from a new game, or from a save made before you first went to the
 - Your companions are welcome too, and follow you in and out through the gate.
 
 **Familiar faces**
-- A couple of the fair's visitors may seem oddly familiar. They're fully voiced, they
-  wander, and they each have something to say. **Can you spot them?**
+- Two of the fair's visitors may seem oddly familiar. One is a cheerful bard who insists the
+  fair is completely under control (please don't ask follow-up questions). The other carries
+  a ledger, has counted the lanterns, and has concerns. Both are fully voiced, both wander
+  the fair, and each has plenty to say. **Can you spot them?**
 
 **The Mystery of the Horse on the Roof**
 - One morning, a horse was found standing on the roof of the stage. It's perfectly calm.
@@ -106,6 +112,10 @@ says so, visit from a new game, or from a save made before you first went to the
 
 The fair wouldn't look the way it does without these creators. Thank you!
 
+**A note on AI:** I made the fair with a lot of help from AI tools. The music, the singing and
+the cameo voices, some of the artwork and models, and much of the code were made with them,
+then tested and tuned by hand, many times over, in game. Everything is credited below.
+
 **Models** (converted and modified for Skyrim; each under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)):
 - "Palisade" by [adam127](https://sketchfab.com/adam127): the walls
@@ -119,9 +129,11 @@ The fair wouldn't look the way it does without these creators. Thank you!
 
 **Music, voices and animation**
 - The soundtrack, the crowd and the singers: made with Suno
-- The fair's two famous visitors: voiced with ElevenLabs
+- The fair's two familiar visitors: voiced with ElevenLabs
 - The singers' cheer: "Cheering" from Adobe Mixamo, retargeted for Skyrim
-- The folk dance and the paper lanterns: made for the fair with ChatGPT ("Astra")
+- The folk dance, the paper lanterns and much of the artwork: made for the fair with
+  ChatGPT ("Astra")
+- The fair's plugin, scripts and tools: built with Claude (Anthropic)
 
 **Mods that inspired or work with the fair**
 - **Holidays**, whose festival decorations inspired the fair's lanterns and bunting
