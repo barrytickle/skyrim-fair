@@ -30,6 +30,7 @@ internal static class FairCameos
         var npcs = new List<Npc>();
         var idles = new List<FormKey>();
         var holds = new List<float>();
+        var stops = new List<FormKey>();
         var first = new List<int>();
         var count = new List<int>();
         foreach (var c in config.Members)
@@ -123,6 +124,7 @@ internal static class FairCameos
             {
                 idles.Add(FormKeyHelper.Parse(idle.Idle));
                 holds.Add(idle.Hold);
+                stops.Add(idle.Stop.Length > 0 ? FormKeyHelper.Parse(idle.Stop) : FormKey.Null);
             }
         }
 
@@ -193,7 +195,9 @@ internal static class FairCameos
             var voiceRoot = Path.Combine(faces.VoiceOut is { } vo && Path.IsPathRooted(vo) ? vo : Path.Combine(FairPaths.ConfigDirectory, faces.VoiceOut), mod.ModKey.FileName);
             foreach (var (member, npc) in voiced)
             {
-                var voice = new VoiceType(mod) { EditorID = member.VoiceType };
+                // DNAM 01 (Allow Default Dialog), as every vanilla NPC voice type (MaleYoungEager
+                // 013AD1): without it he couldn't be talked to (2026-09-25, in game).
+                var voice = new VoiceType(mod) { EditorID = member.VoiceType, Flags = VoiceType.Flag.AllowDefaultDialog };
                 mod.VoiceTypes.Add(voice);
                 npc.Voice = new FormLinkNullable<IVoiceTypeGetter>(voice.FormKey);
 
@@ -252,6 +256,7 @@ internal static class FairCameos
         script.Properties.Add(new ScriptObjectListProperty { Name = "Cameos", Objects = placed.Select(p => Obj(p.FormKey)).ToExtendedList() });
         script.Properties.Add(new ScriptObjectListProperty { Name = "CameoIdles", Objects = idles.Select(Obj).ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoHolds", Data = holds.ToExtendedList() });
+        script.Properties.Add(new ScriptObjectListProperty { Name = "CameoStops", Objects = stops.Select(Obj).ToExtendedList() });
         script.Properties.Add(new ScriptIntListProperty { Name = "CameoFirstIdle", Data = first.ToExtendedList() });
         script.Properties.Add(new ScriptIntListProperty { Name = "CameoIdleCount", Data = count.ToExtendedList() });
         script.Properties.Add(new ScriptFloatListProperty { Name = "CameoEveryMin", Data = config.Members.Select(m => m.Every[0]).ToExtendedList() });

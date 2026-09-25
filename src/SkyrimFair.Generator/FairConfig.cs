@@ -554,6 +554,9 @@ internal sealed record CameoIdle
     public string Name { get; init; } = string.Empty;
 
     public float Hold { get; init; } = 10f;
+
+    /// <summary>The idle that ends it (a paired exit, as Hadvar's ledger has); empty: the band's stop.</summary>
+    public string Stop { get; init; } = string.Empty;
 }
 
 internal sealed record SingerMember

@@ -46,6 +46,8 @@ def main() -> None:
     # mod folder's root they override the originals while Skyrim Fair has the higher MO2 priority.
     # For Barry's own game only: a release never packages them (docs/COMPATIBILITY.md).
     files += [(f, dest / f.name) for f in sorted((ROOT / "dist" / "spid").glob("*_DISTR.ini"))]
+    # The SEQ file: start-game quests with dialogue (the generator writes it next to the plugin).
+    files += [(f, dest / "Seq" / f.name) for f in sorted((ROOT / "dist" / "Seq").glob("*.seq"))]
     for src, dst, skip in TREES:
         base = ROOT / src
         if not base.is_dir():

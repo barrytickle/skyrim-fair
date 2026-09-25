@@ -249,9 +249,10 @@
           "template": "000457F6:Skyrim.esm", "outfit": "000E40DD:Skyrim.esm",
           "at": [2048, 1000, 0, 0], "radius": 2200, "energy": 40,
           "idles": [
+            {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 20, "stop": "0010ACAE:Skyrim.esm"},
             {"idle": "00089975:Skyrim.esm", "name": "IdleNoteRead", "hold": 8},
-            {"idle": "00075C3D:Skyrim.esm", "name": "IdleExamine", "hold": 6},
-            {"idle": "000BB052:Skyrim.esm", "name": "IdleBook_Reading", "hold": 14}
+            {"idle": "0010ACAD:Skyrim.esm", "name": "IdleHadvarWriteLedgerEnter", "hold": 20, "stop": "0010ACAE:Skyrim.esm"},
+            {"idle": "00075C3D:Skyrim.esm", "name": "IdleExamine", "hold": 6}
           ],
           "every": [25, 50]
         }

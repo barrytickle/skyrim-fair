@@ -4,6 +4,29 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the cameos couldn't be talked to; Claudius's ledger; the floating grass again
+
+Barry, in game: the horse is "excellent"; "Garrick and Claudius isn't interactable"; the
+floating grass is still there; and could Claudius do "the paperclip animation from the vanilla
+intro... one of the imperials has got a list" (Hadvar's ledger at Helgen).
+- **Two fixes for talking to them:**
+  - **Their voice types allow default dialogue now** (`DNAM 01`, as every vanilla NPC voice
+    type: MaleYoungEager `013AD1` has it). The singers' voice types, copied for the cameos,
+    had 0.
+  - **A SEQ file:** `dist/Seq/SkyrimFair.seq` (deployed to `Seq\`), as xEdit writes it: the
+    start-game-enabled quests that carry dialogue, each FormID as the file stores it, with
+    the plugin's own index (02, after Skyrim.esm and Holidays.esp). They're
+    `SkyrimFairSingers` (`0x16BA`) and `SkyrimFairCameos` (`0x6000A`). The generator writes it
+    after the plugin, once the masters are known, and it's deterministic.
+- **Claudius's ledger:** Hadvar's, `IdleHadvarWriteLedgerEnter` (`10ACAD`, 20 s), ended with
+  its own `IdleHadvarWriteLedgerExit` (`10ACAE`): the cameos' idles take a `stop` now
+  (`CameoStops`; None falls back to `BandStop`). In turn: ledger, note, ledger, a look round.
+- **The floating grass:** the plugin places nothing there, and the console click went
+  through it. The next test is Barry's: `tg` (grass off) and `tll` (distant LOD off), to see
+  which one makes it vanish.
+- Plugin `4862de5d0bc42b97...`, deterministic; the same 4,213 records; deployed with the
+  script and the SEQ.
+
 ### Later: the cameos speak (Barry's recorded lines)
 
 Barry: "a cameos folder... a json of their lines and their filename... so they say it when

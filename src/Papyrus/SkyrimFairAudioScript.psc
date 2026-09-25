@@ -152,6 +152,8 @@ Actor[] Property Cameos Auto
 own sandbox; every so often, when free, each plays his next idle and stops it after its hold.}
 Idle[] Property CameoIdles Auto
 Float[] Property CameoHolds Auto
+Idle[] Property CameoStops Auto
+{The idle that ends each of CameoIdles (Hadvar's ledger has its own exit); None: BandStop.}
 Int[] Property CameoFirstIdle Auto
 Int[] Property CameoIdleCount Auto
 {Each cameo's idles are CameoIdles[CameoFirstIdle[i] ...], CameoIdleCount[i] of them, in turn.}
@@ -290,6 +292,7 @@ Bool holding = False
 Float[] cameoNext
 Bool[] cameoPlaying
 Int[] cameoPlays
+Int[] cameoIdleNow
 Float cameoWake = 0.0
 Float holdEnds = 0.0
 
@@ -318,6 +321,7 @@ Function Recover()
 	cameoNext = new Float[8]
 	cameoPlaying = new Bool[8]
 	cameoPlays = new Int[8]
+	cameoIdleNow = new Int[8]
 	SingersStand()
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
@@ -736,6 +740,9 @@ Function CameoIdles(Float now)
 		cameoPlaying = new Bool[8]
 		cameoPlays = new Int[8]
 	EndIf
+	If cameoIdleNow.Length < 8
+		cameoIdleNow = new Int[8]
+	EndIf
 	Float perSecond = TimeScale.GetValue() / 86400.0
 	Int i = 0
 	While i < Cameos.Length && i < 8
@@ -745,7 +752,12 @@ Function CameoIdles(Float now)
 		ElseIf now >= cameoNext[i] && a
 			If cameoPlaying[i]
 				If a.Is3DLoaded()
-					a.PlayIdle(BandStop)
+					Idle stop = BandStop
+					Int playing = cameoIdleNow[i]
+					If playing < CameoStops.Length && CameoStops[playing]
+						stop = CameoStops[playing]
+					EndIf
+					a.PlayIdle(stop)
 					a.EvaluatePackage()
 				EndIf
 				cameoPlaying[i] = False
@@ -753,6 +765,7 @@ Function CameoIdles(Float now)
 			ElseIf CameoIdleCount[i] > 0 && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
 				Int k = CameoFirstIdle[i] + cameoPlays[i] % CameoIdleCount[i]
 				If a.PlayIdle(CameoIdles[k])
+					cameoIdleNow[i] = k
 					cameoPlays[i] = cameoPlays[i] + 1
 					cameoPlaying[i] = True
 					cameoNext[i] = now + CameoHolds[k] * perSecond

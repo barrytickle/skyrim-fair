@@ -328,6 +328,30 @@ internal static class FairPluginGenerator
             .WithNoDataFolder()
             .Write();
 
+        // Seq\<plugin>.seq: the start-game-enabled quests that carry dialogue (as xEdit writes it,
+        // each FormID as the file stores it, its own index after the masters). Without it their
+        // dialogue can stay dead (the cameos couldn't be talked to, 2026-09-25).
+        var dialogueQuests = mod.DialogTopics.Select(t => t.Quest.FormKey).ToHashSet();
+        var seqQuests = mod.Quests
+            .Where(q => q.Flags.HasFlag(Quest.Flag.StartGameEnabled) && dialogueQuests.Contains(q.FormKey))
+            .OrderBy(q => q.FormKey.ID)
+            .ToList();
+        // The masters are known once the plugin is written: its own index follows them.
+        var masterCount = (uint)SkyrimMod.CreateFromBinaryOverlay(outputPath, SkyrimRelease.SkyrimSE).ModHeader.MasterReferences.Count;
+        var seqDir = Path.Combine(outputDirectory, "Seq");
+        Directory.CreateDirectory(seqDir);
+        var seqPath = Path.Combine(seqDir, Path.ChangeExtension(mod.ModKey.FileName.String, ".seq"));
+        using (var seq = new BinaryWriter(File.Create(seqPath)))
+        {
+            foreach (var q in seqQuests)
+            {
+                seq.Write((masterCount << 24) | q.FormKey.ID);
+            }
+        }
+
+        Console.WriteLine($"  seq: {seqQuests.Count} start-game quests with dialogue ({string.Join(", ", seqQuests.Select(q => q.EditorID))})");
+
+
         foreach (var (file, lines) in FairSpidPatches.Build(config, outputDirectory))
         {
             Console.WriteLine($"  SPID patch {file}: {lines} line(s) exclude -{config.FairWorld.NpcKeyword}");
