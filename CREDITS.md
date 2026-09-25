@@ -14,10 +14,11 @@ original author and its redistribution permission are confirmed.
 | --- | --- | --- | --- |
 | Palisade wall | adam127 (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
 | Viking Palisade gate | Sereib (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
-| Outdoor Toilet | Stroti; Tamira; Astra | bundled | modder's resource: credit, free, **not to be re-uploaded** |
-| Scaffold light towers | Barry (source to confirm) | bundled | **pending: source and licence** |
-| Stage music, crowd sounds, singers' voices | Barry | bundled | **pending: provenance and terms** |
-| Paired folk dance | Astra | bundled (re-based clips) | **pending: Astra's credit and consent to ship** |
+| Outdoor Toilet | Stroti; Tamira; Astra | bundled today | modder's resource, **not to be re-uploaded**: being replaced by Strifey7's Outhouse |
+| Outhouse (its replacement) | Strifey7 (Sketchfab) | to be converted and bundled | CC BY 4.0: credit ships |
+| Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
+| Stage music, crowd sounds, singers' voices | Barry, made with Suno | bundled | non-commercial use at least; **which Suno plan** decides the rest |
+| Paired folk dance | Barry, made with ChatGPT ("Astra") | bundled (re-based clips) | the project's own |
 | Holidays | Nexus 1533 | a master; its records are placed | dependency, nothing copied |
 | Open Animation Replacer | (Nexus) | swaps the folk-dance and tempo clips in | dependency, nothing copied |
 | Professional Dancer | contentcat and davidgilbertking | its dances, when installed | optional, nothing copied |
@@ -70,14 +71,14 @@ The fair's outhouses are **bundled** in the built mod as `meshes\Stroti\Outdoor 
 | --- | --- | --- |
 | Original model (Oblivion) | Stroti | http://oblivion.nexusmods.com/mods/37634 |
 | Skyrim conversion | Tamira | https://www.nexusmods.com/skyrimspecialedition/mods/4086 |
-| SE / AE format conversion (stream 83 NiTriShape to stream 100 BSTriShape) | Astra, for Skyrim Fair | `external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip` |
+| SE / AE format conversion (stream 83 NiTriShape to stream 100 BSTriShape) | Barry, with ChatGPT ("Astra"), for Skyrim Fair | `external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip` |
 
 The original readme's permissions: *"This is a modder's resource. You may use the meshes and
 textures for your own mods as long as you give credit and you do not charge money for it. Do
 not upload to other sites."* So:
 - Skyrim Fair must stay free, and this credit must ship with it.
-- **"Do not upload to other sites"** rules out re-uploading it inside the mod on Nexus. Before
-  release, either ship it as a dependency or replace it (`docs/RELEASE.md`).
+- **"Do not upload to other sites"** rules out re-uploading it inside the mod on Nexus.
+  **It's being replaced** by Strifey7's Outhouse (above), and leaves the mod when that's in.
 - The files are **not committed to this repository**, so git never uploads them anywhere.
   `.gitignore` excludes `assets/meshes/Stroti/` and `assets/textures/Stroti/`. To restore
   them, unzip the `meshes/` and `textures/` folders of Astra's zip into `assets/`.
@@ -91,12 +92,36 @@ Attribution:
 
 > Outdoor Toilet by Stroti, converted for Skyrim by Tamira, SE conversion by Astra.
 
-### The scaffold light towers (source to confirm)
+### Scaffold (Sketchfab, CC BY 4.0)
 
-`meshes\barry_scaffold\scaffold.nif` and `textures\barry_scaffold\scaffold_d.dds` and
-`scaffold_n.dds` are the fair's light towers: four inside the fair, and four on the exterior.
-Barry supplied them. **Record the original model's source and licence here before any
-public release.**
+`meshes\barry_scaffold\scaffold.nif`, with `textures\barry_scaffold\scaffold_d.dds` and
+`scaffold_n.dds`, is the fair's light towers: four inside the fair, and four on the exterior.
+Barry converted it for Skyrim.
+
+| Model | Author | Source | Licence |
+| --- | --- | --- | --- |
+| scaffold | Js_TuruokaJunpei (https://sketchfab.com/Js_TuruokaJunpei) | https://sketchfab.com/3d-models/scaffold-90789439e18c4f3cbdb5c51b6c43b531 | CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) |
+
+CC BY asks that changes be indicated: record what the conversion changed (scale, origin,
+collision, materials) here.
+
+Attribution:
+
+> "scaffold" by Js_TuruokaJunpei, licensed under CC BY 4.0. Converted and modified for Skyrim.
+
+### Outhouse (Sketchfab, CC BY 4.0): replacing Stroti's
+
+Stroti's Outdoor Toilet can't be re-uploaded (below), so Barry is replacing it with this
+model, converted in Blender to a Skyrim NIF. Once it's in, the Stroti files leave the mod,
+and this section records the files and the changes made.
+
+| Model | Author | Source | Licence |
+| --- | --- | --- | --- |
+| Outhouse | Strifey7 (https://sketchfab.com/Strifey7) | https://sketchfab.com/3d-models/outhouse-545355086dbb4b789a9cfe09d0ad5efe | CC BY 4.0 (http://creativecommons.org/licenses/by/4.0/) |
+
+Attribution:
+
+> "Outhouse" by Strifey7, licensed under CC BY 4.0. Converted and modified for Skyrim.
 
 ## Barry's audio
 
@@ -113,10 +138,20 @@ songs' vocal stems. `tools/bards/build_vocals.py` splits them into lines. The le
 lines carry the vocal, and the other two singers' lines carry silence with the same lip
 track.
 
-**Status:** **provenance and redistribution terms are still to confirm**, for example
-whether the songs came from an AI music service, or the crowd recordings from a sound
-library. The sources and the built files are kept out of git. Record the terms here before
-any public release.
+**Provenance: all made with Suno** (Barry, 2026-09-25): the songs, their stems and the
+crowd sounds. Suno's terms (https://help.suno.com/en/articles/2746945) depend on the plan
+they were made on:
+- **Free (Basic) plan:** Suno owns them, and "you are allowed to use the songs for
+  non-commercial purposes". A free mod is non-commercial. To be safe, opt the mod out of
+  Nexus Donation Points and credit Suno.
+- **Pro or Premier plan:** Barry owns them, and may use them commercially.
+
+**Still to confirm:** which plan. Suno also notes that wholly AI-made music may not qualify
+for copyright protection. The sources and the built files are kept out of git.
+
+Attribution:
+
+> Music and crowd sounds made with Suno.
 
 ## Built from Bethesda's files
 
@@ -168,9 +203,11 @@ affiliated with or endorsed by Bethesda.
 - An old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*`, 2026-09-21) is
   project-made, but the plugin doesn't use it. Leave it out of any package.
 
-### Paired folk dance (Astra)
+### Paired folk dance (made with ChatGPT)
 
-**Animation:** `folk_turn_A.hkx` and `folk_turn_B.hkx` by Astra, made for Skyrim Fair.
+**Animation:** `folk_turn_A.hkx` and `folk_turn_B.hkx`, made for Skyrim Fair by Barry with
+ChatGPT ("Astra", a ChatGPT model, not a person). OpenAI's terms assign the output to the
+user, so there's no one else to ask.
 They're authored in Blender 3.6 on the vanilla male and female skeletons (no bones added),
 and encoded with PyNifly's standalone HKX codec (a build tool only).
 - `tools/folk/rebase_folk.py` rewrites only the root track, so each dancer's clip starts at
@@ -178,8 +215,7 @@ and encoded with PyNifly's standalone HKX codec (a build tool only).
 - The two clips replace the Cicero dance's animation for the fair's two folk dancers only,
   through Open Animation Replacer.
 - The sources stay in Barry's untracked `character-actors/`, and the derived clips aren't
-  committed. **Confirm with Astra how they want to be credited, and that they're happy for
-  the clips to ship, before any public release.**
+  committed.
 
 ## Dependencies (nothing of theirs is copied)
 
@@ -322,10 +358,11 @@ Every file in the deployed mod folder was traced to its source:
 | --- | --- | --- | --- | --- | --- |
 | Palisade wall | `meshes\barry_palisades\palisade.nif`, `textures\barry_palisades\palisade\*.dds` | Palisade (Sketchfab) | adam127 | CC BY 4.0, with attribution | Bundled |
 | Main gate | `meshes\barry_palisades\viking_palisade_gate_closed.nif` (placed), `viking_palisade_gate.nif` (open, not placed), `textures\barry_palisades\viking_palisade_gate\*.dds` | Viking Palisade gate (Sketchfab) | Sereib | CC BY 4.0, with attribution | Bundled |
-| Outhouses | `meshes\Stroti\Outdoor Toilet\*.nif`, `textures\Stroti\*.dds` | Stroti's Outdoor Toilet resource | Stroti; Tamira; Astra | Credit, free, not re-uploaded | Built mod only, kept out of git; **dependency or replacement before release** |
-| Light towers | `meshes\barry_scaffold\scaffold.nif`, `textures\barry_scaffold\*.dds` | Barry's scaffold watchtower | Barry (source to confirm) | **Pending** | Bundled |
-| Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | Barry's audio | Barry (provenance to confirm) | **Pending** | Built mod only |
-| Folk dance | `...\OpenAnimationReplacer\SkyrimFairFolk\` | Astra's folk turn | Astra | **Pending: credit and consent** | Built mod only |
+| Outhouses (today) | `meshes\Stroti\Outdoor Toilet\*.nif`, `textures\Stroti\*.dds` | Stroti's Outdoor Toilet resource | Stroti; Tamira; Barry with ChatGPT | Credit, free, not re-uploaded | **Being replaced** by Strifey7's Outhouse |
+| Outhouses (replacement) | to come | Outhouse (Sketchfab) | Strifey7 | CC BY 4.0, with attribution | To be bundled |
+| Light towers | `meshes\barry_scaffold\scaffold.nif`, `textures\barry_scaffold\*.dds` | scaffold (Sketchfab) | Js_TuruokaJunpei | CC BY 4.0, with attribution | Bundled |
+| Stage music, crowd sounds, voices | `Sound\SkyrimFair\`, `Sound\Voice\SkyrimFair.esp\` | made with Suno | Barry | Non-commercial at least; **confirm the Suno plan** | Built mod only |
+| Folk dance | `...\OpenAnimationReplacer\SkyrimFairFolk\` | the folk turn | Barry, made with ChatGPT | The project's own | Built mod only |
 | Market goods (174 props) | `meshes\SkyrimFair\Props\*.nif`, `TowerLantern.nif` | Skyrim | Bethesda | Vanilla meshes, rigid bodies fixed | Built mod only |
 | Crowd figures (off) | `meshes\SkyrimFair\Crowd\*.nif` | Skyrim | Bethesda | Vanilla meshes, posed | Built mod only |
 | Instrument tempo clips | `...\OpenAnimationReplacer\SkyrimFairTempo\` | Skyrim | Bethesda | Vanilla loops, retimed | Built mod only |

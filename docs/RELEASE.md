@@ -111,12 +111,12 @@ Permissions and provenance (details in `CREDITS.md`):
       before release. Their face meshes are already Bethesda's.
 - [ ] Leave the old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*.dds`) out of
       the package: the plugin doesn't use it, and it's only left over in the deploy folder.
-- [ ] The scaffold tower asset's source and licence.
-- [ ] The music and crowd recordings' provenance and terms (`docs/AUDIO.md`).
-- [ ] Stroti's Outdoor Toilet can't be re-uploaded: ship it as a dependency, or replace
-      it.
-- [ ] Astra: how they want to be credited for the folk dance, and permission to ship the
-      re-based clips.
+- [x] The scaffold tower: "scaffold" by Js_TuruokaJunpei (Sketchfab), CC BY 4.0. Credit ships; record the conversion's changes in `CREDITS.md`.
+- [ ] The music and crowd sounds are Suno's (Barry, 2026-09-25). **Confirm the plan:** on the free plan, the use must stay non-commercial (opt out of Donation Points) and credit Suno; on Pro or Premier, Barry owns them.
+- [ ] Stroti's Outdoor Toilet can't be re-uploaded: **being replaced** by "Outhouse" by
+      Strifey7 (Sketchfab, CC BY 4.0), converted by Barry. Then drop `meshes\Stroti\` and
+      `textures\Stroti\`.
+- [x] The folk dance: Barry's, made with ChatGPT ("Astra"). Nothing to ask.
 - [ ] Maximum Destruction's and Stealth Detection Fixes' authors: permission for any
       replacement `_DISTR.ini`, or ask them to add `-SkyrimFairNPC` upstream.
 - [ ] Holidays and Open Animation Replacer credited as requirements.
