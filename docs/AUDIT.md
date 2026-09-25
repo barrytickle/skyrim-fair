@@ -55,8 +55,8 @@ The navmesh is identical: 9 meshes, 6,267 vertices, 7,916 triangles.
 
 Every file in the deployed folder was traced to its source (the detail is in `CREDITS.md`,
 "Audit of what ships"):
-- **Whiterun Mossy Wet Stonefloor (99294): permission needed.** The avenue cobbles are its
-  `wrstonefloor01` textures, byte for byte.
+- **Whiterun Mossy Wet Stonefloor (99294): the avenue cobbles were its `wrstonefloor01`
+  textures, byte for byte.** Replaced (below).
 - **New finding: Vanilla Remastered - The New Normal (153879).** The singers' three face
   tints came from its archives. The modlist's `Skyrim - Textures*.bsa` are its, and
   `singers.faceArchives` searched them. The face meshes are Bethesda's.
@@ -75,6 +75,28 @@ Every file in the deployed folder was traced to its source (the detail is in `CR
 - **Downloaded, not used:** Crowded Streets, Diverse Archery Targets, Fireworks (183953),
   Incaendo's Banner Resource, Terrain Parallax, Medieval Markets, Riverwood Walls and
   Whiterun Stone Stairs.
+- **Then, Barry: "let's replace them. Can we make our own parallax textures?"** Done:
+  - The cobbles are vanilla `wrstonefloor01` (diffuse and normal, byte for byte, from the
+    Steam install's archives), and **the fair's own parallax map**, `Cobble01_p.dds`.
+  - `tools/make_cobble.py` builds the set. The height is integrated from the vanilla
+    normal map's slopes: a least-squares surface in the Fourier domain, which wraps
+    without a seam because the texture tiles.
+    - Features wider than two stones are filtered out, and 15% of the diffuse's light and
+      dark is added for grain.
+    - The top 5% is clipped, so the stone tops plateau and the mortar is deep.
+    - The green channel is read "down", chosen because that reading agrees with the
+      diffuse (+0.29 against -0.07).
+  - It's an 8-bit luminance DDS, 1024 x 1024, with all 11 mip levels, like the old one
+    (512, no compression).
+  - **Barry chose copies over vanilla's paths.** A Whiterun replacer lays its stones out
+    differently (Mossy Wet's correlate -0.02 with vanilla's), so pointing at vanilla's
+    paths would put our bumps under someone else's stones.
+  - Same paths, so the plugin is unchanged (`e89da4ef...`). The three textures are
+    deployed.
+  - **The look changes:** vanilla's stone is darker and greener than Mossy Wet's grey.
+  - **To test:** walk the avenue. Do the cobbles stand up from the mortar, and do the
+    bumps sit on the stones? Is there no seam where the texture repeats, and no shimmer
+    at a distance?
 - **A leftover:** the deploy folder still has the old procedural cobble
   (`textures\SkyrimFair\SkyrimFair_Cobble01*`), which the plugin doesn't use. It stays out of
   any package.

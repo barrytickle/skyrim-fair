@@ -22,6 +22,7 @@ hand-made: a C#/Mutagen generator reads `fair.config.json` and writes `dist/Skyr
 ```
 python tools/make_static_props.py --data "E:/Modlists/Still In Skyrim/stock/Data"   # only when props change
 python tools/build_audio.py                                                          # music/, sound-effects/ -> assets/sound/
+build/texvenv/Scripts/python tools/make_cobble.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"   # the cobbles (numpy, Pillow)
 python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast and held instrument loops (when a speed changes)
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
 # after a layout change, for the navmesh's obstacle footprints (then run the generator again):
@@ -34,7 +35,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - `deploy.py` copies only changed game files and checks each copy byte-for-byte.
 - Git-ignored build output and third-party files: `assets/sound/`, `assets/scripts/`,
   `build/`, `assets/meshes/SkyrimFair/Props/`, `assets/textures/SkyrimFair/Ground/`
-  (the Whiterun cobbles, permission pending), `assets/*/Stroti/`, and `external/`.
+  (the cobbles, from `tools/make_cobble.py`), `assets/*/Stroti/`, and `external/`.
   `music/` and `sound-effects/` are Barry's untracked audio sources.
 - Test setup:
   - MO2 profile "Still in Skyrim Plus" with Community Shaders and Terrain Helper
@@ -201,7 +202,7 @@ current):
 - a grass cache for the fair's worldspace, with the mod-page note
 - the Tamriel exterior's limits: the navmesh, LOD, and landscape mods in that area
 - Professional Dancer: optional but recommended (Dance.esp, then Pandora); nothing of it ships
-- permission for the Whiterun stonefloor textures
+- the singers' face tints, to rebuild from Bethesda's archives (they're Vanilla Remastered's)
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance
 - Stroti can't be re-uploaded (see `CREDITS.md`)

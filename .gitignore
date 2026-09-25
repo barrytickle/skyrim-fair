@@ -30,9 +30,8 @@ assets/meshes/actors/
 # The singers' FaceGen tints, copied from the game's archives by the generator
 assets/textures/actors/
 
-# The Whiterun Mossy Wet Stonefloor textures (Nexus 99294), copied to a fair-only path for the
-# cobbled avenue; redistribution permission unverified, so kept out of git.
-#   unzip wrstonefloor01*.dds from external/ into assets/textures/SkyrimFair/Ground/Cobble01*.dds
+# The avenue's cobbles: vanilla wrstonefloor01 (diffuse, normal) and the fair's own parallax
+# map, built output of tools/make_cobble.py --data <Steam's Skyrim SE Data>.
 assets/textures/SkyrimFair/Ground/
 
 # Built runtime files: sound from tools/build_audio.py (from Barry's untracked music/ and

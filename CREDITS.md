@@ -281,7 +281,7 @@ parallax slots), so installing them is optional and improves the look:
 
 | Mod | Nexus (SE) | What the fair uses it for |
 | --- | --- | --- |
-| Whiterun Mossy Wet Stonefloor – Grey 2k | 99294 | **now copied** for the cobbled avenue to `textures\SkyrimFair\Ground\Cobble01*.dds` (a fair-only path, so Whiterun city is untouched). Shipped in Barry's local build only and kept out of git: **redistribution permission must be confirmed before any public release** |
+| Whiterun Mossy Wet Stonefloor – Grey 2k | 99294 | **no longer used** (2026-09-25). The avenue's cobbles were its textures; they're now vanilla `wrstonefloor01` with the fair's own parallax map (`tools/make_cobble.py`). Installing it no longer changes the fair |
 | Terrain Parallax 1.5 – 4K2K | 54860 | parallax on the fair's grass, dirt and path ground (landscape `_p` maps) |
 
 ## Audit of what ships (2026-09-25)
@@ -291,7 +291,8 @@ Every file in the deployed mod folder was traced to its source:
   (checked against the Steam install) or one of the credited assets above: the palisade
   and gate, the scaffold tower, Stroti's outhouse.
 - **The plugin's own texture paths** are vanilla, apart from the cobbles
-  (`SkyrimFair\Ground\Cobble01*`, Nexus 99294, above).
+  (`SkyrimFair\Ground\Cobble01*`). Those were Nexus 99294's; now they're vanilla
+  `wrstonefloor01` plus the fair's own parallax map.
 - **Props (174 sources):** Bethesda's meshes from the modlist's stock folder. They differ
   from the Steam install's in 8 bytes of Havok data, the mark of another official game
   version, with no mod edits. The stock folder has no loose files.
@@ -300,11 +301,19 @@ Every file in the deployed mod folder was traced to its source:
   Archery Targets (98142), Fireworks (183953; the fair's fireworks are vanilla effects),
   Incaendo's Banner Resource 2 (94919), Terrain Parallax (54860), and the Medieval Markets,
   Riverwood Has Charm and Walls and Whiterun Stone Stairs entries above.
-- **Still to settle:** the cobbles' permission, the singers' tints, the scaffold tower's
+- **Still to settle:** the singers' tints, the scaffold tower's
   source, the music's provenance, Astra's credit, and the SPID patches' authors
   (`docs/RELEASE.md`).
 - The old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*`, committed
   2026-09-21 as project-made) isn't used by the plugin, so it's left out of the package.
+
+## The avenue's cobbles (vanilla, with the fair's own parallax)
+
+`textures\SkyrimFair\Ground\Cobble01.dds` and `Cobble01_n.dds` are Bethesda's
+`textures\architecture\whiterun\wrstonefloor01.dds` and `_n.dds`, unchanged, copied from
+the vanilla archives. They sit under the fair's own path so that they always match the
+height map. `Cobble01_p.dds` is the project's own, computed from the vanilla normal map
+(`tools/make_cobble.py`).
 
 ## Bethesda Game Studios
 

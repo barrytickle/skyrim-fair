@@ -102,9 +102,9 @@ the music stops, and the performers freeze.
 ## Before any public release
 
 Permissions and provenance (details in `CREDITS.md`):
-- [ ] Permission for the Whiterun Mossy Wet Stonefloor textures (the avenue cobbles),
-      or replace them. `textures\SkyrimFair\Ground\Cobble01*.dds` are byte-identical to
-      its `wrstonefloor01*` (checked 2026-09-25).
+- [x] The avenue cobbles no longer use Whiterun Mossy Wet Stonefloor (Nexus 99294):
+      they're vanilla `wrstonefloor01` with the fair's own parallax map (2026-09-25,
+      `tools/make_cobble.py`). Build them from Bethesda's archives (the Steam install).
 - [ ] **The singers' face tints** (`textures\actors\character\FaceGenData\FaceTint\SkyrimFair.esp\*.dds`)
       are copied from Vanilla Remastered - The New Normal's archives (Nexus 153879), not
       Bethesda's. Rebuild them from the vanilla `Skyrim - Textures*.bsa` (Steam's install)
