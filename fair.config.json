@@ -2452,7 +2452,7 @@
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": -46, "exact": true},
             {"piece": "0009625E:Skyrim.esm", "x": 0, "y": 46, "yaw": 180, "exact": true},
             {"piece": "000533D3:Skyrim.esm", "x": 0, "y": 0.0, "z": 162, "scale": 0.8, "exact": true},
-            {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 52.0, "z": 168, "exact": true},
+            {"piece": "000F0A1E:Skyrim.esm", "x": 0, "y": 52.0, "z": 168, "yaw": 180, "exact": true},
             {"piece": "00034D23:Skyrim.esm", "x": 9, "y": 46, "z": 120, "yaw": 90, "optional": true, "exact": true}
           ]
         },

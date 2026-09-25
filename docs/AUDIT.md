@@ -4,6 +4,20 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.2: the herbalist's sign, and the keepers re-placed
+
+Barry: the seating "is now resolved!!!" (**confirmed in game**: re-seat layout 2). Then, at the
+herbalist: "the sign is misaligned, and the herbalist is stood too far from the stand".
+- **The sign:** `sign_aromatics` hangs Solitude's **SignSAngelinesAromatics** (`0F0A1E`), whose
+  board spans local y 20..84 from its hook, unturned at kit y 52, so it hung out past the post.
+  The other sign kits turn their board 180. Now `"yaw": 180`: it spans between its posts
+  (4,256..4,320 between 4,242 and 4,334), under the kit's crossbeam.
+- **The keeper:** in the plugin he's 80 behind the stand's centre, at the whiterun_stand spot
+  (0, -98). The stand's counter top ends 54 behind the stand's centre (kit y -74), so -98 is as
+  close as a keeper fits. He had drifted in the save. `Reseat()` (layout **3**) now also sends
+  all 59 keepers (`Keepers`) back to their spots once, with `EvaluatePackage`.
+- Plugin `9c0fc5e67878dd96`, deterministic, no FormID change. Deployed. **2.0.1.2** repackaged.
+
 ### Later: 2.0.1.2: the music ducks when you talk to anyone at the fair
 
 Barry: "Are we able to detect when any of the fair visitors are talking when you interact with

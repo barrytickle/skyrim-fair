@@ -507,8 +507,12 @@ internal static class FairPluginGenerator
                 stageScript.Properties.Add(new ScriptObjectListProperty { Name = "SeatChairs", Objects = reseatChairs.Select(Ref).ToExtendedList() });
                 stageScript.Properties.Add(new ScriptFloatListProperty { Name = "SeatYaw", Data = reseatYaw.ToExtendedList() });
                 stageScript.Properties.Add(new ScriptObjectListProperty { Name = "Sitters", Objects = sitters.Select(Ref).ToExtendedList() });
+                var keeperBases = mod.Npcs.Where(n => (n.EditorID ?? "").StartsWith(config.FairWorld.Vendors.EditorIdPrefix, StringComparison.Ordinal)).Select(n => n.FormKey).ToHashSet();
+                var keepers = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>())
+                    .Where(n => keeperBases.Contains(n.Base.FormKey)).OrderBy(n => n.FormKey.ID).Select(n => n.FormKey).ToList();
+                stageScript.Properties.Add(new ScriptObjectListProperty { Name = "Keepers", Objects = keepers.Select(Ref).ToExtendedList() });
                 stageScript.Properties.Add(new ScriptIntProperty { Name = "SeatLayoutVersion", Data = seatSwap.LayoutVersion });
-                Console.WriteLine($"  re-seat: {reseatChairs.Count} chairs and {sitters.Count} seated visitors, layout {seatSwap.LayoutVersion}");
+                Console.WriteLine($"  re-seat: {reseatChairs.Count} chairs, {sitters.Count} seated visitors and {keepers.Count} keepers, layout {seatSwap.LayoutVersion}");
             }
         }
 

@@ -134,6 +134,9 @@ Float[] Property SeatYaw Auto
 bar stools keeps their old angles, so each is turned to its heading once (SeatLayoutVersion).}
 Actor[] Property Sitters Auto
 {The seated visitors: sent back to their seats (their editor locations) once, to sit down again.}
+Actor[] Property Keepers Auto
+{The shopkeepers: sent back to their spots behind their counters once as well (one had wandered
+off beside his stall in a save, 2026-09-25).}
 Int Property SeatLayoutVersion Auto
 {Bumped whenever the seat layout changes, so every save re-seats once more.}
 Perk Property FairTalk Auto
@@ -863,8 +866,16 @@ Function Reseat()
 		EndIf
 		i += 1
 	EndWhile
+	i = 0
+	While i < Keepers.Length
+		If Keepers[i] && !Keepers[i].IsDead()
+			Keepers[i].MoveToMyEditorLocation()
+			Keepers[i].EvaluatePackage()
+		EndIf
+		i += 1
+	EndWhile
 	seatLayoutDone = SeatLayoutVersion
-	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs and " + Sitters.Length + " visitors (layout " + SeatLayoutVersion + ")")
+	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs, " + Sitters.Length + " visitors and " + Keepers.Length + " keepers (layout " + SeatLayoutVersion + ")")
 EndFunction
 
 ; Every companion the finder turns up that isn't already near the player is moved to them,
