@@ -317,7 +317,7 @@ Attribution:
 
 ### Paper lanterns (made with ChatGPT)
 
-**Models:** `meshesarry_paper_lanterns\lantern_tall_red.nif` and `lantern_round_blue.nif`, new
+**Models:** `meshes\barry_paper_lanterns\lantern_tall_red.nif` and `lantern_round_blue.nif`, new
 procedural meshes made for Skyrim Fair by Barry with ChatGPT ("Astra") in Blender 3.6.23
 (2026-09-25). A lantern image Barry supplied was only a visual reference: no source mesh or
 texture was used. The paper art was generated with ChatGPT's image tool; the prompts are in
