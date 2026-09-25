@@ -237,6 +237,7 @@
       "members": [
         {
           "id": "Garrick", "name": "Garrick Sol V", "shortName": "Garrick",
+          "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "emotion": "Happy",
           "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [2048, 3300, 0, 180], "radius": 2200, "energy": 80,
           "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 25}],
@@ -244,6 +245,7 @@
         },
         {
           "id": "Claudius", "name": "Claudius Vale", "shortName": "Claudius",
+          "voiceLines": "claudius_vale", "voiceDir": "cameos/claudius/mono", "voiceType": "SkyrimFairClaudiusVoice", "emotion": "Puzzled",
           "template": "000457F6:Skyrim.esm", "outfit": "000E40DD:Skyrim.esm",
           "at": [2048, 1000, 0, 0], "radius": 2200, "energy": 40,
           "idles": [

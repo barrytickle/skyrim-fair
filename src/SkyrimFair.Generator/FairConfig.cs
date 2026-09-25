@@ -467,6 +467,15 @@ internal sealed record CameosConfig
     /// <summary>Their own FormID range, so nothing renumbers.</summary>
     public uint FormIdBase { get; init; } = 0x60000;
 
+    /// <summary>The cameos' dialogue quest; short, so voice file names are never truncated.</summary>
+    public string QuestEditorId { get; init; } = "SkyrimFairCameos";
+
+    /// <summary>tools/cameos/build_voices.py's output, one folder per cameo id.</summary>
+    public string VoiceBuildDir { get; init; } = "build/cameos";
+
+    /// <summary>Barry's lines: {"garrick_sol_v": [{"file", "text"}, ...]} (read by build_voices.py).</summary>
+    public string VoiceLinesFile { get; init; } = "cameos/skyrim_fair_voicelines.json";
+
     /// <summary>The sandbox each gets a wider copy of: DefaultSandboxEditorLocation1024NoConv.</summary>
     public string Package { get; init; } = "0010F587:Skyrim.esm";
 
@@ -518,6 +527,18 @@ internal sealed record CameoMember
     public float Radius { get; init; } = 1500f;
 
     public int Energy { get; init; } = 50;
+
+    /// <summary>His key in the lines file; empty: he says nothing of his own.</summary>
+    public string VoiceLines { get; init; } = string.Empty;
+
+    /// <summary>His recordings (build_voices.py reads them).</summary>
+    public string VoiceDir { get; init; } = string.Empty;
+
+    /// <summary>His own voice type, so only his lines play for him.</summary>
+    public string VoiceType { get; init; } = string.Empty;
+
+    /// <summary>The emotion his lines play with (Happy, Neutral, Puzzled...).</summary>
+    public string Emotion { get; init; } = "Neutral";
 
     /// <summary>His idles, in turn: each played, then stopped after its hold (seconds).</summary>
     public List<CameoIdle> Idles { get; init; } = new();

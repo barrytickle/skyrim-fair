@@ -127,6 +127,7 @@ Permissions and provenance (details in `CREDITS.md`):
       `exterior.fairSign.enabled` to false for a release build.
 - [ ] Leave `meshes\Stroti\` and `textures\Stroti\` out of the package: the plugin no longer
       uses them (they're still in Barry's deploy folder).
+- [ ] The cameos' voice recordings (`cameos/`): record their source and terms in `CREDITS.md`.
 - [x] The folk dance: Barry's, made with ChatGPT ("Astra"). Nothing to ask.
 - [x] Stealth Detection Fixes, Maximum Destruction and Strange Runes: no permission needed.
       Players make the one-word edits themselves, from `docs/COMPATIBILITY.md` on the mod page.

@@ -4,6 +4,38 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the cameos speak (Barry's recorded lines)
+
+Barry: "a cameos folder... a json of their lines and their filename... so they say it when
+you interact with them".
+- **The lines file** (`cameos/skyrim_fair_voicelines.json`) had two commas wrong at the end
+  of Claudius's list (one missing after 15, one extra after 16), and was fixed. Garrick has 12
+  lines, Claudius 16. The recordings are mono 44.1 kHz 16-bit.
+- **`tools/cameos/build_voices.py`:** for each line, LipGenerator with the line's text (curly
+  quotes straightened for it), then xwmaencode and LIPFuzer, into `build/cameos/<id>/<nn>.fuz`
+  plus `lines.json`. All 28 are checked to carry a lip track.
+- **The dialogue** (`FairCameos.cs`), when you talk to him (Skyrim's greeting is the Hello
+  topic, `DialogueGenericHello`'s):
+  - each has his own voice type (`SkyrimFairGarrickVoice`, `SkyrimFairClaudiusVoice`), so no
+    vanilla line, all filtered by voice type, is ever his
+  - a quest, `SkyrimFairCameos`, with a Hello topic each (Misc, subtype 0x4F, `SNAM HELO`,
+    priority 50, no branch)
+  - one INFO per line: Random, `GetIsID` him, the text as the subtitle, Happy (Garrick) or
+    Puzzled (Claudius)
+  - the .fuz copied to `Sound\Voice\SkyrimFair.esp\<voice type>\skyrimfaircameos__<INFO id>_1.fuz`
+  - Checked subrecord by subrecord against `DialogueGenericHello` and its INFO `0D2C26`:
+    - the topic's DATA (`00074f00`) and SNAM are identical
+    - the INFOs have the same ENAM/CNAM/TRDT/NAM1-3/CTDA
+    - the voice types' DNAM is 0, as the singers' is
+- 33 records appended in the cameos' range (`0x6000A`-`0x6002A`); nothing else moves.
+  Plugin `c27c7ee4d4576023...`, deterministic, deployed with the 28 voice files.
+- Vanilla may also greet the player as he passes with a Hello; that's the same topic, so
+  they may say a line then too.
+- **To test:**
+  - Talk to Garrick and Claudius: a line each time, their own voice, lips moving, the
+    subtitle right?
+  - Does the conversation close by itself, or does an empty menu stay open?
+
 ### Later: the cameos' names, and a horse on the stage roof
 
 - **"Change their tag to their name":** in game they showed their face template's label

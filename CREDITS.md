@@ -204,6 +204,15 @@ Attribution:
 
 > Music and crowd sounds made with Suno.
 
+## The cameos' voices (Barry's)
+
+Garrick Sol V's 12 lines and Claudius Vale's 16 (`cameos/<name>/mono/*.wav`, the text in
+`cameos/skyrim_fair_voicelines.json`), supplied by Barry, are shipped as
+`Sound\Voice\SkyrimFair.esp\SkyrimFairGarrickVoice\` and `...\SkyrimFairClaudiusVoice\`.
+Their lip tracks come from Bethesda's LipGenerator (`tools/cameos/build_voices.py`).
+**Where the recordings came from, and on what terms, is still to record here.** The sources
+are kept out of git.
+
 ## Built from Bethesda's files
 
 All of these are Bethesda Game Studios' assets, rebuilt or copied for the fair. Anything

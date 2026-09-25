@@ -24,6 +24,7 @@ python tools/make_static_props.py --data "E:/Modlists/Still In Skyrim/stock/Data
 python tools/build_audio.py                                                          # music/, sound-effects/ -> assets/sound/
 build/texvenv/Scripts/python tools/make_cobble.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"   # the cobbles (numpy, Pillow)
 python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast and held instrument loops (when a speed changes)
+python tools/cameos/build_voices.py                                                  # cameos/<name>/mono/*.wav + lines json -> build/cameos/ (.fuz)
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
 # after a layout change, for the navmesh's obstacle footprints (then run the generator again):
 python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"

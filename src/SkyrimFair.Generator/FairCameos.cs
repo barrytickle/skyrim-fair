@@ -27,6 +27,7 @@ internal static class FairCameos
         var sandbox = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.Package));
         var keyword = mod.Keywords.FirstOrDefault(k => k.EditorID == npcKeyword);
         var placed = new List<PlacedNpc>();
+        var npcs = new List<Npc>();
         var idles = new List<FormKey>();
         var holds = new List<float>();
         var first = new List<int>();
@@ -104,6 +105,7 @@ internal static class FairCameos
             }
 
             mod.Npcs.Add(npc);
+            npcs.Add(npc);
 
             var at = c.At;
             var reference = new PlacedNpc(mod)
@@ -165,6 +167,83 @@ internal static class FairCameos
                 Base = new FormLinkNullable<INpcGetter>(horse.FormKey),
                 Placement = new Placement { Position = new P3Float(roof.At[0], roof.At[1], roof.At[2]), Rotation = new P3Float(0f, 0f, a) },
             });
+        }
+
+        // ---- their lines: a Hello (what an NPC says when you talk to him), one per recording ----
+        // Each has his own voice type, so no vanilla line (they're filtered by voice type) is his,
+        // and a Hello topic in the cameos' quest shaped as vanilla's DialogueGenericHello: Misc,
+        // subtype 0x4F, SNAM HELO, priority 50, no branch; each INFO Random, for him only (GetIsID).
+        // The voice files come from tools/cameos/build_voices.py (build/cameos/<id>/), copied to
+        // Sound\Voice\<plugin>\<voice type>\<quest>__<INFO id>_1.fuz, lowercase (as the singers').
+        var voiced = config.Members.Select((m, i) => (Member: m, Npc: npcs[i]))
+            .Where(x => x.Member.VoiceLines.Length > 0 && x.Member.VoiceType.Length > 0)
+            .ToList();
+        if (voiced.Count > 0)
+        {
+            var quest = new Quest(mod)
+            {
+                EditorID = config.QuestEditorId,
+                Name = "Fair cameos",
+                Flags = Quest.Flag.StartGameEnabled,
+                Priority = 0,
+                // Mutagen leaves these out unless set; every vanilla quest has ANAM, every INFO CNAM.
+                NextAliasID = 0,
+            };
+            mod.Quests.Add(quest);
+            var voiceRoot = Path.Combine(faces.VoiceOut is { } vo && Path.IsPathRooted(vo) ? vo : Path.Combine(FairPaths.ConfigDirectory, faces.VoiceOut), mod.ModKey.FileName);
+            foreach (var (member, npc) in voiced)
+            {
+                var voice = new VoiceType(mod) { EditorID = member.VoiceType };
+                mod.VoiceTypes.Add(voice);
+                npc.Voice = new FormLinkNullable<IVoiceTypeGetter>(voice.FormKey);
+
+                var cues = Path.Combine(FairPaths.ConfigDirectory, config.VoiceBuildDir, member.Id);
+                var cuesFile = Path.Combine(cues, "lines.json");
+                if (!File.Exists(cuesFile))
+                {
+                    throw new InvalidOperationException($"cameos {member.Id}: no {cuesFile}; run tools/cameos/build_voices.py");
+                }
+
+                using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(cuesFile));
+                var topic = new DialogTopic(mod)
+                {
+                    Quest = new FormLinkNullable<IQuestGetter>(quest.FormKey),
+                    Category = DialogTopic.CategoryEnum.Misc,
+                    Subtype = (DialogTopic.SubtypeEnum)0x4F,
+                    SubtypeName = new RecordType("HELO"),
+                    Priority = 50f,
+                };
+                var emotion = Enum.Parse<Emotion>(member.Emotion);
+                foreach (var line in doc.RootElement.EnumerateArray())
+                {
+                    var info = new DialogResponses(mod)
+                    {
+                        Flags = new DialogResponseFlags { Flags = DialogResponses.Flag.Random },
+                        FavorLevel = FavorLevel.None,
+                    };
+                    info.Responses.Add(new DialogResponse
+                    {
+                        Emotion = emotion,
+                        EmotionValue = 50,
+                        ResponseNumber = 1,
+                        Flags = DialogResponse.Flag.UseEmotionAnimation,
+                        Text = line.GetProperty("text").GetString()!,
+                        ScriptNotes = string.Empty,
+                        Edits = string.Empty,
+                    });
+                    var him = new GetIsIDConditionData { RunOnType = Condition.RunOnType.Subject };
+                    him.Object.Link.SetTo(npc.FormKey);
+                    info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = him });
+                    topic.Responses.Add(info);
+
+                    var name = $"{config.QuestEditorId}__{info.FormKey.ID:x8}_1.fuz".ToLowerInvariant();
+                    var dst = Path.Combine(voiceRoot, voice.EditorID!, name);
+                    Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+                    File.Copy(Path.Combine(cues, line.GetProperty("fuz").GetString()!), dst, overwrite: true);
+                }
+
+                mod.DialogTopics.Add(topic);
+            }
         }
 
         // ---- the stage script's schedule for their idles
