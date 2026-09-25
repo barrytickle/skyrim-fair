@@ -4,6 +4,40 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the singers loop their cheer; the licences settled; the archers' "strike"
+
+Barry: "the archers have gone on strike, same with the bards". Then: "ignore the bard singers
+comments. But can we just have the bard singers constantly doing that animation, like we have
+with the people dancing". And: the welcome sign "is okay", Mixamo allows commercial and
+personal use, the voices were made with ElevenLabs Pro, and "everything else is okay".
+- **The strike is a vanilla trap, not the fair.** Papyrus.0.log:
+  - `TrapDweThresher` on `00078307` (Skyrim.esm, in Raldbthar02) fired 28,701 times from the
+    moment the save loaded ("VM is thawing"), each time lacking its 3D. That's the vanilla
+    thresher bug: a trap caught mid-swing when its cell unloaded.
+  - The flood starved every script. The stage script's 8-second singer steps went quiet for
+    104 s (07:59:44-08:01:28), which stopped whatever it drives: the band, the singers, the
+    archers' queue.
+  - The fair doesn't touch the trap. The fix is in Barry's save (below).
+- **The singers loop their cheer** (script only): the log showed them still stepping ("singers
+  step to ±200"). That's the saved-property trap: Barry's save kept the old
+  `SingerStepOffsets`, though `songs.config.json` has none. And the cheer waited for each
+  step, so it only fitted in between.
+  - In the steady show, `SingerSteps` now brings them home once (offset 0) and never steps.
+  - `SingerGestures` no longer waits for a step, so the cheer replays back to back, as the
+    dancers' loops do.
+- **Licences:**
+  - the welcome sign cleared to ship; the release no longer reserves it
+  - Mixamo: personal and commercial use
+  - the cameo voices: ElevenLabs Pro
+  - `CREDITS.md`, `RELEASE.md` and the Nexus description are updated.
+  - For 1.0 there's no grass-cache file: the page tells cache users to regenerate their cache
+    with the fair installed.
+- `tools/package.py`:
+  - no release switches now, so the release plugin is the dev one (`709eeed250ad09a0`)
+  - the sign is in the zip (521 files, 172 MB)
+  - the only open item is checking the SPID lines before each upload
+- **To test:** the singers stand on their marks and loop the cheer without stopping.
+
 ### Later: Holidays no longer needed
 
 Barry: "frame rate is still the same :) And yes please!!" (drop Holidays).

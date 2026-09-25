@@ -17,9 +17,9 @@ build_voices, build_papyrus; see CLAUDE.md). This script then:
    mod page's text, compatibility and credits) and RELEASE_TODO.md (what's still open).
 
 Release switches (a copy of the config, fair.release.json, written next to it for the
-config's relative paths and removed afterwards):
-- exterior.fairSign.reserve: the welcome sign's licence is unconfirmed (docs/RELEASE.md).
-  Its records stay (a vanilla XMarker, initially disabled), so no FormID moves.
+config's relative paths and removed afterwards): none at the moment. The welcome sign was
+reserved until Barry cleared it (2026-09-25); `exterior.fairSign.reserve` still exists for a
+piece that must stay out of a release without moving any FormID.
 """
 import argparse
 import hashlib
@@ -46,8 +46,6 @@ RELEASE_PLUGIN_DIR = "build/release/plugin"
 EXCLUDE = {
     "meshes/stroti/": "Stroti's outhouse: can't be re-uploaded, and replaced (CREDITS.md)",
     "textures/stroti/": "Stroti's outhouse textures",
-    "meshes/barry_fair_sign/": "the welcome sign: its licence is unconfirmed (reserved in the plugin)",
-    "textures/barry_fair_sign/": "the welcome sign's textures",
     "meshes/skyrimfair/crowd/": "the static crowd figures: switched off, the plugin places none",
     "textures/skyrimfair/skyrimfair_cobble01": "the old procedural cobble: unused",
     "scripts/skyrimfairnpcguard.pex": "the retired guard script: nothing uses it",
@@ -55,19 +53,8 @@ EXCLUDE = {
 
 # Still open before a public upload (docs/RELEASE.md); listed in RELEASE_TODO.md.
 OPEN = [
-    "The welcome sign (JeffK's \"Low-Poly Wooden Sign made of Three Planks\", Sketchfab Standard): "
-    "ask the author to confirm CC BY for a free mod. When confirmed, drop `exterior.fairSign.reserve` "
-    "from the release switches and the two `barry_fair_sign` exclusions in tools/package.py.",
-    "The singers' cheer (a Mixamo clip, retargeted): check Adobe's Mixamo terms for shipping it inside a mod. "
-    "It's in the package (`meshes\\actors\\character\\animations\\OpenAnimationReplacer\\SkyrimFairBardSinger\\`). "
-    "Without it, the singers do the vanilla cheer.",
-    "The cameos' voice recordings (Garrick and Claudius): record their source and terms in CREDITS.md.",
-    "The grass cache for SkyrimFairWorld (a precache run on Barry's setup, only its `.cgid` files), "
-    "as an optional file for NGIO / Grass Cache Helper users. Not built yet.",
-    "The Tamriel exterior's known limits (docs/RELEASE.md): Tamriel's navmesh isn't cut by the wall; "
-    "no LOD; landscape mods near (-2..-1, -4..-3).",
     "Check the SPID lines in NEXUS_PAGE.md against the current versions of Maximum Destruction, "
-    "Stealth Detection Fixes and Strange Runes.",
+    "Stealth Detection Fixes and Strange Runes before each upload (the instructions quote their lines).",
 ]
 
 
@@ -83,7 +70,6 @@ def excluded(rel: str) -> str | None:
 def build_plugin() -> pathlib.Path:
     config = json.loads((ROOT / "fair.config.json").read_text(encoding="utf-8"))
     config["outputDirectory"] = RELEASE_PLUGIN_DIR
-    config["exterior"]["fairSign"]["reserve"] = True
     RELEASE_CONFIG.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
     out = ROOT / RELEASE_PLUGIN_DIR / PLUGIN
     try:
@@ -253,9 +239,8 @@ archery, fireworks and a crowd. Version {version}.
 
 Install with Mod Organizer 2 or Vortex ("Mod Manager Download"), and enable `SkyrimFair.esp`.
 
-**Grass caches:** if you use a grass cache (NGIO / Grass Cache Helper NG), install the grass
-cache optional file too, or the fair's ground will have no grass. If you regenerate your own
-cache, do it with the fair installed and it will be included.
+**Grass caches:** if you use a grass cache (NGIO / Grass Cache Helper NG), the fair's ground has
+no grass until you regenerate your cache with the fair installed; it's then included.
 
 **Updating:** some updates change the stage show's data, which a save keeps. If an update's notes
 say so, start a new game or visit the fair from a save made before you first entered it.

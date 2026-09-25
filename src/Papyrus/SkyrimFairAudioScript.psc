@@ -474,7 +474,7 @@ Event OnUpdate()
 	If phase == 2 && singerWake > now && Seconds(singerWake - now) < left
 		left = Seconds(singerWake - now)
 	EndIf
-	If phase == 2 && SingerStepOffsets.Length > 0 && stepNext > now && Seconds(stepNext - now) < left
+	If phase == 2 && !SteadyShow && SingerStepOffsets.Length > 0 && stepNext > now && Seconds(stepNext - now) < left
 		left = Seconds(stepNext - now)
 	EndIf
 	If cameoWake > now && Seconds(cameoWake - now) < left
@@ -777,7 +777,7 @@ Function SingerGestures(Float now)
 			If now < stepDone
 				; Mid-step: a full-body idle would stop the walk.
 				singerNext[i] = stepDone
-			ElseIf singing && SingerStepOffsets.Length > 0 && stepOn && now + clip * perSecond > stepNext
+			ElseIf !SteadyShow && singing && SingerStepOffsets.Length > 0 && stepOn && now + clip * perSecond > stepNext
 				; It wouldn't end before the next step: wait until that one's done.
 				singerNext[i] = stepNext + SingerStepSeconds * perSecond
 			ElseIf Singers[i].PlayIdle(moves[which])
@@ -949,6 +949,15 @@ Function SingerSteps(Float now)
 		Return
 	EndIf
 	Float perSecond = TimeScale.GetValue() / 86400.0
+	If SteadyShow
+		; The steady show: no stepping. Home once (a save may still hold the old step offsets),
+		; then they stay on their marks and loop the cheer, as the dancers loop theirs.
+		If !stepOn || stepApplied != 0.0
+			SingerOffset(0.0)
+			HoldGestures(now + SingerStepSeconds * perSecond)
+		EndIf
+		Return
+	EndIf
 	If !stepOn
 		stepAt = 0
 		SingerOffset(SingerStepOffsets[0])

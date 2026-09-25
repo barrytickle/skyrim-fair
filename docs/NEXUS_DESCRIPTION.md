@@ -21,9 +21,8 @@ nobody can explain.
 2. Enable `SkyrimFair.esp`. It needs nothing but Skyrim itself, so it can load anywhere.
 3. Optionally, install the recommended mods below.
 4. **If you use a grass cache** (No Grass In Objects / Grass Cache Helper NG, as most big
-   modlists do), also install the **Grass Cache** optional file. Without it, the fair's ground
-   has no grass. If you generate your own grass cache, do it with the fair installed and it
-   will be included.
+   modlists do), the fair's ground has no grass until you regenerate your cache with the fair
+   installed; it's then included. Nothing breaks without it.
 5. **If you use Maximum Destruction, Stealth Detection Fixes or Strange Runes,** make the
    one-word edits in the Compatibility section below. **Without them, Maximum Destruction and
    Stealth Detection Fixes freeze the game at the fair.**
@@ -121,7 +120,9 @@ edit to each mod's own file: see the Compatibility section.
 - The singers' cheer: "Cheering" from Adobe Mixamo, retargeted to the Skyrim skeleton
 - The music, the crowd and the singers' voices: made with Suno
 - The folk dance: made for the fair with ChatGPT ("Astra")
-- Garrick's and Claudius's voices: <!-- TODO: credit the source of the cameo recordings -->
+- Garrick's and Claudius's voices: made with ElevenLabs
+- The welcome sign: "Low-Poly Wooden Sign made of Three Planks" by
+  [JeffK](https://sketchfab.com/jeffkolada), converted and modified for Skyrim
 
 **Tools**
 - Mutagen by Noggog: the fair's plugin is generated with it
