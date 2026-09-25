@@ -197,6 +197,8 @@ def main() -> None:
     compat = (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
     page = PAGE.format(version=args.version) + "\n\n" + compat + "\n\n---\n\n" + credits.read_text(encoding="utf-8")
     (top / "NEXUS_PAGE.md").write_text(page, encoding="utf-8")
+    # The Nexus form's five sections (Description, Installation, Features, Requirements, Shout outs).
+    shutil.copyfile(ROOT / "docs" / "NEXUS_DESCRIPTION.md", top / "NEXUS_DESCRIPTION.md")
     todo = [f"# {name}: still open before uploading", ""]
     todo += [f"- [ ] {item}" for item in OPEN]
     todo += ["", "## Left out of the package", ""]
