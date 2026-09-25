@@ -183,6 +183,14 @@ internal sealed record FairWorldConfig
     public HolidaysFreeConfig HolidaysFree { get; init; } = new();
 
     /// <summary>
+    /// Pressing E on anyone at the fair ducks the music while they answer: a hidden player perk,
+    /// vanilla PlayerWerewolfFeed's shape (an AddActivateChoice entry, RunImmediately and
+    /// ReplaceDefault, with a fragment that ducks and then runs the normal activation). Not for
+    /// Garrick and Claudius (their own lines duck it), the dead, or while sneaking.
+    /// </summary>
+    public TalkDuckConfig TalkDuck { get; init; } = new();
+
+    /// <summary>
     /// Seats swapped last of all (their FormIDs stay): a vanilla bar stool gives its sitter the
     /// bar-counter lean, with no counter at the fair (a Nexus player's screenshot, 2026-09-25),
     /// so each becomes a chair facing its table, whose sitters sit upright and drink.
@@ -630,6 +638,18 @@ internal sealed record PaperLanternsConfig
 /// Holidays' bunting and props replaced (FairHolidaysFree.cs), after the paper lanterns and in
 /// their FormID range. With both, SkyrimFair.esp's only master is Skyrim.esm (Barry, 2026-09-25).
 /// </summary>
+internal sealed record TalkDuckConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairTalk";
+
+    public string Script { get; init; } = "SkyrimFairTalkDuck";
+
+    /// <summary>How long the music stays ducked after pressing E on someone, in seconds.</summary>
+    public float Seconds { get; init; } = 5f;
+}
+
 internal sealed record SeatSwapConfig
 {
     public bool Enabled { get; init; }

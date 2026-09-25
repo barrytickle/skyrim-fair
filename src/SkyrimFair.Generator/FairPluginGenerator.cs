@@ -355,6 +355,85 @@ internal static class FairPluginGenerator
                 Console.WriteLine($"  ground grass: {ltex.EditorID} now grows {string.Join(", ", grass.Grasses.Select(g => $"{g.From} at {g.Density}"))}; FormIDs 0x{from:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             }
 
+            // The talk perk: pressing E on anyone at the fair ducks the music while they answer.
+            // Vanilla PlayerWerewolfFeed's shape: an AddActivateChoice entry (RunImmediately,
+            // ReplaceDefault, no label so the prompt keeps its own text), tab 0 the player,
+            // tab 1 the target, and a Local fragment script (VMAD v5, format 2, extra bind data 2,
+            // fragment #0 with its unknown2 1). Appended in the same range.
+            var talk = config.FairWorld.TalkDuck;
+            var stage = mod.Quests.FirstOrDefault(q => q.VirtualMachineAdapter?.Scripts.Any(s => s.Name == "SkyrimFairAudioScript") == true);
+            if (talk.Enabled && stage is not null)
+            {
+                var from = mod.ModHeader.Stats.NextFormID;
+                var duck = new GlobalFloat(mod) { EditorID = $"{talk.EditorIdPrefix}DuckUntil", Data = 0f };
+                mod.Globals.Add(duck);
+                var fairWs = mod.Worldspaces.First(w => w.EditorID == config.FairWorld.EditorId);
+                var npcKeyword = mod.Keywords.First(k => k.EditorID == config.FairWorld.NpcKeyword);
+                ConditionFloat Is(ConditionData data, float value) => new() { CompareOperator = CompareOperator.EqualTo, ComparisonValue = value, Data = data };
+                var inFair = new GetInWorldspaceConditionData { RunOnType = Condition.RunOnType.Subject };
+                inFair.WorldspaceOrList.Link.SetTo(fairWs.FormKey);
+                var player = new PerkCondition { RunOnTabIndex = 0 };
+                player.Conditions.Add(Is(inFair, 1f));
+                player.Conditions.Add(Is(new IsSneakingConditionData { RunOnType = Condition.RunOnType.Subject }, 0f));
+                var target = new PerkCondition { RunOnTabIndex = 1 };
+                var fairNpc = new HasKeywordConditionData { RunOnType = Condition.RunOnType.Subject };
+                fairNpc.Keyword.Link.SetTo(npcKeyword.FormKey);
+                target.Conditions.Add(Is(fairNpc, 1f));
+                target.Conditions.Add(Is(new GetDeadConditionData { RunOnType = Condition.RunOnType.Subject }, 0f));
+                foreach (var cameo in mod.Npcs.Where(n => (n.EditorID ?? "").StartsWith(config.FairWorld.Cameos.EditorIdPrefix, StringComparison.Ordinal)
+                    && n.EditorID!.Length > config.FairWorld.Cameos.EditorIdPrefix.Length && !n.EditorID.Contains("Horse", StringComparison.Ordinal)))
+                {
+                    var notHim = new GetIsIDConditionData { RunOnType = Condition.RunOnType.Subject };
+                    notHim.Object.Link.SetTo(cameo.FormKey);
+                    target.Conditions.Add(Is(notHim, 0f));
+                }
+
+                var perk = new Perk(mod)
+                {
+                    EditorID = $"{talk.EditorIdPrefix}Perk",
+                    Name = "Fair Talk",
+                    Description = "The music quietens while the fair's people answer you.",
+                    Trait = false,
+                    Level = 0,
+                    NumRanks = 1,
+                    Playable = false,
+                    Hidden = true,
+                };
+                var entry = new PerkEntryPointAddActivateChoice
+                {
+                    Rank = 0,
+                    Priority = 0,
+                    EntryPoint = APerkEntryPointEffect.EntryType.Activate,
+                    PerkConditionTabCount = 2,
+                    ButtonLabel = null,  // no EPF2, as vanilla's RunImmediately entry (PlayerWerewolfFeed)
+                    Flags = new PerkScriptFlag { Flags = PerkScriptFlag.Flag.RunImmediately | PerkScriptFlag.Flag.ReplaceDefault, FragmentIndex = 0 },
+                };
+                entry.Conditions.Add(player);
+                entry.Conditions.Add(target);
+                perk.Effects.Add(entry);
+                var script = new ScriptEntry { Name = talk.Script, Flags = ScriptEntry.Flag.Local };
+                script.Properties.Add(new ScriptObjectProperty { Name = "DuckUntil", Object = new FormLink<ISkyrimMajorRecordGetter>(duck.FormKey) });
+                script.Properties.Add(new ScriptFloatProperty { Name = "Seconds", Data = talk.Seconds });
+                perk.VirtualMachineAdapter = new PerkAdapter
+                {
+                    Version = 5,
+                    ObjectFormat = 2,
+                    ScriptFragments = new PerkScriptFragments
+                    {
+                        ExtraBindDataVersion = 2,
+                        FileName = talk.Script,
+                        Fragments = { new IndexedScriptFragment { FragmentIndex = 0, Unknown = 0, Unknown2 = 1, ScriptName = talk.Script, FragmentName = "Fragment_0" } },
+                    },
+                };
+                perk.VirtualMachineAdapter.Scripts.Add(script);
+                mod.Perks.Add(perk);
+
+                var stageScript = stage.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript");
+                stageScript.Properties.Add(new ScriptObjectProperty { Name = "FairTalk", Object = new FormLink<ISkyrimMajorRecordGetter>(perk.FormKey) });
+                stageScript.Properties.Add(new ScriptObjectProperty { Name = "TalkDuckUntil", Object = new FormLink<ISkyrimMajorRecordGetter>(duck.FormKey) });
+                Console.WriteLine($"  talk duck: {perk.EditorID}, {talk.Seconds} s a reply, {target.Conditions.Count - 2} cameos excluded; FormIDs 0x{from:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            }
+
             mod.ModHeader.Stats.NextFormID = saved;
         }
 

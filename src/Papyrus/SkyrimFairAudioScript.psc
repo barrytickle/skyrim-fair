@@ -128,6 +128,11 @@ Idle Property SingerEndMove Auto
 {At a song's end, with the crowd's cheer (a wave).}
 Float Property SingerGap = 2.0 Auto
 {Seconds each singer stands between moves.}
+Perk Property FairTalk Auto
+{The fair's talk perk (SkyrimFairTalkDuck): pressing E on anyone at the fair ducks the music while
+they answer. Given to the player at the fair; its conditions keep it to the fair.}
+GlobalVariable Property TalkDuckUntil Auto
+{Set by the talk perk's fragment: the real time until which the music stays ducked.}
 Perk Property FairPrices Auto
 {The fair's prices (FairShops.cs): a hidden perk, buying at many times the price, only in the
 fair's worldspace. Given to the player at the fair; it does nothing anywhere else.}
@@ -437,6 +442,9 @@ Event OnUpdate()
 	If FairPrices && !Game.GetPlayer().HasPerk(FairPrices)
 		Game.GetPlayer().AddPerk(FairPrices)
 	EndIf
+	If FairTalk && !Game.GetPlayer().HasPerk(FairTalk)
+		Game.GetPlayer().AddPerk(FairTalk)
+	EndIf
 	ApplyCrowdLayers()
 	CameoIdles2(Utility.GetCurrentGameTime())
 
@@ -451,7 +459,7 @@ Event OnUpdate()
 	EndIf
 
 	If songInstance != 0
-		If CameoTalking() || Utility.IsInMenuMode()
+		If CameoTalking() || Utility.IsInMenuMode() || (TalkDuckUntil && Utility.GetCurrentRealTime() < TalkDuckUntil.GetValue())
 			; Someone's speaking (or the player's in a menu): the band all but stops.
 			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix2 * SpeechDuckLevel)
 		Else

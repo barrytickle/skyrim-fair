@@ -653,6 +653,10 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **a perk that catches E on NPCs** (`SkyrimFairTalkPerk`): copy vanilla PlayerWerewolfFeed's
+  entry exactly. RunImmediately + ReplaceDefault with no label leaves the prompt's own text;
+  the fragment must call `akTargetRef.Activate(akActor, True)`, or the activation is lost.
+  Keep sneaking and the dead out (tab 0 IsSneaking 0, tab 1 GetDead 0)
 - **the SPID Patcher** (`tools/compat/skyrimfair_spid_patcher.py`) and `docs/COMPATIBILITY.md`
   must list the same lines. When a mod changes its line, update both (the packager checks the
   patcher's lines are on the page, and that the description's Compatibility section matches)

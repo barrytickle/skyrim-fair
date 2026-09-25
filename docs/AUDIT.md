@@ -4,6 +4,35 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 2.0.1.2: the music ducks when you talk to anyone at the fair
+
+Barry: "Are we able to detect when any of the fair visitors are talking when you interact with
+them? And also reduce the music there?", "any interaction with an npc", "but keep it seperate
+from garrick and claudius".
+- A visitor's greeting opens no menu (`Utility.IsInMenuMode` misses it), and vanilla's greeting
+  lines aren't ours to fragment. So we catch the key press instead: **`SkyrimFairTalkPerk`**
+  (`0xA0041`), a hidden player perk in the shape of vanilla **PlayerWerewolfFeed**
+  (`02BA1D`):
+  - one `AddActivateChoice` entry: `DATA 0e0902`, `EPFT 04`, `EPF3` 3 (RunImmediately +
+    ReplaceDefault), no label (no `EPF2`), no spell (no `EPFD`), as vanilla's spell-less
+    entries
+  - tab 0 (the player): GetInWorldspace SkyrimFairWorld, IsSneaking 0 (pickpocketing stays
+    vanilla)
+  - tab 1 (the target): HasKeyword SkyrimFairNPC, GetDead 0 (looting stays vanilla), and
+    GetIsID not Garrick and not Claudius (their own lines duck it)
+  - fragment `SkyrimFairTalkDuck` (VMAD v5, format 2, Local, extra bind data 2, fragment #0,
+    unknown2 1, as vanilla's): it sets its own global `SkyrimFairTalkDuckUntil` (`0xA0040`)
+    to now + 5 s, then `akTargetRef.Activate(akActor, True)`, so the talk, greeting or shop
+    runs as usual
+- The stage script gives the player the perk (`FairTalk`) and ducks while `TalkDuckUntil` is
+  ahead, alongside the cameos and menus.
+- Plugin `c28f4efb1f9408db`, deterministic; the FormID diff shows only the two new records.
+  Deployed. **2.0.1.2** packaged (with the seats, below).
+- **To test:**
+  - pressing E on a visitor dips the music while they answer, and talking still works
+  - shops open; sneaking still pickpockets
+  - Garrick and Claudius as before
+
 ### Later: 2.0.1.2: seated visitors placed on their seats
 
 A Nexus player's screenshot (Barry): at a round table (`CommonTableRound01`), one visitor sat in
