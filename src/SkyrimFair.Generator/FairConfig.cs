@@ -505,6 +505,48 @@ internal sealed record ShopsConfig
 
     /// <summary>Theme (as the stalls': cheese, smith...) to its shop.</summary>
     public Dictionary<string, ShopTrade> Trades { get; init; } = new();
+
+    /// <summary>Each stall's counter opens its keeper's barter menu ("Browse").</summary>
+    public ShopCounters Counters { get; init; } = new();
+
+    /// <summary>Keepers pushed off their spot are put back.</summary>
+    public ShopKeeperHome KeeperHome { get; init; } = new();
+}
+
+/// <summary>
+/// The keepers stand behind deep counters, and tall goods hide them, so they were out of reach
+/// from the street at some stalls (2026-09-25). Each stall's counter becomes an activator with
+/// the same model, named for the stall: looking at it says "Browse Cheese & Dairy Stall", and
+/// E opens the nearest keeper's barter menu (SkyrimFairStallCounter.psc). The references keep
+/// their FormIDs and only change base, last of all.
+/// </summary>
+internal sealed record ShopCounters
+{
+    public bool Enabled { get; init; }
+
+    /// <summary>The counters' vanilla statics.</summary>
+    public List<string> Models { get; init; } = new() { "0005B2E2:Skyrim.esm", "000F3C72:Skyrim.esm", "000F3C73:Skyrim.esm" };
+
+    public string Verb { get; init; } = "Browse";
+
+    public string Script { get; init; } = "SkyrimFairStallCounter";
+
+    /// <summary>A counter serves the nearest keeper within this.</summary>
+    public float Reach { get; init; } = 220f;
+}
+
+/// <summary>
+/// A keeper pushed out from behind the counter can't walk back (the stall's goods and crates
+/// box the spot in; the clothing stall, 2026-09-25). SkyrimFairKeeper.psc puts them back.
+/// </summary>
+internal sealed record ShopKeeperHome
+{
+    public bool Enabled { get; init; }
+
+    public string Script { get; init; } = "SkyrimFairKeeper";
+
+    /// <summary>Further than this from their spot, a keeper is put back.</summary>
+    public float Stray { get; init; } = 60f;
 }
 
 internal sealed record ShopTrade
@@ -2942,6 +2984,12 @@ internal sealed record StageAudioConfig
 
     public float SingerGap { get; init; } = 2f;
 
+    /// <summary>Everything plays through the whole song (songs.config.json's <c>steady</c>).</summary>
+    public bool Steady { get; init; }
+
+    /// <summary>In the steady show, the sing move's real length, replayed with no gap.</summary>
+    public float SingerLoop { get; init; }
+
     public SingerSteps SingerSteps { get; init; } = new();
 
     public List<MoreDance> MoreDances { get; init; } = new();
@@ -3779,6 +3827,15 @@ internal sealed record StageShowFile
 
     /// <summary>Seconds each singer stands between moves.</summary>
     public float SingerGap { get; init; } = 2f;
+
+    /// <summary>
+    /// Everything plays through the whole song: every instrument at its normal loop, the singers
+    /// singing, their sing move back to back. The drums and singers timelines are kept, but ignored.
+    /// </summary>
+    public bool Steady { get; init; }
+
+    /// <summary>The sing move's real length in seconds (the singers' Mixamo cheer: 2.9), for the steady show.</summary>
+    public float SingerLoop { get; init; }
 
     /// <summary>The singers stepping across the deck as a line.</summary>
     public SingerSteps SingerSteps { get; init; } = new();

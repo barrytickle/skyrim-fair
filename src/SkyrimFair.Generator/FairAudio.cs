@@ -338,6 +338,8 @@ internal static class FairAudio
             new ScriptObjectListProperty { Name = "SingerRestMoves", Objects = Moves(config.Stage.SingerRest).Idles },
             new ScriptFloatListProperty { Name = "SingerRestLengths", Data = Moves(config.Stage.SingerRest).Lengths },
             Float("SingerGap", config.Stage.SingerGap),
+            new ScriptBoolProperty { Name = "SteadyShow", Data = config.Stage.Steady },
+            Float("SteadySingerLoop", config.Stage.SingerLoop),
             new ScriptObjectListProperty { Name = "SingerCheerMoves", Objects = Moves(config.Stage.SingerCheer).Idles },
             new ScriptFloatListProperty { Name = "SingerCheerLengths", Data = Moves(config.Stage.SingerCheer).Lengths },
             new ScriptFloatListProperty { Name = "SectionStarts2", Data = Sections().Select(x => x.Start).ToExtendedList() },

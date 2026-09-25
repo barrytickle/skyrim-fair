@@ -375,6 +375,8 @@
     }
   },
   "singerGap": 2.0,
+  "steady": true,
+  "singerLoop": 2.9,
   "singerSteps": {
     "offsets": [],
     "every": 8.0,

@@ -648,6 +648,13 @@ Project-owned mesh work is code-first and reproducible.
 - **a vendor** needs: a faction flagged `Vendor` (with `CRVA` set explicitly), a persistent
   merchant chest, a buy list, hours and a location (`NearSelf` for stalls), and
   `JobMerchantFaction` for DialogueGeneric's barter line (`FairShops.cs`)
+- **reach over a counter**: the activation pick stops at the first collision. A keeper behind
+  a deep counter with tall goods on it can be out of reach from the street. So the counters
+  are activators with the counter's model that open the keeper's barter menu
+  (`shops.counters`). Turn a static into an activator by changing the reference's base last
+  of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **the steady show** (`songs.config.json` `steady`): the timelines' drums and singers
+  levels are ignored, and the singers' sing move replays at `singerLoop` with no gap
 - **adding a stage song**: give it `"added": true` in `songs.config.json`. Its sound records (and the exterior's quieter copy) then go in the added-songs range (`FairAddedSongs`, 0x50000), so it can go anywhere in the playlist without renumbering anything. Keep the flag on for good. Songs without timelines play everything and dance throughout
 - **named NPCs** (`FairCameos.cs`): don't use a Traits template for a named NPC: in game it shows the template's name. Copy the vanilla face field by field and its FaceGen files (`FairSingers.CopyFace`); built after the life pass in their own range (0x60000), so they get the `SkyrimFairNPC` keyword by hand (the keyword loop runs earlier); `alwaysOn` has `SkyrimFairCameo` so the culling never switches them off
 - **clearing a large reference** (on the worldspace's RNAM list): don't disable it. Its LOD model stays visible until the reference is loaded and showing, and a disabled one never is. Sink it under the ground, enabled (`exterior.sinkLarge`, `FairExterior`)

@@ -22,8 +22,15 @@ namespace SkyrimFair.Generator;
 /// </summary>
 internal static class FairShops
 {
-    public static (int Shops, int Keepers, int Items) Build(SkyrimMod mod, ShopsConfig config, string keeperPrefix, ISkyrimModGetter master)
+    /// <summary>
+    /// Builds the shops. The counters' activators are made here (in the shops' range); the
+    /// counter references change base in <see cref="Apply"/>, last of all, so nothing built from
+    /// the statics (the navmesh, the sight table) sees a difference.
+    /// </summary>
+    public static (int Shops, int Keepers, int Items, List<(IPlacedObject Ref, FormKey Base)> Counters) Build(
+        SkyrimMod mod, ShopsConfig config, string keeperPrefix, ISkyrimModGetter master, Worldspace world)
     {
+        var keeperNpcs = new List<Npc>();
         var byEditorId = new Dictionary<string, FormKey>(StringComparer.OrdinalIgnoreCase);
         foreach (var r in master.EnumerateMajorRecords())
         {
@@ -110,10 +117,93 @@ internal static class FairShops
             {
                 npc.Factions.Add(new RankPlacement { Faction = new FormLink<IFactionGetter>(faction.FormKey), Rank = 0 });
                 npc.Factions.Add(new RankPlacement { Faction = new FormLink<IFactionGetter>(merchantJob), Rank = 0 });
+                keeperNpcs.Add(npc);
                 keepers++;
             }
         }
 
-        return (shops, keepers, items);
+        var byBase = keeperNpcs.ToDictionary(n => n.FormKey);
+        var keeperRefs = world.EnumerateMajorRecords<IPlacedNpc>()
+            .Where(r => r.Placement is not null && byBase.ContainsKey(r.Base.FormKey))
+            .OrderBy(r => r.FormKey.ID)
+            .ToList();
+
+        // Keepers kept at their counters: each record is placed once, so its spot goes on the record.
+        if (config.KeeperHome.Enabled)
+        {
+            foreach (var r in keeperRefs)
+            {
+                var npc = byBase[r.Base.FormKey];
+                var entry = new ScriptEntry { Name = config.KeeperHome.Script };
+                entry.Properties.Add(new ScriptFloatProperty { Name = "HomeX", Data = r.Placement!.Position.X });
+                entry.Properties.Add(new ScriptFloatProperty { Name = "HomeY", Data = r.Placement.Position.Y });
+                entry.Properties.Add(new ScriptFloatProperty { Name = "Stray", Data = config.KeeperHome.Stray });
+                npc.VirtualMachineAdapter = new VirtualMachineAdapter { Version = 5, ObjectFormat = 2 };
+                npc.VirtualMachineAdapter.Scripts.Add(entry);
+            }
+        }
+
+        // The counters: an activator per trade and model, named for the stall.
+        var counters = new List<(IPlacedObject Ref, FormKey Base)>();
+        if (config.Counters.Enabled)
+        {
+            var models = config.Counters.Models.Select(FormKeyHelper.Parse).ToList();
+            var made = new Dictionary<(string Trade, FormKey Model), Mutagen.Bethesda.Skyrim.Activator>();
+            var pieces = world.EnumerateMajorRecords<IPlacedObject>()
+                .Where(o => o.Placement is not null && models.Contains(o.Base.FormKey) && (o.MajorRecordFlagsRaw & 0x800) == 0)
+                .OrderBy(o => o.FormKey.ID)
+                .ToList();
+            foreach (var piece in pieces)
+            {
+                var p = piece.Placement!.Position;
+                var near = keeperRefs
+                    .Select(k => (Ref: k, D: MathF.Sqrt((k.Placement!.Position.X - p.X) * (k.Placement.Position.X - p.X) + (k.Placement.Position.Y - p.Y) * (k.Placement.Position.Y - p.Y))))
+                    .Where(k => k.D <= config.Counters.Reach)
+                    .OrderBy(k => k.D)
+                    .FirstOrDefault();
+                if (near.Ref is null)
+                {
+                    continue;
+                }
+
+                var npc = byBase[near.Ref.Base.FormKey];
+                var trade = npc.EditorID![keeperPrefix.Length..^2];
+                if (!made.TryGetValue((trade, piece.Base.FormKey), out var act))
+                {
+                    var stat = master.Statics.First(x => x.FormKey == piece.Base.FormKey);
+                    act = new Mutagen.Bethesda.Skyrim.Activator(mod)
+                    {
+                        EditorID = $"{config.EditorIdPrefix}{trade}Counter{made.Keys.Count(k => k.Trade == trade) + 1}",
+                        Name = npc.Name?.String,
+                        ObjectBounds = stat.ObjectBounds.DeepCopy(),
+                        Model = stat.Model?.DeepCopy(),
+                        ActivateTextOverride = config.Counters.Verb,
+                    };
+                    mod.Activators.Add(act);
+                    made[(trade, piece.Base.FormKey)] = act;
+                }
+
+                // The keeper's base, not the reference: found at the counter when it's used.
+                var entry = new ScriptEntry { Name = config.Counters.Script };
+                entry.Properties.Add(new ScriptObjectProperty { Name = "Keeper", Object = new FormLink<ISkyrimMajorRecordGetter>(npc.FormKey) });
+                entry.Properties.Add(new ScriptFloatProperty { Name = "Reach", Data = config.Counters.Reach + 60f });
+                piece.VirtualMachineAdapter = new VirtualMachineAdapter { Version = 5, ObjectFormat = 2 };
+                piece.VirtualMachineAdapter.Scripts.Add(entry);
+                counters.Add((piece, act.FormKey));
+            }
+        }
+
+        return (shops, keepers, items, counters);
+    }
+
+    /// <summary>The counters change base to their activators (their FormIDs stay).</summary>
+    public static int Apply(List<(IPlacedObject Ref, FormKey Base)> counters)
+    {
+        foreach (var (piece, act) in counters)
+        {
+            piece.Base = new FormLinkNullable<IPlaceableObjectGetter>(act);
+        }
+
+        return counters.Count;
     }
 }

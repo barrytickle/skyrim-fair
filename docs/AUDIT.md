@@ -4,6 +4,46 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: a steady show, counters you can browse, keepers kept at their spots
+
+Barry: "have all instruments and singing and animations for singing playing constantly. I
+feel like the timing doesn't match up much." And: eight keepers (spices, cheese, elven,
+fishmonger, herbalist, furs, pottery, bard) couldn't be traded with. He could reach them
+and got the E prompt, but at some stalls "they're stood too far back to interact with them
+from our side". Also: the clothing keeper "can't get to the stall because there's props in
+the way".
+- **The steady show** (`songs.config.json`: `"steady": true`, `"singerLoop": 2.9`). New
+  script properties `SteadyShow` and `SteadySingerLoop`, so they reach running saves.
+  - Every instrument plays at its normal loop for the whole song: no rests, no fast stretches.
+  - The singers sing throughout, with their sing move (IdleCivilWarCheer, the Mixamo cheer
+    through OAR) replayed back to back at its real 2.9 s, with no gap.
+  - The drums and singers timelines stay in the file but are ignored. The crowd's timeline
+    still runs, and between songs is as before (the cheer, fireworks, the band puts
+    instruments away).
+- **Counters to browse** (`shops.counters`). The keepers' records were all alike: factions,
+  flags, package. The difference is reach: they stand behind deep counters (WRMarketStand02's
+  counter is about 95 deep), and tall goods hide their bodies. So each stall's counter
+  (WRMarketStand02, WHMarketStall01/02) is now an activator with the same model, named for
+  the stall. "Browse Cheese & Dairy Stall", and E opens the nearest keeper's barter menu
+  (`SkyrimFairStallCounter.psc`, `Game.FindClosestReferenceOfTypeFromRef` on the keeper's
+  record, then `ShowBarterMenu`).
+  - 55 activators, appended to the shops' range (`0x90084`-`0x900BA`). The 59 counter
+    references keep their FormIDs and only change base, last of all (after the navmesh and
+    the sight table).
+  - All 59 counters point to their own stall's keeper (checked by name).
+  - Talking to a keeper still works as before.
+- **Keepers kept at their spots** (`shops.keeperHome`, `SkyrimFairKeeper.psc` on each keeper
+  record). A moment after loading, and every 20 s while loaded, a keeper more than 60 from
+  their spot is moved back to it. Not while the player talks to them or in combat.
+- Plugin `2ee8341ca27afa2f`, deterministic over two builds. The FormID diff against the
+  deployed plugin shows only the 55 new activators. Deployed.
+- **To test:**
+  - Look at a counter (the eight stalls first): do you see "Browse ...", and does E open the
+    stall's shop?
+  - Is the clothing keeper back behind the counter?
+  - During a song: do all instruments play throughout, and do the singers loop the cheer
+    without stopping?
+
 ### Later: the singers' own cheer (Barry's Mixamo retarget)
 
 Barry: "help me install that zip packaged with the mod" (`character-actors/cheering-retarget/`,

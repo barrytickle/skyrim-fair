@@ -1188,6 +1188,7 @@ internal static class FairWorld
         }
 
         // ---- the stalls as shops (FairShops.cs): their own FormID range -----------------------------
+        var shopCounters = new List<(IPlacedObject Ref, FormKey Base)>();
         if (config.Shops.Enabled && master is not null)
         {
             var saved = mod.ModHeader.Stats.NextFormID;
@@ -1197,8 +1198,8 @@ internal static class FairWorld
             }
 
             mod.ModHeader.Stats.NextFormID = config.Shops.FormIdBase;
-            var (shopCount, keeperCount, itemCount) = FairShops.Build(mod, config.Shops, config.Vendors.EditorIdPrefix, master);
-            Console.WriteLine($"  shops: {shopCount} trades, {keeperCount} keepers selling, {itemCount} stock lines; FormIDs 0x{config.Shops.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            (var shopCount, var keeperCount, var itemCount, shopCounters) = FairShops.Build(mod, config.Shops, config.Vendors.EditorIdPrefix, master, worldspace);
+            Console.WriteLine($"  shops: {shopCount} trades, {keeperCount} keepers selling, {itemCount} stock lines, {shopCounters.Count} counters to browse; FormIDs 0x{config.Shops.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
@@ -1512,6 +1513,11 @@ internal static class FairWorld
             }
         }
 
+        // The stalls' counters become their activators, last of all (FairShops.Apply).
+        if (shopCounters.Count > 0)
+        {
+            Console.WriteLine($"  counters: {FairShops.Apply(shopCounters)} browsable");
+        }
 
         mod.Worldspaces.Add(worldspace);
 

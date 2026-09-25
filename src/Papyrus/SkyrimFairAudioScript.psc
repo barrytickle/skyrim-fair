@@ -128,6 +128,13 @@ Idle Property SingerEndMove Auto
 {At a song's end, with the crowd's cheer (a wave).}
 Float Property SingerGap = 2.0 Auto
 {Seconds each singer stands between moves.}
+Bool Property SteadyShow Auto
+{Barry, 2026-09-25: everything plays through the whole song. Every instrument at its normal
+loop, the singers singing, and their sing move replayed back to back; the songs' drums and
+singers timelines are ignored (the crowd's still runs).}
+Float Property SteadySingerLoop Auto
+{In the steady show, the sing move's real length (the Mixamo cheer's clip, 2.9 s), replayed
+with no gap.}
 Actor Property SingerAnchor Auto
 {Hidden under the deck, facing north, its AI off. While the show runs the singers keep an
 offset from it (KeepOffsetFromActor), so they step sideways across the deck facing the crowd.}
@@ -732,7 +739,9 @@ Function SingerGestures(Float now)
 	EndIf
 	Idle[] moves = SingerMoves
 	Float[] lengths = SingerMoveLengths
-	If !singing
+	If SteadyShow
+		; The sing move, always.
+	ElseIf !singing
 		moves = SingerRestMoves
 		lengths = SingerRestLengths
 	ElseIf singMode == 2 && SingerCheerMoves.Length > 0
@@ -751,6 +760,14 @@ Function SingerGestures(Float now)
 			If which < lengths.Length
 				clip = lengths[which]
 			EndIf
+			Float gap = SingerGap + i * 0.4
+			If SteadyShow
+				; Back to back: the clip's own length, no breath (the stagger is at the song's start).
+				gap = 0.0
+				If SteadySingerLoop > 0.0
+					clip = SteadySingerLoop
+				EndIf
+			EndIf
 			If now < stepDone
 				; Mid-step: a full-body idle would stop the walk.
 				singerNext[i] = stepDone
@@ -759,7 +776,7 @@ Function SingerGestures(Float now)
 				singerNext[i] = stepNext + SingerStepSeconds * perSecond
 			ElseIf Singers[i].PlayIdle(moves[which])
 				singerPlays[i] = singerPlays[i] + 1
-				singerNext[i] = now + (clip + SingerGap + i * 0.4) * perSecond
+				singerNext[i] = now + (clip + gap) * perSecond
 			Else
 				singerNext[i] = now + perSecond
 			EndIf
@@ -1027,6 +1044,9 @@ Function Sections(Float now)
 		Int k = 0
 		While k < count && k < 8
 			Int level = SectionPlay2[applied * count + k]
+			If SteadyShow
+				level = 1
+			EndIf
 			If level != playLevel[k]
 				Debug.Trace("SkyrimFairAudio: instrument " + k + " level " + level + " at " + into + " s")
 			EndIf
@@ -1043,7 +1063,7 @@ Function Sections(Float now)
 			k += 1
 		EndWhile
 		Int mode = 1
-		If applied < SectionSing2.Length
+		If applied < SectionSing2.Length && !SteadyShow
 			mode = SectionSing2[applied]
 		EndIf
 		If mode != singMode
