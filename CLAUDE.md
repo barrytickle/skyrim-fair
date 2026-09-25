@@ -100,6 +100,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
   - `0x10000` crowd figures (off)
   - `0x20000` `fairWorld.life`
   - `0x30000` `exterior`
+  - `0x40000` the singers' anchor (`singers.anchor`)
 
   Inside a range, append only. Diff FormIDs against the deployed plugin every pass.
 - **Rotations:** Skyrim turns a reference about the world's Z, then Y, then X, clockwise.

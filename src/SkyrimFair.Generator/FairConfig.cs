@@ -414,6 +414,45 @@ internal sealed record SingersConfig
     public string VoiceOut { get; init; } = "assets/sound/Voice";
 
     public List<SingerMember> Members { get; init; } = new();
+
+    /// <summary>What the singers keep their offset from as they step (songs.config.json singerSteps).</summary>
+    public SingerAnchor Anchor { get; init; } = new();
+}
+
+/// <summary>
+/// An invisible NPC under the deck, facing north with its AI off. The stage script has each
+/// singer keep an offset from it (KeepOffsetFromActor), and moves the offsets sideways, so
+/// the line steps across the deck still facing the crowd. It has its own FormID range.
+/// </summary>
+internal sealed record SingerAnchor
+{
+    /// <summary><c>[x, y, z]</c>; heading 0.</summary>
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    /// <summary>Small, so it fits under the deck.</summary>
+    public float Scale { get; init; } = 0.5f;
+
+    public string Race { get; init; } = "00013746:Skyrim.esm";
+
+    public uint FormIdBase { get; init; } = 0x40000;
+}
+
+/// <summary>songs.config.json "singerSteps": the singers' line stepping across the deck.</summary>
+internal sealed record SingerSteps
+{
+    /// <summary>The line's sideways offsets, in turn, one a step; the first is where each song starts. None: they stand.</summary>
+    public List<float> Offsets { get; init; } = new();
+
+    public float Every { get; init; } = 8f;
+
+    /// <summary>Seconds a step takes; gestures wait for it.</summary>
+    public float StepSeconds { get; init; } = 3f;
+
+    public float FirstStep { get; init; } = 6f;
+
+    public float CatchUpRadius { get; init; } = 1000f;
+
+    public float FollowRadius { get; init; } = 12f;
 }
 
 internal sealed record SingerMember
@@ -2592,6 +2631,8 @@ internal sealed record StageAudioConfig
 
     public float SingerGap { get; init; } = 2f;
 
+    public SingerSteps SingerSteps { get; init; } = new();
+
     public List<MoreDance> MoreDances { get; init; } = new();
 
     public string MoreDancesPlugin { get; init; } = "Dance.esp";
@@ -3408,6 +3449,9 @@ internal sealed record StageShowFile
 
     /// <summary>Seconds each singer stands between moves.</summary>
     public float SingerGap { get; init; } = 2f;
+
+    /// <summary>The singers stepping across the deck as a line.</summary>
+    public SingerSteps SingerSteps { get; init; } = new();
 
     /// <summary>
     /// Professional Dancer's dances (its animation events, which exist once the mod is installed and

@@ -2,7 +2,56 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the compound's exterior in Tamriel, replacing the old terrace (2026-09-24)
+## Current pass: the singers step across the deck (2026-09-25)
+
+Barry: the singers should move, "maybe like crab walking style". He chose **the three
+sliding as a line**, **200 units, every 8 s**.
+
+Plugin `e89da4ef21206fab...`, deterministic (two builds, same SHA256), deployed with the
+recompiled scripts. Against the deployed `eed0547c...`: every record is unchanged, and **2
+are added** in a new range, `0x40000` (`SkyrimFairSingerAnchor` NPC and its reference).
+The navmesh is identical: 9 meshes, 6,267 vertices, 7,916 triangles.
+
+- **How:** while the show runs, each singer holds an offset from an **anchor** with
+  `KeepOffsetFromActor`, and his heading holds too. The anchor is an invisible Nord at
+  scale 0.5, AI off, under the deck's centre (2048, 5544, 0), facing north. Each singer's
+  offset is his mark plus the line's sideways shift, facing his own mark's heading (175 to
+  185°, the crowd).
+  - Moving the shift should make the engine walk them sideways with its own left and right
+    walk animations, still facing the crowd. That's the crab walk. No new animations, no OAR.
+- **The steps** (`songs.config.json` `singerSteps`, Barry's to edit): offsets `0, -200, 0,
+  200` in turn (plus is east, the crowd's right), one every 8 s while they sing. The first
+  comes 6 s into a song, and each song starts on the marks.
+  - **Resting** (a `rest` stretch), they go back to their marks to clap. The next step comes
+    a full 8 s after they start singing again.
+  - **At a song's end** they go back to their marks for the wave.
+  - Leaving the fair, or a game load, lets go of the anchor: their stay-at-editor-location
+    package has them again.
+  - **Gestures wait for steps:** none starts during a step (3 s, `stepSeconds`), or if it
+    wouldn't end before the next step. So they gesture together in the 5 s between steps.
+  - An empty `offsets` keeps them still, as before.
+- **Papyrus:** `SkyrimFairAudioScript`: `SingerSteps`, `SingerOffset`, `HoldGestures` and
+  `SingersStand`; the properties `SingerAnchor`, `SingerHomeX/Y/Z`, `SingerFacing`,
+  `SingerStepOffsets`, `SingerStepEvery`, `SingerStepSeconds`, `SingerFirstStep`,
+  `SingerCatchUp` (1000: under it they walk, never run) and `SingerFollow` (12). The log
+  says `SkyrimFairAudio: singers step to <offset>` on each step.
+
+**Unknowns, for the test:**
+- Do they really sidestep, or turn to walk and then turn back? The engine decides that.
+- Is the angle in degrees? If they face the wrong way, it's radians.
+- Does the anchor stay put under the deck, and out of sight?
+- Does the lip sync keep up while they move (Fiddle, Dragonborn-Approved)?
+
+**To test (Barry):**
+1. Watch a song from the dance floor. After about 6 s, does the line step to its right (your
+   left)? Then back, then the other way, every 8 s?
+2. Do they face you while they move, or turn?
+3. Do they walk (not run, not slide)? Do they bump the lutes behind them?
+4. In a rest stretch, do they go back and clap? At the end, do they wave on their marks?
+5. Can you see the anchor anywhere (a small figure under or on the deck)?
+6. If it goes wrong, `Papyrus.0.log` lines starting `SkyrimFairAudio: singers step`.
+
+## the compound's exterior in Tamriel, replacing the old terrace (2026-09-24)
 
 Barry: "build the exterior outside of whiterun. I did have a place at -2 -4 in tamriel. I
 think we should knock that down and replace it with the exterior of the compound". He

@@ -81,6 +81,7 @@ try
                         SingerCheer = show.SingerMoves.GetValueOrDefault("cheer") ?? new CrowdMove(),
                         SingerEnd = show.SingerMoves.GetValueOrDefault("end") ?? new CrowdMove(),
                         SingerGap = show.SingerGap,
+                        SingerSteps = show.SingerSteps,
                         MoreDances = show.MoreDances,
                         MoreDancesPlugin = show.MoreDancesPlugin,
                         MoreDancesCheck = show.MoreDancesCheck,

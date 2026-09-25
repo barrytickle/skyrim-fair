@@ -223,6 +223,75 @@ internal static class FairSingers
         script.Properties.Add(new ScriptFloatListProperty { Name = "SingerStarts", Data = starts.ToExtendedList() });
         script.Properties.Add(new ScriptIntListProperty { Name = "SongFirstLine", Data = firstLine.ToExtendedList() });
         script.Properties.Add(new ScriptIntListProperty { Name = "SongLineCount", Data = lineCount.ToExtendedList() });
+
+        // ---- the line's steps: an anchor to keep an offset from, in its own FormID range
+        var steps = audio.Stage.SingerSteps;
+        if (steps.Offsets.Count > 0)
+        {
+            var a = config.Anchor;
+            if (a.At.Length != 3)
+            {
+                throw new InvalidOperationException("singers.anchor.at: [x, y, z] is needed for songs.config.json singerSteps");
+            }
+
+            var saved = mod.ModHeader.Stats.NextFormID;
+            if (saved >= a.FormIdBase)
+            {
+                throw new InvalidOperationException($"FormIDs reached the singers' anchor range (0x{a.FormIdBase:X}): raise singers.anchor.formIdBase");
+            }
+
+            mod.ModHeader.Stats.NextFormID = a.FormIdBase;
+            var anchorNpc = new Npc(mod)
+            {
+                EditorID = $"{config.EditorIdPrefix}Anchor",
+                Race = new FormLink<IRaceGetter>(FormKeyHelper.Parse(a.Race)),
+                Class = new FormLink<IClassGetter>(FormKeyHelper.Parse(looksFrom.Class)),
+                Configuration = new NpcConfiguration
+                {
+                    Flags = NpcConfiguration.Flag.AutoCalcStats | NpcConfiguration.Flag.Invulnerable,
+                    Level = new NpcLevel { Level = 1 },
+                    CalcMinLevel = 1,
+                    CalcMaxLevel = 1,
+                    SpeedMultiplier = 100,
+                },
+                AIData = new AIData
+                {
+                    Aggression = Aggression.Unaggressive,
+                    Confidence = Confidence.Cowardly,
+                    Responsibility = Responsibility.NoCrime,
+                    Assistance = Assistance.HelpsNobody,
+                },
+                ObjectBounds = new ObjectBounds { First = new P3Int16(-22, -14, 0), Second = new P3Int16(22, 14, 128) },
+                PlayerSkills = new PlayerSkills(),
+            };
+            anchorNpc.Packages.Add(new FormLink<IPackageGetter>(FormKeyHelper.Parse(config.Package)));
+            mod.Npcs.Add(anchorNpc);
+            var anchorRef = new PlacedNpc(mod)
+            {
+                EditorID = $"{anchorNpc.EditorID}Ref",
+                Base = new FormLinkNullable<INpcGetter>(anchorNpc.FormKey),
+                Placement = new Placement { Position = new P3Float(a.At[0], a.At[1], a.At[2]), Rotation = new P3Float(0f, 0f, 0f) },
+                Scale = a.Scale,
+            };
+            putPersistent(anchorRef);
+            mod.ModHeader.Stats.NextFormID = saved;
+
+            // Each mark as an offset from the anchor; the anchor faces north, so its frame is the world's.
+            var members = singers.Select(s => s.Member.At).ToList();
+            script.Properties.Add(new ScriptObjectProperty { Name = "SingerAnchor", Object = new FormLink<ISkyrimMajorRecordGetter>(anchorRef.FormKey) });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "SingerHomeX", Data = members.Select(m => m[0] - a.At[0]).ToExtendedList() });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "SingerHomeY", Data = members.Select(m => m[1] - a.At[1]).ToExtendedList() });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "SingerHomeZ", Data = members.Select(m => m[2] + 2f - a.At[2]).ToExtendedList() });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "SingerFacing", Data = members.Select(m => m[3]).ToExtendedList() });
+            script.Properties.Add(new ScriptFloatListProperty { Name = "SingerStepOffsets", Data = steps.Offsets.ToExtendedList() });
+            script.Properties.Add(new ScriptFloatProperty { Name = "SingerStepEvery", Data = steps.Every });
+            script.Properties.Add(new ScriptFloatProperty { Name = "SingerStepSeconds", Data = steps.StepSeconds });
+            script.Properties.Add(new ScriptFloatProperty { Name = "SingerFirstStep", Data = steps.FirstStep });
+            script.Properties.Add(new ScriptFloatProperty { Name = "SingerCatchUp", Data = steps.CatchUpRadius });
+            script.Properties.Add(new ScriptFloatProperty { Name = "SingerFollow", Data = steps.FollowRadius });
+            Console.WriteLine($"  singer steps: offsets [{string.Join(", ", steps.Offsets)}] every {steps.Every} s; anchor {anchorRef.FormKey.ID:X6} at ({a.At[0]}, {a.At[1]}, {a.At[2]})");
+        }
+
         return (singers.Count, topics.Count, files);
     }
 

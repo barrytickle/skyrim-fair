@@ -124,6 +124,26 @@ Idle Property SingerEndMove Auto
 {At a song's end, with the crowd's cheer (a wave).}
 Float Property SingerGap = 2.0 Auto
 {Seconds each singer stands between moves.}
+Actor Property SingerAnchor Auto
+{Hidden under the deck, facing north, its AI off. While the show runs the singers keep an
+offset from it (KeepOffsetFromActor), so they step sideways across the deck facing the crowd.}
+Float[] Property SingerHomeX Auto
+Float[] Property SingerHomeY Auto
+Float[] Property SingerHomeZ Auto
+{Each singer's mark, as an offset from the anchor.}
+Float[] Property SingerFacing Auto
+{Each singer's heading, in degrees from the anchor's.}
+Float[] Property SingerStepOffsets Auto
+{The line's sideways offsets, in turn, one a step (songs.config.json singerSteps). None: they stand.}
+Float Property SingerStepEvery = 8.0 Auto
+{Seconds between steps while they sing.}
+Float Property SingerStepSeconds = 3.0 Auto
+{Seconds a step takes: no gesture starts before it ends, or would run into the next.}
+Float Property SingerFirstStep = 6.0 Auto
+{Seconds into a song before the first step.}
+Float Property SingerCatchUp = 1000.0 Auto
+Float Property SingerFollow = 12.0 Auto
+{KeepOffsetFromActor's radii: past catch-up they'd run; within follow they stand.}
 Float[] Property SingerStarts Auto
 {Each line's start, in seconds from its song's start.}
 Int[] Property SongFirstLine Auto
@@ -239,6 +259,13 @@ Int crowdMode = 0
 Float[] singerNext
 Int[] singerPlays
 Float singerWake = 0.0
+; The singers' steps: the offset in force (SingerStepOffsets index), when the next is due and
+; when the last ends (game time), and whether their offset is held at all.
+Int stepAt = 0
+Float stepNext = 0.0
+Float stepDone = 0.0
+Float stepApplied = 0.0
+Bool stepOn = False
 ; Whether Professional Dancer is loaded (looked up once a load), and who's in one of its dances
 ; (a looping animation, stopped with IdleForceDefaultState).
 Bool moreDancesChecked = False
@@ -271,6 +298,7 @@ Function Recover()
 	appliedTier = -1
 	folkNext = 0.0
 	moreDancesChecked = False
+	SingersStand()
 	FillStripSpells()
 	RegisterForSingleUpdate(1.0)
 EndFunction
@@ -345,6 +373,7 @@ Event OnUpdate()
 		Sections(show)
 		PlayBand()
 		Dance()
+		SingerSteps(now)
 		SingerGestures(now)
 		FolkDance(now)
 		Sing(show)
@@ -366,6 +395,9 @@ Event OnUpdate()
 	EndIf
 	If phase == 2 && singerWake > now && Seconds(singerWake - now) < left
 		left = Seconds(singerWake - now)
+	EndIf
+	If phase == 2 && SingerStepOffsets.Length > 0 && stepNext > now && Seconds(stepNext - now) < left
+		left = Seconds(stepNext - now)
 	EndIf
 	If phase != 2 && bandOn && bandUntil > show && Seconds(bandUntil - show) < left
 		; Wake as the song's last note ends, to put the instruments away.
@@ -433,6 +465,11 @@ Function Advance(Float now)
 			singerNext[si] = Utility.GetCurrentGameTime() + (1.5 + si * 1.3) * TimeScale.GetValue() / 86400.0
 			si += 1
 		EndWhile
+		; The line starts on its marks and takes its first step a few seconds in.
+		stepAt = 0
+		stepOn = False
+		stepDone = 0.0
+		stepNext = Utility.GetCurrentGameTime() + SingerFirstStep * TimeScale.GetValue() / 86400.0
 		crowdMode = 0
 		nextSection = -1
 		endSection = -1
@@ -538,6 +575,7 @@ Function StopAll()
 	EndWhile
 	SetAmbience(False)
 	StopBand(False)
+	SingersStand()
 EndFunction
 
 ; Each bard not yet playing takes up their instrument, once their 3D is there to play it.
@@ -641,7 +679,13 @@ Function SingerGestures(Float now)
 			If which < lengths.Length
 				clip = lengths[which]
 			EndIf
-			If Singers[i].PlayIdle(moves[which])
+			If now < stepDone
+				; Mid-step: a full-body idle would stop the walk.
+				singerNext[i] = stepDone
+			ElseIf singing && SingerStepOffsets.Length > 0 && stepOn && now + clip * perSecond > stepNext
+				; It wouldn't end before the next step: wait until that one's done.
+				singerNext[i] = stepNext + SingerStepSeconds * perSecond
+			ElseIf Singers[i].PlayIdle(moves[which])
 				singerPlays[i] = singerPlays[i] + 1
 				singerNext[i] = now + (clip + SingerGap + i * 0.4) * perSecond
 			Else
@@ -653,6 +697,85 @@ Function SingerGestures(Float now)
 		EndIf
 		i += 1
 	EndWhile
+EndFunction
+
+; The singers step as a line: while they sing, every SingerStepEvery seconds the next offset in
+; SingerStepOffsets; resting, back to their marks (to clap there). The first call of a song puts
+; them on their offset from the anchor, which faces them to the crowd.
+Function SingerSteps(Float now)
+	If SingerStepOffsets.Length == 0 || !SingerAnchor || SingerHomeX.Length < Singers.Length
+		Return
+	EndIf
+	Float perSecond = TimeScale.GetValue() / 86400.0
+	If !stepOn
+		stepAt = 0
+		SingerOffset(SingerStepOffsets[0])
+	EndIf
+	If !singing
+		If stepApplied != 0.0
+			SingerOffset(0.0)
+			HoldGestures(now + SingerStepSeconds * perSecond)
+		EndIf
+		; After a rest, a full interval before the next step.
+		stepNext = now + SingerStepEvery * perSecond
+		Return
+	EndIf
+	If now >= stepNext
+		stepAt = (stepAt + 1) % SingerStepOffsets.Length
+		SingerOffset(SingerStepOffsets[stepAt])
+		HoldGestures(now + SingerStepSeconds * perSecond)
+		stepNext = now + SingerStepEvery * perSecond
+	EndIf
+EndFunction
+
+; Every singer keeps his mark's offset from the anchor, moved sideways by dx.
+Function SingerOffset(Float dx)
+	If !SingerAnchor || SingerHomeX.Length < Singers.Length
+		Return
+	EndIf
+	If SingerAnchor.Is3DLoaded()
+		; Neither is sure to last a reload of its 3D, so both are set every time.
+		SingerAnchor.EnableAI(False)
+		SingerAnchor.SetAlpha(0.0)
+	EndIf
+	Int i = 0
+	While i < Singers.Length
+		If Singers[i] && Singers[i].Is3DLoaded()
+			Singers[i].KeepOffsetFromActor(SingerAnchor, SingerHomeX[i] + dx, SingerHomeY[i], SingerHomeZ[i], 0.0, 0.0, SingerFacing[i], SingerCatchUp, SingerFollow)
+		EndIf
+		i += 1
+	EndWhile
+	If dx != stepApplied || !stepOn
+		Debug.Trace("SkyrimFairAudio: singers step to " + dx)
+	EndIf
+	stepApplied = dx
+	stepOn = True
+EndFunction
+
+; No singer's gesture starts before a step ends.
+Function HoldGestures(Float until)
+	stepDone = until
+	Int i = 0
+	While i < singerNext.Length
+		If singerNext[i] < until
+			singerNext[i] = until
+		EndIf
+		i += 1
+	EndWhile
+EndFunction
+
+; The singers let go of the anchor: their package (stay at the editor location) has them again.
+Function SingersStand()
+	Int i = 0
+	While i < Singers.Length
+		If Singers[i]
+			Singers[i].ClearKeepOffsetFromActor()
+		EndIf
+		i += 1
+	EndWhile
+	stepOn = False
+	stepApplied = 0.0
+	stepDone = 0.0
 EndFunction
 
 ; Every section whose start has come is applied, from the song's own start (so timer error
@@ -999,6 +1122,10 @@ EndFunction
 
 ; The song's end: the singers wave, and the floor turns to the stage and claps and cheers.
 Function Cheer()
+	; Back to their marks for the wave (a no-op when they're on them).
+	If stepOn && stepApplied != 0.0
+		SingerOffset(0.0)
+	EndIf
 	Int s = 0
 	While SingerEndMove && s < Singers.Length
 		If Singers[s] && Singers[s].Is3DLoaded()
