@@ -3158,6 +3158,15 @@ internal sealed record StageAudioConfig
 
     public float SingerGap { get; init; } = 2f;
 
+    /// <summary>The stage music and the cheer, as a share of the music volume (a player found it drowned out the NPCs).</summary>
+    public float MusicMix { get; init; } = 0.8f;
+
+    /// <summary>The music's share of its mix while anyone speaks (dialogue or barter menu, a cameo's greeting).</summary>
+    public float SpeechDuckLevel { get; init; } = 0.05f;
+
+    /// <summary>The longest wait between the stage script's looks while a song plays, in seconds.</summary>
+    public float SpeechPoll { get; init; } = 1f;
+
     /// <summary>Everything plays through the whole song (songs.config.json's <c>steady</c>).</summary>
     public bool Steady { get; init; }
 

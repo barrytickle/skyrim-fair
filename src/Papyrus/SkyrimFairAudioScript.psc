@@ -184,7 +184,16 @@ Float[] Property CameoEveryMax3 Auto
 GlobalVariable Property CameoDuckUntil Auto
 {Set by each cameo line's begin fragment (SkyrimFairCameoLine): the real time its line ends.}
 Float Property CameoDuckLevel = 0.2 Auto
-{The music's volume, as a share, while a cameo speaks (0.2, about 14 dB down).}
+{Retired: SpeechDuckLevel now (a save keeps this one's old value).}
+Float Property MusicMix = 0.8 Auto
+{The stage music and the crowd's cheer, as a share of MusicVolume (0.8). A player found the band
+drowned out the NPCs (Nexus, 2026-09-25).}
+Float Property SpeechDuckLevel = 0.05 Auto
+{The music's volume, as a share of its mix, while anyone speaks: a cameo's greeting, or any
+dialogue or barter menu open (Utility.IsInMenuMode). 0.05, nearly silent.}
+Float Property SpeechPoll = 1.0 Auto
+{The longest the script waits between looks while the show runs, so the music dips within about
+a second of a conversation starting.}
 GlobalVariable[] Property CameoSpot Auto
 Int[] Property CameoSpotCount Auto
 Float[] Property CameoMoveMin3 Auto
@@ -440,10 +449,11 @@ Event OnUpdate()
 	EndIf
 
 	If songInstance != 0
-		If CameoTalking()
-			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * CameoDuckLevel)
+		If CameoTalking() || Utility.IsInMenuMode()
+			; Someone's speaking (or the player's in a menu): the band all but stops.
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix * SpeechDuckLevel)
 		Else
-			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
+			Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix)
 		EndIf
 	EndIf
 	SetAmbience(phase == 2)
@@ -483,6 +493,10 @@ Event OnUpdate()
 	If left > 0.5 && CameoNear()
 		; A cameo close by: look again soon, so the music ducks as soon as he's spoken to.
 		left = 0.5
+	EndIf
+	If left > SpeechPoll && songInstance != 0
+		; Look at least this often while a song plays, to dip it when a conversation starts.
+		left = SpeechPoll
 	EndIf
 	If phase != 2 && bandOn && bandUntil > show && Seconds(bandUntil - show) < left
 		; Wake as the song's last note ends, to put the instruments away.
@@ -566,7 +580,7 @@ Function Advance(Float now)
 			nextLine = SongFirstLine2[track]
 			endLine = nextLine + SongLineCount2[track]
 		EndIf
-		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue())
+		Sound.SetInstanceVolume(songInstance, MusicVolume.GetValue() * MusicMix)
 		Enter(2, SongLengths2[track] - Lead(), now)
 	ElseIf phase == 2
 		; The last note is ringing: the crowd cheers, the song finishes under it, then a breath.
@@ -577,7 +591,7 @@ Function Advance(Float now)
 		Int cheer = SongCheers2[track]
 		If cheer >= 0 && cheer < Cheers.Length
 			cheerInstance = Cheers[cheer].Play(StageSpeaker)
-			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue())
+			Sound.SetInstanceVolume(cheerInstance, CheerVolume.GetValue() * MusicMix)
 			Debug.Trace("SkyrimFairAudio: cheer " + cheer + " at " + Seconds(now - songStarted) + " s into song " + track + " (" + SongLengths2[track] + " s long, lead " + lead + ")")
 			Enter(3, CheerLengths[cheer], now)
 			Cheer()

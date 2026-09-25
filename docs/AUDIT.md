@@ -4,6 +4,31 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: 1.0.1: the music makes room for talking (the first Nexus feedback)
+
+A Nexus comment: "I would recommend lowering the volume of the song a bit though, I found it
+hard to hear the NPCs that were trying to talk to me, and some of their mouths did not move at
+all". Barry: "reduce the fair volume to about 80%, and maybe drop it to like 5% when a character
+is speaking". He also found "garrick and claudius doesn't lip sync on vanilla".
+- **The mix** (script only; new properties, so it reaches saves):
+  - `MusicMix` 0.8 on the stage music and the crowd's cheer
+  - `SpeechDuckLevel` 0.05 while anyone speaks: `CameoTalking()` or `Utility.IsInMenuMode()`
+    (any dialogue or barter menu, vanilla Papyrus)
+  - `SpeechPoll` 1.0: while a song plays, the script looks at least every second, so the dip
+    lands within about a second
+  - `CameoDuckLevel` retired; config in the stage audio (`musicMix`, `speechDuckLevel`,
+    `speechPoll`)
+- **Lip sync, not fixed yet.** What's checked:
+  - all 28 cameo and 147 singer `.fuz` files carry lip data, laid out like vanilla's
+    (version 1, the same header shape)
+  - the audio plays, so the paths are right
+  - Garrick's FaceGen head is `MaleHeadWoodElf` and his race Wood Elf; Claudius's is
+    `MaleHeadBreton` and his race Breton, so the heads match their races and head parts
+  - next: whether they lip-sync in Barry's modlist (which has mfgfix and FaceGen Fixes), to
+    tell our files from the plain game
+- Plugin `9cf36fdb0024fc3d`, deterministic, no FormID change. Deployed. **Release 1.0.1**
+  packaged (`dist/release/SkyrimFair-1.0.1/`).
+
 ### Later: released on Nexus
 
 Barry uploaded The Wanderer's Fair to Nexus Mods (2026-09-25), then the update with the
