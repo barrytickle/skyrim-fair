@@ -176,6 +176,9 @@ internal sealed record FairWorldConfig
     /// <summary>The stalls as shops (FairShops.cs).</summary>
     public ShopsConfig Shops { get; init; } = new();
 
+    /// <summary>The fair's own paper lanterns in place of Holidays' (FairPaperLanterns.cs).</summary>
+    public PaperLanternsConfig PaperLanterns { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -574,6 +577,59 @@ internal sealed record ShopKeeperHome
 
     /// <summary>Further than this from their spot, a keeper is put back.</summary>
     public float Stray { get; init; } = 60f;
+}
+
+/// <summary>
+/// The fair's own paper lanterns (Astra's, 2026-09-25) in place of Holidays' animated ones, so
+/// the lanterns no longer need Holidays (FairPaperLanterns.cs). Two shapes in six colours,
+/// in their own FormID range; every placed Holidays lantern changes base, keeping its FormID.
+/// </summary>
+internal sealed record PaperLanternsConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairPaperLantern";
+
+    public uint FormIdBase { get; init; } = 0xA0000;
+
+    public List<PaperLanternShape> Shapes { get; init; } = new();
+
+    public List<string> Colours { get; init; } = new() { "red", "orange", "yellow", "green", "blue", "purple" };
+
+    /// <summary>The coloured paper, {0} the shape and {1} the colour (tools/make_lantern_colours.py).</summary>
+    public string PaperTexture { get; init; } = "barry_paper_lanterns\\lantern_{0}_{1}_d.dds";
+
+    public string NormalTexture { get; init; } = "barry_paper_lanterns\\lantern_n.dds";
+
+    /// <summary>The NIFs' paper shape, and its 3D index (the texture swap's target).</summary>
+    public string PaperShape { get; init; } = "Ribbed_paper";
+
+    public int PaperIndex { get; init; } = 1;
+
+    /// <summary>Each Holidays lantern (FormKey) to the colour it becomes.</summary>
+    public Dictionary<string, string> Replace { get; init; } = new();
+
+    /// <summary>The share of lanterns that take the first shape (the tall one); the rest the second.</summary>
+    public float TallShare { get; init; } = 0.5f;
+
+    /// <summary>Holidays' lantern hangs from a hook this far above its origin; ours hang from theirs.</summary>
+    public float HookAbove { get; init; } = 6f;
+}
+
+internal sealed record PaperLanternShape
+{
+    public string Id { get; init; } = string.Empty;
+
+    /// <summary>Under meshes\, as the STAT's MODL stores it.</summary>
+    public string Model { get; init; } = string.Empty;
+
+    /// <summary>Its size against Holidays' lantern (24 wide, 44 tall).</summary>
+    public float Scale { get; init; } = 1f;
+
+    /// <summary>Its object bounds at scale 1 (x, y, z): the NIF's own extents.</summary>
+    public short[] BoundsMin { get; init; } = new short[3];
+
+    public short[] BoundsMax { get; init; } = new short[3];
 }
 
 internal sealed record ShopTrade

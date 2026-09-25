@@ -653,6 +653,11 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **the paper lanterns** (`FairPaperLanterns.cs`): one NIF per shape, with the colour from a
+  texture swap (MODS) of a texture set whose paper is also the glow map. A new colour is
+  one entry in `tools/make_lantern_colours.py`'s COLOURS and in `paperLanterns.colours`. The
+  swap runs in `FairPluginGenerator` after the exterior, because the exterior places lanterns
+  after `FairWorld` ends
 - **releasing**: `tools/package.py` builds the upload. Release-only switches go in its
   `build_plugin` (a config copy, `fair.release.json`, git-ignored and removed after), never in
   `fair.config.json`. A piece left out of a release must reserve its records (as

@@ -18,7 +18,7 @@ original author and its redistribution permission are confirmed.
 | Fair Inspector posters (5 designs) | filththemutt (Sketchfab) | bundled, converted, new artwork | CC BY 4.0: credit ships |
 | "Whiterun Fair" welcome sign | JeffK (jeffkolada, Sketchfab) | Barry's game only, converted | **Sketchfab Standard, not CC BY: the author's OK needed to ship it** |
 | Scaffold light towers | Js_TuruokaJunpei (Sketchfab) | bundled, converted | CC BY 4.0: credit ships |
-| Paper lanterns (tall, round) | Barry, made with ChatGPT ("Astra") | built, not yet placed | the project's own |
+| Paper lanterns (tall, round) | Barry, made with ChatGPT ("Astra") | bundled: every lantern at the fair | the project's own |
 | Stage music, crowd sounds, singers' voices | Barry, made with Suno (Pro) | bundled | Barry owns them (Suno Pro) |
 | Paired folk dance | Barry, made with ChatGPT ("Astra") | bundled (re-based clips) | the project's own |
 | Holidays | Nexus 1533 | a master; its records are placed | dependency, nothing copied |
@@ -326,8 +326,8 @@ texture was used. The paper art was generated with ChatGPT's image tool; the pro
 **Colours:** the other ten papers (`lantern_<tall|round>_<colour>_d.dds`) are recoloured from
 Astra's two by `tools/make_lantern_colours.py`. The project's own.
 
-Not placed yet: they're the planned replacement for Holidays' lanterns, if the fair drops
-Holidays as a requirement (docs/RELEASE.md).
+They replace Holidays' animated lanterns everywhere (2026-09-25, `fairWorld.paperLanterns`).
+Holidays is still a master, for its festival rope lines and a few props.
 
 ### Paired folk dance (made with ChatGPT)
 

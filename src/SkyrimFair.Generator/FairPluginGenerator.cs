@@ -314,6 +314,20 @@ internal static class FairPluginGenerator
                 + $"FormIDs 0x{ext.FormIds.From:X}-0x{ext.FormIds.To:X}");
         }
 
+        // The fair's own paper lanterns in place of Holidays', in their own FormID range. Last of
+        // all, after the exterior, so every placed lantern (the fair's and the exterior's in
+        // Tamriel) changes base, and nothing built from them earlier sees a difference.
+        if (config.FairWorld.Enabled && config.FairWorld.PaperLanterns.Enabled)
+        {
+            var pl = config.FairWorld.PaperLanterns;
+            var saved = mod.ModHeader.Stats.NextFormID;
+            mod.ModHeader.Stats.NextFormID = pl.FormIdBase;
+            var swaps = FairPaperLanterns.Build(mod, pl, mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedObject>()));
+            Console.WriteLine($"  paper lanterns: {FairPaperLanterns.Apply(swaps)} placed, {swaps.Select(s => s.Base).Distinct().Count()} kinds; "
+                + $"FormIDs 0x{pl.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // Empty array properties can't be initialised from a plugin ("cannot be initialized because
         // the value is the incorrect type" in the log); left out, the script sees them empty anyway.
         foreach (var quest in mod.Quests.Where(q => q.VirtualMachineAdapter is not null))

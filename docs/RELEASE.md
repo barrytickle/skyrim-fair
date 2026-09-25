@@ -9,7 +9,7 @@ licence question changes.
 | Requirement | Why |
 | --- | --- |
 | Skyrim Special Edition / Anniversary Edition | `SkyrimFair.esp` masters `Skyrim.esm` |
-| **Holidays** (Nexus Mods SE 1533) | A master of `SkyrimFair.esp`: the festival rope lines, lanterns and festive props are its records (`CREDITS.md`) |
+| **Holidays** (Nexus Mods SE 1533) | A master of `SkyrimFair.esp`: the festival rope lines and a few festive props are its records (`CREDITS.md`). The lanterns are the fair's own since 2026-09-25 |
 
 The fair's own scripts use vanilla Papyrus only, so SKSE is needed only for Open Animation
 Replacer, below.

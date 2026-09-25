@@ -1525,6 +1525,7 @@ internal static class FairWorld
             Console.WriteLine($"  counters: {FairShops.Apply(shopCounters)} browsable");
         }
 
+
         mod.Worldspaces.Add(worldspace);
 
         return new FairWorldResult(

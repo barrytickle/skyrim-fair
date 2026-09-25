@@ -4,6 +4,32 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the paper lanterns replace Holidays'
+
+Barry: "let's do that :D". Twelve kinds instead of Holidays' six: two shapes in six colours.
+- **`FairPaperLanterns.cs`**, in a new range `0xA0000`-`0xA0017`: per shape and colour, a
+  texture set and a static.
+  - The texture set: the coloured paper as diffuse and glow map, plus the shared normal.
+    It's the same shape as Holidays' `_WetHolidayLanternTxt_Red` (TX00, TX01, TX03, DNAM 0).
+  - The static: Astra's NIF, with the texture set swapped onto `Ribbed_paper` (3D index 1,
+    read from the NIFs).
+- **All 222 placed Holidays lanterns** (the fair's, life's and the exterior's in Tamriel) keep
+  their FormIDs and only change base. That happens last of all, in `FairPluginGenerator`,
+  after the exterior: run at the end of `FairWorld`, it missed the exterior's last 8.
+  - Each keeps its colour, and is tall or round by a hash of its FormID: 111 tall and 111
+    round.
+  - Scaled to Holidays' 24 wide: tall ×1.5, round ×1.45, times their own scale.
+  - Lifted 6 (times their scale) to hang from Holidays' hook point.
+- The FormID diff against the deployed plugin: only the 24 new records. The statics' 12-byte
+  `DNAM` matches every other static in the plugin.
+- Plugin `f7ca9173822b4a47`, deterministic. Deployed, with the two NIFs and 14 textures.
+- Holidays is still a master, for the rope lines and a few props (`docs/RELEASE.md`).
+- **To test:**
+  - The lanterns hang from the ropes and posts where the old ones did, at a good size.
+  - Their colours, and the glow at night.
+  - The frame rate: 111 × 9,472 and 111 × 6,592 triangles. If it drops, ask Astra for
+    lighter versions.
+
 ### Later: the paper lanterns in six colours
 
 Barry: Astra's lanterns zip, "a round and a tall variant". "Can we add some colour glows?"
