@@ -4,6 +4,38 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the stalls are shops
+
+Barry: "we've not actually hooked up the vendors to a shop yet". He chose stock themed to
+each stall, and "sell only" (they barely buy).
+- **`FairShops.cs`**, in a new range `0x90000` (132 records: 33 trades x a faction, a
+  merchant chest, its reference and a buy list). The pattern is vanilla's: Belethor's
+  `ServicesWhiterunBelethorsGoods` and the Khajiit caravans' factions.
+  - **The faction:** `Vendor` and `CanBeOwner`; open 0-24; the location `NearSelf` (as the
+    caravans); its chest; a buy list of the trade's own keywords (not inverted: cheese sells
+    to the dairy, arrows to the fletcher). It has the caravans' crime values (`CRVA`, which
+    Mutagen leaves out unless set) and no ranks, and was checked subrecord by subrecord
+    against vanilla.
+  - **The chest** (`Respawns`) stands in the holding cell `SkyrimFairSandbox`. It has
+    Belethor's chest's model and bounds, the trade's stock, and 100 gold (150-250 for the gear
+    trades).
+  - **The keepers** (59, by EditorID `SkyrimFairVendor<Theme><NN>`) join their trade's
+    faction and `JobMerchantFaction`. That faction's line in DialogueGeneric's
+    `OfferServicesTopic`, "What have you got for sale?", opens the barter menu, in their own
+    vanilla voices.
+- **The stock** (`fair.config.json` `shops.trades`): 248 lines across 33 trades, items and
+  vanilla vendor leveled lists by EditorID, resolved against Skyrim.esm (a wrong name stops
+  the build). For example: cheese, all six cheeses and the mammoth bowl; the herbalist, 16
+  ingredients; the fletcher, arrows and three bows; Imperial and Stormcloak armour; the
+  mage, tomes, soul gems, scrolls and a staff.
+- Plugin `3d1b5b1f98d0956b...`, deterministic, deployed. Against `dce9957d...`, 132
+  records are added; otherwise the keepers only gain factions.
+- **To test:**
+  - Ask a keeper "What have you got for sale?": does the barter menu open with their stall's
+    goods?
+  - Do they buy only their own kind of goods?
+  - Does stock come back after a couple of days?
+
 ### Later: Claudius unstuck, louder voices and a deeper dip, the exterior wall fuller
 
 Barry: the vendors aren't hooked up to shops yet (planned next); Claudius seems idle; the

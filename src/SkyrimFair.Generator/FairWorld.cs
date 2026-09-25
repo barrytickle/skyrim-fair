@@ -1187,6 +1187,21 @@ internal static class FairWorld
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
+        // ---- the stalls as shops (FairShops.cs): their own FormID range -----------------------------
+        if (config.Shops.Enabled && master is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            if (saved >= config.Shops.FormIdBase)
+            {
+                throw new InvalidOperationException($"FormIDs reached the shops' range (0x{config.Shops.FormIdBase:X}): raise shops.formIdBase");
+            }
+
+            mod.ModHeader.Stats.NextFormID = config.Shops.FormIdBase;
+            var (shopCount, keeperCount, itemCount) = FairShops.Build(mod, config.Shops, config.Vendors.EditorIdPrefix, master);
+            Console.WriteLine($"  shops: {shopCount} trades, {keeperCount} keepers selling, {itemCount} stock lines; FormIDs 0x{config.Shops.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // The mod's own counter must stay below the crowd figures' range.
         var counter = mod.ModHeader.Stats.NextFormID;
         if (counter >= config.CrowdFormIdBase)

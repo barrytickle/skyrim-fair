@@ -107,6 +107,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
   - `0x60000` the cameos (`cameos`: Garrick Sol V, Claudius Vale, their rounds, the posters, the roof horse)
   - `0x70000` the companions' finder (`companions`)
   - `0x80000` the lights at the lanterns (`lights`)
+  - `0x90000` the shops (`shops`: factions, merchant chests, buy lists)
 
   Inside a range, append only. Diff FormIDs against the deployed plugin every pass.
 - **Rotations:** Skyrim turns a reference about the world's Z, then Y, then X, clockwise.

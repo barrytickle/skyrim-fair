@@ -173,6 +173,9 @@ internal sealed record FairWorldConfig
     /// <summary>Glow at the lanterns (FairLights.cs).</summary>
     public LightsConfig Lights { get; init; } = new();
 
+    /// <summary>The stalls as shops (FairShops.cs).</summary>
+    public ShopsConfig Shops { get; init; } = new();
+
     /// <summary>A global the stage script sets to 1 while the player is at the fair (read by the compatibility patches).</summary>
     public string AtFairGlobal { get; init; } = "SkyrimFairAtFair";
 
@@ -472,6 +475,54 @@ internal sealed record SingerSteps
 /// CurrentFollowerFaction, alive, not told to wait. The stage script restarts it on arriving
 /// at the fair and on leaving, and moves each one it finds to the player.
 /// </summary>
+internal sealed record ShopsConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairShop";
+
+    public uint FormIdBase { get; init; } = 0x90000;
+
+    /// <summary>The interior cell the merchant chests stand in.</summary>
+    public string HoldingCell { get; init; } = "SkyrimFairSandbox";
+
+    /// <summary>JobMerchantFaction: DialogueGeneric's barter line is for its members.</summary>
+    public string MerchantJobFaction { get; init; } = "00051596:Skyrim.esm";
+
+    /// <summary>The vanilla vendor faction whose crime values ours take (a Khajiit caravan's).</summary>
+    public string FactionTemplate { get; init; } = "ServicesThievesGuildCaravanZaynabi";
+
+    /// <summary>The vanilla merchant chest whose model and bounds ours take.</summary>
+    public string ChestTemplate { get; init; } = "MerchantWhiterunBelethorsGoodsChest";
+
+    /// <summary>The gold item, and how much each keeper has for buying ("sell only": a little).</summary>
+    public string Gold { get; init; } = "Gold001";
+
+    public int GoldEach { get; init; } = 100;
+
+    /// <summary>Theme (as the stalls': cheese, smith...) to its shop.</summary>
+    public Dictionary<string, ShopTrade> Trades { get; init; } = new();
+}
+
+internal sealed record ShopTrade
+{
+    /// <summary>What it sells: items or leveled lists, by EditorID, with counts.</summary>
+    public List<ShopItem> Stock { get; init; } = new();
+
+    /// <summary>What it buys back: item keywords, by EditorID (VendorItemFood...).</summary>
+    public List<string> Buys { get; init; } = new();
+
+    /// <summary>Its own gold, if not the default.</summary>
+    public int Gold { get; init; }
+}
+
+internal sealed record ShopItem
+{
+    public string Item { get; init; } = string.Empty;
+
+    public int Count { get; init; } = 1;
+}
+
 internal sealed record LightsConfig
 {
     public bool Enabled { get; init; }
