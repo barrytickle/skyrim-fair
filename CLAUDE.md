@@ -35,7 +35,7 @@ python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
 - `deploy.py` copies only changed game files and checks each copy byte-for-byte.
 - Git-ignored build output and third-party files: `assets/sound/`, `assets/scripts/`,
   `build/`, `assets/meshes/SkyrimFair/Props/`, `assets/textures/SkyrimFair/Ground/`
-  (the cobbles, from `tools/make_cobble.py`), `assets/*/Stroti/`, and `external/`.
+  (the cobbles, from `tools/make_cobble.py`), `assets/*/Stroti/` (no longer used), and `external/`.
   `music/` and `sound-effects/` are Barry's untracked audio sources.
 - Test setup:
   - MO2 profile "Still in Skyrim Plus" with Community Shaders and Terrain Helper
@@ -204,4 +204,4 @@ current):
 - Professional Dancer: optional but recommended (Dance.esp, then Pandora); nothing of it ships
 - the scaffold tower asset's source and licence
 - the music and crowd recordings' provenance
-- Stroti can't be re-uploaded (see `CREDITS.md`)
+- leave the retired Stroti outhouse files out of the package (replaced by Strifey7's, `CREDITS.md`)
