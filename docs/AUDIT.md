@@ -4,6 +4,20 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the lip sync decision: SSE Engine Fixes
+
+Barry, on vanilla with 2.0.1.4: "claudius has stopped working", though his lip files were
+byte-identical to 2.0.1.3's, which worked. "maybe we should go with the SSE version".
+- So plain SE's lip sync is **intermittent**: the same files animate in one session and not the
+  next. That's the "desync" bug Engine Fixes' `bLipSync` fixes, and it's likely what the Nexus
+  commenter saw on other NPCs too. Borrowing vanilla lips can't make it dependable.
+- **Decision:** the cameos keep their own lip tracks, generated from their words, so they're
+  properly in sync where Engine Fixes is installed. SSE Engine Fixes stays recommended on the
+  page. `borrow_lips.py` stays in the repo, off (no `lipsFrom` in the config).
+- The rebuilt voices equal 2.0.1.1's: the audio byte-identical, the lips the same kind (the lip
+  generator isn't byte-repeatable). So **2.0.1.1, on Nexus, is the version**; only the page
+  text changes. Deployed; the test builds (2.0.1.2-2.0.1.4, LipTest) were removed.
+
 ### Later: 2.0.1.4: spoken lines only for the borrowed lips
 
 Barry, on vanilla with 2.0.1.3: "claudius worked, garrick didn't". So the length theory was
