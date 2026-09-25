@@ -4,6 +4,31 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: the SPID Patcher for players
+
+Barry: "could we make a py file for the compatibility stuff?" (a patcher for players).
+- **`tools/compat/skyrimfair_spid_patcher.py`**: standalone, Python 3.8+, standard library
+  only.
+  - Players point it at MO2's `mods` or Skyrim's `Data`, or double-click it and paste the
+    folder.
+  - It adds `-SkyrimFairNPC` to exactly the five lines on the Compatibility page: second
+    field, `NONE` replaced or appended after a comma.
+  - It keeps the BOM and line endings, backs up each changed file
+    (`.skyrimfair-backup`), and has `--dry-run` and `--undo`.
+  - A line that has changed is left alone, with "NOT FOUND ... check the fair's mod page"
+    and exit code 2.
+- **Tested on copies** of Barry's originals, read-only from the modlist:
+  - the output is byte-identical to `dist/spid/` (the generator's patches)
+  - a second run changes nothing
+  - `--undo` restores byte-identical originals and removes the backups
+  - a changed line is refused
+  - no crash without keyboard input
+- `tools/package.py` writes `SkyrimFair-<version>-SPID-Patcher.zip` (the script and a
+  README), for the mod page's optional files. It stops if the patcher targets a line the
+  Compatibility page doesn't list.
+- `docs/COMPATIBILITY.md` and the Nexus description mention it as "the easy way", before the
+  by-hand edits.
+
 ### Later: the Nexus description, complete
 
 Barry: "generate a new NEXUS_DESCRIPTION ... for the new dependencies" and "incorporate the

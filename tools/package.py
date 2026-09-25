@@ -197,6 +197,22 @@ def main() -> None:
 
     # The upload archive: the Data folder's contents at its top level.
     archive = shutil.make_archive(str(top / name), "zip", root_dir=data_dir)
+
+    # The optional SPID Patcher (tools/compat): the player's patcher and a readme, zipped on
+    # their own, for the mod page's optional files. Not a mod: nothing to install in MO2.
+    patcher_dir = top / "SPID-Patcher"
+    patcher_dir.mkdir()
+    patcher = ROOT / "tools" / "compat" / "skyrimfair_spid_patcher.py"
+    sys.path.insert(0, str(patcher.parent))
+    import skyrimfair_spid_patcher as spid  # noqa: E402
+    stale = [form for forms in spid.TARGETS.values() for form in forms if form not in compat]
+    if stale:
+        sys.exit(f"the SPID Patcher targets lines the Compatibility page doesn't list: {stale}")
+    shutil.copyfile(patcher, patcher_dir / patcher.name)
+    doc = patcher.read_text(encoding="utf-8").split('"""', 2)[1].strip()
+    (patcher_dir / "README.txt").write_text(doc.replace("\\\\", "\\") + "\n", encoding="utf-8")
+    patcher_zip = shutil.make_archive(str(top / f"{name}-SPID-Patcher"), "zip", root_dir=patcher_dir)
+    print(f"optional SPID Patcher {pathlib.Path(patcher_zip).relative_to(ROOT)}")
     size = sum(f.stat().st_size for f in data_dir.rglob("*") if f.is_file())
 
     # The mod page and what's still open.

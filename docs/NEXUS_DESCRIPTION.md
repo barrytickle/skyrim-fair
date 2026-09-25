@@ -38,8 +38,8 @@ do)? The fair's ground has no grass until you regenerate your cache with the fai
 Nothing breaks without it, it's just less green.
 
 **Using Maximum Destruction, Stealth Detection Fixes or Strange Runes?** Please make the
-one-word edits in **Compatibility**, at the bottom of this page. Without them, the game
-freezes at the fair.
+one-word edits in **Compatibility**, at the bottom of this page, or let the optional
+**SPID Patcher** make them for you. Without them, the game freezes at the fair.
 
 **Updating:** some updates change the stage show, which your save remembers. If an update
 says so, visit from a new game, or from a save made before you first went to the fair.
@@ -161,7 +161,12 @@ The fix is one word per line: `-SkyrimFairNPC`. It tells SPID to skip anyone at 
 (every fair NPC carries the `SkyrimFairNPC` keyword). Nothing changes anywhere else in
 your game.
 
-**How:** open each file below in a text editor (it's in the mod's folder; in Mod Organizer
+**The easy way:** download the optional **SPID Patcher** file, and run
+`skyrimfair_spid_patcher.py` (it needs [Python](https://www.python.org/downloads/) 3.8 or newer).
+Point it at your MO2 `mods` folder, or at Skyrim's `Data` folder for Vortex. It makes the edits
+below for you, keeps a backup of each file, and can put them back with `--undo`.
+
+**By hand:** open each file below in a text editor (it's in the mod's folder; in Mod Organizer
 2, right-click the mod and choose "Open in Explorer"). Find the line, and change it as
 shown. Save the file. If you update the mod later, make the edit again.
 

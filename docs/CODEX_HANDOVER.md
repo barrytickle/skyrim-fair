@@ -653,6 +653,9 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **the SPID Patcher** (`tools/compat/skyrimfair_spid_patcher.py`) and `docs/COMPATIBILITY.md`
+  must list the same lines. When a mod changes its line, update both (the packager checks the
+  patcher's lines are on the page, and that the description's Compatibility section matches)
 - **no Holidays**: the plugin's only master is `Skyrim.esm` (`FairHolidaysFree.cs`). Don't
   place a piece from any other plugin without making it a requirement on purpose;
   `tools/package.py` stops a release if the masters change. A prop that needs extra pieces
