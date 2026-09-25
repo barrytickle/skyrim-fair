@@ -103,7 +103,14 @@ the music stops, and the performers freeze.
 
 Permissions and provenance (details in `CREDITS.md`):
 - [ ] Permission for the Whiterun Mossy Wet Stonefloor textures (the avenue cobbles),
-      or replace them.
+      or replace them. `textures\SkyrimFair\Ground\Cobble01*.dds` are byte-identical to
+      its `wrstonefloor01*` (checked 2026-09-25).
+- [ ] **The singers' face tints** (`textures\actors\character\FaceGenData\FaceTint\SkyrimFair.esp\*.dds`)
+      are copied from Vanilla Remastered - The New Normal's archives (Nexus 153879), not
+      Bethesda's. Rebuild them from the vanilla `Skyrim - Textures*.bsa` (Steam's install)
+      before release. Their face meshes are already Bethesda's.
+- [ ] Leave the old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*.dds`) out of
+      the package: the plugin doesn't use it, and it's only left over in the deploy folder.
 - [ ] The scaffold tower asset's source and licence.
 - [ ] The music and crowd recordings' provenance and terms (`docs/AUDIO.md`).
 - [ ] Stroti's Outdoor Toilet can't be re-uploaded: ship it as a dependency, or replace

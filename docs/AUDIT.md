@@ -51,6 +51,34 @@ The navmesh is identical: 9 meshes, 6,267 vertices, 7,916 triangles.
 5. Can you see the anchor anywhere (a small figure under or on the deck)?
 6. If it goes wrong, `Papyrus.0.log` lines starting `SkyrimFairAudio: singers step`.
 
+### Permissions audit (Barry: "audit if there's any mods we borrowed from that we still need to ask permission for")
+
+Every file in the deployed folder was traced to its source (the detail is in `CREDITS.md`,
+"Audit of what ships"):
+- **Whiterun Mossy Wet Stonefloor (99294): permission needed.** The avenue cobbles are its
+  `wrstonefloor01` textures, byte for byte.
+- **New finding: Vanilla Remastered - The New Normal (153879).** The singers' three face
+  tints came from its archives. The modlist's `Skyrim - Textures*.bsa` are its, and
+  `singers.faceArchives` searched them. The face meshes are Bethesda's.
+  - The fix: point `faceArchives` at the Steam install's `Data` (vanilla), and rebuild.
+    That's Barry's call; not done in this pass.
+- **Still pending, as before:** the scaffold tower's source and licence, the music's
+  provenance, Astra's credit, and the SPID `_DISTR.ini` copies' authors (Maximum
+  Destruction, Stealth Detection Fixes, Strange Runes).
+- **Clear:**
+  - the palisade and gate (CC BY 4.0)
+  - Stroti's outhouse (a modder's resource; not to be re-uploaded)
+  - Holidays (a master, nothing copied)
+  - Professional Dancer (detected at runtime, nothing copied)
+  - the 174 props (Bethesda's meshes)
+  - the crowd figures and the OAR tempo clips (vanilla)
+- **Downloaded, not used:** Crowded Streets, Diverse Archery Targets, Fireworks (183953),
+  Incaendo's Banner Resource, Terrain Parallax, Medieval Markets, Riverwood Walls and
+  Whiterun Stone Stairs.
+- **A leftover:** the deploy folder still has the old procedural cobble
+  (`textures\SkyrimFair\SkyrimFair_Cobble01*`), which the plugin doesn't use. It stays out of
+  any package.
+
 ## the compound's exterior in Tamriel, replacing the old terrace (2026-09-24)
 
 Barry: "build the exterior outside of whiterun. I did have a place at -2 -4 in tamriel. I

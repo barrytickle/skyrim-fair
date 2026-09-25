@@ -236,8 +236,12 @@ from the command line. None of its code is bundled with the mod.
 ## Stage singers' faces (vanilla)
 
 The three singers copy vanilla face-template NPCs' faces (`039CF6`, `039CFF`, `039D17`).
-Their FaceGen head meshes and tint textures are vanilla files, copied under the singers'
-FormIDs. The singers' voice files are built from Barry's song stems (see the music's
+Their FaceGen head meshes and tint textures are copied under the singers' FormIDs.
+- **The head meshes are Bethesda's**, byte-identical to the Steam install's.
+- **The tint textures are not, yet** (audit, 2026-09-25): Barry's modlist has no vanilla
+  texture archives. Its `Skyrim - Textures*.bsa` are Vanilla Remastered - The New Normal's
+  (Nexus 153879), and the three tints match those. Rebuild them from Bethesda's archives
+  before any release (`docs/RELEASE.md`). The singers' voice files are built from Barry's song stems (see the music's
 provenance above).
 
 ## Compatibility patches (Maximum Destruction, Stealth Detection Fixes, Strange Runes)
@@ -279,6 +283,28 @@ parallax slots), so installing them is optional and improves the look:
 | --- | --- | --- |
 | Whiterun Mossy Wet Stonefloor – Grey 2k | 99294 | **now copied** for the cobbled avenue to `textures\SkyrimFair\Ground\Cobble01*.dds` (a fair-only path, so Whiterun city is untouched). Shipped in Barry's local build only and kept out of git: **redistribution permission must be confirmed before any public release** |
 | Terrain Parallax 1.5 – 4K2K | 54860 | parallax on the fair's grass, dirt and path ground (landscape `_p` maps) |
+
+## Audit of what ships (2026-09-25)
+
+Every file in the deployed mod folder was traced to its source:
+- **Every texture path in the shipped meshes** is either in Bethesda's own archives
+  (checked against the Steam install) or one of the credited assets above: the palisade
+  and gate, the scaffold tower, Stroti's outhouse.
+- **The plugin's own texture paths** are vanilla, apart from the cobbles
+  (`SkyrimFair\Ground\Cobble01*`, Nexus 99294, above).
+- **Props (174 sources):** Bethesda's meshes from the modlist's stock folder. They differ
+  from the Steam install's in 8 bytes of Havok data, the mark of another official game
+  version, with no mod edits. The stock folder has no loose files.
+- **Masters:** Skyrim.esm and Holidays.esp only.
+- **Downloaded and read, but nothing used or shipped:** Crowded Streets (127723), Diverse
+  Archery Targets (98142), Fireworks (183953; the fair's fireworks are vanilla effects),
+  Incaendo's Banner Resource 2 (94919), Terrain Parallax (54860), and the Medieval Markets,
+  Riverwood Has Charm and Walls and Whiterun Stone Stairs entries above.
+- **Still to settle:** the cobbles' permission, the singers' tints, the scaffold tower's
+  source, the music's provenance, Astra's credit, and the SPID patches' authors
+  (`docs/RELEASE.md`).
+- The old procedural cobble (`textures\SkyrimFair\SkyrimFair_Cobble01*`, committed
+  2026-09-21 as project-made) isn't used by the plugin, so it's left out of the package.
 
 ## Bethesda Game Studios
 
