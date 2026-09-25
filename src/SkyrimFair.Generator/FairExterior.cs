@@ -515,6 +515,13 @@ internal static class FairExterior
                     var slide = FairHash.Signed(4400, k, 2) * app.Spacing * 0.25f;
                     var (x, y) = (sx0 + ux * (at + slide) + uy * off, sy0 + uy * (at + slide) - ux * off);
                     var yaw = heading + MathF.PI / 2f + FairHash.Signed(4400, k, 3) * 0.2f + (side == 0f ? 0f : FairHash.Hash3(4400, k, 4) * MathF.PI);
+                    if (!app.Pave)
+                    {
+                        // Unpaved: the piece's FormID is kept, so everything after it keeps its own.
+                        mod.GetNextFormKey();
+                        continue;
+                    }
+
                     PutObject(new PlacedObject(mod)
                     {
                         Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(piece)),

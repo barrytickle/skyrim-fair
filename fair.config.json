@@ -3590,6 +3590,7 @@
       {"name": "fire north", "centre": [1309, 3194], "radius": 150}
     ],
     "approach": {
+      "pave": false,
       "start": 150,
       "to": [-5900, -10120],
       "clearHalfWidth": 450,

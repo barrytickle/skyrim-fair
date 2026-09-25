@@ -3715,6 +3715,12 @@ internal sealed record ExteriorApproach
 {
     public bool Enabled { get; init; } = true;
 
+    /// <summary>
+    /// Lay the road chunks. Off (2026-09-25), the way stays cleared but bare: on this slope
+    /// the wide, thin chunks stood out of the ground like rocks. Their FormIDs are still taken.
+    /// </summary>
+    public bool Pave { get; init; } = true;
+
     public float Start { get; init; } = 150f;
 
     public float[]? To { get; init; }

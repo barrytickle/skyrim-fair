@@ -11,11 +11,19 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 - **"Whiterun might be west":** it's east. Whiterun Stables' map marker is at x 18,313,
   and the gate at -5,900; Rorikstead is west (-84,302). Facing the gate (south), the arm
   points to the left, east. Left as it is.
-- **The rock in front of the gate is still there**, with the large reference sunk 3,000
-  under the ground. The next test, for Barry: open the console and click the rock.
-  - If it's selectable, its FormID says what it is.
-  - If nothing selects, it's LOD: the DynDOLOD output (2026-09-14) was generated with the
-    rock in place, and only a DynDOLOD re-run removes it.
+- **The rock in front of the gate was the fair's own path.** Barry clicked it in the
+  console: `RoadChunkM01`, ref `0x30133`, the first road chunk of the approach.
+  - The chunks are thin (M01 is 520 x 225, 41 deep). Each was tilted to the slope at its
+    centre and set 6 into the ground, so where the ground curves, an edge rode out of it:
+    knee-high by the gate, where the ground falls away. From the front, the path read as
+    rocks. (The vanilla slab was already gone.)
+  - **Barry chose: remove the path.** `exterior.approach.pave` is false. The way stays
+    cleared, and the 12 pieces' FormIDs stay taken (`0x30133`-`0x3013E`), so the flags,
+    road sign and welcome sign keep theirs.
+  - Plugin `d1d9fe7591c55b68...`, deterministic, deployed. Against `2b417b40...`, only the
+    12 chunks are gone.
+  - The large-reference sinking stays: it's right regardless, and a DynDOLOD re-run is
+    still due for the compound's LOD.
 
 ### Later: the "Whiterun Fair" welcome sign outside the gate
 
