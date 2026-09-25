@@ -193,6 +193,10 @@ internal static class FairShops
                 var entry = new ScriptEntry { Name = config.Counters.Script };
                 entry.Properties.Add(new ScriptObjectProperty { Name = "Keeper", Object = new FormLink<ISkyrimMajorRecordGetter>(npc.FormKey) });
                 entry.Properties.Add(new ScriptFloatProperty { Name = "Reach", Data = config.Counters.Reach + 60f });
+                // Its keeper's own reference, looked up in game by FormID: the records' copies made
+                // at load (leveled faces) aren't the record, so a search by base found nobody.
+                entry.Properties.Add(new ScriptIntProperty { Name = "KeeperRefId", Data = (int)near.Ref.FormKey.ID });
+                entry.Properties.Add(new ScriptStringProperty { Name = "KeeperPlugin", Data = mod.ModKey.FileName.String });
                 piece.VirtualMachineAdapter = new VirtualMachineAdapter { Version = 5, ObjectFormat = 2 };
                 piece.VirtualMachineAdapter.Scripts.Add(entry);
                 counters.Add((piece, act.FormKey));

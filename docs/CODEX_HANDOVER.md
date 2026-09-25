@@ -653,6 +653,10 @@ Project-owned mesh work is code-first and reproducible.
   are activators with the counter's model that open the keeper's barter menu
   (`shops.counters`). Turn a static into an activator by changing the reference's base last
   of all, so its FormID and everything built from the static (navmesh, sight table) stay
+- **finding a templated NPC's reference**: a reference whose NPC templates a leveled list
+  runs on a copy of the record made at load, so searches by base
+  (`FindClosestReferenceOfTypeFromRef`) miss it. Keep the reference's FormID and use
+  `Game.GetFormFromFile` (the stall counters)
 - **a new activator**: don't copy a static's `MODT` onto it (the texture hashes crashed the
   game at startup, 2026-09-25). Copy the model and set `Model.Data = null`, and set
   `MarkerColor` (PNAM) and `Flags` (FNAM) explicitly, as vanilla's

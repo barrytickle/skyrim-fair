@@ -4,6 +4,21 @@ This is the current verified state of Skyrim Fair and Barry's local deployment. 
 
 ## Current pass: the singers step across the deck (2026-09-25)
 
+### Later: Browse opened nothing
+
+Barry: at the flagged stalls he gets both "Browse" and "Talk". Browse does nothing, Talk
+works, and he wants to keep both.
+- Cause: the counter searched for its keeper by the keeper's NPC record
+  (`FindClosestReferenceOfTypeFromRef`). A keeper's reference runs on a copy of the record,
+  made at load because their faces come from a leveled list, so the search found nobody.
+- Now each counter has its keeper's own reference: new properties `KeeperRefId` (the
+  reference's FormID in the plugin) and `KeeperPlugin`, looked up with `Game.GetFormFromFile`
+  when the counter is used. `Keeper` is kept but retired. A failed lookup is traced
+  ("SkyrimFairStallCounter: no keeper for ...").
+- All 59 counters' IDs land on their own stall's keeper (checked by name).
+- Plugin `941d460f4cbbe8f6`, deterministic; no FormID changed. Deployed.
+- **To test:** Browse at the flagged stalls opens the shop.
+
 ### Later: the startup crash on the counters' activators
 
 Barry: a crash on startup (CrashLogger: `EXCEPTION_ACCESS_VIOLATION` at `SkyrimSE.exe+0D066F4`
