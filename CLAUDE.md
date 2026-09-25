@@ -121,77 +121,36 @@ python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair
 - **Edit scripts:** write Python edit scripts to the scratchpad with the Write tool.
   Bash heredocs break on apostrophes.
 
-## Where we are (end of 2026-09-24)
+## Where we are (end of 2026-09-25): ready for Nexus
 
-Plugin `eed0547ce3b3aff8...`, committed (`66190a8`) and deployed. The day's detail is in
-`docs/AUDIT.md`, newest first.
+Plugin `709eeed250ad09a0` (dev and release builds identical), deployed. The day's detail is in
+`docs/AUDIT.md`, newest first. **Release 1.0.0 is packaged and ready to upload**
+(`dist/release/SkyrimFair-1.0.0/`, from `python tools/package.py --version 1.0.0`):
+- `SkyrimFair-1.0.0.zip` (the main file), `SkyrimFair-1.0.0-Compatibility.zip` (optional:
+  the instructions and the SPID Patcher)
+- `NEXUS_DESCRIPTION.bbcode.txt` and `NEXUS_CREDITS.bbcode.txt`, to paste into Nexus
 
 **Confirmed in game by Barry today:**
-- the taller palisade (scale 4) and gate, and the stage lanterns and Whiterun flags
-- **crowd culling** at margin 512 (77-96 -> 90-120 fps with frame generation; pop-in only
-  when looking for it)
-- **the varied crowd** (the face pool)
-- **the stage can't be climbed** (solid invisible walls)
-- **Professional Dancer's dances** (Dance.esp plus Pandora; optional, detected at runtime)
-- the stage-show timelines in `songs.config.json`, which Barry edits himself
-- the children, the seated visitors; the folk pair is fine at a distance
-- **more life** (`fairWorld.life`): the decorations "look fantastic". With live grass,
-  Barry saw the shrubs and "nice patches of grass"
-- **the Tamriel exterior** ("honestly astonished"). Then:
-  - the rock in front of the gate cleared
-  - a road-chunk path to the road
-  - a Whiterun flag each side of the gate
+- the shops: all 33 trades, Browse on the counters, the gear stalls at 20x
+- the steady show, the roof horse staying put, the keepers at their spots
+- the paper lanterns ("incredible"), with no frame-rate cost
+- the fair without Holidays ("a proper seamless transition"): `Skyrim.esm` is the only master
 
-  These last three are built and deployed, and not yet seen.
+**Built, not yet confirmed in game:** the singers looping their cheer on their marks.
 
-**Built, not yet confirmed in game:**
-- **the show clock** (`ShowNow`): cheers and fireworks on time with the music (they were
-  10-35 s late). Barry: "i trust ya"
-- **the fair's own fireworks** after each song (vanilla effects, no dependency)
-- **fast and held instrument loops** through OAR (`build_tempo.py`)
-- **the exterior's details:**
-  - the gate door both ways
-  - the faint music (12 dB down, `exterior.show`) and crowd murmur outside
-  - night fireworks from inside, about every 150 s
-  - the view from the hills
-- the more-life details:
-  - banners against the logs (`out` 34, `bannerDrop` 70)
-  - pelts over the rope, tools leant on the barrels
-  - the smoke's size (0.6)
-  - the goats staying in the pen, the chickens and dogs behaving
-- the singers' lip sync on Fiddle and Dragonborn-Approved (**de-prioritised**: "too far
-  away to see")
+**Before uploading (Barry):** a fresh-install test of the zip (untick the dev "Skyrim Fair"
+and Holidays, then new game), and the SPID lines checked against the three mods' current files.
 
-**Switched off:** the static crowd figures (`crowdFiguresEnabled: false`), for their glow.
+**Settled:** every licence (the welcome sign, Mixamo, ElevenLabs voices), the Nexus page text
+in Barry's voice, the Nexus links, and the exterior's limits and the missing grass cache
+accepted for 1.0.
 
-## Plan for 2026-09-25
-
-1. **Barry's checks** from yesterday's builds (the lists are in `docs/AUDIT.md`'s last
-   three passes):
-   - the exterior's path, flags and gate doors
-   - the outside music level, and the fireworks at night
-   - the more-life details above
-   - Put the live-grass test settings back if they're still on: `SetGrassLoadCreate = 1`
-     in `GrassCacheHelperNG.ini`, and `bAllowCreateGrass=0` in the profile's `skyrim.ini`.
-2. **The singers move: "maybe like crab walking style"** (sidestepping across the deck,
-   facing the crowd). Plan first, then build.
-   - A patrol package between deck markers turns them to walk.
-   - Real sidestepping may come from `KeepOffsetFromActor` on an invisible pacing actor,
-     or from OAR swapping a strafe animation while they move.
-   - Test on the deck's own navmesh island; `Say()` works while walking.
-3. **Exterior follow-ups, as Barry chooses:**
-   - Tamriel's navmesh isn't cut by the wall (NPCs may walk into it).
-   - No LOD: it shows only within about two cells. DynDOLOD or xLODGen object LOD would
-     show it from the mountains; that's a Barry-run tool.
-   - More inside for the view from above: a few tents or stalls.
-4. **Grass for release:** if Barry likes it, generate a grass cache for `SkyrimFairWorld`
-   (a precache run, keeping only its `.cgid` files) to ship.
-5. **From the backlog, as Barry chooses:**
-   - vendor inventories at festival prices (`docs/STALLS.md`)
-   - the MCM (`docs/MCM.md`)
-   - the 6 trades not yet placed
-   - bard animation variants (`docs/BARDS.md`)
-   - the release checklist (`docs/RELEASE.md`)
+**Next, if Barry comes back to it:**
+- whatever players report after launch
+- the cameo hint on the page, if Barry says who Garrick and Claudius are based on
+- a lighter lantern model, only if the frame rate ever needs it
+- the backlog: the MCM (`docs/MCM.md`), bard animation variants (`docs/BARDS.md`), a grass
+  cache for the fair's worldspace
 
 **The show's data carries a 2** (`Songs2`, `CameoIdles2`, ...): a save keeps a script's
 property values, so data under old names never reached Barry's save. Rename again (3) when an
