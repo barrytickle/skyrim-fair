@@ -100,4 +100,5 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   inheritance letters), who finds the player in the next town. Not sent when the player asks
   Claudius to bring it back at the camp. The letter is a book record, e.g.: "The Wanderer's Fair
   has returned to the road west of Whiterun. I have inspected it. It is present. C. Vale, Fair
-  Inspector. P.S. The horse is back on the roof." One letter record, handed over each return.
+  Inspector. P.S. The horse is back on the roof. Claudius, investigate immediately." (Barry's
+  ending: Claudius's note to himself, left in.) One letter record, handed over each return.
