@@ -148,6 +148,8 @@ Perk Property FairTalk Auto
 they answer. Given to the player at the fair; its conditions keep it to the fair.}
 GlobalVariable Property TalkDuckUntil Auto
 {Set by the talk perk's fragment: the real time until which the music stays ducked.}
+Quest Property Passport Auto
+{The Fair Passport (SkyrimFairPassport), if built: told when each song starts and ends.}
 Perk Property FairPrices Auto
 {The fair's prices (FairShops.cs): a hidden perk, buying at many times the price, only in the
 fair's worldspace. Given to the player at the fair; it does nothing anywhere else.}
@@ -567,6 +569,9 @@ Function Advance(Float now)
 		songInstance = Songs2[track].Play(StageSpeaker)
 		Debug.Trace("SkyrimFairAudio: song " + track + " playing, instance " + songInstance)
 		songsPlayed += 1
+		If Passport
+			(Passport as SkyrimFairPassport).SongStarted()
+		EndIf
 		dancing = new Bool[128]
 		danceEnds = new Float[128]
 		dancePlays = new Int[128]
@@ -615,6 +620,9 @@ Function Advance(Float now)
 	ElseIf phase == 2
 		; The last note is ringing: the crowd cheers, the song finishes under it, then a breath.
 		Float lead = Lead()
+		If Passport
+			(Passport as SkyrimFairPassport).SongEnded()
+		EndIf
 		tailInstance = songInstance
 		songInstance = 0
 		bandUntil = now + lead * TimeScale.GetValue() / 86400.0

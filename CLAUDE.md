@@ -113,6 +113,7 @@ python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair
   - `0x80000` the lights at the lanterns (`lights`)
   - `0x90000` the shops (`shops`: factions, merchant chests, buy lists)
   - `0xA0000` the paper lanterns (`paperLanterns`: a texture set and a static per shape and colour)
+  - `0xB0000` the Fair Passport (`passport`: the quest, its items, Claudius's two lines)
 
   Inside a range, append only. Diff FormIDs against the deployed plugin every pass.
 - **Rotations:** Skyrim turns a reference about the world's Z, then Y, then X, clockwise.

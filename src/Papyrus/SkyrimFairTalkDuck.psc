@@ -11,6 +11,9 @@ stage script can't tell anyone is speaking (a Nexus player couldn't hear the NPC
 Function Fragment_0(ObjectReference akTargetRef, Actor akActor)
 ;BEGIN CODE
 	DuckUntil.SetValue(Utility.GetCurrentRealTime() + Seconds)
+	If Passport
+		(Passport as SkyrimFairPassport).Chat(akTargetRef)
+	EndIf
 	akTargetRef.Activate(akActor, True)
 ;END CODE
 EndFunction
@@ -22,3 +25,5 @@ GlobalVariable Property DuckUntil Auto
 {Real time (Utility.GetCurrentRealTime) until which the stage script ducks the music.}
 Float Property Seconds Auto
 {How long a reply is given (5).}
+Quest Property Passport Auto
+{The Fair Passport (SkyrimFairPassport), if built: each visitor talked to counts once.}

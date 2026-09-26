@@ -2,7 +2,39 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Claudius's new voice, and a 17th line (2026-09-26)
+## Current pass: the Fair Passport (2026-09-26, for 2.0.1.3)
+
+Barry: the fair has "great stuff to look at, but not enough reasons to stay". Of the minigame
+ideas he chose **the Fair Passport**: stamps for the roof horse, the show and the people; the
+reward an amulet and the horse's deed; Claudius hands it over (two new lines Barry records).
+- **The quest** `SkyrimFairPassport` (SideQuest, start-game enabled, run once), in its own range
+  **0xB0000** (`fairWorld.passport`, `FairPassport.cs`, built last of all). Stages 0, 10
+  (issued), 15 (full), 20 (returned, completes). Objectives, the stamps: 10 a whole song, 20
+  Garrick, 30 Claudius, 40 five visitors talked to (`<Global=SkyrimFairPassportChats>/5`), 50
+  the roof horse seen, then 60 the return.
+- **Who stamps** (`SkyrimFairPassport.psc`): the stage script tells it when each song starts and
+  ends (at the fair throughout: stamp); the cameos' line fragments stamp Garrick and Claudius
+  (`Passport`, `Stamp` properties on all 29 lines); the talk perk counts each visitor once
+  (a FormList); the quest's own 2-second check stamps the horse when it's within 3,000 and in
+  the player's line of sight.
+- **Claudius's two lines** sit at the top of his Hello topic: the hand-over (stage 0: the
+  Passport note, stage 10, Claudius's stamp) and the hand-in (stage 15: the Seal and the Deed,
+  stage 20). Their fragment `SkyrimFairPassportLine` ducks the music as his others do. Until
+  Barry records them (`claudius_passport` in the lines file: `passport_give.wav`,
+  `passport_done.wav`), `build_voices.py` skips them and they play as subtitles.
+- **The items:** the Fair Passport and the Deed to the Roof Horse (notes copied from vanilla
+  MS07JareeRaNote), Claudius's Seal of Approval (vanilla Gold Necklace, template TNAM, Fortify
+  Barter 10% from a copy of EnchArmorFortifySpeechcraftBase, MagicDisallowEnchanting, 500 gold).
+- **Checked against vanilla:** the quest subrecord by subrecord with MS07 and FreeformRiften07
+  (every stage a QSDT, every objective an FNAM, QTGL for the count), the lines with the cameos'
+  (ENAM set explicitly), the amulet with EnchNecklaceOneHanded06.
+- Plugin `357c46190e47c1b3`, deterministic. FormID diff: 9 added (0xB0000-0xB0008), none moved.
+  All 13 scripts compile. Deployed.
+- **Not yet confirmed in game:** the whole flow. To test: talk to Claudius (the Passport, the
+  quest, his stamp), watch a song through, talk to Garrick and 5 visitors, look at the roof
+  horse, then back to Claudius.
+
+## Earlier pass: Claudius's new voice, and a 17th line (2026-09-26)
 
 Barry re-recorded Claudius "to make him more of a character than a generic bloke" (all 16
 lines, `cameos/claudius/mono/`), then added a 17th line ("Oh for fuck sake, how'd that horse get

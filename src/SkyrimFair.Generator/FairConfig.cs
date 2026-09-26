@@ -190,6 +190,8 @@ internal sealed record FairWorldConfig
     /// </summary>
     public TalkDuckConfig TalkDuck { get; init; } = new();
 
+    public PassportConfig Passport { get; init; } = new();
+
     /// <summary>
     /// Seats swapped last of all (their FormIDs stay): a vanilla bar stool gives its sitter the
     /// bar-counter lean, with no counter at the fair (a Nexus player's screenshot, 2026-09-25),
@@ -648,6 +650,80 @@ internal sealed record TalkDuckConfig
 
     /// <summary>How long the music stays ducked after pressing E on someone, in seconds.</summary>
     public float Seconds { get; init; } = 5f;
+}
+
+/// <summary>
+/// The Fair Passport (FairPassport.cs): a side quest Claudius Vale hands out. Its objectives are
+/// the stamps; a full card, handed back to him, earns an amulet and the deed to the roof horse.
+/// Its own FormID range, made last of all (after the talk perk and the seat swap).
+/// </summary>
+internal sealed record PassportConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairPassport";
+
+    public uint FormIdBase { get; init; } = 0xB0000;
+
+    public string Script { get; init; } = "SkyrimFairPassport";
+
+    /// <summary>The hand-over and hand-in lines' fragment script.</summary>
+    public string LineScript { get; init; } = "SkyrimFairPassportLine";
+
+    public string QuestName { get; init; } = "The Fair Passport";
+
+    /// <summary>The cameo who hands it out and takes it back (cameos.members[].id).</summary>
+    public string Inspector { get; init; } = "Claudius";
+
+    /// <summary>The key of his two lines in the cameos' lines file (the hand-over, then the hand-in);
+    /// built by tools/cameos/build_voices.py into build/cameos/Passport/. Without the recordings the
+    /// lines play as subtitles only (<see cref="Give"/>, <see cref="Done"/>).</summary>
+    public string VoiceLines { get; init; } = "claudius_passport";
+
+    public string VoiceDir { get; init; } = "cameos/claudius/mono";
+
+    public string Give { get; init; } = string.Empty;
+
+    public string Done { get; init; } = string.Empty;
+
+    /// <summary>Visitors to talk to for the chat stamp.</summary>
+    public int Chats { get; init; } = 5;
+
+    /// <summary>How near (units) the roof horse must be, and in sight, for its stamp.</summary>
+    public float HorseRange { get; init; } = 3000f;
+
+    /// <summary>The objectives' text, in order: the song, Garrick, Claudius, the chats, the horse,
+    /// then the return. The chats' may hold <c>{count}</c> (the global) and <c>{total}</c>.</summary>
+    public List<string> Objectives { get; init; } = new();
+
+    /// <summary>The journal, at stages 10 (issued), 15 (full) and 20 (returned).</summary>
+    public List<string> Log { get; init; } = new();
+
+    public string PassportName { get; init; } = "Fair Passport";
+
+    public string PassportText { get; init; } = string.Empty;
+
+    public string DeedName { get; init; } = "Deed to the Roof Horse";
+
+    public string DeedText { get; init; } = string.Empty;
+
+    /// <summary>The note both are copied from (vanilla MS07JareeRaNote: Note01).</summary>
+    public string NoteFrom { get; init; } = "000F23E0:Skyrim.esm";
+
+    public string SealName { get; init; } = "Claudius's Seal of Approval";
+
+    /// <summary>The amulet copied (vanilla JewelryNecklaceGold) and the enchantment copied
+    /// (vanilla EnchArmorFortifySpeechcraftBase, Fortify Barter), at <see cref="SealBarter"/>%.</summary>
+    public string SealFrom { get; init; } = "000877D5:Skyrim.esm";
+
+    public string SealEnchantmentFrom { get; init; } = "0010FB84:Skyrim.esm";
+
+    public float SealBarter { get; init; } = 10f;
+
+    public uint SealValue { get; init; } = 500;
+
+    /// <summary>MagicDisallowEnchanting, as vanilla's unique jewellery.</summary>
+    public string NoDisenchant { get; init; } = "000C27BD:Skyrim.esm";
 }
 
 internal sealed record SeatSwapConfig

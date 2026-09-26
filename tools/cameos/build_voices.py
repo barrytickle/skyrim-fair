@@ -50,49 +50,66 @@ def main():
     cameos = config['fairWorld']['cameos']
     lines_file = ROOT / cameos.get('voiceLinesFile', 'cameos/skyrim_fair_voicelines.json')
     all_lines = json.loads(lines_file.read_text(encoding='utf-8'))
+    loud = cameos.get('voiceLoudness', -12)
     for member in cameos['members']:
         key, src = member.get('voiceLines'), member.get('voiceDir')
         if not key or not src:
             continue
-        entries = all_lines[key]
-        work = OUT / member['id']
-        staging = work / 'staging'
-        if work.exists():
-            shutil.rmtree(work)
-        staging.mkdir(parents=True)
-        made = []
-        for k, entry in enumerate(entries, 1):
-            wav = ROOT / src / entry['file']
-            if not wav.exists():
-                sys.exit(f"{member['id']}: {wav} is missing")
-            base = f"{k:02d}"
-            loud = cameos.get('voiceLoudness', -12)
-            run('ffmpeg', '-v', 'error', '-y', '-i', wav, '-af', f'acompressor=threshold=-24dB:ratio=3:attack=5:release=80:makeup=6,loudnorm=I=-12:TP=-1.0:LRA=7,'
-                f'volume={loud + 12}dB,alimiter=limit=0.89:attack=2:release=40:level=false',
-                '-ar', '44100', '-ac', '1', '-c:a', 'pcm_s16le', staging / f'{base}.wav')
-            for attempt in range(3):  # LipGenerator now and then exits 1 on a file it accepts on a rerun
-                try:
-                    run(LIPGEN, staging / f'{base}.wav', plain(entry['text']), f'-OutputFileName:{staging / (base + ".lip")}')
-                    break
-                except RuntimeError:
-                    if attempt == 2:
-                        raise
-            with wave.open(str(staging / f'{base}.wav')) as w:
-                seconds = round(w.getnframes() / w.getframerate(), 2)
-            if not (staging / f'{base}.lip').exists():
-                raise RuntimeError(f"LipGenerator wrote no lip for {member['id']} {base}")
-            run(XWMA, staging / f'{base}.wav', staging / f'{base}.xwm')
-            (staging / f'{base}.wav').unlink()
-            made.append({'file': entry['file'], 'text': entry['text'], 'fuz': f'{base}.fuz', 'seconds': seconds})
-        run(LIPFUZER, '-s', staging, '-d', work, '--norec', '-v', 0)
-        for m in made:
-            fuz = (work / m['fuz']).read_bytes() if (work / m['fuz']).exists() else b''
-            # A .fuz is 'FUZE', a version, the lip size, the lip data, then the xWMA audio.
-            if fuz[:4] != b'FUZE' or int.from_bytes(fuz[8:12], 'little') < 100:
-                raise RuntimeError(f"{member['id']} {m['fuz']}: missing, or without a lip track")
-        shutil.rmtree(staging)
-        (work / 'lines.json').write_text(json.dumps(made, indent=1, ensure_ascii=False), encoding='utf-8')
-        print(f"  {member['id']}: {len(made)} lines -> {work}")
+        build(member['id'], all_lines[key], src, loud)
+
+    # The Fair Passport's two lines (fairWorld.passport): Claudius's hand-over and hand-in, kept
+    # apart from his greetings. Until they're recorded, the plugin plays them as subtitles only.
+    passport = config['fairWorld'].get('passport', {})
+    if passport.get('enabled'):
+        key = passport.get('voiceLines', 'claudius_passport')
+        src = passport.get('voiceDir', 'cameos/claudius/mono')
+        entries = all_lines.get(key, [])
+        if len(entries) >= 2 and all((ROOT / src / e['file']).exists() for e in entries[:2]):
+            build('Passport', entries[:2], src, loud)
+        else:
+            shutil.rmtree(OUT / 'Passport', ignore_errors=True)
+            print(f"  Passport: no recordings yet ('{key}' in {lines_file.name}, files in {src}): subtitles only")
+
+
+def build(member_id, entries, src, loud):
+    """One set of lines: build/cameos/<member_id>/<nn>.fuz and lines.json."""
+    work = OUT / member_id
+    staging = work / 'staging'
+    if work.exists():
+        shutil.rmtree(work)
+    staging.mkdir(parents=True)
+    made = []
+    for k, entry in enumerate(entries, 1):
+        wav = ROOT / src / entry['file']
+        if not wav.exists():
+            sys.exit(f"{member_id}: {wav} is missing")
+        base = f"{k:02d}"
+        run('ffmpeg', '-v', 'error', '-y', '-i', wav, '-af', f'acompressor=threshold=-24dB:ratio=3:attack=5:release=80:makeup=6,loudnorm=I=-12:TP=-1.0:LRA=7,'
+            f'volume={loud + 12}dB,alimiter=limit=0.89:attack=2:release=40:level=false',
+            '-ar', '44100', '-ac', '1', '-c:a', 'pcm_s16le', staging / f'{base}.wav')
+        for attempt in range(3):  # LipGenerator now and then exits 1 on a file it accepts on a rerun
+            try:
+                run(LIPGEN, staging / f'{base}.wav', plain(entry['text']), f'-OutputFileName:{staging / (base + ".lip")}')
+                break
+            except RuntimeError:
+                if attempt == 2:
+                    raise
+        with wave.open(str(staging / f'{base}.wav')) as w:
+            seconds = round(w.getnframes() / w.getframerate(), 2)
+        if not (staging / f'{base}.lip').exists():
+            raise RuntimeError(f"LipGenerator wrote no lip for {member_id} {base}")
+        run(XWMA, staging / f'{base}.wav', staging / f'{base}.xwm')
+        (staging / f'{base}.wav').unlink()
+        made.append({'file': entry['file'], 'text': entry['text'], 'fuz': f'{base}.fuz', 'seconds': seconds})
+    run(LIPFUZER, '-s', staging, '-d', work, '--norec', '-v', 0)
+    for m in made:
+        fuz = (work / m['fuz']).read_bytes() if (work / m['fuz']).exists() else b''
+        # A .fuz is 'FUZE', a version, the lip size, the lip data, then the xWMA audio.
+        if fuz[:4] != b'FUZE' or int.from_bytes(fuz[8:12], 'little') < 100:
+            raise RuntimeError(f"{member_id} {m['fuz']}: missing, or without a lip track")
+    shutil.rmtree(staging)
+    (work / 'lines.json').write_text(json.dumps(made, indent=1, ensure_ascii=False), encoding='utf-8')
+    print(f"  {member_id}: {len(made)} lines -> {work}")
 
 
 if __name__ == '__main__':

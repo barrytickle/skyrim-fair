@@ -8,6 +8,9 @@ menu, so the stage script can't see it (IsInDialogueWithPlayer stays false); thi
 Function Fragment_0(ObjectReference akSpeakerRef)
 ;BEGIN CODE
 	DuckUntil.SetValue(Utility.GetCurrentRealTime() + Seconds)
+	If Passport && Stamp > 0
+		(Passport as SkyrimFairPassport).Stamp(Stamp)
+	EndIf
 ;END CODE
 EndFunction
 ;END FRAGMENT
@@ -18,3 +21,7 @@ GlobalVariable Property DuckUntil Auto
 {Real time (Utility.GetCurrentRealTime) until which the stage script ducks the music.}
 Float Property Seconds Auto
 {This line's length, and a little.}
+Quest Property Passport Auto
+{The Fair Passport (SkyrimFairPassport), if built.}
+Int Property Stamp Auto
+{The Passport objective this cameo's lines stamp (20 Garrick, 30 Claudius; 0 none).}

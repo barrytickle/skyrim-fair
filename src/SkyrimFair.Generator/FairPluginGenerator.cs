@@ -524,6 +524,18 @@ internal static class FairPluginGenerator
             }
         }
 
+        // The Fair Passport, last of all in its own FormID range: it hooks the cameos' lines, the
+        // talk perk and the stage script, so everything they are is built first.
+        var passportConfig = config.FairWorld.Passport;
+        if (config.FairWorld.Enabled && passportConfig.Enabled && config.FairWorld.Cameos.Enabled && master is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            mod.ModHeader.Stats.NextFormID = passportConfig.FormIdBase;
+            var summary = FairPassport.Build(mod, config.FairWorld, master);
+            Console.WriteLine($"  passport: {summary}; FormIDs 0x{passportConfig.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // Empty array properties can't be initialised from a plugin ("cannot be initialized because
         // the value is the incorrect type" in the log); left out, the script sees them empty anyway.
         foreach (var quest in mod.Quests.Where(q => q.VirtualMachineAdapter is not null))
