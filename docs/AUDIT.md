@@ -2,7 +2,23 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: an xEdit error from a player (2026-09-26, for 2.0.1.3)
+## Current pass: Claudius's new face (2026-09-26, for 2.0.1.3)
+
+Barry: Claudius "seems a bit young for his character"; he wanted "the monk style hair, bit
+grey", and a face players won't bump into often. His donor was `TreasCorpseCommonerBretonMale`
+[0457F6] (black hair, young). Now the Dark Brotherhood's **"Nervous Patron"**
+(`DBRecurringContact1Dawnstar` [087B8B], met once, for one contract): Nord, `HairMaleElder2`
+(balding), `HairColor13BrightGrey`, clean-shaven. One config line (`cameos.members`,
+Claudius's `template`).
+- The hair is baked into the donor's FaceGen head, so the look is changed by changing the
+  donor, never the hair part alone (a mismatch gives a dark face).
+- Read back: race NordRace, head parts and six tint layers the donor's, voice type unchanged
+  (`060019`). His `facegeom` .nif and `facetint` .dds are byte-identical to the donor's.
+- Plugin `8ff62104172201c2`, deterministic (two runs). Against the previous build: 4,605
+  records both, none gone, none new, no EditorID changed. Deployed (the plugin and his two
+  FaceGen files).
+
+## Earlier pass: an xEdit error from a player (2026-09-26, for 2.0.1.3)
 
 A player reported xEdit errors in interior cell block 9, "something about a persistent flag".
 Block 9 holds one cell, `SkyrimFairSandbox` [0009E1] (the dev sandbox that also holds the
@@ -13,7 +29,7 @@ membership). Harmless in game, but a real error. Fixed in `FairSandbox.cs` (flag
   without the flag, flagged refs in Temporary groups, interior cells in the wrong block or
   sub-block, duplicate block groups) found only that ref, in 2.0.1.2 and the 2.0.1.3 build.
   After the fix it finds nothing.
-- Plugin `afe4dbbe11350952`, deterministic; one byte differs from the previous build (the
+- Plugin `afe4dbbe11350952` (superseded by the face pass), deterministic; one byte differs from the previous build (the
   flag). No FormID change. Deployed. Ships with 2.0.1.3.
 
 ## Earlier pass: the Fair Passport (2026-09-26, for 2.0.1.3)

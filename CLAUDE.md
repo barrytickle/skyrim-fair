@@ -135,7 +135,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `afe4dbbe11350952`, deterministic;
+**2.0.1.3, built and deployed, not yet packaged** (plugin `8ff62104172201c2`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
@@ -149,9 +149,13 @@ detail in `docs/AUDIT.md`'s current pass):
   a Quest Object alias (can't be dropped); Claudius takes it back.
 - **An xEdit error a player found:** the sandbox's COC marker (interior block 9) was in a
   Persistent group without the Persistent flag. Fixed (one byte); no other ref has the problem.
+- **Claudius's new face** (Barry: too young; "monk style hair, bit grey"; a rarely met face):
+  his donor is now the Dark Brotherhood's "Nervous Patron" (087B8B): Nord, balding, bright grey,
+  clean-shaven.
 
 **Barry's tests for tomorrow:**
-1. Claudius's new voice: level beside Garrick, lip sync, line 17 turning up.
+1. Claudius's new voice: level beside Garrick, lip sync, line 17 turning up. And his new face:
+   old enough, the hair monkish enough (if not, another donor is one config line), no dark face.
 2. The Passport, start to finish on a save that hasn't had it: the hand-over (voice, journal,
    his stamp), a whole song, Garrick, the chat counter (0/5 to 5/5 in the journal), the horse
    stamp when looking at the roof, then the hand-in and the rewards. Check the passport can't
