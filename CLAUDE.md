@@ -186,18 +186,26 @@ detail in `docs/AUDIT.md`'s current pass):
   in `mono/` (01-10.wav, mono 44.1 kHz, 4-9 s; the ElevenLabs originals in `original/`). Each line
   is a different character (`voice`: young_nord_male, older_nord_female, breton_male,
   drunk_nord_male, imperial_female, young_breton_female, older_imperial_male, rough_nord_female,
-  cheerful_breton_male, older_nord_male). **Plan (to confirm with Barry, then build):**
-  - 10 featured fairgoers built like the cameos: their own NPC records with faces copied from
-    vanilla NPCs of the right race, sex and age (`FairSingers.CopyFace`), each with its own voice
-    type, a Hello topic line per entry (more entries with the same `voice` later: random among
-    them), played when talked to; the talk duck and the Passport's chat stamp should count them
-  - no face-pool problem (the pool's visitors keep their vanilla voices); only these 10 lose
-    vanilla barks
-  - placed where their lines fit: the drunk and the rough Nord woman by the mead stalls, the
-    archery one by the range, the bard-watcher at the stage, the older Nord man with a view of
-    the roof horse, the others about the avenue
-  - `build_voices.py` builds them like the cameos (build/cameos/Fairgoers/<voice>/); their own
-    FormID range, 0xC0000, after the Passport
+  cheerful_breton_male, older_nord_male). **Barry's decisions (2026-09-26), for the update
+  after 2.0.1.3:** the whole crowd becomes these 10 characters, on repeat (~14 of each):
+  - converted: the ~140 visitors (about 100 standing or dancing, ~40 sitters, the wanderers).
+    Not converted: the band, singers, archers (their animation setups), the ~60 stall-keepers
+    (a custom voice type loses vanilla's barter lines, so the trade option), the 4 children,
+    the cameos
+  - **types, not clones** (Barry's pick): each character is a voice type plus a look (race, sex,
+    age); each copy's face comes from the vetted face pool limited to that look, so no twins
+  - **the line only when talked to** (Barry's pick), silent walking past; check the game allows
+    it cleanly (walk-by hellos share the Hello topic), else a long greeting cooldown
+  - 10 voice types, `build_voices.py` builds them like the cameos; one Hello line each (more
+    entries with the same `voice` later: random among them); the talk duck and the Passport's
+    chat counter should count them
+  - who plays whom round-robin, a few placed on purpose: the drunk and the rough Nord woman by
+    the mead stalls, the archery one by the range, the bard-watcher at the stage, the older Nord
+    man with a view of the roof horse
+  - their own FormID range, 0xC0000, after the Passport
+  - existing saves keep each visitor's rolled face: test on Barry's save; if the change doesn't
+    show, a one-time refresh (marked done before it waits, unlike the first `Reseat`)
+  - they lose vanilla's generic barks
 - A quest marker on Claudius for "Return the Fair Passport" (left out to keep the pass small).
 - Then package 2.0.1.3 and write its changelog.
 
