@@ -98,3 +98,18 @@ already has something in it, or in place of `NONE`).
 
 **Mod authors:** adding `-SkyrimFairNPC` to your own line is harmless for players without
 the fair, and saves them the edit.
+
+---
+
+## Checked: compatible, no patch needed
+
+Answers given to players, each checked plugin against plugin (the fair's Tamriel footprint is
+cells (-3,-4), (-3,-3), (-2,-4), (-2,-3), with no landscape edits):
+
+- **Elysium Estate**, **Whiterun Manor**, **JG Pondside Cottage**
+- **JK's Whiterun Outskirts** (1.6.2, checked 2026-09-26): all its edits are around Whiterun
+  (cells 1..9, -5..3), about 14,000 units from the fair; no shared references. The only
+  records both touch are the Tamriel worldspace and its persistent cell (identical to vanilla
+  in both, each only adds its own references) and the navmesh info map (`012FB4`), whose
+  entries the game merges across plugins; neither changes an entry the other does. Any load
+  order.
