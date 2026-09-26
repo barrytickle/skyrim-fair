@@ -1,0 +1,31 @@
+{
+  "name": "SkyrimFairCrowd_Clapping01",
+  "description": "Nord farmer in Farm Clothes 01 and hat, standing and clapping at chest height (npc_applaud2 idle).",
+  "animation": "npc_applaud2.hkx",
+  "frame": 90,
+  "weight": 0.5,
+  "parts": {
+    "outfit": "clothes/farmclothes01/torsom_{w}.nif",
+    "boots": "clothes/farmclothes01/bootsm_{w}.nif",
+    "hat": "clothes/farmclothes01/hatm.nif",
+    "hands": "actors/character/character assets/malehands_{w}.nif",
+    "head": "actors/character/character assets/malehead.nif",
+    "eyes": "actors/character/character assets/eyesmale.nif",
+    "brows": "actors/character/character assets/faceparts/malebrows.nif",
+    "mouth": "actors/character/character assets/mouth/mouthhuman.nif"
+  },
+  "tints": {
+    "skin": [
+      0.92,
+      0.8,
+      0.7
+    ],
+    "hair": [
+      0.36,
+      0.25,
+      0.16
+    ]
+  },
+  "output": "assets/meshes/SkyrimFair/Crowd/SkyrimFairCrowd_Clapping01.nif",
+  "notes": "The farm cap uses body slot 31 (Hair, partition 131), so the game hides the hair headpart under it; no hair mesh is included."
+}
