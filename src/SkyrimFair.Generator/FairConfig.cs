@@ -707,8 +707,14 @@ internal sealed record PassportConfig
 
     public string DeedText { get; init; } = string.Empty;
 
-    /// <summary>The note both are copied from (vanilla MS07JareeRaNote: Note01).</summary>
+    /// <summary>The deed's note is copied from vanilla MS07JareeRaNote (Note01).</summary>
     public string NoteFrom { get; init; } = "000F23E0:Skyrim.esm";
+
+    /// <summary>The passport is a small leather journal, copied from vanilla MQ201UlfricDossier
+    /// (JournalLowPoly02). It's a quest item while the card is being collected: the quest's alias
+    /// PassportItem (Optional, Quest Object, as vanilla CR12's Totem) holds it, so it can't be
+    /// dropped, sold or stored; Claudius takes it back at the hand-in.</summary>
+    public string PassportFrom { get; init; } = "000F6846:Skyrim.esm";
 
     public string SealName { get; init; } = "Claudius's Seal of Approval";
 

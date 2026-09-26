@@ -22,6 +22,12 @@ reward an amulet and the horse's deed; Claudius hands it over (two new lines Bar
   stage 20). Their fragment `SkyrimFairPassportLine` ducks the music as his others do. Until
   Barry records them (`claudius_passport` in the lines file: `passport_give.wav`,
   `passport_done.wav`), `build_voices.py` skips them and they play as subtitles.
+- **The passport is a quest item** (Barry: "make it a quest item so they can't remove it"): a
+  small leather journal (copied from vanilla MQ201UlfricDossier, JournalLowPoly02), placed as a
+  reference of its own and held by the quest's alias `PassportItem` (Optional, Quest Object, as
+  vanilla CR12's Totem: ALST, ALID, FNAM 6, VTCK 0, ALED), so it can't be dropped, sold or
+  stored. Claudius takes it back at the hand-in. A plain passport from the first test build
+  becomes the quest item on the quest's next check. Plugin `b981e5b9ef1fb42a`, no FormID change.
 - **The items:** the Fair Passport and the Deed to the Roof Horse (notes copied from vanilla
   MS07JareeRaNote), Claudius's Seal of Approval (vanilla Gold Necklace, template TNAM, Fortify
   Barter 10% from a copy of EnchArmorFortifySpeechcraftBase, MagicDisallowEnchanting, 500 gold).

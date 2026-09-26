@@ -40,10 +40,9 @@ internal static class FairPassport
         var chatted = new FormList(mod) { EditorID = $"{config.EditorIdPrefix}Chatted" };
         mod.FormLists.Add(chatted);
 
-        var note = master.Books.First(b => b.FormKey == FormKeyHelper.Parse(config.NoteFrom));
-        Book Note(string id, string name, string text)
+        Book Note(string from, string id, string name, string text)
         {
-            var book = note.Duplicate(mod.GetNextFormKey());
+            var book = master.Books.First(b => b.FormKey == FormKeyHelper.Parse(from)).Duplicate(mod.GetNextFormKey());
             book.EditorID = $"{config.EditorIdPrefix}{id}";
             book.Name = name;
             book.BookText = text;
@@ -51,8 +50,8 @@ internal static class FairPassport
             return book;
         }
 
-        var passport = Note("Note", config.PassportName, config.PassportText);
-        var deed = Note("Deed", config.DeedName, config.DeedText);
+        var passport = Note(config.PassportFrom, "Note", config.PassportName, config.PassportText);
+        var deed = Note(config.NoteFrom, "Deed", config.DeedName, config.DeedText);
 
         var enchantment = master.ObjectEffects.First(e => e.FormKey == FormKeyHelper.Parse(config.SealEnchantmentFrom)).Duplicate(mod.GetNextFormKey());
         enchantment.EditorID = $"{config.EditorIdPrefix}SealEnchantment";
@@ -81,8 +80,20 @@ internal static class FairPassport
             Priority = 60,
             Type = Quest.TypeEnum.SideQuest,
             Filter = "Misc\\SkyrimFair\\",
-            NextAliasID = 0,
+            NextAliasID = 1,
         };
+
+        // The passport's alias: filled by the script (ForceRefTo) when Claudius hands it over, and
+        // a Quest Object, so the passport can't leave the player's inventory (vanilla CR12 'Totem':
+        // Optional, Quest Object, no fill).
+        quest.Aliases.Add(new QuestAlias
+        {
+            ID = 0,
+            Type = QuestAlias.TypeEnum.Reference,
+            Name = "PassportItem",
+            Flags = QuestAlias.Flag.Optional | QuestAlias.Flag.QuestObject,
+            VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),  // VTCK 0, as vanilla's
+        });
         quest.TextDisplayGlobals.Add(new FormLink<IGlobalGetter>(chats.FormKey));
         QuestStage Stage(ushort index, string? log, bool complete = false)
         {
@@ -107,6 +118,7 @@ internal static class FairPassport
 
         var script = new ScriptEntry { Name = config.Script };
         script.Properties.Add(Obj("PassportNote", passport.FormKey));
+        script.Properties.Add(new ScriptObjectProperty { Name = "PassportItem", Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 0 });
         script.Properties.Add(Obj("HorseDeed", deed.FormKey));
         script.Properties.Add(Obj("Seal", seal.FormKey));
         script.Properties.Add(Obj("Chats", chats.FormKey));

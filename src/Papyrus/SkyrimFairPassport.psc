@@ -9,7 +9,10 @@ return. The stamps come from the stage script (SongStarted, SongEnded), the came
 check for the horse while a card is being collected.}
 
 Book Property PassportNote Auto
-{The passport itself, handed over with it.}
+{The passport itself (a small journal).}
+ReferenceAlias Property PassportItem Auto
+{Holds the player's passport while the card is collected: a Quest Object, so it can't be dropped,
+sold or stored.}
 Book Property HorseDeed Auto
 Armor Property Seal Auto
 {Claudius's Seal of Approval.}
@@ -28,7 +31,7 @@ Bool songWatching = False
 ; ---- the lines (SkyrimFairPassportLine): 1 the hand-over, 2 the hand-in -------------------
 Function Hand(Int step)
 	If step == 1 && GetStage() < 10
-		Game.GetPlayer().AddItem(PassportNote, 1)
+		GiveCard(False)
 		SetStage(10)
 		Int i = 1
 		While i <= 5
@@ -40,11 +43,27 @@ Function Hand(Int step)
 		RegisterForSingleUpdate(2.0)
 	ElseIf step == 2 && GetStage() == 15
 		Actor player = Game.GetPlayer()
+		; He takes the passport back.
+		ObjectReference card = PassportItem.GetReference()
+		PassportItem.Clear()
+		If card && player.GetItemCount(card) > 0
+			player.RemoveItem(card, 1)
+		ElseIf player.GetItemCount(PassportNote) > 0
+			player.RemoveItem(PassportNote, 1)
+		EndIf
 		player.AddItem(Seal, 1)
 		player.AddItem(HorseDeed, 1)
 		SetObjectiveCompleted(60)
 		SetStage(20)
 	EndIf
+EndFunction
+
+; ---- the passport as a reference of its own, held by the Quest Object alias -------------------
+Function GiveCard(Bool silent)
+	Actor player = Game.GetPlayer()
+	ObjectReference card = player.PlaceAtMe(PassportNote, 1, True, True)
+	PassportItem.ForceRefTo(card)
+	player.AddItem(card, 1, silent)
 EndFunction
 
 ; ---- a stamp: its objective ticked; with all five, the return is shown ----------------------
@@ -97,6 +116,11 @@ Event OnUpdate()
 		Return
 	EndIf
 	Actor player = Game.GetPlayer()
+	; A passport handed over before it was a quest item (a 2.0.1.3 test build) becomes one.
+	If !PassportItem.GetReference() && player.GetItemCount(PassportNote) > 0
+		player.RemoveItem(PassportNote, 1, True)
+		GiveCard(True)
+	EndIf
 	If player.GetWorldSpace() != Fair
 		songWatching = False
 	ElseIf Horse && !IsObjectiveCompleted(50) && player.GetDistance(Horse) < HorseRange && player.HasLOS(Horse)
