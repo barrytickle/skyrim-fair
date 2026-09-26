@@ -2,7 +2,20 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Claudius's new face (2026-09-26, for 2.0.1.3)
+## Current pass: Garrick's and Claudius's new faces (2026-09-26, for 2.0.1.3)
+
+**Garrick** (Barry: "more wood elf than demon elf"): he was already a Wood Elf, but his donor,
+`WERoadCourierWoodElf` [1065EE], has heavy dark smudging round the eyes and cheeks in its
+face tint (seen by converting the candidates' `facetint` .dds to a contact sheet). Now
+**Edorfin** [01E957], a cut Windhelm resident: in `CityWindhelmResidentList` and two
+Relationship records but placed nowhere, so no player meets him. Clean tint, light eye
+shadow, black hair (`HairMaleDarkElf03`), clean-shaven, deep brown Wood Elf eyes.
+- Read back: WoodElfRace, the donor's head parts and five tint layers, voice type unchanged
+  (`06000B`); his FaceGen .nif and .dds byte-identical to Edorfin's.
+- Plugin `231fe0d02971ba36`, deterministic (two runs); 4,605 records, none gone or new, no
+  EditorID changed. Deployed (the plugin and his two FaceGen files).
+
+**Claudius:**
 
 Barry: Claudius "seems a bit young for his character"; he wanted "the monk style hair, bit
 grey", and a face players won't bump into often. His donor was `TreasCorpseCommonerBretonMale`
@@ -14,7 +27,7 @@ Claudius's `template`).
   donor, never the hair part alone (a mismatch gives a dark face).
 - Read back: race NordRace, head parts and six tint layers the donor's, voice type unchanged
   (`060019`). His `facegeom` .nif and `facetint` .dds are byte-identical to the donor's.
-- Plugin `8ff62104172201c2`, deterministic (two runs). Against the previous build: 4,605
+- Plugin `8ff62104172201c2` (superseded by Garrick's), deterministic (two runs). Against the previous build: 4,605
   records both, none gone, none new, no EditorID changed. Deployed (the plugin and his two
   FaceGen files).
 

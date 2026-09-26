@@ -253,7 +253,7 @@
         {
           "id": "Garrick", "name": "Garrick Sol V", "shortName": "Garrick",
           "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "emotion": "Happy", "lineSlots": 12,
-          "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
+          "template": "0001E957:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [1044, 4630, 0, 120], "radius": 2200, "energy": 80,
           "stand": true,
           "idles": [{"idle": "00096F8D:Skyrim.esm", "name": "IdleLuteStart", "hold": 600}],
