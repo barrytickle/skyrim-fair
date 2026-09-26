@@ -156,13 +156,24 @@ detail in `docs/AUDIT.md`'s current pass):
    be dropped.
 
 **Waiting on Barry's decision:**
-- **Visitor lines** (Barry: "something random and unique per person"). Recommended option A:
-  about 120 subtitle-only one-liners, one or two per visitor type (85 of the 120 visitor bases
-  take random voices from the face pool, so voiced lines would need every pool voice type).
-  Only when talked to, not as walk-by greetings. **Draft the lines for Barry to review before
-  building.** Options B (4 fair voice types, ~40 recordings, visitors lose vanilla barks) and C
-  (every pool voice type, ElevenLabs API batch) were explained; a hybrid could voice the few
-  fixed-voice visitors (drunk, children, commander) later.
+- **Visitor lines: Barry chose option B** (voiced, a few fair voice types): the visitors get
+  fair voice types of their own and a Hello pool of voiced one-liners each, played only when
+  talked to (not walk-by greetings). Barry has recorded 10 lines, "not quite ready yet".
+  Before building, settle with Barry:
+  - which voices (planned: 4, young and old, male and female) and which his 10 lines are for;
+    where they go (suggest `cameos/visitors/<voice>/mono/` plus a key per voice in the lines file,
+    built by `build_voices.py` like the cameos')
+  - **the catch to check first:** 85 of the 120 visitor bases take face, race and voice from the
+    face pool (`SkyrimFairFacesMale`/`Female` leveled lists, a Traits template), and a Traits
+    template brings the voice with it. So the fair voices must go on the pool's entries: fine
+    if they're the fair's own NPC records, but vanilla NPCs can't be changed without overriding
+    them. Look at the pool first. The other 35 bases (children, the drunk, ...) set their voice
+    directly.
+  - with fair voice types the visitors lose vanilla's voiced lines (generic greetings, combat
+    and bump barks), which are filtered by voice type; Barry accepted that trade-off
+  - a human voice on a Khajiit, Argonian or Orc face: keep beast races on vanilla voices, or
+    accept it
+  - the new records in a range of their own (0xC0000), after the Passport
 - A quest marker on Claudius for "Return the Fair Passport" (left out to keep the pass small).
 - Then package 2.0.1.3 and write its changelog.
 
