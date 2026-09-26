@@ -2,7 +2,28 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Garrick's new voice, and both cameos' new faces (2026-09-26, for 2.0.1.3)
+## Current pass: the seat fixer that never finished (2026-09-26, for 2.0.1.3)
+
+Barry, testing 2.0.1.3 on a save from before the Passport: people at a bench near Garrick
+"constantly dropping in and out of existence", and no bard music. His Papyrus log: 1,975
+errors from `Reseat()` (`SetAngle`: "cannot be rotated", the same 25 chairs 106 times in two
+minutes), and no "re-seated" line ever. `Reseat` (2.0.1.2, once per `SeatLayoutVersion`)
+disables the 39 seated visitors, turns the chairs, then moves and enables the visitors and
+the 59 keepers; those calls wait on the game, and it only marked itself done at the end.
+OnUpdate kept starting it again (probably the culling's update, on the same quest), so runs
+piled up, each switching the visitors off and on, and the show, which runs after it in
+OnUpdate, never got its turn: no music.
+- Fix (`SkyrimFairAudioScript.psc`): `Reseat` returns at once if a run is going
+  (`reseating`), and marks `seatLayoutDone` before anything waits. A chair is only turned if
+  it's more than 1 degree off its heading (`AngleOff`): all 25 `CommonChair02` already are
+  at it in the plugin, and the game refuses the turn anyway.
+- Shipped in 2.0.1.2, so players who updated an older save can have it too: 2.0.1.3's
+  changelog should say so.
+- Compiled, deployed (the scripts; the plugin unchanged, `b126e0d9fa2a737f`). Barry's check:
+  the benches still, the music playing, one "re-seated" line in the log.
+- Barry confirmed both cameos' new faces in game ("look really good now").
+
+## Earlier pass: Garrick's new voice, and both cameos' new faces (2026-09-26, for 2.0.1.3)
 
 **Garrick's new voice:** Barry re-recorded his 12 lines (his old voice was "a bit squeaky"),
 same files and text. All mono 44.1 kHz 16-bit, 4.5-6.9 s. `build_voices.py` rebuilt Garrick

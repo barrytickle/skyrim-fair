@@ -294,6 +294,9 @@ Int phase = 0
 Int track = 0
 ; The seat layout this save has been brought to (SeatLayoutVersion).
 Int seatLayoutDone = 0
+; True while Reseat runs: its Disable, MoveTo and Enable calls wait on the game, and another
+; OnUpdate arriving meanwhile started it again and again (2026-09-26).
+Bool reseating = False
 Int songInstance = 0
 Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
@@ -851,6 +854,14 @@ EndFunction
 ; stools' angles and the visitors' old spots, so they sat facing away, leaning on nothing
 ; (a Nexus player's screenshot, 2026-09-25).
 Function Reseat()
+	; Marked done before anything waits on the game, so no later OnUpdate starts it again: each
+	; run switched every seated visitor off and on, and overlapping runs kept them popping in and
+	; out at the benches, the run never finishing (Barry's screenshot and log, 2026-09-26).
+	If reseating
+		Return
+	EndIf
+	reseating = True
+	seatLayoutDone = SeatLayoutVersion
 	; The seated first taken out: one already sitting keeps his old seat's transform if his chair
 	; is turned under him (layout 1 left one sitting beside his chair, 2026-09-25).
 	Int i = 0
@@ -860,9 +871,11 @@ Function Reseat()
 		EndIf
 		i += 1
 	EndWhile
+	; Only a chair not already at its heading is turned: the game refuses to rotate the chairs
+	; ("cannot be rotated", all 25 in Barry's log), and in a save they are mostly right already.
 	i = 0
 	While i < SeatChairs.Length && i < SeatYaw.Length
-		If SeatChairs[i]
+		If SeatChairs[i] && AngleOff(SeatChairs[i].GetAngleZ(), SeatYaw[i]) > 1.0
 			SeatChairs[i].SetAngle(0.0, 0.0, SeatYaw[i])
 		EndIf
 		i += 1
@@ -894,8 +907,23 @@ Function Reseat()
 		EndIf
 		i += 1
 	EndWhile
-	seatLayoutDone = SeatLayoutVersion
+	reseating = False
 	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs, " + Sitters.Length + " visitors and " + Keepers.Length + " keepers (layout " + SeatLayoutVersion + ")")
+EndFunction
+
+; How far apart two headings are, in degrees (0 to 180), whatever turns either carries.
+Float Function AngleOff(Float a, Float b)
+	Float d = a - b
+	While d > 180.0
+		d -= 360.0
+	EndWhile
+	While d < -180.0
+		d += 360.0
+	EndWhile
+	If d < 0.0
+		Return -d
+	EndIf
+	Return d
 EndFunction
 
 ; Every companion the finder turns up that isn't already near the player is moved to them,

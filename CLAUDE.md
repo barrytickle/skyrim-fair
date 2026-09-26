@@ -156,8 +156,14 @@ detail in `docs/AUDIT.md`'s current pass):
   (01E957), a Wood Elf cut from the game (placed nowhere): clean skin, black hair.
 - **Garrick's new voice:** Barry re-recorded his 12 lines (same text); only the lines' stored
   lengths change in the plugin.
+- **The seat fixer that never finished** (Barry's test, 2026-09-26): on a save from before
+  2.0.1.2, `Reseat()` kept being restarted, so seated visitors popped in and out and the
+  music never started. It now runs once and can't overlap. It shipped in 2.0.1.2: say so in
+  the changelog. Both new faces confirmed by Barry.
 
 **Barry's tests for tomorrow:**
+0. The seat fix, on the same save: the benches still, the music playing, and one
+   "SkyrimFairAudio: re-seated" line in the Papyrus log.
 1. Claudius's new voice: level beside Garrick, lip sync, line 17 turning up. And his new face:
    old enough, the hair monkish enough (if not, another donor is one config line), no dark face.
    Garrick's new face too: less sinister, no dark face. And his new voice: level beside
