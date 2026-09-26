@@ -135,7 +135,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `d4c291be6bf40ec3`, deterministic;
+**2.0.1.3, built and deployed, not yet packaged** (plugin `d186e57b9fc45de1`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
@@ -167,6 +167,8 @@ detail in `docs/AUDIT.md`'s current pass):
   recording), then hands it over. Passport range now 0xB0000-0xB000C.
   Its first build crashed the game at startup: the topic's SNAM was blank (Mutagen writes it
   from `SubtypeName`). Fixed (`CUST`).
+  Then he spoke but didn't run (he waited where the player had been at the gate): now he waits
+  where he is and triggers on the player anywhere in the fair, as Ancano's run-up.
 
 **Barry's tests for tomorrow:**
 0a. The run-up, on a save without the Passport: entering through the gate, and loading a save

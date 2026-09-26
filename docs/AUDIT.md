@@ -28,6 +28,12 @@ when present. Four records at the end of the Passport's range, so nothing moves:
   plugin now has a code (`IDAT`, `HELO`, `CUST`). My subrecord check compared names, not
   values: new record types are now compared value by value too. Plugin `d4c291be6bf40ec3`,
   deterministic; deployed.
+- **He said the line but didn't run up** (Barry's test). The copied package waits "near the
+  player" (input 8), a spot the game fixes when the package starts (the player at the gate): he
+  went there and waited until the player happened by. Now as Ancano's: wait (8) and trigger (62)
+  near himself (Ancano's input 62, copied), radius 128 and 12,000 (`passport.greetRange`: the
+  whole fair, about 5,400 by 7,000, from anywhere); the greet distance (75) stays 300 on the
+  player. Plugin `d186e57b9fc45de1`, deterministic, no FormID change; deployed.
 
 ## Earlier pass: the Passport's Claudius stamp retired (2026-09-26, for 2.0.1.3)
 

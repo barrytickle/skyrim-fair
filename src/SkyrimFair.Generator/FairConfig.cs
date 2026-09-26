@@ -692,9 +692,19 @@ internal sealed record PassportConfig
     /// </summary>
     public string Stop { get; init; } = string.Empty;
 
-    /// <summary>The vanilla force greet his run-up copies: every location on the player, so he
-    /// runs straight to them wherever they are.</summary>
+    /// <summary>The vanilla force greet his run-up copies (the ForceGreet template, Run).</summary>
     public string GreetFrom { get; init; } = "00109C68:Skyrim.esm";
+
+    /// <summary>
+    /// The vanilla force greet whose wait and trigger locations his takes: "near self", as
+    /// Ancano's in MG03. The copied one waits "near the player", which the game fixes where the
+    /// player is when the package starts (at the gate), so he went there and waited (Barry's
+    /// test, 2026-09-26). Near self, he waits where he is and, the player in range, runs to them.
+    /// </summary>
+    public string GreetTriggerFrom { get; init; } = "0010E811:Skyrim.esm";
+
+    /// <summary>The trigger's radius round him: the whole fair (about 5,400 by 7,000) from anywhere.</summary>
+    public float GreetRange { get; init; } = 12000f;
 
     /// <summary>Visitors to talk to for the chat stamp.</summary>
     public int Chats { get; init; } = 5;

@@ -348,6 +348,15 @@ internal static class FairPassport
             var greet = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetFrom)).Duplicate(mod.GetNextFormKey());
             greet.EditorID = $"{config.EditorIdPrefix}RunUp";
             greet.VirtualMachineAdapter = null;
+            // Wait (8) and trigger (62) near himself, as Ancano's; the greet distance (75) stays on
+            // the player, so once triggered he runs to them wherever they are.
+            var nearSelf = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetTriggerFrom)).Data[62];
+            var waitHere = (PackageDataLocation)nearSelf.DeepCopy();
+            waitHere.Location.Radius = 128;
+            greet.Data[8] = waitHere;
+            var trigger = (PackageDataLocation)nearSelf.DeepCopy();
+            trigger.Location.Radius = (uint)config.GreetRange;
+            greet.Data[62] = trigger;
             var topicInput = greet.Data.Values.OfType<PackageDataTopic>().Single();
             topicInput.Topics.Clear();
             topicInput.Topics.Add(new TopicReference { Reference = new FormLink<IDialogTopicGetter>(greetTopic.FormKey) });
