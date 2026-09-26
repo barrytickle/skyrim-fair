@@ -116,7 +116,7 @@ python tools/package.py --version 2.0.1.3   # a release: dist/release/SkyrimFair
   - `0x80000` the lights at the lanterns (`lights`)
   - `0x90000` the shops (`shops`: factions, merchant chests, buy lists)
   - `0xA0000` the paper lanterns (`paperLanterns`: a texture set and a static per shape and colour)
-  - `0xB0000` the Fair Passport (`passport`: the quest, its items, Claudius's two lines)
+  - `0xB0000` the Fair Passport (`passport`: the quest, its items, Claudius's lines, his run-up)
 
   Inside a range, append only. Diff FormIDs against the deployed plugin every pass.
 - **Rotations:** Skyrim turns a reference about the world's Z, then Y, then X, clockwise.
@@ -135,7 +135,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `8b72aa04de96adbb`, deterministic;
+**2.0.1.3, built and deployed, not yet packaged** (plugin `12dcb9f63a80eb0a`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
@@ -162,8 +162,13 @@ detail in `docs/AUDIT.md`'s current pass):
   the changelog. Both new faces confirmed by Barry.
 - **The Passport: confirmed working by Barry.** Its "Talk to Claudius" stamp is retired (it ticked
   at the hand-over): four stamps, then "Return the Fair Passport to Claudius Vale".
+- **Claudius's run-up** (a nod to Oblivion): without a Passport, in the fair, he runs to the player
+  (a force greet) and opens with "Stop! You violated the law! ...Well. The fair rules." (Barry's
+  recording), then hands it over. Passport range now 0xB0000-0xB000C.
 
 **Barry's tests for tomorrow:**
+0a. The run-up, on a save without the Passport: entering through the gate, and loading a save
+   inside the fair: he runs over, says the stop line then the hand-over, voiced, the music down.
 0. The seat fix, on the same save: the benches still, the music playing, and one
    "SkyrimFairAudio: re-seated" line in the Papyrus log.
 1. Claudius's new voice: level beside Garrick, lip sync, line 17 turning up. And his new face:

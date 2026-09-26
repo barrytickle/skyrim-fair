@@ -2,7 +2,28 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the Passport's Claudius stamp retired (2026-09-26, for 2.0.1.3)
+## Current pass: Claudius's run-up, a nod to Oblivion (2026-09-26, for 2.0.1.3)
+
+Barry: when you enter the fair (or load a save there) without the Passport, Claudius runs up:
+"Stop! You violated the law! ...Well. The fair rules.", then the hand-over. Barry recorded
+`passport_stop.wav` (2.6 s), the third entry of `claudius_passport`; `build_voices.py` takes it
+when present. Four records at the end of the Passport's range, so nothing moves:
+- `0B0009` a topic (Topic, Custom, priority 50) in the cameos quest, no EditorID, so its voice
+  files take the proven `skyrimfaircameos__<info>_<n>` names; `0B000A` `SkyrimFairPassportStopBranch`
+  (Player, Blocking), field for field as Ancano's `MG03AncanoForcegreetBranch`; `0B000B` its one
+  line, two responses (the stop, the hand-over), as Ancano's run-up line is, on Claudius and
+  Passport stage 0, with the hand-over fragment (step 1; music ducked 13.04 s).
+- `0B000C` `SkyrimFairPassportRunUp`: a copy of `dunBlindCliffForceGreetAndRewardPlayer`
+  (the ForceGreet template, Run; every location on the player, so he runs straight to them),
+  its topic ours, conditions Passport stage 0 and the player in the fair's worldspace (without
+  it he'd set out across Skyrim). First in Claudius's packages.
+- The stage script (`PassportGreet`) plays him no idle and moves him to no spot while he runs
+  it, and ends an idle he's in.
+- Subrecords against vanilla's: the topic lacks only EDID; the line has VMAD and no TCLT/CIS2;
+  the package has the same subrecords plus two CTDA; the branch matches byte for byte but for
+  its IDs. Plugin `12dcb9f63a80eb0a`, deterministic; 4,609 records (4 new, none gone). Deployed.
+
+## Earlier pass: the Passport's Claudius stamp retired (2026-09-26, for 2.0.1.3)
 
 Barry: the Passport works "really good"; but "Talk to Claudius" was ticked the moment he
 handed it over, so the step was redundant. Objective 30 is retired (an empty entry in

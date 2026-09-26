@@ -686,6 +686,16 @@ internal sealed record PassportConfig
 
     public string Done { get; init; } = string.Empty;
 
+    /// <summary>
+    /// What he opens his run-up with (the lines file's third entry, when recorded), before the
+    /// hand-over: a nod to Oblivion's guards. Empty: no run-up.
+    /// </summary>
+    public string Stop { get; init; } = string.Empty;
+
+    /// <summary>The vanilla force greet his run-up copies: every location on the player, so he
+    /// runs straight to them wherever they are.</summary>
+    public string GreetFrom { get; init; } = "00109C68:Skyrim.esm";
+
     /// <summary>Visitors to talk to for the chat stamp.</summary>
     public int Chats { get; init; } = 5;
 

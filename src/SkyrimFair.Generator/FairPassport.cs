@@ -196,20 +196,27 @@ internal static class FairPassport
 
             if (cue is { } rec)
             {
-                var dst = Path.Combine(voiceRoot, voice.EditorID!, $"{cameos.QuestEditorId}__{info.FormKey.ID:x8}_1.fuz".ToLowerInvariant());
-                Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
-                var fuz = File.ReadAllBytes(Path.Combine(cues, rec.GetProperty("fuz").GetString()!));
-                if (cameos.LooseLip)
-                {
-                    // As FairCameos: the .fuz unpacked into the .lip and .xwm plain Skyrim reads.
-                    var lipSize = BitConverter.ToInt32(fuz, 8);
-                    File.WriteAllBytes(Path.ChangeExtension(dst, ".lip"), fuz[12..(12 + lipSize)]);
-                    File.WriteAllBytes(Path.ChangeExtension(dst, ".xwm"), fuz[(12 + lipSize)..]);
-                }
-                else
-                {
-                    File.WriteAllBytes(dst, fuz);
-                }
+                Voice(info.FormKey, 1, rec);
+            }
+        }
+
+        // A recorded line's voice, under the name the engine looks for (the topics are the cameos
+        // quest's, and have no EditorID).
+        void Voice(FormKey info, int response, System.Text.Json.JsonElement rec)
+        {
+            var dst = Path.Combine(voiceRoot, voice.EditorID!, $"{cameos.QuestEditorId}__{info.ID:x8}_{response}.fuz".ToLowerInvariant());
+            Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+            var fuz = File.ReadAllBytes(Path.Combine(cues, rec.GetProperty("fuz").GetString()!));
+            if (cameos.LooseLip)
+            {
+                // As FairCameos: the .fuz unpacked into the .lip and .xwm plain Skyrim reads.
+                var lipSize = BitConverter.ToInt32(fuz, 8);
+                File.WriteAllBytes(Path.ChangeExtension(dst, ".lip"), fuz[12..(12 + lipSize)]);
+                File.WriteAllBytes(Path.ChangeExtension(dst, ".xwm"), fuz[(12 + lipSize)..]);
+            }
+            else
+            {
+                File.WriteAllBytes(dst, fuz);
             }
         }
 
@@ -246,7 +253,115 @@ internal static class FairPassport
             .FirstOrDefault(s => s.Name == fw.TalkDuck.Script);
         talk?.Properties.Add(Obj("Passport", quest.FormKey));
 
+        // ---- his run-up (Barry, 2026-09-26: a nod to Oblivion's guards) ----------------------------
+        // Built last, so its records take the range's next IDs and nothing before them moves. While
+        // the passport isn't issued and the player is in the fair, Claudius runs to them (a copy of
+        // a vanilla force greet whose every location is the player) and opens a blocking branch whose
+        // one line is two responses, the stop then the hand-over, as Ancano's run-up in MG03 is.
+        var runUp = string.Empty;
+        if (!string.IsNullOrEmpty(config.Stop))
+        {
+            var cameoQuest = topic.Quest.FormKey;
+            var greetTopic = new DialogTopic(mod)
+            {
+                Quest = new FormLinkNullable<IQuestGetter>(cameoQuest),
+                Priority = 50f,
+                TopicFlags = 0,
+                Category = DialogTopic.CategoryEnum.Topic,
+                Subtype = DialogTopic.SubtypeEnum.Custom,
+            };
+            var branch = new DialogBranch(mod)
+            {
+                EditorID = $"{config.EditorIdPrefix}StopBranch",
+                Quest = new FormLink<IQuestGetter>(cameoQuest),
+                Category = DialogBranch.CategoryType.Player,
+                Flags = DialogBranch.Flag.Blocking,
+                StartingTopic = new FormLinkNullable<IDialogTopicGetter>(greetTopic.FormKey),
+            };
+            greetTopic.Branch = new FormLinkNullable<IDialogBranchGetter>(branch.FormKey);
+
+            var stopCue = recorded.Count >= 3 ? recorded[2] : (System.Text.Json.JsonElement?)null;
+            var giveCue = recorded.Count >= 1 ? recorded[0] : (System.Text.Json.JsonElement?)null;
+            var stopText = stopCue?.GetProperty("text").GetString() ?? config.Stop;
+            var giveText = giveCue?.GetProperty("text").GetString() ?? config.Give;
+            var info = new DialogResponses(mod) { Flags = new DialogResponseFlags(), FavorLevel = FavorLevel.None };  // ENAM, as vanilla's
+            byte n = 1;
+            foreach (var text in new[] { stopText, giveText })
+            {
+                info.Responses.Add(new DialogResponse
+                {
+                    Emotion = emotion,
+                    EmotionValue = 50,
+                    ResponseNumber = n++,
+                    Flags = DialogResponse.Flag.UseEmotionAnimation,
+                    Text = text,
+                    ScriptNotes = string.Empty,
+                    Edits = string.Empty,
+                });
+            }
+
+            var him = new GetIsIDConditionData { RunOnType = Condition.RunOnType.Subject };
+            him.Object.Link.SetTo(inspector.FormKey);
+            info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = him });
+            var notIssued = new GetStageConditionData { RunOnType = Condition.RunOnType.Subject };
+            notIssued.Quest.Link.SetTo(quest.FormKey);
+            info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = notIssued });
+            greetTopic.Responses.Add(info);
+
+            float Seconds(System.Text.Json.JsonElement? cue, string text) =>
+                cue is { } c && c.TryGetProperty("seconds", out var len) ? len.GetSingle() : 1.5f + text.Length / 15f;
+            var entry = new ScriptEntry { Name = config.LineScript, Flags = ScriptEntry.Flag.Local };
+            entry.Properties.Add(Obj("DuckUntil", duck.FormKey));
+            entry.Properties.Add(new ScriptFloatProperty { Name = "Seconds", Data = Seconds(stopCue, stopText) + Seconds(giveCue, giveText) + 0.5f });
+            entry.Properties.Add(Obj("Passport", quest.FormKey));
+            entry.Properties.Add(new ScriptIntProperty { Name = "Step", Data = 1 });
+            info.VirtualMachineAdapter = new DialogResponsesAdapter
+            {
+                Version = 5,
+                ObjectFormat = 2,
+                ScriptFragments = new ScriptFragments
+                {
+                    ExtraBindDataVersion = 2,
+                    FileName = config.LineScript,
+                    OnBegin = new ScriptFragment { ExtraBindDataVersion = 1, ScriptName = config.LineScript, FragmentName = "Fragment_0" },
+                },
+            };
+            info.VirtualMachineAdapter.Scripts.Add(entry);
+            if (stopCue is { } s1)
+            {
+                Voice(info.FormKey, 1, s1);
+            }
+
+            if (giveCue is { } s2)
+            {
+                Voice(info.FormKey, 2, s2);
+            }
+
+            mod.DialogTopics.Add(greetTopic);
+            mod.DialogBranches.Add(branch);
+
+            // The package: the vanilla one with this topic, on these conditions. Only while the player
+            // is in the fair: elsewhere he'd set out across Skyrim after them.
+            var greet = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetFrom)).Duplicate(mod.GetNextFormKey());
+            greet.EditorID = $"{config.EditorIdPrefix}RunUp";
+            greet.VirtualMachineAdapter = null;
+            var topicInput = greet.Data.Values.OfType<PackageDataTopic>().Single();
+            topicInput.Topics.Clear();
+            topicInput.Topics.Add(new TopicReference { Reference = new FormLink<IDialogTopicGetter>(greetTopic.FormKey) });
+            greet.Conditions.Clear();
+            var stillNot = new GetStageConditionData { RunOnType = Condition.RunOnType.Subject };
+            stillNot.Quest.Link.SetTo(quest.FormKey);
+            greet.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = stillNot });
+            var inFair = new GetInWorldspaceConditionData { RunOnType = Condition.RunOnType.Reference, Reference = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse("00000014:Skyrim.esm")) };
+            inFair.WorldspaceOrList.Link.SetTo(fairWs.FormKey);
+            greet.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = inFair });
+            mod.Packages.Add(greet);
+            inspector.Packages.Insert(0, new FormLink<IPackageGetter>(greet.FormKey));
+            stage.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript").Properties.Add(Obj("PassportGreet", greet.FormKey));
+            runUp = $", run-up {(stopCue is null ? "subtitled" : "voiced")}";
+        }
+
         return $"{quest.EditorID}: {quest.Objectives.Count} objectives, {stamped} cameo lines stamp, "
-            + $"lines {(recorded.Count >= 2 ? "voiced" : "subtitles only")}, horse {(horse is null ? "missing" : "found")}, talk perk {(talk is null ? "missing" : "hooked")}";
+            + $"lines {(recorded.Count >= 2 ? "voiced" : "subtitles only")}, horse {(horse is null ? "missing" : "found")}, talk perk {(talk is null ? "missing" : "hooked")}{runUp}";
     }
 }

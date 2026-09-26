@@ -57,7 +57,8 @@ def main():
             continue
         build(member['id'], all_lines[key], src, loud)
 
-    # The Fair Passport's two lines (fairWorld.passport): Claudius's hand-over and hand-in, kept
+    # The Fair Passport's lines (fairWorld.passport): Claudius's hand-over and hand-in (and the stop
+    # his run-up opens with, the third), kept
     # apart from his greetings. Until they're recorded, the plugin plays them as subtitles only.
     passport = config['fairWorld'].get('passport', {})
     if passport.get('enabled'):
@@ -65,7 +66,9 @@ def main():
         src = passport.get('voiceDir', 'cameos/claudius/mono')
         entries = all_lines.get(key, [])
         if len(entries) >= 2 and all((ROOT / src / e['file']).exists() for e in entries[:2]):
-            build('Passport', entries[:2], src, loud)
+            # A third, the stop he opens his run-up with, once it's recorded.
+            take = 3 if len(entries) >= 3 and (ROOT / src / entries[2]['file']).exists() else 2
+            build('Passport', entries[:take], src, loud)
         else:
             shutil.rmtree(OUT / 'Passport', ignore_errors=True)
             print(f"  Passport: no recordings yet ('{key}' in {lines_file.name}, files in {src}): subtitles only")

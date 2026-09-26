@@ -150,6 +150,9 @@ GlobalVariable Property TalkDuckUntil Auto
 {Set by the talk perk's fragment: the real time until which the music stays ducked.}
 Quest Property Passport Auto
 {The Fair Passport (SkyrimFairPassport), if built: told when each song starts and ends.}
+Package Property PassportGreet Auto
+{Claudius's run up to a player without a passport (a force greet): while he runs it, no idle
+and no move to another spot, and an idle he's in is ended at once.}
 Perk Property FairPrices Auto
 {The fair's prices (FairShops.cs): a hidden perk, buying at many times the price, only in the
 fair's worldspace. Given to the player at the fair; it does nothing anywhere else.}
@@ -1010,6 +1013,10 @@ Function CameoIdles2(Float now)
 	Int i = 0
 	While i < Cameos.Length && i < 8
 		Actor a = Cameos[i]
+		Bool greeting = PassportGreet && a && a.GetCurrentPackage() == PassportGreet
+		If greeting && cameoPlaying[i]
+			cameoNext[i] = now
+		EndIf
 		If cameoNext[i] == 0.0
 			cameoNext[i] = now + Utility.RandomFloat(CameoEveryMin3[i], CameoEveryMax3[i]) * perSecond
 		ElseIf now >= cameoNext[i] && a
@@ -1035,7 +1042,7 @@ Function CameoIdles2(Float now)
 				cameoPlaying[i] = False
 				cameoExiting[i] = True
 				cameoNext[i] = now + 3.0 * perSecond
-			ElseIf CameoIdleCount2[i] > 0 && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
+			ElseIf CameoIdleCount2[i] > 0 && !greeting && a.Is3DLoaded() && !a.IsInCombat() && a.GetSitState() == 0 && !a.IsInDialogueWithPlayer()
 				Int k = CameoFirstIdle2[i] + cameoPlays[i] % CameoIdleCount2[i]
 				If a.PlayIdle(CameoIdles2[k])
 					cameoIdleNow[i] = k
@@ -1056,7 +1063,7 @@ Function CameoIdles2(Float now)
 		If a && i < CameoSpotCount.Length && CameoSpotCount[i] > 1 && i < CameoSpot.Length && CameoSpot[i]
 			If cameoMoveNext[i] == 0.0
 				cameoMoveNext[i] = now + Utility.RandomFloat(CameoMoveMin3[i], CameoMoveMax3[i]) * perSecond
-			ElseIf now >= cameoMoveNext[i] && !cameoPlaying[i] && !cameoExiting[i]
+			ElseIf now >= cameoMoveNext[i] && !cameoPlaying[i] && !cameoExiting[i] && !greeting
 				Int count = CameoSpotCount[i]
 				Int spot = ((CameoSpot[i].GetValue() as Int) + 1 + Utility.RandomInt(0, count - 2)) % count
 				CameoSpot[i].SetValue(spot)
