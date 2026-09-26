@@ -82,6 +82,11 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   sound marker (`SOUN`, not an `SNDR`) played at him by script while the player is near,
   with a pause between runs, ducked like the stage music when someone's talked to. Barry is
   also re-voicing Garrick's 12 lines (same files and slots, so no FormID moves).
+- **The roof horse camps too** (Barry): moved to the camp and perched on a big flat-topped
+  boulder beside it, standing and grazing up there (horses have no sit idle; a tent's slope
+  would drop him). A short patrol or hold package on the rock's top, like the roof's `deck`,
+  which needs a flat collision top. The Passport's horse stamp (in reach and in sight) works
+  there as well.
 - **Changing it:** ask Claudius, at the camp or at the fair. Asking for the fair
   back at the camp fades the screen to black (`Game.FadeOutGame`, vanilla), swaps the
   state, and fades in on the fair. Otherwise the fair only arrives or leaves while the
