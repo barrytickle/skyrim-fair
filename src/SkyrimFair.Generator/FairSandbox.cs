@@ -66,6 +66,9 @@ internal static class FairSandbox
         // ---- coc marker: where the console drops the player ---------------------
         var marker = Place(mod, FormKeyHelper.Parse(s.CocMarker), 0f, 0f, s.FloorZ + MarkerLift);
         marker.EditorID = s.EditorId + "COCMarker";
+        // Mutagen doesn't write the Persistent flag from group membership; xEdit
+        // reports a ref in the Persistent group without it as an error.
+        marker.MajorRecordFlagsRaw = 0x400;
         cell.Persistent.Add(marker);
 
         // Interior cells are filed by the decimal digits of their FormID: the last

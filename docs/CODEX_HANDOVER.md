@@ -956,3 +956,4 @@ On taking over:
 4. summarise the current state to Barry in a short handover note
 5. wait for Barry's in-game feedback or next explicit task
 6. from then on, own the implementation and documentation workflow above
+- **every ref in a Persistent group needs the Persistent flag (0x400) set by hand**, interior cells included: Mutagen writes group membership but not the flag, and xEdit reports the mismatch as an error (a player's report, 2026-09-26: the sandbox's COC marker). Check every cell's Persistent and Temporary groups against the flag when adding persistent refs

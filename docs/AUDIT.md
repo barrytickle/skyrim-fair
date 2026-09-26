@@ -2,7 +2,21 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the Fair Passport (2026-09-26, for 2.0.1.3)
+## Current pass: an xEdit error from a player (2026-09-26, for 2.0.1.3)
+
+A player reported xEdit errors in interior cell block 9, "something about a persistent flag".
+Block 9 holds one cell, `SkyrimFairSandbox` [0009E1] (the dev sandbox that also holds the
+33 shops' merchant chests). Its COC marker `SkyrimFairSandboxCOCMarker` [000A14] sat in the
+cell's Persistent group without the Persistent record flag (Mutagen doesn't set it from group
+membership). Harmless in game, but a real error. Fixed in `FairSandbox.cs` (flag 0x400).
+- A throwaway Mutagen checker (every interior and exterior cell: refs in Persistent groups
+  without the flag, flagged refs in Temporary groups, interior cells in the wrong block or
+  sub-block, duplicate block groups) found only that ref, in 2.0.1.2 and the 2.0.1.3 build.
+  After the fix it finds nothing.
+- Plugin `afe4dbbe11350952`, deterministic; one byte differs from the previous build (the
+  flag). No FormID change. Deployed. Ships with 2.0.1.3.
+
+## Earlier pass: the Fair Passport (2026-09-26, for 2.0.1.3)
 
 Barry: the fair has "great stuff to look at, but not enough reasons to stay". Of the minigame
 ideas he chose **the Fair Passport**: stamps for the roof horse, the show and the people; the
