@@ -28,6 +28,7 @@ reward an amulet and the horse's deed; Claudius hands it over (two new lines Bar
 - **Checked against vanilla:** the quest subrecord by subrecord with MS07 and FreeformRiften07
   (every stage a QSDT, every objective an FNAM, QTGL for the count), the lines with the cameos'
   (ENAM set explicitly), the amulet with EnchNecklaceOneHanded06.
+- Barry recorded both lines ("Everyone at this fair requires a passport..." and "Every stamp. All in order..."), now voiced: plugin `4290ba2c4f320c31` (the lines' durations), no FormID change.
 - Plugin `357c46190e47c1b3`, deterministic. FormID diff: 9 added (0xB0000-0xB0008), none moved.
   All 13 scripts compile. Deployed.
 - **Not yet confirmed in game:** the whole flow. To test: talk to Claudius (the Passport, the
