@@ -24,4 +24,4 @@ Float Property Seconds Auto
 Quest Property Passport Auto
 {The Fair Passport (SkyrimFairPassport), if built.}
 Int Property Stamp Auto
-{The Passport objective this cameo's lines stamp (20 Garrick, 30 Claudius; 0 none).}
+{The Passport objective this cameo's lines stamp (20 Garrick; 0 none, as Claudius's: his stamp, 30, is retired).}

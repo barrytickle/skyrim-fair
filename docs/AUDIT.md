@@ -2,7 +2,17 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the seat fixer that never finished (2026-09-26, for 2.0.1.3)
+## Current pass: the Passport's Claudius stamp retired (2026-09-26, for 2.0.1.3)
+
+Barry: the Passport works "really good"; but "Talk to Claudius" was ticked the moment he
+handed it over, so the step was redundant. Objective 30 is retired (an empty entry in
+`passport.objectives`: the generator skips it and the others keep their indices): the stamps
+are 10 song, 20 Garrick, 40 five visitors, 50 the horse; then 60, "Return the Fair Passport to
+Claudius Vale", as before. Claudius's 17 lines stamp nothing (`Stamp` 0); `Stamp()` ignores 30.
+The card's list loses "One (1) conversation with the Inspector". Plugin `8b72aa04de96adbb`,
+deterministic, no FormID change; scripts and plugin deployed.
+
+## Earlier pass: the seat fixer that never finished (2026-09-26, for 2.0.1.3)
 
 Barry, testing 2.0.1.3 on a save from before the Passport: people at a bench near Garrick
 "constantly dropping in and out of existence", and no bard music. His Papyrus log: 1,975

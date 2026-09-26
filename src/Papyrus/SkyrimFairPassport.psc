@@ -3,8 +3,8 @@ Scriptname SkyrimFairPassport Extends Quest
 objectives are the stamps, and a full card handed back to him earns the Seal and the deed.
 
 Stages: 0 not issued; 10 issued, collecting; 15 every stamp, return it; 20 returned (complete).
-Objectives: 10 a whole song, 20 Garrick, 30 Claudius, 40 the chats, 50 the roof horse, 60 the
-return. The stamps come from the stage script (SongStarted, SongEnded), the cameos' lines
+Objectives: 10 a whole song, 20 Garrick, 40 the chats, 50 the roof horse, 60 the return (30,
+Claudius's own stamp, is retired: he hands the passport over, so it was done at once). The stamps come from the stage script (SongStarted, SongEnded), the cameos' lines
 (SkyrimFairCameoLine: Stamp), the talk perk (SkyrimFairTalkDuck: Chat), and this script's own
 check for the horse while a card is being collected.}
 
@@ -33,13 +33,10 @@ Function Hand(Int step)
 	If step == 1 && GetStage() < 10
 		GiveCard(False)
 		SetStage(10)
-		Int i = 1
-		While i <= 5
-			SetObjectiveDisplayed(i * 10)
-			i += 1
-		EndWhile
-		; Talking to him counts: he has just spoken.
-		Stamp(30)
+		SetObjectiveDisplayed(10)
+		SetObjectiveDisplayed(20)
+		SetObjectiveDisplayed(40)
+		SetObjectiveDisplayed(50)
 		RegisterForSingleUpdate(2.0)
 	ElseIf step == 2 && GetStage() == 15
 		Actor player = Game.GetPlayer()
@@ -66,19 +63,15 @@ Function GiveCard(Bool silent)
 	player.AddItem(card, 1, silent)
 EndFunction
 
-; ---- a stamp: its objective ticked; with all five, the return is shown ----------------------
+; ---- a stamp: its objective ticked; with all four, the return is shown ----------------------
 Function Stamp(Int objective)
-	If GetStage() != 10 || IsObjectiveCompleted(objective)
+	If GetStage() != 10 || objective == 30 || IsObjectiveCompleted(objective)
 		Return
 	EndIf
 	SetObjectiveCompleted(objective)
-	Int i = 1
-	While i <= 5
-		If !IsObjectiveCompleted(i * 10)
-			Return
-		EndIf
-		i += 1
-	EndWhile
+	If !IsObjectiveCompleted(10) || !IsObjectiveCompleted(20) || !IsObjectiveCompleted(40) || !IsObjectiveCompleted(50)
+		Return
+	EndIf
 	SetStage(15)
 	SetObjectiveDisplayed(60)
 EndFunction

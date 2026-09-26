@@ -110,6 +110,12 @@ internal static class FairPassport
         quest.Stages.Add(Stage(20, Log(2), complete: true));
         for (var i = 0; i < config.Objectives.Count; i++)
         {
+            // An empty entry is a retired objective: its index stays unused, so the others keep theirs.
+            if (string.IsNullOrEmpty(config.Objectives[i]))
+            {
+                continue;
+            }
+
             var text = config.Objectives[i]
                 .Replace("{count}", $"<Global={chats.EditorID}>", StringComparison.Ordinal)
                 .Replace("{total}", config.Chats.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal);
@@ -215,7 +221,9 @@ internal static class FairPassport
             var npc = mod.Npcs.FirstOrDefault(n => n.EditorID == $"{cameos.EditorIdPrefix}{m.Id}");
             if (npc is not null)
             {
-                stampOf[npc.FormKey] = m.Id == config.Inspector ? 30 : 20;
+                // The Inspector's stamp (30) is retired: he hands the passport over, so talking to him
+                // was done the moment it began (Barry, 2026-09-26). His lines stamp nothing.
+                stampOf[npc.FormKey] = m.Id == config.Inspector ? 0 : 20;
             }
         }
 
