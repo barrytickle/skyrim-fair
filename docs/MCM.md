@@ -76,7 +76,12 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   camp by the road at the gate's spot (tent, bedroll, campfire, a table with his ledger),
   enabled opposite the fair's marker. Claudius is one actor: when the fair leaves, he is
   moved to the camp and a package conditioned on the global sandboxes him there; when it
-  comes back, he returns to his rounds. Garrick stays inside, out of reach.
+  comes back, he returns to his rounds.
+- **Garrick camps with him** (Barry): moved to the camp the same way, sat by the fire with his
+  lute, singing a vanilla bard song (Barry supplies the recording, in Garrick's voice): a
+  sound marker (`SOUN`, not an `SNDR`) played at him by script while the player is near,
+  with a pause between runs, ducked like the stage music when someone's talked to. Barry is
+  also re-voicing Garrick's 12 lines (same files and slots, so no FormID moves).
 - **Changing it:** ask Claudius, at the camp or at the fair. Asking for the fair
   back at the camp fades the screen to black (`Game.FadeOutGame`, vanilla), swaps the
   state, and fades in on the fair. Otherwise the fair only arrives or leaves while the
