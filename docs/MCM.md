@@ -55,3 +55,32 @@ After the first scripted feature (the stage playlist) introduces the Papyrus com
 step. Until then, the only action is to generate new switchable features under an
 enable parent. The vendors are already one group in `fairWorld.vendors` and are the
 first candidate.
+
+## Planned for 2.0.2: the fair comes and goes (Barry, 2026-09-26)
+
+Players asked for the fair not to be a permanent fixture: "one that randomly appears or
+appears only at certain times of the month/year/holidays. Just to keep it fresh". Build after
+2.0.1.3 is tested and uploaded.
+
+- **The schedule**, one setting (a global): **Always here** (the default; Barry: keep it, so
+  no one's fair vanishes on update), **Festival days** (a few days around the lore
+  festivals; check the dates against UESP), **Fair week** (the first days of each in-game
+  month), **Wandering** (a weekly chance). Papyrus reads the vanilla `GameDay` / `GameMonth`
+  globals, so no SKSE is needed.
+- **One switch for everything outside the gate:** a persistent, initially enabled `XMarker`
+  as enable parent of the exterior (gate, wall, silhouettes, outside show). The vanilla refs
+  the fair disables take the same parent with "opposite", in place of the initially-disabled
+  flag, so they come back when the fair leaves. The sunk large refs stay sunk (their LOD);
+  the site reads as a cleared field. The Tamriel navmesh stays.
+- **When it's away: Claudius's campsite** (Barry's idea, in place of a notice board): a small
+  camp by the road at the gate's spot (tent, bedroll, campfire, a table with his ledger),
+  enabled opposite the fair's marker. Claudius is one actor: when the fair leaves, he is
+  moved to the camp and a package conditioned on the global sandboxes him there; when it
+  comes back, he returns to his rounds. Garrick stays inside, out of reach.
+- **Changing it without MCM:** ask Claudius, at the camp or at the fair. Asking for the fair
+  back at the camp fades the screen to black (`Game.FadeOutGame`, vanilla), swaps the
+  state, and fades in on the fair. Otherwise the fair only arrives or leaves while the
+  player is in another worldspace or well away from it, never in view, and never while
+  the player is inside.
+- **MCM** (optional: SKSE, SkyUI, MCM Helper): a page with the same setting.
+- The Passport pauses while the fair is away; its stamps keep.
