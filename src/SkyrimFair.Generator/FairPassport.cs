@@ -269,6 +269,9 @@ internal static class FairPassport
                 TopicFlags = 0,
                 Category = DialogTopic.CategoryEnum.Topic,
                 Subtype = DialogTopic.SubtypeEnum.Custom,
+                // SNAM, the subtype's code: Mutagen writes it from this, not from Subtype, and left it
+                // blank, which crashed the game at startup (2026-09-26). Vanilla's say CUST.
+                SubtypeName = new Mutagen.Bethesda.Plugins.RecordType("CUST"),
             };
             var branch = new DialogBranch(mod)
             {

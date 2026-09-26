@@ -22,6 +22,12 @@ when present. Four records at the end of the Passport's range, so nothing moves:
 - Subrecords against vanilla's: the topic lacks only EDID; the line has VMAD and no TCLT/CIS2;
   the package has the same subrecords plus two CTDA; the branch matches byte for byte but for
   its IDs. Plugin `12dcb9f63a80eb0a`, deterministic; 4,609 records (4 new, none gone). Deployed.
+- **It crashed the game at startup** (Barry's crash log: the branch `0B000A` and topic `0B0009`,
+  under the cameos quest, in the loader). The topic's SNAM was blank (`00000000`); vanilla's
+  is `CUST`. Mutagen writes SNAM from `SubtypeName`, not `Subtype`. Set; every topic in the
+  plugin now has a code (`IDAT`, `HELO`, `CUST`). My subrecord check compared names, not
+  values: new record types are now compared value by value too. Plugin `d4c291be6bf40ec3`,
+  deterministic; deployed.
 
 ## Earlier pass: the Passport's Claudius stamp retired (2026-09-26, for 2.0.1.3)
 
