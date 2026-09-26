@@ -77,11 +77,9 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   enabled opposite the fair's marker. Claudius is one actor: when the fair leaves, he is
   moved to the camp and a package conditioned on the global sandboxes him there; when it
   comes back, he returns to his rounds.
-- **Garrick camps with him** (Barry): moved to the camp the same way, sat by the fire with his
-  lute, singing a vanilla bard song (Barry supplies the recording, in Garrick's voice): a
-  sound marker (`SOUN`, not an `SNDR`) played at him by script while the player is near,
-  with a pause between runs, ducked like the stage music when someone's talked to. Barry is
-  also re-voicing Garrick's 12 lines (same files and slots, so no FormID moves).
+- **Garrick camps with him** (Barry): moved to the camp the same way, sat by the fire playing
+  his lute (the lute idle, as at the fair). No song and no audio (Barry, 2026-09-26: the
+  ElevenLabs singing was too inconsistent).
 - **The roof horse camps too** (Barry): moved to the camp and perched on a big flat-topped
   boulder beside it, standing and grazing up there (horses have no sit idle; a tent's slope
   would drop him). A short patrol or hold package on the rock's top, like the roof's `deck`,
@@ -93,5 +91,6 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   player is in another worldspace or well away from it, never in view, and never while
   the player is inside.
 - **No MCM** (Barry, 2026-09-26): Claudius's dialogue is the whole interface, so the fair
-  keeps no requirements beyond Skyrim.esm. His lines for it: `claudius_camp` in the lines file.
+  keeps no requirements beyond Skyrim.esm. His lines for it: `claudius_camp` in the lines file (the 9 are recorded, in
+  `cameos/claudius/mono/`, 2026-09-26).
 - The Passport pauses while the fair is away; its stamps keep.

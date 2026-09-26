@@ -2,7 +2,19 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Garrick's and Claudius's new faces (2026-09-26, for 2.0.1.3)
+## Current pass: Garrick's new voice, and both cameos' new faces (2026-09-26, for 2.0.1.3)
+
+**Garrick's new voice:** Barry re-recorded his 12 lines (his old voice was "a bit squeaky"),
+same files and text. All mono 44.1 kHz 16-bit, 4.5-6.9 s. `build_voices.py` rebuilt Garrick
+(12), Claudius (17) and the Passport (2). The plugin changes only in each Garrick line's
+`SkyrimFairCameoLine.Seconds` (the music duck's length, from the new recordings: line 1
+6.69 s to 7.42 s). Plugin `b126e0d9fa2a737f`, deterministic; 4,605 records, none gone or new.
+Deployed (the plugin and Garrick's voice files).
+- Barry also recorded Claudius's 9 camp and schedule lines for 2.0.2 (`claudius_camp` in the
+  lines file, added now; no member reads that key yet, so nothing is built from it).
+- The camp song is dropped (ElevenLabs' singing too inconsistent): Garrick will only play
+  his lute at the camp.
+
 
 **Garrick** (Barry: "more wood elf than demon elf"): he was already a Wood Elf, but his donor,
 `WERoadCourierWoodElf` [1065EE], has heavy dark smudging round the eyes and cheeks in its
@@ -12,7 +24,7 @@ Relationship records but placed nowhere, so no player meets him. Clean tint, lig
 shadow, black hair (`HairMaleDarkElf03`), clean-shaven, deep brown Wood Elf eyes.
 - Read back: WoodElfRace, the donor's head parts and five tint layers, voice type unchanged
   (`06000B`); his FaceGen .nif and .dds byte-identical to Edorfin's.
-- Plugin `231fe0d02971ba36`, deterministic (two runs); 4,605 records, none gone or new, no
+- Plugin `231fe0d02971ba36` (superseded by the voice build), deterministic (two runs); 4,605 records, none gone or new, no
   EditorID changed. Deployed (the plugin and his two FaceGen files).
 
 **Claudius:**
