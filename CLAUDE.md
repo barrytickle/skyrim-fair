@@ -156,24 +156,23 @@ detail in `docs/AUDIT.md`'s current pass):
    be dropped.
 
 **Waiting on Barry's decision:**
-- **Visitor lines: Barry chose option B** (voiced, a few fair voice types): the visitors get
-  fair voice types of their own and a Hello pool of voiced one-liners each, played only when
-  talked to (not walk-by greetings). Barry has recorded 10 lines, "not quite ready yet".
-  Before building, settle with Barry:
-  - which voices (planned: 4, young and old, male and female) and which his 10 lines are for;
-    where they go (suggest `cameos/visitors/<voice>/mono/` plus a key per voice in the lines file,
-    built by `build_voices.py` like the cameos')
-  - **the catch to check first:** 85 of the 120 visitor bases take face, race and voice from the
-    face pool (`SkyrimFairFacesMale`/`Female` leveled lists, a Traits template), and a Traits
-    template brings the voice with it. So the fair voices must go on the pool's entries: fine
-    if they're the fair's own NPC records, but vanilla NPCs can't be changed without overriding
-    them. Look at the pool first. The other 35 bases (children, the drunk, ...) set their voice
-    directly.
-  - with fair voice types the visitors lose vanilla's voiced lines (generic greetings, combat
-    and bump barks), which are filtered by voice type; Barry accepted that trade-off
-  - a human voice on a Khajiit, Argonian or Orc face: keep beast races on vanilla voices, or
-    accept it
-  - the new records in a range of their own (0xC0000), after the Passport
+- **Visitor lines: 10 voiced fairgoers** (Barry chose voiced lines, 2026-09-26). His set is in
+  `cameos/fair-visitors/`: `fair-visitors.json` (`"fairgoers"`: file, voice, text), recordings
+  in `mono/` (01-10.wav, mono 44.1 kHz, 4-9 s; the ElevenLabs originals in `original/`). Each line
+  is a different character (`voice`: young_nord_male, older_nord_female, breton_male,
+  drunk_nord_male, imperial_female, young_breton_female, older_imperial_male, rough_nord_female,
+  cheerful_breton_male, older_nord_male). **Plan (to confirm with Barry, then build):**
+  - 10 featured fairgoers built like the cameos: their own NPC records with faces copied from
+    vanilla NPCs of the right race, sex and age (`FairSingers.CopyFace`), each with its own voice
+    type, a Hello topic line per entry (more entries with the same `voice` later: random among
+    them), played when talked to; the talk duck and the Passport's chat stamp should count them
+  - no face-pool problem (the pool's visitors keep their vanilla voices); only these 10 lose
+    vanilla barks
+  - placed where their lines fit: the drunk and the rough Nord woman by the mead stalls, the
+    archery one by the range, the bard-watcher at the stage, the older Nord man with a view of
+    the roof horse, the others about the avenue
+  - `build_voices.py` builds them like the cameos (build/cameos/Fairgoers/<voice>/); their own
+    FormID range, 0xC0000, after the Passport
 - A quest marker on Claudius for "Return the Fair Passport" (left out to keep the pass small).
 - Then package 2.0.1.3 and write its changelog.
 
