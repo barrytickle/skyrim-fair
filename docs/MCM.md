@@ -77,10 +77,11 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   enabled opposite the fair's marker. Claudius is one actor: when the fair leaves, he is
   moved to the camp and a package conditioned on the global sandboxes him there; when it
   comes back, he returns to his rounds. Garrick stays inside, out of reach.
-- **Changing it without MCM:** ask Claudius, at the camp or at the fair. Asking for the fair
+- **Changing it:** ask Claudius, at the camp or at the fair. Asking for the fair
   back at the camp fades the screen to black (`Game.FadeOutGame`, vanilla), swaps the
   state, and fades in on the fair. Otherwise the fair only arrives or leaves while the
   player is in another worldspace or well away from it, never in view, and never while
   the player is inside.
-- **MCM** (optional: SKSE, SkyUI, MCM Helper): a page with the same setting.
+- **No MCM** (Barry, 2026-09-26): Claudius's dialogue is the whole interface, so the fair
+  keeps no requirements beyond Skyrim.esm. His lines for it: `claudius_camp` in the lines file.
 - The Passport pauses while the fair is away; its stamps keep.
