@@ -26,14 +26,14 @@ build/texvenv/Scripts/python tools/make_cobble.py --data "E:/SteamLibrary/steama
 build/texvenv/Scripts/python tools/make_bunting.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"  # the bunting's colourways
 build/texvenv/Scripts/python tools/make_lantern_colours.py                                                          # the paper lanterns' colours
 python tools/bards/build_tempo.py --data "E:/Modlists/Still In Skyrim/stock/Data"     # fast and held instrument loops (when a speed changes)
-python tools/cameos/build_voices.py                                                  # cameos/<name>/mono/*.wav + lines json -> build/cameos/ (.fuz)
-python tools/cameos/borrow_lips.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"   # after build_voices: vanilla lip tracks of the same length (plain SE skips today's lips)
+python tools/cameos/build_voices.py                                                  # cameos/<name>/mono/*.wav + lines json -> build/cameos/ (.fuz), the Passport's two lines too
+python tools/cameos/borrow_lips.py --data "E:/SteamLibrary/steamapps/common/Skyrim Special Edition/Data"   # off (no member has lipsFrom): SSE Engine Fixes is recommended instead
 python tools/build_papyrus.py --ck "C:/Program Files (x86)/Steam/steamapps/common/skyrim"
 # after a layout change, for the navmesh's obstacle footprints (then run the generator again):
 python tools/make_footprints.py --data "E:/Modlists/Still In Skyrim/stock/Data" --extra "E:/Modlists/Still In Skyrim/mods/Holidays"
 dotnet run -c Release --project src/SkyrimFair.Generator -- fair.config.json         # run from the repo root
 python tools/deploy.py --to "E:/Modlists/Still In Skyrim/mods/Skyrim Fair"
-python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair-<version>/ (the Data folder, the .zip, NEXUS_PAGE.md, RELEASE_TODO.md)
+python tools/package.py --version 2.0.1.3   # a release: dist/release/SkyrimFair-<version>/ (the Data folder, the .zip, NEXUS_PAGE.md, RELEASE_TODO.md)
 ```
 
 - The generator must be deterministic: run it twice and compare the SHA256.
@@ -70,8 +70,11 @@ python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair
   - `FairAudio.cs`: sound, the stage quest, the band
   - `FairExterior.cs`: the compound's exterior in Tamriel (the gate, the wall, silhouettes, the outside show), own FormID range (`exterior.formIdBase`)
   - `FairLife.cs`: palisade banners and ropes, plants, props, smoke, animals, on their own FormID range (`life.formIdBase`)
+  - `FairCameos.cs`: Garrick Sol V and Claudius Vale, their lines (`lineSlots`: lines added after release go at the end of the range), rounds, posters, the roof horse
+  - `FairShops.cs`, `FairPaperLanterns.cs`, `FairHolidaysFree.cs`: the shops, the fair's own lanterns, bunting and props (no Holidays master)
+  - `FairPassport.cs`: the Fair Passport quest (built last, range 0xB0000)
   - `FairConfig.cs`: every config record
-- `src/Papyrus/*.psc`: the stage audio controller, its player alias, and the pen horse.
+- `src/Papyrus/*.psc`: the stage script (`SkyrimFairAudioScript`: the show, the music duck, the re-seat), the cameos' and the Passport's line fragments, the talk perk (`SkyrimFairTalkDuck`), the Passport (`SkyrimFairPassport`), the counters, the keepers, the horses.
 - `tools/`: props, BSA extraction, NIF preview, audio build, Papyrus build, deploy.
 - `docs/`:
   - `AUDIT.md`: the pass-by-pass log, newest first
@@ -123,52 +126,65 @@ python tools/package.py --version 1.0.0     # a release: dist/release/SkyrimFair
 - **Edit scripts:** write Python edit scripts to the scratchpad with the Write tool.
   Bash heredocs break on apostrophes.
 
-## Where we are (end of 2026-09-25): released on Nexus
+## Where we are (end of 2026-09-26): 2.0.1.3 in progress
 
-**The Wanderer's Fair is live on Nexus Mods** (uploaded by Barry, 2026-09-25, then an update
-with the grass fix; Vortex updates from Nexus). From now on: bump the version for every release
-(`tools/package.py --version 2.0.1` and so on, matching Nexus, where the grass fix went up as
-version 2), and treat player reports as the
-next work.
+**Released on Nexus** since 2026-09-25, updated from player reports. Versions so far: 1.0.0,
+2 (the grass fix), 2.0.1 (volume), 2.0.1.1 (music at 60%, louder voices), 2.0.1.2 (the seats,
+the herbalist's sign, the music ducking when you talk to anyone: confirmed by Barry, packaged,
+changelog written; Barry was uploading it). Bump the version for every release and package with
+`tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
+for the cameos' lip sync on plain SE.
 
+**2.0.1.3, built and deployed, not yet packaged** (plugin `b981e5b9ef1fb42a`, deterministic;
+detail in `docs/AUDIT.md`'s current pass):
+- **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
+  and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
+  Cameo lines now have `lineSlots` (Garrick 12, Claudius 16): lines past it take FormIDs at the
+  end of the cameos' range. Line 17 is `060058`.
+- **The Fair Passport** (Barry's pick from the minigame ideas): Claudius hands it out when first
+  spoken to (voiced: "Everyone at this fair requires a passport..."). Journal objectives are the
+  stamps: a whole song, Garrick, Claudius, 5 visitors talked to, the roof horse seen. The hand-in
+  (voiced: "Every stamp. All in order...") gives Claudius's Seal of Approval (gold necklace,
+  Fortify Barter 10%) and the Deed to the Roof Horse. The passport is a leather journal held by
+  a Quest Object alias (can't be dropped); Claudius takes it back.
 
-Plugin `709eeed250ad09a0` (dev and release builds identical), deployed. The day's detail is in
-`docs/AUDIT.md`, newest first. **Release 1.0.0 is packaged and ready to upload**
-(`dist/release/SkyrimFair-1.0.0/`, from `python tools/package.py --version 1.0.0`):
-- `SkyrimFair-1.0.0.zip` (the main file), `SkyrimFair-1.0.0-Compatibility.zip` (optional:
-  the instructions and the SPID Patcher)
-- `NEXUS_DESCRIPTION.bbcode.txt` and `NEXUS_CREDITS.bbcode.txt`, to paste into Nexus
+**Barry's tests for tomorrow:**
+1. Claudius's new voice: level beside Garrick, lip sync, line 17 turning up.
+2. The Passport, start to finish on a save that hasn't had it: the hand-over (voice, journal,
+   his stamp), a whole song, Garrick, the chat counter (0/5 to 5/5 in the journal), the horse
+   stamp when looking at the roof, then the hand-in and the rewards. Check the passport can't
+   be dropped.
 
-**Confirmed in game by Barry today:**
-- the shops: all 33 trades, Browse on the counters, the gear stalls at 20x
-- the steady show, the roof horse staying put, the keepers at their spots
-- the paper lanterns ("incredible"), with no frame-rate cost
-- the fair without Holidays ("a proper seamless transition"): `Skyrim.esm` is the only master
+**Waiting on Barry's decision:**
+- **Visitor lines** (Barry: "something random and unique per person"). Recommended option A:
+  about 120 subtitle-only one-liners, one or two per visitor type (85 of the 120 visitor bases
+  take random voices from the face pool, so voiced lines would need every pool voice type).
+  Only when talked to, not as walk-by greetings. **Draft the lines for Barry to review before
+  building.** Options B (4 fair voice types, ~40 recordings, visitors lose vanilla barks) and C
+  (every pool voice type, ElevenLabs API batch) were explained; a hybrid could voice the few
+  fixed-voice visitors (drunk, children, commander) later.
+- A quest marker on Claudius for "Return the Fair Passport" (left out to keep the pass small).
+- Then package 2.0.1.3 and write its changelog.
 
-**Built, not yet confirmed in game:** the singers looping their cheer on their marks.
+**Parked ideas** (Barry, 2026-09-26): the Festival Spirit buff (a whole song gives a skill-rate
+buff, 2/10), the archery contest (5/10), the Shout toss (needs a lent scroll: Unrelenting Force
+comes late in the main quest), and a rhythm game: **Bard Hero** (Nexus 186544) already plays
+Clone Hero chart folders, so charts of the fair's songs as an optional add-on would be ~3/10.
 
-**Before uploading (Barry):** a fresh-install test of the zip (untick the dev "Skyrim Fair"
-and Holidays, then new game), and the SPID lines checked against the three mods' current files.
-
-**Settled:** every licence (the welcome sign, Mixamo, ElevenLabs voices), the Nexus page text
-in Barry's voice, the Nexus links, and the exterior's limits and the missing grass cache
-accepted for 1.0.
-
-**Next, if Barry comes back to it:**
-- whatever players report after launch
-- the cameo hint on the page, if Barry says who Garrick and Claudius are based on
-- a lighter lantern model, only if the frame rate ever needs it
-- the backlog: the MCM (`docs/MCM.md`), bard animation variants (`docs/BARDS.md`), a grass
-  cache for the fair's worldspace
+**Compatibility answered for players:** Elysium Estate, Whiterun Manor and Pondside Cottage are
+all compatible. The fair's Tamriel footprint is cells (-3,-4), (-3,-3), (-2,-4), (-2,-3), with no
+landscape edits; about 37 vanilla refs there are disabled or sunk.
 
 **The show's data carries a 2** (`Songs2`, `CameoIdles2`, ...): a save keeps a script's
 property values, so data under old names never reached Barry's save. Rename again (3) when an
-update must reach saves already playing (`docs/CODEX_HANDOVER.md`).
+update must reach saves already playing (`docs/CODEX_HANDOVER.md`). Saves also keep placed
+refs' positions: `Reseat()` puts pieces back once per `seatSwap.layoutVersion` (now 4).
 
 **Housekeeping to know:**
 - The other agent's `tools/crowd/` changes and `library.json` are uncommitted; they're
   theirs to commit.
-- `character-actors/` is Barry's and Astra's, untracked; don't commit it.
+- `character-actors/`, `cameos/` (Barry's recordings and lines file), `music/` and
+  `sound-effects/` are untracked; don't commit them.
 - Some records are kept only so no FormID moves: the retired guard's FormList, the
   `SkyrimFairAtFair` global, and `SkyrimFairNpcGuard.pex`. Drop the pex from any release
   package.
@@ -177,13 +193,14 @@ update must reach saves already playing (`docs/CODEX_HANDOVER.md`).
   its IDs.
 - Don't write to Barry's MO2 profile or other mods' folders. The auto-mode classifier
   refuses it, and Barry installs mods himself. `deploy.py` into `mods/Skyrim Fair` is fine.
+- Four Oldrim Creation Kit files were copied into `E:\SteamLibrary\steamapps\common\Skyrim`
+  while chasing lip sync; harmless, removable if Barry wants.
 
-**Open items before any public release** (the full list is `docs/RELEASE.md`; keep it
-current):
-- the SPID fix goes on the mod page as instructions (`docs/COMPATIBILITY.md`), never as files
-- a grass cache for the fair's worldspace, with the mod-page note
+**Open items** (the full list is `docs/RELEASE.md`; keep it current):
+- the SPID fix stays on the mod page as instructions (`docs/COMPATIBILITY.md`, and the optional
+  Compatibility download), never as plugin files
+- a grass cache for the fair's worldspace
 - the Tamriel exterior's limits: the navmesh, LOD, and landscape mods in that area
 - Professional Dancer: optional but recommended (Dance.esp, then Pandora); nothing of it ships
-- the scaffold tower asset's source and licence
-- the music and crowd recordings' provenance
+- the scaffold tower asset's source and licence; the music and crowd recordings' provenance
 - leave the retired Stroti outhouse files out of the package (replaced by Strifey7's, `CREDITS.md`)
