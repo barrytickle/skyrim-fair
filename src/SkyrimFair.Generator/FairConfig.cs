@@ -979,6 +979,10 @@ internal sealed record CameoMember
     /// <summary>His own voice type, so only his lines play for him.</summary>
     public string VoiceType { get; init; } = string.Empty;
 
+    /// <summary>How many of his lines take their FormIDs in turn (those released so far; 0: all).
+    /// Lines after these are appended at the end of the cameos' range, so no FormID moves.</summary>
+    public int LineSlots { get; init; }
+
     /// <summary>The emotion his lines play with (Happy, Neutral, Puzzled...).</summary>
     public string Emotion { get; init; } = "Neutral";
 

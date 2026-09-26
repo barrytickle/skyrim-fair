@@ -2,7 +2,25 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the singers step across the deck (2026-09-25)
+## Current pass: Claudius's new voice, and a 17th line (2026-09-26)
+
+Barry re-recorded Claudius "to make him more of a character than a generic bloke" (all 16
+lines, `cameos/claudius/mono/`), then added a 17th line ("Oh for fuck sake, how'd that horse get
+up there?") to `cameos/skyrim_fair_voicelines.json`. The JSON's commas were fixed (one
+missing after line 16, one extra after 17).
+- **New lines keep every FormID:** the cameos' lines took their INFO FormIDs in turn, so a
+  17th Claudius line would have moved every later cameo record (the rounds, the posters, the
+  duck global). Each member now has `lineSlots` (Garrick 12, Claudius 16, the released
+  counts): lines past it are made last of all in the cameos' range (`FairCameos.AddLine`,
+  deferred). His 17th line is `060058`.
+- `build_voices.py` rebuilt both cameos (Garrick's audio is unchanged; his lip files
+  differ byte-wise, as the lip generator isn't byte-identical between runs).
+- Plugin `6822602658c827c8`, deterministic. FormID diff against the deployed plugin: one
+  added (`060058`), none moved or removed. The lines' duck lengths follow the new
+  recordings. Deployed.
+- **Not yet confirmed in game:** the new voice, its loudness, and his lips on the new lines.
+
+## Earlier pass: the singers step across the deck (2026-09-25)
 
 ### Later: 2.0.1.2: the herbalist's sign, and the keepers re-placed
 

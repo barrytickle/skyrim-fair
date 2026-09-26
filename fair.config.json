@@ -251,7 +251,7 @@
       "members": [
         {
           "id": "Garrick", "name": "Garrick Sol V", "shortName": "Garrick",
-          "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "emotion": "Happy",
+          "voiceLines": "garrick_sol_v", "voiceDir": "cameos/garrick/mono", "voiceType": "SkyrimFairGarrickVoice", "emotion": "Happy", "lineSlots": 12,
           "template": "001065EE:Skyrim.esm", "outfit": "000DAB74:Skyrim.esm",
           "at": [1044, 4630, 0, 120], "radius": 2200, "energy": 80,
           "stand": true,
@@ -263,7 +263,7 @@
         },
         {
           "id": "Claudius", "name": "Claudius Vale", "shortName": "Claudius",
-          "voiceLines": "claudius_vale", "voiceDir": "cameos/claudius/mono", "voiceType": "SkyrimFairClaudiusVoice", "emotion": "Puzzled",
+          "voiceLines": "claudius_vale", "voiceDir": "cameos/claudius/mono", "voiceType": "SkyrimFairClaudiusVoice", "emotion": "Puzzled", "lineSlots": 16,
           "template": "000457F6:Skyrim.esm", "outfit": "000E40DD:Skyrim.esm",
           "at": [2048, 1000, 0, 0], "radius": 2200, "energy": 40,
           "idles": [

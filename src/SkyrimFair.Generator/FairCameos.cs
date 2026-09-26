@@ -192,6 +192,8 @@ internal static class FairCameos
         // The voice files come from tools/cameos/build_voices.py (build/cameos/<id>/), copied to
         // Sound\Voice\<plugin>\<voice type>\<quest>__<INFO id>_1.fuz, lowercase (as the singers').
         var spoken = new List<(DialogResponses Info, float Seconds)>();
+        // Lines beyond a member's LineSlots (added after release), made last of all in the range.
+        var later = new List<Action>();
         var voiced = config.Members.Select((m, i) => (Member: m, Npc: npcs[i]))
             .Where(x => x.Member.VoiceLines.Length > 0 && x.Member.VoiceType.Length > 0)
             .ToList();
@@ -207,7 +209,6 @@ internal static class FairCameos
                 NextAliasID = 0,
             };
             mod.Quests.Add(quest);
-            var voiceRoot = Path.Combine(faces.VoiceOut is { } vo && Path.IsPathRooted(vo) ? vo : Path.Combine(FairPaths.ConfigDirectory, faces.VoiceOut), mod.ModKey.FileName);
             foreach (var (member, npc) in voiced)
             {
                 // DNAM 01 (Allow Default Dialog), as every vanilla NPC voice type (MaleYoungEager
@@ -233,51 +234,66 @@ internal static class FairCameos
                     Priority = 50f,
                 };
                 var emotion = Enum.Parse<Emotion>(member.Emotion);
-                foreach (var line in doc.RootElement.EnumerateArray())
+                var lines = doc.RootElement.EnumerateArray().Select(l => l.Clone()).ToList();
+                for (var n = 0; n < lines.Count; n++)
                 {
-                    var info = new DialogResponses(mod)
+                    var line = lines[n];
+                    if (member.LineSlots > 0 && n >= member.LineSlots)
                     {
-                        Flags = new DialogResponseFlags { Flags = DialogResponses.Flag.Random },
-                        FavorLevel = FavorLevel.None,
-                    };
-                    info.Responses.Add(new DialogResponse
-                    {
-                        Emotion = emotion,
-                        EmotionValue = 50,
-                        ResponseNumber = 1,
-                        Flags = DialogResponse.Flag.UseEmotionAnimation,
-                        Text = line.GetProperty("text").GetString()!,
-                        ScriptNotes = string.Empty,
-                        Edits = string.Empty,
-                    });
-                    var him = new GetIsIDConditionData { RunOnType = Condition.RunOnType.Subject };
-                    him.Object.Link.SetTo(npc.FormKey);
-                    info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = him });
-                    topic.Responses.Add(info);
-                    spoken.Add((info, line.TryGetProperty("seconds", out var len) ? len.GetSingle() : 6f));
-
-                    var name = $"{config.QuestEditorId}__{info.FormKey.ID:x8}_1.fuz".ToLowerInvariant();
-                    var dst = Path.Combine(voiceRoot, voice.EditorID!, name);
-                    Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
-                    var fuz = File.ReadAllBytes(Path.Combine(cues, line.GetProperty("fuz").GetString()!));
-                    if (config.LooseLip)
-                    {
-                        // The .fuz unpacked: its lip track as a .lip and its audio as a .xwm, the
-                        // layout plain Skyrim reads itself. The packed .fuz lip-synced only in
-                        // Barry's modlist, never on an unmodded game (2026-09-25). A .fuz is
-                        // 'FUZE', a version, the lip size, the lip data, then the xWMA audio.
-                        var lipSize = BitConverter.ToInt32(fuz, 8);
-                        File.WriteAllBytes(Path.ChangeExtension(dst, ".lip"), fuz[12..(12 + lipSize)]);
-                        File.WriteAllBytes(Path.ChangeExtension(dst, ".xwm"), fuz[(12 + lipSize)..]);
-                        File.Delete(dst);
+                        later.Add(() => AddLine(topic, npc, voice, emotion, cues, line));
                     }
                     else
                     {
-                        File.WriteAllBytes(dst, fuz);
+                        AddLine(topic, npc, voice, emotion, cues, line);
                     }
                 }
 
                 mod.DialogTopics.Add(topic);
+            }
+        }
+
+        void AddLine(DialogTopic topic, Npc npc, VoiceType voice, Emotion emotion, string cues, System.Text.Json.JsonElement line)
+        {
+            var voiceRoot = Path.Combine(faces.VoiceOut is { } vo && Path.IsPathRooted(vo) ? vo : Path.Combine(FairPaths.ConfigDirectory, faces.VoiceOut), mod.ModKey.FileName);
+            var info = new DialogResponses(mod)
+            {
+                Flags = new DialogResponseFlags { Flags = DialogResponses.Flag.Random },
+                FavorLevel = FavorLevel.None,
+            };
+            info.Responses.Add(new DialogResponse
+            {
+                Emotion = emotion,
+                EmotionValue = 50,
+                ResponseNumber = 1,
+                Flags = DialogResponse.Flag.UseEmotionAnimation,
+                Text = line.GetProperty("text").GetString()!,
+                ScriptNotes = string.Empty,
+                Edits = string.Empty,
+            });
+            var him = new GetIsIDConditionData { RunOnType = Condition.RunOnType.Subject };
+            him.Object.Link.SetTo(npc.FormKey);
+            info.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = him });
+            topic.Responses.Add(info);
+            spoken.Add((info, line.TryGetProperty("seconds", out var len) ? len.GetSingle() : 6f));
+
+            var name = $"{config.QuestEditorId}__{info.FormKey.ID:x8}_1.fuz".ToLowerInvariant();
+            var dst = Path.Combine(voiceRoot, voice.EditorID!, name);
+            Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+            var fuz = File.ReadAllBytes(Path.Combine(cues, line.GetProperty("fuz").GetString()!));
+            if (config.LooseLip)
+            {
+                // The .fuz unpacked: its lip track as a .lip and its audio as a .xwm, the
+                // layout plain Skyrim reads itself. The packed .fuz lip-synced only in
+                // Barry's modlist, never on an unmodded game (2026-09-25). A .fuz is
+                // 'FUZE', a version, the lip size, the lip data, then the xWMA audio.
+                var lipSize = BitConverter.ToInt32(fuz, 8);
+                File.WriteAllBytes(Path.ChangeExtension(dst, ".lip"), fuz[12..(12 + lipSize)]);
+                File.WriteAllBytes(Path.ChangeExtension(dst, ".xwm"), fuz[(12 + lipSize)..]);
+                File.Delete(dst);
+            }
+            else
+            {
+                File.WriteAllBytes(dst, fuz);
             }
         }
 
@@ -451,6 +467,13 @@ internal static class FairCameos
         // data 2 (the fragment itself 1), OnBegin Fragment_0.
         var duck = new GlobalFloat(mod) { EditorID = $"{config.EditorIdPrefix}DuckUntil", Data = 0f };
         mod.Globals.Add(duck);
+
+        // Lines added since release (beyond each member's lineSlots): the range's last records.
+        foreach (var add in later)
+        {
+            add();
+        }
+
         foreach (var (info, seconds) in spoken)
         {
             var entry = new ScriptEntry { Name = config.LineScript, Flags = ScriptEntry.Flag.Local };
