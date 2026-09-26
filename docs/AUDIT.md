@@ -34,6 +34,12 @@ when present. Four records at the end of the Passport's range, so nothing moves:
   near himself (Ancano's input 62, copied), radius 128 and 12,000 (`passport.greetRange`: the
   whole fair, about 5,400 by 7,000, from anywhere); the greet distance (75) stays 300 on the
   player. Plugin `d186e57b9fc45de1`, deterministic, no FormID change; deployed.
+- **Barry: Claudius sits at a table by default.** His AI is only re-checked now and then, so on
+  arrival he stayed seated under his rounds' sandbox. The stage script's `RunUp()`, each update
+  at the fair while the passport isn't issued: not on the run-up yet, `EvaluatePackage` at once;
+  on it but still seated after two checks, `IdleForceDefaultState` (as his ledger's exit) and
+  re-evaluate. New property `PassportInspector` (his persistent ref, `060005`). Plugin
+  `50c6812ec5df1b1c`, deterministic, no FormID change; scripts and plugin deployed.
 
 ## Earlier pass: the Passport's Claudius stamp retired (2026-09-26, for 2.0.1.3)
 

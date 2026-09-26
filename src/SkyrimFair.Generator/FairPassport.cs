@@ -369,7 +369,10 @@ internal static class FairPassport
             greet.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = inFair });
             mod.Packages.Add(greet);
             inspector.Packages.Insert(0, new FormLink<IPackageGetter>(greet.FormKey));
-            stage.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript").Properties.Add(Obj("PassportGreet", greet.FormKey));
+            var stageScript = stage.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript");
+            stageScript.Properties.Add(Obj("PassportGreet", greet.FormKey));
+            var hisRef = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>()).Single(n => n.Base.FormKey == inspector.FormKey);
+            stageScript.Properties.Add(Obj("PassportInspector", hisRef.FormKey));
             runUp = $", run-up {(stopCue is null ? "subtitled" : "voiced")}";
         }
 

@@ -153,6 +153,9 @@ Quest Property Passport Auto
 Package Property PassportGreet Auto
 {Claudius's run up to a player without a passport (a force greet): while he runs it, no idle
 and no move to another spot, and an idle he's in is ended at once.}
+Actor Property PassportInspector Auto
+{Claudius, whom RunUp nudges: his AI is only re-checked every so often, so a player arriving
+found him still seated at his table under his rounds' sandbox (Barry, 2026-09-26).}
 Perk Property FairPrices Auto
 {The fair's prices (FairShops.cs): a hidden perk, buying at many times the price, only in the
 fair's worldspace. Given to the player at the fair; it does nothing anywhere else.}
@@ -300,6 +303,8 @@ Int seatLayoutDone = 0
 ; True while Reseat runs: its Disable, MoveTo and Enable calls wait on the game, and another
 ; OnUpdate arriving meanwhile started it again and again (2026-09-26).
 Bool reseating = False
+; RunUp's checks with Claudius on his run-up but still seated.
+Int runUpSeated = 0
 Int songInstance = 0
 Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
@@ -474,6 +479,7 @@ Event OnUpdate()
 		Reseat()
 	EndIf
 	ApplyCrowdLayers()
+	RunUp()
 	CameoIdles2(Utility.GetCurrentGameTime())
 
 	If MusicEnabled.GetValue() < 0.5 || Songs2.Length == 0
@@ -912,6 +918,35 @@ Function Reseat()
 	EndWhile
 	reseating = False
 	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs, " + Sitters.Length + " visitors and " + Keepers.Length + " keepers (layout " + SeatLayoutVersion + ")")
+EndFunction
+
+; Claudius's run-up, while the passport isn't issued (the player is at the fair: OnUpdate only
+; calls this there). His AI is re-checked at once if he isn't on it yet; on it but still seated
+; after two checks, he's put back to standing, as his ledger's exit is, so he can run.
+Function RunUp()
+	If !PassportGreet || !PassportInspector || !Passport || Passport.GetStage() != 0
+		runUpSeated = 0
+		Return
+	EndIf
+	Actor a = PassportInspector
+	If a.IsDead() || a.IsDisabled() || a.IsInDialogueWithPlayer()
+		Return
+	EndIf
+	If a.GetCurrentPackage() != PassportGreet
+		runUpSeated = 0
+		a.EvaluatePackage()
+		Return
+	EndIf
+	If a.GetSitState() >= 2 && a.Is3DLoaded()
+		runUpSeated += 1
+		If runUpSeated >= 2
+			Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+			a.EvaluatePackage()
+			runUpSeated = 0
+		EndIf
+	Else
+		runUpSeated = 0
+	EndIf
 EndFunction
 
 ; How far apart two headings are, in degrees (0 to 180), whatever turns either carries.
