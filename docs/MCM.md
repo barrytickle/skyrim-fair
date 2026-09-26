@@ -94,3 +94,10 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   keeps no requirements beyond Skyrim.esm. His lines for it: `claudius_camp` in the lines file (the 9 are recorded, in
   `cameos/claudius/mono/`, 2026-09-26).
 - The Passport pauses while the fair is away; its stamps keep.
+- **A courier letter when it's back** (Barry: always, no option to stop them): when the
+  schedule brings the fair back, the script hands a letter from Claudius to the vanilla courier
+  (`WICourier`, `WICourierScript.addItemToContainer(letter)`, no SKSE; vanilla quests use it for
+  inheritance letters), who finds the player in the next town. Not sent when the player asks
+  Claudius to bring it back at the camp. The letter is a book record, e.g.: "The Wanderer's Fair
+  has returned to the road west of Whiterun. I have inspected it. It is present. C. Vale, Fair
+  Inspector. P.S. The horse is back on the roof." One letter record, handed over each return.
