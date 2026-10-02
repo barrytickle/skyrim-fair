@@ -2,7 +2,28 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Claudius's run-up, a nod to Oblivion (2026-09-26, for 2.0.1.3)
+## Current pass: the run-up still doesn't run, and it now logs (2026-10-02, for 2.0.1.3)
+
+Barry's test of `50c6812ec5df1b1c`: no run-up. His Papyrus log (15:02) shows the show running
+normally, but `RunUp()` logged nothing, so it can't say why: whether his save had the Passport
+already, whether Claudius was on the run-up package, or whether he stayed seated.
+- Read back from the plugin: the run-up is first of Claudius's 8 packages, its conditions
+  (Passport stage 0 on him; the player in the fair's worldspace) are right, the quest is Start
+  Game Enabled, and his ref (`060005`) is persistent. No alias packages hold him.
+- Against vanilla: Ancano's trigger (input 62) is near self, radius **500**; ours stretched
+  it to 12,000. The trigger now stays on the player, as the copied BlindCliff package's is
+  (radius `passport.greetRange`, 12,000, so the player is always inside it); the wait (8)
+  stays near self, 128. **Not a sure fix:** the game may fix a location aimed at the player
+  where the player stood when the package started (the wait location did that, 2026-09-26).
+- `RunUp()` now logs a "SkyrimFairAudio: run-up ..." line whenever its state changes: "off,
+  passport stage N", or his current package, sit state, 3D, dialogue, and distance.
+- The singers' anchor (`040001`) came back as a null form once, at load (`SingerOffset`,
+  line 1161); harmless, noted.
+- Plugin `548af21f4058f665`, deterministic, no FormID change; one record changed (the run-up,
+  `0B000C`; a Mutagen overlay comparison also flagged the Seal, `0B0005`, but its bytes are
+  identical). Scripts and plugin deployed.
+
+## Earlier pass: Claudius's run-up, a nod to Oblivion (2026-09-26, for 2.0.1.3)
 
 Barry: when you enter the fair (or load a save there) without the Passport, Claudius runs up:
 "Stop! You violated the law! ...Well. The fair rules.", then the hand-over. Barry recorded

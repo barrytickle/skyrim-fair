@@ -305,6 +305,8 @@ Int seatLayoutDone = 0
 Bool reseating = False
 ; RunUp's checks with Claudius on his run-up but still seated.
 Int runUpSeated = 0
+; The run-up's state last logged, so the log gets a line only when it changes.
+String runUpLogged = ""
 Int songInstance = 0
 Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
@@ -926,9 +928,13 @@ EndFunction
 Function RunUp()
 	If !PassportGreet || !PassportInspector || !Passport || Passport.GetStage() != 0
 		runUpSeated = 0
+		If Passport
+			RunUpLog("off, passport stage " + Passport.GetStage(), "")
+		EndIf
 		Return
 	EndIf
 	Actor a = PassportInspector
+	RunUpLog("package " + a.GetCurrentPackage() + ", sit " + a.GetSitState() + ", 3D " + a.Is3DLoaded() + ", talking " + a.IsInDialogueWithPlayer(), ", " + (a.GetDistance(Game.GetPlayer()) as Int) + " away")
 	If a.IsDead() || a.IsDisabled() || a.IsInDialogueWithPlayer()
 		Return
 	EndIf
@@ -946,6 +952,15 @@ Function RunUp()
 		EndIf
 	Else
 		runUpSeated = 0
+	EndIf
+EndFunction
+
+; A line in the log for the run-up, only when its state changes (the extra, his distance, is
+; left out of the comparison, or every step he took would log).
+Function RunUpLog(String what, String extra)
+	If what != runUpLogged
+		runUpLogged = what
+		Debug.Trace("SkyrimFairAudio: run-up " + what + extra)
 	EndIf
 EndFunction
 
