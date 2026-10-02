@@ -193,6 +193,12 @@ internal sealed record FairWorldConfig
     public PassportConfig Passport { get; init; } = new();
 
     /// <summary>
+    /// The voiced fairgoers: the visitors become ten characters, each a voice type of its own, a
+    /// face list of its own and a line when talked to (Barry, 2026-09-26 and 2026-10-02).
+    /// </summary>
+    public FairgoersConfig Fairgoers { get; init; } = new();
+
+    /// <summary>
     /// Seats swapped last of all (their FormIDs stay): a vanilla bar stool gives its sitter the
     /// bar-counter lean, with no counter at the fair (a Nexus player's screenshot, 2026-09-25),
     /// so each becomes a chair facing its table, whose sitters sit upright and drink.
@@ -948,6 +954,58 @@ internal sealed record CompanionsConfig
 
     /// <summary>Its own FormID range: one quest record.</summary>
     public uint FormIdBase { get; init; } = 0x70000;
+}
+
+internal sealed record FairgoersConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairFairgoer";
+
+    /// <summary>Their own FormID range, after the Passport's.</summary>
+    public uint FormIdBase { get; init; } = 0xC0000;
+
+    /// <summary>The lines: <c>{"fairgoers": [{"file", "voice", "text"}]}</c>, Barry's.</summary>
+    public string LinesFile { get; init; } = "cameos/fair-visitors/fair-visitors.json";
+
+    /// <summary>Where tools/cameos/build_voices.py writes each character's .fuz and lines.json.</summary>
+    public string VoiceBuildDir { get; init; } = "build/cameos/fairgoers";
+
+    /// <summary>Visitor bases are those whose EditorID starts so (the children's don't count).</summary>
+    public string VisitorPrefix { get; init; } = "SkyrimFairVisitor";
+
+    public string ChildPrefix { get; init; } = "SkyrimFairVisitorChild";
+
+    public IReadOnlyList<FairgoerCharacter> Characters { get; init; } = Array.Empty<FairgoerCharacter>();
+
+    /// <summary>A few characters put on purpose: the visitor nearest each point plays it.</summary>
+    public IReadOnlyList<FairgoerPlacement> Placed { get; init; } = Array.Empty<FairgoerPlacement>();
+}
+
+internal sealed record FairgoerCharacter
+{
+    /// <summary>The lines file's <c>voice</c>.</summary>
+    public string Voice { get; init; } = string.Empty;
+
+    /// <summary>The EditorID part (e.g. YoungNordMale).</summary>
+    public string Id { get; init; } = string.Empty;
+
+    public string Outfit { get; init; } = string.Empty;
+
+    /// <summary>The vanilla NPCs whose faces it wears (Skyrim.esm FormKeys), Barry's picks.</summary>
+    public IReadOnlyList<string> Faces { get; init; } = Array.Empty<string>();
+}
+
+internal sealed record FairgoerPlacement
+{
+    public string Voice { get; init; } = string.Empty;
+
+    public float[] At { get; init; } = Array.Empty<float>();
+
+    public string Why { get; init; } = string.Empty;
+
+    /// <summary>May switch a retired visitor (initially disabled) back on for it.</summary>
+    public bool Wake { get; init; }
 }
 
 internal sealed record CameosConfig

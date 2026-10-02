@@ -2,7 +2,39 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Claudius lives at the entrance (2026-10-02, for 2.0.1.3)
+## Current pass: the voiced fairgoers, first build (2026-10-02, for 2.0.1.3)
+
+Barry: "Can we look at implementing the fairgoers voices?", and for 2.0.1.3 (his pick), 8 faces a
+character, picked from contact sheets. His save checks of Claudius at the entrance first: both
+work (already in the fair; loaded outside and walked in).
+- **Why faces are copied:** every visitor took Traits from a face list, and Traits carries the
+  voice, so a visitor's own voice type is ignored. Each character's faces are vanilla NPCs'
+  copied onto fair NPCs with its voice type ("face carriers", `FairSingers.CopyFace`), one
+  face list a character (`SkyrimFairFairgoer<Id>Faces`), and the visitors' bases take Traits
+  from it.
+- `FairFairgoers.cs`, last of all, range `0xC0000`-`0xC008B` (140 records): 10 voice types
+  (Allow Default Dialog), 80 face carriers, 10 face lists (LVLF 03, as vanilla's commoner
+  list), 3 packages (copies of the visitors' standing, seated and wandering ones without
+  "Hellos to player", so walking past is silent), 25 bases (a character and a package: those
+  that occur), a quest `SkyrimFairFairgoers` (Start Game Enabled; the `.seq` lists it), a
+  Hello topic (Misc, 0x4F, HELO, as the cameos') and 10 lines, each on `GetIsVoiceType` its
+  character's, with the cameos' fragment (`SkyrimFairCameoLine`, the music ducked for the line).
+- All 144 visitor refs keep FormID and place; only their bases change: 14 or 15 of each
+  character. On purpose (`fairgoers.placed`): the drunk and the rough Nord woman at the Mead &
+  Ale stall (two retired visitors there switched back on, `wake`), the young Breton woman at the
+  archery range, the older Imperial man watching the bard, the older Nord man with a view of
+  the roof horse. Not converted: band, singers, archers, folk dancers, keepers, children, cameos.
+- **Faces:** `build/fairgoers/faces/<character>.png`, contact sheets for Barry (the vetted pool,
+  by race and sex, the skin texture's `Age40`/`Age50` and grey hair for age; no face shared).
+  Until Barry's picks, each character has its first 8 candidates. 17 candidates (the
+  look-alike bandits) have no face data in their records, only FaceGen, as in vanilla.
+- `build_voices.py --only fairgoers` builds the ten lines (`build/cameos/fairgoers/<voice>/`).
+- Plugin `1258c3ad482250dc`, deterministic; 140 records added, none gone. Deployed (80 FaceGen
+  heads and tints, about 48 MB loose; 10 voice folders).
+- **Not yet known:** whether a save made before keeps each visitor's old rolled face and voice
+  (then a one-time refresh); whether "Hellos to player" off keeps them silent walking past.
+
+## Earlier pass: Claudius lives at the entrance (2026-10-02, for 2.0.1.3)
 
 Barry's test of `2a223f0d2481dc2f`: "he's still stuck on that table, he doesn't appear near
 the main entrance at all"; then "Can we have him just spawn at the entrance? ... keep him there
@@ -28,6 +60,7 @@ force greet wasn't picked either.
   Passport stage 10. The force greet was never picked even with its alias filled (`alias TRUE`,
   `near TRUE`, package still `0B000C`): the script's `Activate` is what starts the talk. The
   force greet and its alias are kept (no FormID moves); they could be dropped later.
+  Barry checked both saves: one already in the fair, one loaded outside and walked in.
 
 ## Earlier pass: Claudius greets the player himself, within a radius (2026-10-02, for 2.0.1.3)
 

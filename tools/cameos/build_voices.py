@@ -13,6 +13,9 @@ cameos.members say (voiceLines: the json key, voiceDir: the folder). For each li
   text (the text improves the mouth shapes; curly quotes are straightened for it)
 - xwmaencode makes the xWMA audio, and LIPFuzer packs both into a .fuz
 
+The fairgoers' lines (fairWorld.fairgoers, cameos/fair-visitors/fair-visitors.json) go to
+build/cameos/fairgoers/<voice>/ the same way; `--only fairgoers` builds just those.
+
 Writes build/cameos/<id>/<nn>.fuz and build/cameos/<id>/lines.json (file, text, fuz, in the
 json's order). The generator (FairCameos.cs) makes one Hello line per entry, subtitled with
 its text, and copies each .fuz to the name the engine looks for.
@@ -46,11 +49,27 @@ def plain(text):
 
 
 def main():
+    only = sys.argv[sys.argv.index('--only') + 1] if '--only' in sys.argv else None
     config = json.loads((ROOT / 'fair.config.json').read_text(encoding='utf-8'))
     cameos = config['fairWorld']['cameos']
     lines_file = ROOT / cameos.get('voiceLinesFile', 'cameos/skyrim_fair_voicelines.json')
     all_lines = json.loads(lines_file.read_text(encoding='utf-8'))
     loud = cameos.get('voiceLoudness', -12)
+
+    # The fairgoers (fairWorld.fairgoers): Barry's lines file, an entry a line with its character
+    # ("voice"); each character's lines go to build/cameos/fairgoers/<voice>/, in the file's order.
+    fairgoers = config['fairWorld'].get('fairgoers', {})
+    if fairgoers.get('enabled') and only in (None, 'fairgoers'):
+        src_file = ROOT / fairgoers.get('linesFile', 'cameos/fair-visitors/fair-visitors.json')
+        entries = json.loads(src_file.read_text(encoding='utf-8'))['fairgoers']
+        src = fairgoers.get('voiceDir', str(src_file.parent.relative_to(ROOT) / 'mono'))
+        for character in fairgoers['characters']:
+            mine = [e for e in entries if e['voice'] == character['voice']]
+            if not mine:
+                sys.exit(f"fairgoers {character['voice']}: no lines in {src_file.name}")
+            build(f"fairgoers/{character['voice']}", mine, src, loud)
+    if only == 'fairgoers':
+        return
     for member in cameos['members']:
         key, src = member.get('voiceLines'), member.get('voiceDir')
         if not key or not src:

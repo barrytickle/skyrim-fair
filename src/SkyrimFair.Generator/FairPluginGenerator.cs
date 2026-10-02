@@ -536,6 +536,18 @@ internal static class FairPluginGenerator
             mod.ModHeader.Stats.NextFormID = saved;
         }
 
+        // The voiced fairgoers, after the Passport in a range of their own: they re-base the
+        // visitors, so the crowd, the re-seat and the culling are all built first.
+        var fairgoers = config.FairWorld.Fairgoers;
+        if (config.FairWorld.Enabled && fairgoers.Enabled && master is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            mod.ModHeader.Stats.NextFormID = fairgoers.FormIdBase;
+            var summary = FairFairgoers.Build(mod, config.FairWorld, master);
+            Console.WriteLine($"  fairgoers: {summary}; FormIDs 0x{fairgoers.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
         // Empty array properties can't be initialised from a plugin ("cannot be initialized because
         // the value is the incorrect type" in the log); left out, the script sees them empty anyway.
         foreach (var quest in mod.Quests.Where(q => q.VirtualMachineAdapter is not null))

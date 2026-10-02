@@ -72,7 +72,8 @@ python tools/package.py --version 2.0.1.3   # a release: dist/release/SkyrimFair
   - `FairLife.cs`: palisade banners and ropes, plants, props, smoke, animals, on their own FormID range (`life.formIdBase`)
   - `FairCameos.cs`: Garrick Sol V and Claudius Vale, their lines (`lineSlots`: lines added after release go at the end of the range), rounds, posters, the roof horse
   - `FairShops.cs`, `FairPaperLanterns.cs`, `FairHolidaysFree.cs`: the shops, the fair's own lanterns, bunting and props (no Holidays master)
-  - `FairPassport.cs`: the Fair Passport quest (built last, range 0xB0000)
+  - `FairPassport.cs`: the Fair Passport quest (range 0xB0000)
+  - `FairFairgoers.cs`: the voiced fairgoers (built last, range 0xC0000): the visitors re-based onto 10 characters
   - `FairConfig.cs`: every config record
 - `src/Papyrus/*.psc`: the stage script (`SkyrimFairAudioScript`: the show, the music duck, the re-seat), the cameos' and the Passport's line fragments, the talk perk (`SkyrimFairTalkDuck`), the Passport (`SkyrimFairPassport`), the counters, the keepers, the horses.
 - `tools/`: props, BSA extraction, NIF preview, audio build, Papyrus build, deploy.
@@ -117,6 +118,7 @@ python tools/package.py --version 2.0.1.3   # a release: dist/release/SkyrimFair
   - `0x90000` the shops (`shops`: factions, merchant chests, buy lists)
   - `0xA0000` the paper lanterns (`paperLanterns`: a texture set and a static per shape and colour)
   - `0xB0000` the Fair Passport (`passport`: the quest, its items, Claudius's lines, his run-up)
+  - `0xC0000` the voiced fairgoers (`fairgoers`: voice types, face carriers and lists, bases, packages, their lines)
 
   Inside a range, append only. Diff FormIDs against the deployed plugin every pass.
 - **Rotations:** Skyrim turns a reference about the world's Z, then Y, then X, clockwise.
@@ -135,7 +137,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `662458117e54e007`, deterministic;
+**2.0.1.3, built and deployed, not yet packaged** (plugin `1258c3ad482250dc`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
@@ -194,7 +196,14 @@ detail in `docs/AUDIT.md`'s current pass):
    stamp when looking at the roof, then the hand-in and the rewards. Check the passport can't
    be dropped.
 
-**Waiting on Barry's decision:**
+- **The voiced fairgoers, first build (in 2.0.1.3, Barry's pick):** all 144 visitors are the 10
+  characters (`FairFairgoers.cs`, `fairgoers` in the config, range 0xC0000), 8 faces each.
+  **Waiting on Barry's face picks** from `build/fairgoers/faces/<character>.png` (he strikes
+  numbers; the first 8 left go in `fairgoers.characters[].faces`); placeholders until then.
+  Then his test: the lines when talked to, silence walking past, the music duck, the Passport's
+  chat count, and whether an old save keeps the old faces (then a one-time refresh).
+
+**Decided before (the fairgoers' design):**
 - **Visitor lines: 10 voiced fairgoers** (Barry chose voiced lines, 2026-09-26). His set is in
   `cameos/fair-visitors/`: `fair-visitors.json` (`"fairgoers"`: file, voice, text), recordings
   in `mono/` (01-10.wav, mono 44.1 kHz, 4-9 s; the ElevenLabs originals in `original/`). Each line
