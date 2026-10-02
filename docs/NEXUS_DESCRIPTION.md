@@ -121,8 +121,8 @@ details (some may change, some may never make it), but here's where it's heading
   add-on.
 - **The case of the horse on the roof:** the Inspector's investigation continues.
 
-Got an idea, or found something that isn't right? Post it in the comments. Several of the
-fixes and features above started there.
+Got an idea, or found something that isn't right? Post it in the comments: plenty of the
+fair's fixes so far started there.
 
 ## Requirements
 
