@@ -1012,6 +1012,10 @@ Function RunUp()
 		; hand-over, as a scene holds the player.
 		Game.DisablePlayerControls(True, True, False, False, True, False, False)
 		runUpHeld = True
+		; Turned to face the player first, wherever they came from: put at the entrance facing the
+		; gate, he had his back to a player who'd loaded inside the fair (Barry, 2026-10-02).
+		a.SetAngle(0.0, 0.0, a.GetAngleZ() + a.GetHeadingAngle(player))
+		a.SetLookAt(player)
 		a.Activate(player)
 		Return
 	EndIf
@@ -1077,11 +1081,14 @@ Function PlaceInspector()
 	Debug.Trace("SkyrimFairAudio: run-up: Claudius put at the entrance")
 EndFunction
 
-; The player's movement back, if the run-up held it.
+; The player's movement back, if the run-up held it, and his eyes off them.
 Function RunUpRelease()
 	If runUpHeld
 		Game.EnablePlayerControls(True, True, False, False, True, False, False)
 		runUpHeld = False
+		If PassportInspector
+			PassportInspector.ClearLookAt()
+		EndIf
 	EndIf
 EndFunction
 

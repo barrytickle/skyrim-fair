@@ -15,6 +15,9 @@ every 2 s (a sprint is ~1,000 units), and its talk range was 250.
 - Let go (`RunUpRelease`, the same flags back): once the passport is issued (stage 10, at the
   hand-over); 3 s after a talk that ended without it (it starts again after the 20 s guard);
   and on every arrival or load (a save made while held keeps the controls off).
+- Barry: "make claudius face you when he triggers the stop line": loaded inside the fair, he had
+  his back to the player (put at the entrance facing the gate). Before the talk he's turned to
+  them (`SetAngle` by `GetHeadingAngle`) and looks at them (`SetLookAt`, cleared on release).
 - Scripts only; the plugin unchanged (`042d072ed31e5a2b`). Deployed.
 
 ## Earlier pass: the fairgoers stand in for the old visitors (2026-10-02, for 2.0.1.3)
