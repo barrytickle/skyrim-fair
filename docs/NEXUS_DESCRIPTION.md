@@ -72,16 +72,26 @@ says so, visit from a new game, or from a save made before you first went to the
   music before you see it, and at night you'll see the fireworks over the walls.
 
 **Life at the fair**
-- A crowd of visitors: families with children, people sat taking it all in, and dancers who
+- A crowd of fairgoers: families with children, people sat taking it all in, and dancers who
   can't keep still.
+- Ten characters among them, each with their own voice, faces and clothes. Stop and talk to
+  them, and they'll tell you what they make of the fair (and the horse). Try the two by the
+  Mead & Ale stall.
 - Archers practising at the range, goats and chickens in the pens, and dogs underfoot.
 - Your companions are welcome too, and follow you in and out through the gate.
 
 **Familiar faces**
 - Two of the fair's visitors may seem oddly familiar. One is a cheerful bard who insists the
   fair is completely under control (please don't ask follow-up questions). The other carries
-  a ledger, has counted the lanterns, and has concerns. Both are fully voiced, both wander
-  the fair, and each has plenty to say. **Can you spot them?**
+  a ledger, has counted the lanterns, and has concerns. Both are fully voiced, and each has
+  plenty to say. You'll meet the second one at the gate, whether you like it or not.
+
+**The Fair Passport**
+- Everyone at this fair requires a passport. The Fair Inspector will see to it.
+- Collect the stamps: stay for a whole song, talk to the bard, chat with five fairgoers, and
+  find the horse on the roof.
+- Hand it back, every stamp in order, for the Inspector's Seal of Approval (it helps at the
+  stalls) and a deed to a very particular horse.
 
 **The Mystery of the Horse on the Roof**
 - One morning, a horse was found standing on the roof of the stage. It's perfectly calm.
@@ -101,7 +111,7 @@ says so, visit from a new game, or from a save made before you first went to the
 
 **Recommended:**
 - **[SSE Engine Fixes](https://www.nexusmods.com/skyrimspecialedition/mods/17230)**: lets the
-  fair's two voiced visitors move their lips as they talk. Plain Skyrim has a lip-sync bug that
+  fair's voiced characters move their lips as they talk. Plain Skyrim has a lip-sync bug that
   it fixes; without it you'll still hear them clearly, their mouths just stay still. Most
   modded setups already have it.
 - **Open Animation Replacer** (needs **SKSE**): the folk dance, the band's livelier
@@ -117,7 +127,7 @@ says so, visit from a new game, or from a save made before you first went to the
 The fair wouldn't look the way it does without these creators. Thank you!
 
 **A note on AI:** I made the fair with a lot of help from AI tools. The music, the singing and
-the cameo voices, some of the artwork and models, and much of the code were made with them,
+the voices, some of the artwork and models, and much of the code were made with them,
 then tested and tuned by hand, many times over, in game. Everything is credited below.
 
 **Models** (converted and modified for Skyrim; each under
@@ -133,7 +143,7 @@ then tested and tuned by hand, many times over, in game. Everything is credited 
 
 **Music, voices and animation**
 - The soundtrack, the crowd and the singers: made with Suno
-- The fair's two familiar visitors: voiced with ElevenLabs
+- The fair's two familiar visitors and the fairgoers: voiced with ElevenLabs
 - The singers' cheer: "Cheering" from Adobe Mixamo, retargeted for Skyrim
 - The folk dance, the paper lanterns and much of the artwork: made for the fair with
   ChatGPT ("Astra")
