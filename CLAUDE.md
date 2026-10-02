@@ -241,6 +241,14 @@ detail in `docs/AUDIT.md`'s current pass):
 - A quest marker on Claudius for "Return the Fair Passport" (left out to keep the pass small).
 - Then package 2.0.1.3 and write its changelog.
 
+**Next, 2.0.2: the fair's schedule and camp** (Barry, 2026-10-02; on the Nexus page's Future
+updates as "The fair's own calendar"): Claudius asks how often the fair should run (every day,
+festivals only, monthly, or at random). When the fair isn't there, a campfire by the road:
+Claudius, the roof horse on a boulder, and Garrick playing his lute (no singing: the camp song
+was dropped). Claudius can bring the fair back early. Barry's 9 lines are recorded
+(`claudius_camp` in `cameos/skyrim_fair_voicelines.json`: camp_hello_01/02, camp_when,
+camp_bring_back, schedule_ask/always/festivals/monthly/wandering); nothing built yet.
+
 **Parked ideas** (Barry, 2026-09-26): the Festival Spirit buff (a whole song gives a skill-rate
 buff, 2/10), the archery contest (5/10), the Shout toss (needs a lent scroll: Unrelenting Force
 comes late in the main quest), and a rhythm game: **Bard Hero** (Nexus 186544) already plays

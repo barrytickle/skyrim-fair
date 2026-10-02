@@ -112,8 +112,9 @@ details (some may change, some may never make it), but here's where it's heading
 
 - **The fair's own calendar:** ask the Fair Inspector how often the fair should come to
   town: every day, festivals only, once a month, or whenever it wanders by. Between visits
-  a small camp keeps the gate, and if you can't wait, he can bring the fair back early (do
-  not ask how).
+  you'll find a campfire by the road: the Inspector with his ledger, the bard playing his
+  lute, and the horse (on a boulder this time). If you can't wait, the Inspector can bring
+  the fair back early. Do not ask how.
 - **An archery contest:** step up to the range and try to beat the regulars.
 - **Festival spirit:** stay for a whole song and leave the fair feeling inspired (a small,
   temporary boost to how quickly you learn).
