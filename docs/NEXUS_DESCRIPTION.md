@@ -110,15 +110,11 @@ says so, visit from a new game, or from a save made before you first went to the
 The fair keeps growing, and these are the ideas on the list. No promises on dates or
 details (some may change, some may never make it), but here's where it's heading:
 
-- **More to say:** more lines for the fairgoers, so a second chat isn't a repeat of the first.
 - **An archery contest:** step up to the range and try to beat the regulars.
 - **Festival spirit:** stay for a whole song and leave the fair feeling inspired (a small,
   temporary boost to how quickly you learn).
 - **A settings menu** (for MCM users): the music's volume, the crowd's size and more,
   changed in game.
-- **A grass cache for the fair**, so cache users get a green fair without regenerating.
-- **Bard Hero charts:** play the fair's songs in Bard Hero's rhythm game, as an optional
-  add-on.
 - **The case of the horse on the roof:** the Inspector's investigation continues.
 
 Got an idea, or found something that isn't right? Post it in the comments: plenty of the
