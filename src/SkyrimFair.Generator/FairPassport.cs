@@ -343,11 +343,11 @@ internal static class FairPassport
             mod.DialogTopics.Add(greetTopic);
             mod.DialogBranches.Add(branch);
 
-            // The package: until the passport is issued, he idles at the entrance, never sitting, so
-            // the player meets him on the way in and talking to him starts the Blocking branch
-            // above. A force greet (a run-up, as Ancano's) was never picked over his sandboxes, and
-            // he sat at his table (Barry's tests, 2026-09-26 and 2026-10-02). A copy of his own wide
-            // sandbox (last in his packages), on the entrance marker; same FormID as the run-up.
+            // The package: he idles at the entrance the whole time, never sitting (Barry: "keep him
+            // there the whole time you're at the fair"), so the player meets him on the way in and
+            // talking to him starts the Blocking branch above. He sat at his table under his rounds
+            // (Barry's tests, 2026-09-26 and 2026-10-02). A copy of his own wide sandbox (last in his
+            // packages), on the entrance marker, with no condition; same FormID as the run-up.
             var wide = mod.Packages.First(p => p.FormKey == inspector.Packages[^1].FormKey);
             var greet = wide.Duplicate(mod.GetNextFormKey());
             greet.EditorID = $"{config.EditorIdPrefix}AtEntrance";
@@ -364,9 +364,6 @@ internal static class FairPassport
             }
 
             greet.Conditions.Clear();
-            var stillNot = new GetStageConditionData { RunOnType = Condition.RunOnType.Subject };
-            stillNot.Quest.Link.SetTo(quest.FormKey);
-            greet.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = stillNot });
             mod.Packages.Add(greet);
             inspector.Packages.Insert(0, new FormLink<IPackageGetter>(greet.FormKey));
             var stageScript = stage.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript");
@@ -415,6 +412,7 @@ internal static class FairPassport
             stageScript.Properties.Add(Obj("PassportForceGreet", force.FormKey));
             stageScript.Properties.Add(new ScriptObjectProperty { Name = "PassportGreeter", Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 1 });
             stageScript.Properties.Add(new ScriptFloatProperty { Name = "PassportGreetRadius", Data = config.GreetRadius });
+            stageScript.Properties.Add(Obj("PassportWaitMarker", entrance.FormKey));
             runUp = $", run-up {(stopCue is null ? "subtitled" : "voiced")}";
         }
 

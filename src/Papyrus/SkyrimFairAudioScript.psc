@@ -151,8 +151,7 @@ GlobalVariable Property TalkDuckUntil Auto
 Quest Property Passport Auto
 {The Fair Passport (SkyrimFairPassport), if built: told when each song starts and ends.}
 Package Property PassportGreet Auto
-{Claudius's wait at the entrance until the passport is issued (a sandbox, no sitting): while he
-runs it, no idle and no move to another spot, and an idle he's in is ended at once.}
+{Claudius's wait at the entrance, the whole time (a sandbox, no sitting).}
 Package Property PassportForceGreet Auto
 {His force greet (on the Passport quest's Greeter alias): with the player within
 PassportGreetRadius and no passport issued, he walks up and starts the stop line.}
@@ -160,6 +159,14 @@ ReferenceAlias Property PassportGreeter Auto
 {The alias holding him for the force greet: forced in the plugin, filled here on saves where the
 Passport quest was already running.}
 Float Property PassportGreetRadius = 800.0 Auto
+ObjectReference Property PassportWaitMarker Auto
+{The entrance marker he waits at: on arrival (or a load) at the fair, if he's wandered off (or a
+save has him at his old table), he's put a few steps in front of it. His AI never walked him
+there from his table (Barry, 2026-10-02).}
+Float Property PassportWaitAhead = 300.0 Auto
+{How far in front of the entrance marker (along its heading, into the fair) he's put.}
+Float Property PassportTalkRange = 250.0 Auto
+{Within this of him, if his force greet hasn't started the talk, the script starts it.}
 Actor Property PassportInspector Auto
 {Claudius, whom RunUp nudges: his AI is only re-checked every so often, so a player arriving
 found him still seated at his table under his rounds' sandbox (Barry, 2026-09-26).}
@@ -314,6 +321,8 @@ Bool reseating = False
 Int runUpSeated = 0
 ; The run-up's state last logged, so the log gets a line only when it changes.
 String runUpLogged = ""
+; When the script last started his talk (real time), so a talk cut short isn't restarted at once.
+Float runUpTalkAt = -100.0
 Int songInstance = 0
 Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
@@ -474,6 +483,7 @@ Event OnUpdate()
 		Enter(1, FirstSongDelay, show)
 		StopBand(True)
 		QueueArchers()
+		PlaceInspector()
 		; Arrived (or loaded here): companions left outside come in.
 		BringCompanions()
 	EndIf
@@ -951,9 +961,23 @@ Function RunUp()
 		PassportGreeter.ForceRefTo(a)
 	EndIf
 	Package now = a.GetCurrentPackage()
-	Bool near = a.GetDistance(Game.GetPlayer()) < PassportGreetRadius
-	RunUpLog("package " + now + ", near " + near + ", sit " + a.GetSitState() + ", 3D " + a.Is3DLoaded() + ", talking " + a.IsInDialogueWithPlayer(), ", " + (a.GetDistance(Game.GetPlayer()) as Int) + " away")
+	Actor player = Game.GetPlayer()
+	Float apart = a.GetDistance(player)
+	Bool near = apart < PassportGreetRadius
+	String atGate = ""
+	If PassportWaitMarker
+		atGate = ", " + (a.GetDistance(PassportWaitMarker) as Int) + " from the entrance"
+	EndIf
+	RunUpLog("package " + now + ", near " + near + ", alias " + (PassportGreeter && PassportGreeter.GetReference()) + ", sit " + a.GetSitState() + ", 3D " + a.Is3DLoaded() + ", talking " + a.IsInDialogueWithPlayer(), ", " + (apart as Int) + " away" + atGate)
 	If a.IsDead() || a.IsDisabled() || a.IsInDialogueWithPlayer()
+		Return
+	EndIf
+	; Close enough and his force greet hasn't started it: start the talk (the player activating
+	; him, as pressing E does), which opens with the stop line's Blocking branch.
+	If apart < PassportTalkRange && a.Is3DLoaded() && !player.IsInCombat() && !Utility.IsInMenuMode() && Utility.GetCurrentRealTime() - runUpTalkAt > 20.0
+		runUpTalkAt = Utility.GetCurrentRealTime()
+		Debug.Trace("SkyrimFairAudio: run-up talk started by the script, " + (apart as Int) + " away")
+		a.Activate(player)
 		Return
 	EndIf
 	If now != PassportGreet && now != PassportForceGreet
@@ -975,6 +999,27 @@ Function RunUp()
 	Else
 		runUpSeated = 0
 	EndIf
+EndFunction
+
+; On arrival (or a load) at the fair: Claudius is put a few steps in front of the entrance
+; marker if he isn't near it, so the player meets him on the way in; his AI never walked him
+; there from his table. Stood up first, if he was seated.
+Function PlaceInspector()
+	If !PassportWaitMarker || !PassportInspector
+		Return
+	EndIf
+	Actor a = PassportInspector
+	If a.IsDead() || a.IsDisabled() || a.IsInDialogueWithPlayer() || a.GetDistance(PassportWaitMarker) < PassportWaitAhead + 200.0
+		Return
+	EndIf
+	If a.GetSitState() >= 2
+		Debug.SendAnimationEvent(a, "IdleForceDefaultState")
+	EndIf
+	Float heading = PassportWaitMarker.GetAngleZ()
+	a.MoveTo(PassportWaitMarker, PassportWaitAhead * Math.Sin(heading), PassportWaitAhead * Math.Cos(heading), 0.0)
+	a.SetAngle(0.0, 0.0, heading + 180.0)
+	a.EvaluatePackage()
+	Debug.Trace("SkyrimFairAudio: run-up: Claudius put at the entrance")
 EndFunction
 
 ; A line in the log for the run-up, only when its state changes (the extra, his distance, is
@@ -1085,7 +1130,8 @@ Function CameoIdles2(Float now)
 	Int i = 0
 	While i < Cameos.Length && i < 8
 		Actor a = Cameos[i]
-		Bool greeting = PassportGreet && a && (a.GetCurrentPackage() == PassportGreet || (PassportForceGreet && a.GetCurrentPackage() == PassportForceGreet))
+		; On his force greet: no idle, and an idle he's in is ended at once.
+		Bool greeting = PassportForceGreet && a && a.GetCurrentPackage() == PassportForceGreet
 		If greeting && cameoPlaying[i]
 			cameoNext[i] = now
 		EndIf

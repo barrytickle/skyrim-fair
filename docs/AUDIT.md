@@ -2,7 +2,29 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Claudius greets the player himself, within a radius (2026-10-02, for 2.0.1.3)
+## Current pass: Claudius lives at the entrance (2026-10-02, for 2.0.1.3)
+
+Barry's test of `2a223f0d2481dc2f`: "he's still stuck on that table, he doesn't appear near
+the main entrance at all"; then "Can we have him just spawn at the entrance? ... keep him there
+the whole time you're at the fair?" The log: he was on the entrance package (`0B000C`) and
+stood up (sit 3 to 0), but stayed 4,725 from the player at the gate; at 662 (`near TRUE`) the
+force greet wasn't picked either.
+- His ref (`060005`) now stands at the entrance: (2048, -1460), heading 180, facing the gate,
+  300 in front of `SkyrimFairWorldEntranceMarker` (`cameos.members` Claudius `at`).
+- `0B000C` (`SkyrimFairPassportAtEntrance`) has no condition now: he idles there the whole
+  time, before and after the Passport, never sitting.
+- The stage script's `PlaceInspector()`, on arrival or a load at the fair: if he's more than
+  500 from the marker (a save keeps him at his old table), stood up and moved (`MoveTo`) 300
+  in front of it, facing the gate. His idles play there as before; only the force greet stops
+  them.
+- The talk itself: the force greet (`0B000D` on the `Greeter` alias, within 800) stays; if it
+  hasn't started the talk with the player within 250 of him, the script does (`Activate`, as
+  pressing E does; once per 20 s at most), which opens with the stop line's Blocking branch.
+  Logged as "run-up talk started by the script".
+- The "run-up" log line adds whether the alias is filled and his distance from the entrance.
+- Plugin `662458117e54e007`, deterministic, no FormID added or lost. Deployed.
+
+## Earlier pass: Claudius greets the player himself, within a radius (2026-10-02, for 2.0.1.3)
 
 Barry: "could we have him automatically speak to you as you come in?", and "only ... if the
 player is within radius of him": players already in the fair when they update shouldn't be
