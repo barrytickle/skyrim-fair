@@ -105,6 +105,25 @@ says so, visit from a new game, or from a save made before you first went to the
 **Runs smoothly**
 - Built to keep your frame rate up, even with a whole festival crowd around you.
 
+## Future updates
+
+The fair keeps growing, and these are the ideas on the list. No promises on dates or
+details (some may change, some may never make it), but here's where it's heading:
+
+- **More to say:** more lines for the fairgoers, so a second chat isn't a repeat of the first.
+- **An archery contest:** step up to the range and try to beat the regulars.
+- **Festival spirit:** stay for a whole song and leave the fair feeling inspired (a small,
+  temporary boost to how quickly you learn).
+- **A settings menu** (for MCM users): the music's volume, the crowd's size and more,
+  changed in game.
+- **A grass cache for the fair**, so cache users get a green fair without regenerating.
+- **Bard Hero charts:** play the fair's songs in Bard Hero's rhythm game, as an optional
+  add-on.
+- **The case of the horse on the roof:** the Inspector's investigation continues.
+
+Got an idea, or found something that isn't right? Post it in the comments. Several of the
+fixes and features above started there.
+
 ## Requirements
 
 **Required:** Skyrim Special Edition or Anniversary Edition. That's it.
@@ -121,6 +140,22 @@ says so, visit from a new game, or from a save made before you first went to the
   Nemesis.
 - **[Terrain Parallax](https://www.nexusmods.com/skyrimspecialedition/mods/54860)**: extra
   depth on the fair's cobbles.
+
+## A thank you
+
+To everyone who downloaded the fair, came for a song and stayed for the pies: thank you.
+When I started this, I hoped a few people might enjoy an evening out in Skyrim. Seeing you
+wander in, take screenshots, and write to say you'd spent an hour just listening to the band
+has been the best part of making it.
+
+And a special thank you to everyone who took the time to post a bug, a suggestion or a
+crash log. Every one of them was read. The seats that stopped flickering, the music that
+dips when you talk to someone, the compatibility answers below, and a good few of the
+fair's little touches all came from you. The fair is better because you cared enough to
+tell me.
+
+Claudius has asked me to add that your feedback has been logged, filed and counter-signed,
+and that he has concerns about all of it. He's also very grateful. He just won't say so.
 
 ## Shout outs
 
