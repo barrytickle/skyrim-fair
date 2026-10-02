@@ -31,6 +31,11 @@ doesn't seem to focus him like a forced interaction".
   log ends 5 s later; so not yet known whether `Reset()` rolls them again. Next: wait for the
   "fairgoers reset" line, then look. If it doesn't, new refs (new FormIDs, nothing in a save)
   in place of the old, the culling's, dancers' and sitters' properties renamed to reach saves.
+- Barry: "add a fake loading screen ... 'updating npc's' with a progress bar". The reset now
+  runs behind vanilla's fade to black (`FadeToBlackImod`, then `...HoldImod`, then `...BackImod`,
+  as Apocrypha's books), the controls off, with notifications "Updating the fair's visitors..."
+  at 25, 50 and 75%, then "The fair's visitors are ready." `fairgoers.refreshVersion` 2, so it
+  runs again on Barry's save. Plugin `b8bf43695c4114c0`, deterministic; deployed.
 
 ## Earlier pass: the voiced fairgoers, first build (2026-10-02, for 2.0.1.3)
 

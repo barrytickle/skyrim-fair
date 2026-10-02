@@ -137,7 +137,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `748024ce12569cf4`, deterministic;
+**2.0.1.3, built and deployed, not yet packaged** (plugin `b8bf43695c4114c0`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
@@ -202,7 +202,7 @@ detail in `docs/AUDIT.md`'s current pass):
   numbers; the first 8 left go in `fairgoers.characters[].faces`); placeholders until then.
   Then his test: the lines when talked to, silence walking past, the music duck, the Passport's
   chat count. Old saves kept the old visitors (Barry, 2026-10-02): `RefreshFairgoers()` resets
-  them once (`fairgoers.refreshVersion`); whether that rolls them again is his next test.
+  them once (`fairgoers.refreshVersion`, now 2), behind a fade to black with progress notes (Barry's "loading screen"); whether that rolls them again is his next test.
 - **Claudius's talk** (Barry, 2026-10-02: sometimes the wrong line, never focused): now stop line,
   the player's reply "Is something wrong?", then the hand-over (the menu opens, so the camera turns to
   him); no walk-by hellos while he waits; the script's 20 s guard survives a relaunch.

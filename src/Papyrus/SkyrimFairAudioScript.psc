@@ -163,6 +163,11 @@ ObjectReference[] Property FairgoerRefs Auto
 {The visitors playing the voiced fairgoers (FairFairgoers.cs). A save keeps each as it was first
 rolled, face and voice, so they're reset once per FairgoersVersion and rolled again.}
 Int Property FairgoersVersion Auto
+ImageSpaceModifier Property FairgoersFadeOut Auto
+ImageSpaceModifier Property FairgoersFadeHold Auto
+ImageSpaceModifier Property FairgoersFadeBack Auto
+{Vanilla's FadeToBlackImod, FadeToBlackHoldImod and FadeToBlackBackImod: the screen is black, the
+controls off, while the fairgoers are reset (Barry: "like a loading screen").}
 ObjectReference Property PassportWaitMarker Auto
 {The entrance marker he waits at: on arrival (or a load) at the fair, if he's wandered off (or a
 save has him at his old table), he's put a few steps in front of it. His AI never walked him
@@ -1018,14 +1023,37 @@ Function RefreshFairgoers()
 		Return
 	EndIf
 	fairgoersDone = FairgoersVersion
+	; As a loading screen: black, the controls off, the progress in the corner (vanilla fades,
+	; as Apocrypha's books use them).
+	Bool fade = FairgoersFadeOut && FairgoersFadeHold && FairgoersFadeBack
+	Game.DisablePlayerControls()
+	If fade
+		FairgoersFadeOut.Apply()
+		Utility.Wait(1.0)
+		FairgoersFadeOut.PopTo(FairgoersFadeHold)
+	EndIf
+	Debug.Notification("Updating the fair's visitors...")
+	Int count = FairgoerRefs.Length
+	Int shown = 0
 	Int i = 0
-	While i < FairgoerRefs.Length
+	While i < count
 		If FairgoerRefs[i]
 			FairgoerRefs[i].Reset()
 		EndIf
 		i += 1
+		Int quarter = (i * 4) / count
+		If quarter > shown && i < count
+			shown = quarter
+			Debug.Notification("Updating the fair's visitors: " + (quarter * 25) + "%")
+		EndIf
 	EndWhile
-	Debug.Trace("SkyrimFairAudio: fairgoers reset: " + FairgoerRefs.Length + " (version " + FairgoersVersion + ")")
+	Debug.Notification("The fair's visitors are ready.")
+	If fade
+		FairgoersFadeHold.PopTo(FairgoersFadeBack)
+		FairgoersFadeHold.Remove()
+	EndIf
+	Game.EnablePlayerControls()
+	Debug.Trace("SkyrimFairAudio: fairgoers reset: " + count + " (version " + FairgoersVersion + ")")
 EndFunction
 
 ; On arrival (or a load) at the fair: Claudius is put a few steps in front of the entrance

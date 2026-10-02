@@ -183,6 +183,11 @@ internal static class FairFairgoers
             Objects = refs.Select(r => new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(r.FormKey) }).ToExtendedList(),
         });
         stageScript.Properties.Add(new ScriptIntProperty { Name = "FairgoersVersion", Data = config.RefreshVersion });
+        // Vanilla's fade to black (out, hold, back), the reset's "loading screen".
+        foreach (var (name, id) in new[] { ("FairgoersFadeOut", "0F756D"), ("FairgoersFadeHold", "0F756E"), ("FairgoersFadeBack", "0F756F") })
+        {
+            stageScript.Properties.Add(new ScriptObjectProperty { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(FormKey.Factory($"{id}:Skyrim.esm")) });
+        }
 
         // ---- their lines: a Hello a voice type --------------------------------------------------------
         var quest = new Quest(mod)
