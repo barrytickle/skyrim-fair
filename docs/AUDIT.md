@@ -2,7 +2,28 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: Claudius waits at the entrance instead of running up (2026-10-02, for 2.0.1.3)
+## Current pass: Claudius greets the player himself, within a radius (2026-10-02, for 2.0.1.3)
+
+Barry: "could we have him automatically speak to you as you come in?", and "only ... if the
+player is within radius of him": players already in the fair when they update shouldn't be
+chased across it.
+- `0B000D` `SkyrimFairPassportForceGreet`: a copy of BlindCliff's force greet, wait (8) and
+  trigger (62) near self (as Ancano's), trigger radius `passport.greetRadius` (800); its topic
+  the stop line's (`0B0009`). Conditions: Passport stage 0, and `GetDistance` to the player
+  under 800.
+- It sits on a new alias of the Passport quest, `Greeter` (ID 1, Optional, forced to his ref
+  `060005`), because alias packages come before the NPC's own (on his list, the run-up was never
+  picked). Its subrecords match vanilla's forced-reference aliases with packages (WERJ12's:
+  ALST, ALID, FNAM, ALFR, ALPC, VTCK, ALED); vanilla's FNAM there is Allow Reserved, ours Optional.
+- The stage script fills the alias (`ForceRefTo`) where the quest already ran without it,
+  re-evaluates him when the player comes in range or leaves it, and clears the alias once the
+  passport is issued. Its "run-up" log line now says `near`. New properties `PassportForceGreet`,
+  `PassportGreeter`, `PassportGreetRadius`.
+- Out of range, he waits at the entrance as before (`0B000C`).
+- (`ActorUtil.AddPackageOverride` was considered: it's PapyrusUtil's, not vanilla.)
+- Plugin `2a223f0d2481dc2f`, deterministic, 4,610 records (one new, none gone). Deployed.
+
+## Earlier pass: Claudius waits at the entrance instead of running up (2026-10-02, for 2.0.1.3)
 
 Barry's test of `548af21f4058f665`: Claudius "getting stuck on a table"; "can we just have him
 idle around the entrance?" The new log lines show the run-up package was never picked: he

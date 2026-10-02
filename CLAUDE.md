@@ -135,7 +135,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `0b536ba1493c06fa`, deterministic;
+**2.0.1.3, built and deployed, not yet packaged** (plugin `2a223f0d2481dc2f`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).
@@ -163,9 +163,11 @@ detail in `docs/AUDIT.md`'s current pass):
 - **The Passport: confirmed working by Barry.** Its "Talk to Claudius" stamp is retired (it ticked
   at the hand-over): four stamps, then "Return the Fair Passport to Claudius Vale".
 - **Claudius at the entrance** (a nod to Oblivion): until the Passport is issued he idles by the
-  gate (a sandbox on `SkyrimFairWorldEntranceMarker`, radius 300, no sitting), and talking to him
-  opens with "Stop! You violated the law! ...Well. The fair rules." (Barry's recording, a
-  Blocking branch), then the hand-over. Passport range 0xB0000-0xB000C.
+  gate (a sandbox on `SkyrimFairWorldEntranceMarker`, radius 300, no sitting). With the player
+  within 800 (`passport.greetRadius`, Barry: "only ... within radius of him"), he walks up and
+  talks (a force greet on the Passport quest's `Greeter` alias): "Stop! You violated the law!
+  ...Well. The fair rules." (Barry's recording, a Blocking branch), then the hand-over.
+  Passport range 0xB0000-0xB000D.
   This replaced a run-up (a force greet): its first build crashed (blank SNAM; fixed with
   `CUST`), then he waited where the player had stood, then the package was never picked and he
   sat at his table (Barry, 2026-10-02: "can we just have him idle around the entrance?").
@@ -173,9 +175,9 @@ detail in `docs/AUDIT.md`'s current pass):
 
 **Barry's tests for tomorrow:**
 0a. Claudius at the entrance, on a save without the Passport: entering through the gate, and
-   loading a save inside the fair: he walks to the gate and idles there, never sits; talking to
-   him plays the stop line then the hand-over, voiced, the music down; afterwards he goes back
-   to his rounds.
+   loading a save inside the fair: he walks to the gate and idles there, never sits; coming
+   within ~800 of him, he walks up and talks by himself (not from further off): the stop line
+   then the hand-over, voiced, the music down; afterwards he goes back to his rounds.
 0. The seat fix, on the same save: the benches still, the music playing, and one
    "SkyrimFairAudio: re-seated" line in the Papyrus log.
 1. Claudius's new voice: level beside Garrick, lip sync, line 17 turning up. And his new face:

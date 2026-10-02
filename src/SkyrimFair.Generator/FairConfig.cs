@@ -701,6 +701,21 @@ internal sealed record PassportConfig
     /// <summary>How far round the entrance marker he wanders while he waits.</summary>
     public float EntranceRadius { get; init; } = 300f;
 
+    /// <summary>The vanilla force greet his copies (the ForceGreet template, Run).</summary>
+    public string GreetFrom { get; init; } = "00109C68:Skyrim.esm";
+
+    /// <summary>
+    /// The vanilla force greet whose "near self" wait and trigger his take, as Ancano's in MG03
+    /// (a wait "near the player" is fixed where the player stood when the package started).
+    /// </summary>
+    public string GreetTriggerFrom { get; init; } = "0010E811:Skyrim.esm";
+
+    /// <summary>
+    /// How near the player must come before he walks up and talks (Barry: only within a radius,
+    /// so players already in the fair aren't chased across it).
+    /// </summary>
+    public float GreetRadius { get; init; } = 800f;
+
     /// <summary>Visitors to talk to for the chat stamp.</summary>
     public int Chats { get; init; } = 5;
 

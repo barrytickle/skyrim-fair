@@ -80,7 +80,7 @@ internal static class FairPassport
             Priority = 60,
             Type = Quest.TypeEnum.SideQuest,
             Filter = "Misc\\SkyrimFair\\",
-            NextAliasID = 1,
+            NextAliasID = 2,
         };
 
         // The passport's alias: filled by the script (ForceRefTo) when Claudius hands it over, and
@@ -373,6 +373,48 @@ internal static class FairPassport
             stageScript.Properties.Add(Obj("PassportGreet", greet.FormKey));
             var hisRef = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>()).Single(n => n.Base.FormKey == inspector.FormKey);
             stageScript.Properties.Add(Obj("PassportInspector", hisRef.FormKey));
+
+            // The force greet: he walks up and starts the stop line, only with the player within
+            // greetRadius of him (players already in the fair aren't chased across it). On a quest
+            // alias, whose packages come before his own (on his own list it was never picked:
+            // Barry's tests). The alias is forced to him; on a save where the quest already runs,
+            // the stage script fills it (ForceRefTo). Wait (8) and trigger (62) near himself, as
+            // Ancano's; it only starts with the player in range, so the player is in the trigger.
+            var force = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetFrom)).Duplicate(mod.GetNextFormKey());
+            force.EditorID = $"{config.EditorIdPrefix}ForceGreet";
+            force.VirtualMachineAdapter = null;
+            var nearSelf = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetTriggerFrom)).Data[62];
+            var waitHere = (PackageDataLocation)nearSelf.DeepCopy();
+            waitHere.Location.Radius = 128;
+            force.Data[8] = waitHere;
+            var trigger = (PackageDataLocation)nearSelf.DeepCopy();
+            trigger.Location.Radius = (uint)config.GreetRadius;
+            force.Data[62] = trigger;
+            var topicInput = force.Data.Values.OfType<PackageDataTopic>().Single();
+            topicInput.Topics.Clear();
+            topicInput.Topics.Add(new TopicReference { Reference = new FormLink<IDialogTopicGetter>(greetTopic.FormKey) });
+            force.Conditions.Clear();
+            var notYet = new GetStageConditionData { RunOnType = Condition.RunOnType.Subject };
+            notYet.Quest.Link.SetTo(quest.FormKey);
+            force.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = notYet });
+            var near = new GetDistanceConditionData { RunOnType = Condition.RunOnType.Subject };
+            near.Target.Link.SetTo(FormKeyHelper.Parse("00000014:Skyrim.esm"));
+            force.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.LessThan, ComparisonValue = config.GreetRadius, Data = near });
+            mod.Packages.Add(force);
+            var greeter = new QuestAlias
+            {
+                ID = 1,
+                Type = QuestAlias.TypeEnum.Reference,
+                Name = "Greeter",
+                Flags = QuestAlias.Flag.Optional,
+                ForcedReference = new FormLinkNullable<IPlacedGetter>(hisRef.FormKey),
+                VoiceTypes = new FormLinkNullable<IAliasVoiceTypeGetter>(FormKey.Null),
+            };
+            greeter.PackageData.Add(new FormLink<IPackageGetter>(force.FormKey));
+            quest.Aliases.Add(greeter);
+            stageScript.Properties.Add(Obj("PassportForceGreet", force.FormKey));
+            stageScript.Properties.Add(new ScriptObjectProperty { Name = "PassportGreeter", Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 1 });
+            stageScript.Properties.Add(new ScriptFloatProperty { Name = "PassportGreetRadius", Data = config.GreetRadius });
             runUp = $", run-up {(stopCue is null ? "subtitled" : "voiced")}";
         }
 

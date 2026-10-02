@@ -153,6 +153,13 @@ Quest Property Passport Auto
 Package Property PassportGreet Auto
 {Claudius's wait at the entrance until the passport is issued (a sandbox, no sitting): while he
 runs it, no idle and no move to another spot, and an idle he's in is ended at once.}
+Package Property PassportForceGreet Auto
+{His force greet (on the Passport quest's Greeter alias): with the player within
+PassportGreetRadius and no passport issued, he walks up and starts the stop line.}
+ReferenceAlias Property PassportGreeter Auto
+{The alias holding him for the force greet: forced in the plugin, filled here on saves where the
+Passport quest was already running.}
+Float Property PassportGreetRadius = 800.0 Auto
 Actor Property PassportInspector Auto
 {Claudius, whom RunUp nudges: his AI is only re-checked every so often, so a player arriving
 found him still seated at his table under his rounds' sandbox (Barry, 2026-09-26).}
@@ -931,17 +938,32 @@ Function RunUp()
 		If Passport
 			RunUpLog("off, passport stage " + Passport.GetStage(), "")
 		EndIf
+		If PassportGreeter && PassportGreeter.GetReference()
+			PassportGreeter.Clear()
+			If PassportInspector
+				PassportInspector.EvaluatePackage()
+			EndIf
+		EndIf
 		Return
 	EndIf
 	Actor a = PassportInspector
-	RunUpLog("package " + a.GetCurrentPackage() + ", sit " + a.GetSitState() + ", 3D " + a.Is3DLoaded() + ", talking " + a.IsInDialogueWithPlayer(), ", " + (a.GetDistance(Game.GetPlayer()) as Int) + " away")
+	If PassportGreeter && !PassportGreeter.GetReference()
+		PassportGreeter.ForceRefTo(a)
+	EndIf
+	Package now = a.GetCurrentPackage()
+	Bool near = a.GetDistance(Game.GetPlayer()) < PassportGreetRadius
+	RunUpLog("package " + now + ", near " + near + ", sit " + a.GetSitState() + ", 3D " + a.Is3DLoaded() + ", talking " + a.IsInDialogueWithPlayer(), ", " + (a.GetDistance(Game.GetPlayer()) as Int) + " away")
 	If a.IsDead() || a.IsDisabled() || a.IsInDialogueWithPlayer()
 		Return
 	EndIf
-	If a.GetCurrentPackage() != PassportGreet
+	If now != PassportGreet && now != PassportForceGreet
 		runUpSeated = 0
 		a.EvaluatePackage()
 		Return
+	EndIf
+	If PassportForceGreet && near != (now == PassportForceGreet)
+		; The player just came in range (or left it): re-check at once, not when the game next does.
+		a.EvaluatePackage()
 	EndIf
 	If a.GetSitState() >= 2 && a.Is3DLoaded()
 		runUpSeated += 1
@@ -1063,7 +1085,7 @@ Function CameoIdles2(Float now)
 	Int i = 0
 	While i < Cameos.Length && i < 8
 		Actor a = Cameos[i]
-		Bool greeting = PassportGreet && a && a.GetCurrentPackage() == PassportGreet
+		Bool greeting = PassportGreet && a && (a.GetCurrentPackage() == PassportGreet || (PassportForceGreet && a.GetCurrentPackage() == PassportForceGreet))
 		If greeting && cameoPlaying[i]
 			cameoNext[i] = now
 		EndIf
