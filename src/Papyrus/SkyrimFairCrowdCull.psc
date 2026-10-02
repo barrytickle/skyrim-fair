@@ -16,7 +16,7 @@ be enabled by script. set SkyrimFairCrowdCulling to 0 turns every actor back on.
 Written by the generator from fair.config.json (fairWorld.crowdCulling).}
 
 WorldSpace Property FairWorld Auto
-Actor[] Property Actors Auto
+Actor[] Property Actors2 Auto
 Int[] Property Layers Auto
 {Each actor's crowd layer (0 is the first), or -1 for one outside the layers.}
 Int[] Property Table Auto
@@ -65,8 +65,8 @@ Function Setup()
 		b += 1
 	EndWhile
 	; If the table didn't load whole, leave everyone on.
-	ready = Actors.Length > 0 && Layers.Length == Actors.Length && Words * 31 >= Actors.Length && Table.Length == Columns * Rows * Words
-	Debug.Trace("SkyrimFairCrowdCull: " + Actors.Length + " actors, table " + Table.Length + " of " + (Columns * Rows * Words) + ", ready " + ready)
+	ready = Actors2.Length > 0 && Layers.Length == Actors2.Length && Words * 31 >= Actors2.Length && Table.Length == Columns * Rows * Words
+	Debug.Trace("SkyrimFairCrowdCull: " + Actors2.Length + " actors, table " + Table.Length + " of " + (Columns * Rows * Words) + ", ready " + ready)
 EndFunction
 
 Event OnUpdate()
@@ -114,7 +114,7 @@ Function Apply(Int square, Int layerCount)
 		If all || now != was
 			Int b = 0
 			Int i = w * 31
-			While b < 31 && i < Actors.Length
+			While b < 31 && i < Actors2.Length
 				Bool seen = (now / bit[b]) % 2 == 1
 				If all || seen != ((was / bit[b]) % 2 == 1)
 					If Set(i, seen && (Layers[i] < 0 || Layers[i] < layerCount))
@@ -141,7 +141,7 @@ EndFunction
 
 ; True if the actor was switched.
 Bool Function Set(Int i, Bool on)
-	Actor a = Actors[i]
+	Actor a = Actors2[i]
 	If !a
 		Return False
 	EndIf

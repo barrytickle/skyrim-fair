@@ -2,7 +2,27 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: old saves roll the fairgoers again; Claudius's talk, focused (2026-10-02, for 2.0.1.3)
+## Current pass: the fairgoers stand in for the old visitors (2026-10-02, for 2.0.1.3)
+
+Barry chose new refs over the reset (my recommendation): a reset may not roll a leveled actor
+again, and it meant about 30 s of black screen (144 `Reset()` calls, ~0.23 s each).
+- **The stand-ins:** each of the 144 visitors gets a new ref (`0xC008C`-`0xC011B`, after the
+  lines, so nothing in the range moved): a copy of it (place, flags, seat link) on its
+  fairgoer base, in the same cell list. A save has nothing of a new ref, so it's rolled
+  fresh: face, voice, outfit.
+- **The old 144** keep their FormIDs and old bases: initially disabled, no enable parent. The
+  stage script's `RetireVisitors()`, on arrival or a load, once per `RetiredVisitorsVersion`
+  (`fairgoers.refreshVersion`), switches off any a save has on (`DisableNoWait`, no waiting),
+  logged "retired visitors switched off: N of 144".
+- **The scripts' lists**, pointed at the stand-ins and renamed so saves get them
+  (`fairgoers.renameLists`): the stage script's `Dancers` -> `Dancers2` (43), `Sitters` ->
+  `Sitters2` (39), the culling's `Actors` -> `Actors2` (108 of 184, same order, so its table
+  holds; it re-applies every actor on each load). The generator throws if any other quest
+  script lists a visitor without a new name.
+- The reset, its fade and its notifications are gone.
+- Plugin `042d072ed31e5a2b`, deterministic; 144 records added, none gone. Deployed.
+
+## Earlier pass: old saves roll the fairgoers again; Claudius's talk, focused (2026-10-02, for 2.0.1.3)
 
 Barry's test of `1258c3ad482250dc`: "the new npc's don't seem to be updated" (an old save in the
 fair, and one outside walked in); and Claudius "sometimes it's the wrong dialogue, and the game

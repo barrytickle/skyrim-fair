@@ -69,7 +69,7 @@ ObjectReference[] Property CrowdLayers Auto
 GlobalVariable Property CrowdLayer Auto
 {How many crowd layers are on: set SkyrimFairCrowdLayers to 0..n in the console.}
 
-Actor[] Property Dancers Auto
+Actor[] Property Dancers2 Auto
 {The dance floor (persistent references): they dance through each song and cheer at its end.}
 Idle[] Property DanceIdles Auto
 Float[] Property DanceLengths Auto
@@ -132,7 +132,7 @@ ObjectReference[] Property SeatChairs Auto
 Float[] Property SeatYaw Auto
 {The chairs at the tables and the heading each should face (degrees). A save that met the fair's
 bar stools keeps their old angles, so each is turned to its heading once (SeatLayoutVersion).}
-Actor[] Property Sitters Auto
+Actor[] Property Sitters2 Auto
 {The seated visitors: sent back to their seats (their editor locations) once, to sit down again.}
 Actor[] Property Keepers Auto
 {The shopkeepers: sent back to their spots behind their counters once as well (one had wandered
@@ -159,15 +159,10 @@ ReferenceAlias Property PassportGreeter Auto
 {The alias holding him for the force greet: forced in the plugin, filled here on saves where the
 Passport quest was already running.}
 Float Property PassportGreetRadius = 800.0 Auto
-ObjectReference[] Property FairgoerRefs Auto
-{The visitors playing the voiced fairgoers (FairFairgoers.cs). A save keeps each as it was first
-rolled, face and voice, so they're reset once per FairgoersVersion and rolled again.}
-Int Property FairgoersVersion Auto
-ImageSpaceModifier Property FairgoersFadeOut Auto
-ImageSpaceModifier Property FairgoersFadeHold Auto
-ImageSpaceModifier Property FairgoersFadeBack Auto
-{Vanilla's FadeToBlackImod, FadeToBlackHoldImod and FadeToBlackBackImod: the screen is black, the
-controls off, while the fairgoers are reset (Barry: "like a loading screen").}
+ObjectReference[] Property RetiredVisitors Auto
+{The visitors the voiced fairgoers stand in for (FairFairgoers.cs): switched off in the plugin,
+and once per RetiredVisitorsVersion here, as a save may have them on.}
+Int Property RetiredVisitorsVersion Auto
 ObjectReference Property PassportWaitMarker Auto
 {The entrance marker he waits at: on arrival (or a load) at the fair, if he's wandered off (or a
 save has him at his old table), he's put a few steps in front of it. His AI never walked him
@@ -328,8 +323,8 @@ Int seatLayoutDone = 0
 Bool reseating = False
 ; RunUp's checks with Claudius on his run-up but still seated.
 Int runUpSeated = 0
-; The fairgoer refresh this save has had (FairgoersVersion).
-Int fairgoersDone = 0
+; The retirement this save has had (RetiredVisitorsVersion).
+Int retiredDone = 0
 ; The run-up's state last logged, so the log gets a line only when it changes.
 String runUpLogged = ""
 ; When the script last started his talk (real time), so a talk cut short isn't restarted at once.
@@ -495,7 +490,7 @@ Event OnUpdate()
 		StopBand(True)
 		QueueArchers()
 		PlaceInspector()
-		RefreshFairgoers()
+		RetireVisitors()
 		; Arrived (or loaded here): companions left outside come in.
 		BringCompanions()
 	EndIf
@@ -746,9 +741,9 @@ Function StopAll()
 	bandUntil = 0.0
 	SetTempo(1)
 	Int i = 0
-	While i < Dancers.Length && i < inMoreDance.Length
-		If inMoreDance[i] && Dancers[i] && Dancers[i].Is3DLoaded()
-			Debug.SendAnimationEvent(Dancers[i], "IdleForceDefaultState")
+	While i < Dancers2.Length && i < inMoreDance.Length
+		If inMoreDance[i] && Dancers2[i] && Dancers2[i].Is3DLoaded()
+			Debug.SendAnimationEvent(Dancers2[i], "IdleForceDefaultState")
 		EndIf
 		inMoreDance[i] = False
 		i += 1
@@ -905,9 +900,9 @@ Function Reseat()
 	; The seated first taken out: one already sitting keeps his old seat's transform if his chair
 	; is turned under him (layout 1 left one sitting beside his chair, 2026-09-25).
 	Int i = 0
-	While i < Sitters.Length
-		If Sitters[i] && !Sitters[i].IsDead()
-			Sitters[i].Disable()
+	While i < Sitters2.Length
+		If Sitters2[i] && !Sitters2[i].IsDead()
+			Sitters2[i].Disable()
 		EndIf
 		i += 1
 	EndWhile
@@ -923,11 +918,11 @@ Function Reseat()
 	; Then back at their seats, to sit down fresh in the turned chairs. (The culling switches off
 	; again any it doesn't want shown.)
 	i = 0
-	While i < Sitters.Length
-		If Sitters[i] && !Sitters[i].IsDead()
-			Sitters[i].MoveToMyEditorLocation()
-			Sitters[i].Enable()
-			Sitters[i].EvaluatePackage()
+	While i < Sitters2.Length
+		If Sitters2[i] && !Sitters2[i].IsDead()
+			Sitters2[i].MoveToMyEditorLocation()
+			Sitters2[i].Enable()
+			Sitters2[i].EvaluatePackage()
 		EndIf
 		i += 1
 	EndWhile
@@ -948,7 +943,7 @@ Function Reseat()
 		i += 1
 	EndWhile
 	reseating = False
-	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs, " + Sitters.Length + " visitors and " + Keepers.Length + " keepers (layout " + SeatLayoutVersion + ")")
+	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs, " + Sitters2.Length + " visitors and " + Keepers.Length + " keepers (layout " + SeatLayoutVersion + ")")
 EndFunction
 
 ; Claudius's wait at the entrance, while the passport isn't issued (the player is at the fair:
@@ -1016,44 +1011,24 @@ Function RunUp()
 	EndIf
 EndFunction
 
-;  Once per FairgoersVersion: every fairgoer reset, so a save rolls them again from their new
-; bases (their faces and voices). Marked done first: a call arriving while it runs returns.
-Function RefreshFairgoers()
-	If FairgoersVersion <= 0 || fairgoersDone >= FairgoersVersion || FairgoerRefs.Length == 0
+; Once per RetiredVisitorsVersion: the visitors the fairgoers stand in for switched off (a save
+; may have them on: the culling switched them). No waiting: DisableNoWait.
+Function RetireVisitors()
+	If RetiredVisitorsVersion <= 0 || retiredDone >= RetiredVisitorsVersion || RetiredVisitors.Length == 0
 		Return
 	EndIf
-	fairgoersDone = FairgoersVersion
-	; As a loading screen: black, the controls off, the progress in the corner (vanilla fades,
-	; as Apocrypha's books use them).
-	Bool fade = FairgoersFadeOut && FairgoersFadeHold && FairgoersFadeBack
-	Game.DisablePlayerControls()
-	If fade
-		FairgoersFadeOut.Apply()
-		Utility.Wait(1.0)
-		FairgoersFadeOut.PopTo(FairgoersFadeHold)
-	EndIf
-	Debug.Notification("Updating the fair's visitors...")
-	Int count = FairgoerRefs.Length
-	Int shown = 0
+	retiredDone = RetiredVisitorsVersion
+	Int off = 0
 	Int i = 0
-	While i < count
-		If FairgoerRefs[i]
-			FairgoerRefs[i].Reset()
+	While i < RetiredVisitors.Length
+		ObjectReference r = RetiredVisitors[i]
+		If r && !r.IsDisabled()
+			r.DisableNoWait()
+			off += 1
 		EndIf
 		i += 1
-		Int quarter = (i * 4) / count
-		If quarter > shown && i < count
-			shown = quarter
-			Debug.Notification("Updating the fair's visitors: " + (quarter * 25) + "%")
-		EndIf
 	EndWhile
-	Debug.Notification("The fair's visitors are ready.")
-	If fade
-		FairgoersFadeHold.PopTo(FairgoersFadeBack)
-		FairgoersFadeHold.Remove()
-	EndIf
-	Game.EnablePlayerControls()
-	Debug.Trace("SkyrimFairAudio: fairgoers reset: " + count + " (version " + FairgoersVersion + ")")
+	Debug.Trace("SkyrimFairAudio: retired visitors switched off: " + off + " of " + RetiredVisitors.Length + " (version " + RetiredVisitorsVersion + ")")
 EndFunction
 
 ; On arrival (or a load) at the fair: Claudius is put a few steps in front of the entrance
@@ -1431,7 +1406,7 @@ EndFunction
 Function CapDances(Float now)
 	Float perSecond = TimeScale.GetValue() / 86400.0
 	Int i = 0
-	While i < Dancers.Length && i < danceEnds.Length
+	While i < Dancers2.Length && i < danceEnds.Length
 		Float cap = now + (i % 8) * 0.5 * perSecond
 		If danceEnds[i] > cap
 			danceEnds[i] = cap
@@ -1504,10 +1479,10 @@ Function FaceStage(Bool[] which)
 	Float[] start = new Float[128]
 	Float[] turn = new Float[128]
 	Int i = 0
-	While i < Dancers.Length && i < 128
-		If which[i] && Dancers[i] && Dancers[i].Is3DLoaded()
-			start[i] = Dancers[i].GetAngleZ()
-			turn[i] = Dancers[i].GetHeadingAngle(StageSpeaker)
+	While i < Dancers2.Length && i < 128
+		If which[i] && Dancers2[i] && Dancers2[i].Is3DLoaded()
+			start[i] = Dancers2[i].GetAngleZ()
+			turn[i] = Dancers2[i].GetHeadingAngle(StageSpeaker)
 		EndIf
 		i += 1
 	EndWhile
@@ -1518,9 +1493,9 @@ Function FaceStage(Bool[] which)
 	Int k = 1
 	While k <= steps
 		i = 0
-		While i < Dancers.Length && i < 128
-			If (turn[i] > 10.0 || turn[i] < -10.0) && Dancers[i] && Dancers[i].Is3DLoaded()
-				Dancers[i].SetAngle(0.0, 0.0, start[i] + turn[i] * k / steps)
+		While i < Dancers2.Length && i < 128
+			If (turn[i] > 10.0 || turn[i] < -10.0) && Dancers2[i] && Dancers2[i].Is3DLoaded()
+				Dancers2[i].SetAngle(0.0, 0.0, start[i] + turn[i] * k / steps)
 			EndIf
 			i += 1
 		EndWhile
@@ -1544,7 +1519,7 @@ EndFunction
 
 ; Each dancer starts a dance when the song starts (as soon as their 3D is there), and the
 ; next as each one ends: a vanilla idle plays its clip once, and re-sending one mid-clip
-; restarts it visibly. Dancers take the dances in turn, offset, so the floor varies.
+; restarts it visibly. Dancers2 take the dances in turn, offset, so the floor varies.
 Function Dance()
 	; The section's crowd mode picks the idles: dance, clap or cheer.
 	Idle[] idles = DanceIdles
@@ -1559,15 +1534,15 @@ Function Dance()
 	If idles.Length == 0
 		Return
 	EndIf
-	If dancing.Length < Dancers.Length
+	If dancing.Length < Dancers2.Length
 		dancing = new Bool[128]
 		danceEnds = new Float[128]
 		dancePlays = new Int[128]
 	EndIf
-	If danceMode.Length < Dancers.Length
+	If danceMode.Length < Dancers2.Length
 		danceMode = new Int[128]
 	EndIf
-	If inMoreDance.Length < Dancers.Length
+	If inMoreDance.Length < Dancers2.Length
 		inMoreDance = new Bool[128]
 	EndIf
 	CheckMoreDances()
@@ -1583,8 +1558,8 @@ Function Dance()
 	String[] events = new String[128]
 	Bool settle = False
 	Int i = 0
-	While i < Dancers.Length && i < dancing.Length
-		If (!dancing[i] || now >= danceEnds[i]) && Dancers[i] && Dancers[i].Is3DLoaded()
+	While i < Dancers2.Length && i < dancing.Length
+		If (!dancing[i] || now >= danceEnds[i]) && Dancers2[i] && Dancers2[i].Is3DLoaded()
 			Int which = (i + dancePlays[i]) % idles.Length
 			moves[i] = idles[which]
 			clips[i] = 6.0
@@ -1600,7 +1575,7 @@ Function Dance()
 			EndIf
 			; A mod dance loops until stopped: settle first, into it or out of it.
 			If todo[i] == 1 || inMoreDance[i]
-				Debug.SendAnimationEvent(Dancers[i], "IdleForceDefaultState")
+				Debug.SendAnimationEvent(Dancers2[i], "IdleForceDefaultState")
 				settle = True
 			EndIf
 		EndIf
@@ -1612,14 +1587,14 @@ Function Dance()
 	EndIf
 	; Pass 2: start them.
 	i = 0
-	While i < Dancers.Length && i < dancing.Length
+	While i < Dancers2.Length && i < dancing.Length
 		Bool started = False
 		If todo[i] == 1
-			Debug.SendAnimationEvent(Dancers[i], events[i])
+			Debug.SendAnimationEvent(Dancers2[i], events[i])
 			inMoreDance[i] = True
 			started = True
 		ElseIf todo[i] == 2
-			If Dancers[i].PlayIdle(moves[i])
+			If Dancers2[i].PlayIdle(moves[i])
 				inMoreDance[i] = False
 				started = True
 			EndIf

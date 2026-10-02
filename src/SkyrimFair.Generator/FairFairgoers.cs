@@ -169,25 +169,8 @@ internal static class FairFairgoers
             counts[c.Voice]++;
         }
 
-        foreach (var r in refs)
-        {
-            r.Base = new FormLinkNullable<INpcGetter>(BaseFor(cast[r.FormKey], PackageOf(visitorBases[r.Base.FormKey])).FormKey);
-        }
-
-        // A save keeps each visitor as it was first rolled (face and voice, Barry's test,
-        // 2026-10-02): the stage script resets them once per RefreshVersion, so they're rolled
-        // again from their new bases.
-        stageScript.Properties.Add(new ScriptObjectListProperty
-        {
-            Name = "FairgoerRefs",
-            Objects = refs.Select(r => new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(r.FormKey) }).ToExtendedList(),
-        });
-        stageScript.Properties.Add(new ScriptIntProperty { Name = "FairgoersVersion", Data = config.RefreshVersion });
-        // Vanilla's fade to black (out, hold, back), the reset's "loading screen".
-        foreach (var (name, id) in new[] { ("FairgoersFadeOut", "0F756D"), ("FairgoersFadeHold", "0F756E"), ("FairgoersFadeBack", "0F756F") })
-        {
-            stageScript.Properties.Add(new ScriptObjectProperty { Name = name, Object = new FormLink<ISkyrimMajorRecordGetter>(FormKey.Factory($"{id}:Skyrim.esm")) });
-        }
+        // The base each visitor's stand-in takes (made here, so the bases' FormIDs stay as they were).
+        var newBase = refs.ToDictionary(r => r.FormKey, r => BaseFor(cast[r.FormKey], PackageOf(visitorBases[r.Base.FormKey])).FormKey);
 
         // ---- their lines: a Hello a voice type --------------------------------------------------------
         var quest = new Quest(mod)
@@ -271,9 +254,91 @@ internal static class FairFairgoers
         }
 
         mod.DialogTopics.Add(topic);
+
+        // ---- new refs in the visitors' places ---------------------------------------------------------
+        // A save keeps each visitor as it was first rolled, face and voice, whatever its base
+        // becomes (Barry's test, 2026-10-02), and a reset didn't roll them again. So each visitor
+        // gets a stand-in, a new ref (a save has nothing of it, so it's rolled from its new base):
+        // the same place, layer and seat link, in the same cell. The old refs keep their FormIDs
+        // and bases, switched off for good: initially disabled, with no enable parent (it would
+        // switch them on), and the stage script switches them off once on saves that have them on.
+        // The scripts' lists of them are renamed (a save keeps a property's old value).
+        var standIn = new Dictionary<FormKey, FormKey>();
+        foreach (var r in refs)
+        {
+            var copy = (PlacedNpc)r.Duplicate(mod.GetNextFormKey());
+            copy.Base = new FormLinkNullable<INpcGetter>(newBase[r.FormKey]);
+            CellListOf(mod, r).Add(copy);
+            standIn[r.FormKey] = copy.FormKey;
+            r.MajorRecordFlagsRaw |= InitiallyDisabledFlag;
+            r.EnableParent = null;
+        }
+
+        var renamed = new List<string>();
+        foreach (var script in mod.Quests.SelectMany(q => q.VirtualMachineAdapter?.Scripts ?? Enumerable.Empty<ScriptEntry>()))
+        {
+            foreach (var list in script.Properties.OfType<ScriptObjectListProperty>().ToList())
+            {
+                if (!list.Objects.Any(o => standIn.ContainsKey(o.Object.FormKey)))
+                {
+                    continue;
+                }
+
+                foreach (var o in list.Objects.Where(o => standIn.ContainsKey(o.Object.FormKey)))
+                {
+                    o.Object = new FormLink<ISkyrimMajorRecordGetter>(standIn[o.Object.FormKey]);
+                }
+
+                if (!config.RenameLists.TryGetValue(list.Name, out var name))
+                {
+                    throw new InvalidOperationException($"fairgoers: {script.Name}.{list.Name} lists visitors; give it a new name in fairgoers.renameLists, so saves get the stand-ins");
+                }
+
+                renamed.Add($"{list.Name} -> {name}");
+                list.Name = name;
+            }
+        }
+
+        stageScript.Properties.Add(new ScriptObjectListProperty
+        {
+            Name = "RetiredVisitors",
+            Objects = refs.Select(r => new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(r.FormKey) }).ToExtendedList(),
+        });
+        stageScript.Properties.Add(new ScriptIntProperty { Name = "RetiredVisitorsVersion", Data = config.RefreshVersion });
+
         var perCharacter = string.Join(", ", config.Characters.Select(c => $"{c.Id} {counts[c.Voice]}"));
         return $"{refs.Count} visitors as {config.Characters.Count} characters ({perCharacter}); "
-            + $"{carriers} faces, {bases.Count} bases, {quiet.Count} packages, {spoken} lines, {woken} retired visitors woken";
+            + $"{carriers} faces, {bases.Count} bases, {quiet.Count} packages, {spoken} lines, {woken} retired visitors woken; "
+            + $"{standIn.Count} stand-ins ({string.Join(", ", renamed)})";
+    }
+
+    /// <summary>The cell list (persistent or temporary) a ref is in.</summary>
+    private static IList<IPlaced> CellListOf(SkyrimMod mod, IPlacedNpc r)
+    {
+        foreach (var w in mod.Worldspaces)
+        {
+            var cells = new List<Cell>();
+            if (w.TopCell is { } top)
+            {
+                cells.Add(top);
+            }
+
+            cells.AddRange(w.SubCells.SelectMany(b => b.Items).SelectMany(s => s.Items));
+            foreach (var cell in cells)
+            {
+                if (cell.Persistent.Contains(r))
+                {
+                    return cell.Persistent;
+                }
+
+                if (cell.Temporary.Contains(r))
+                {
+                    return cell.Temporary;
+                }
+            }
+        }
+
+        throw new InvalidOperationException($"fairgoers: {r.FormKey} is in no cell");
     }
 
     private static FormKey PackageOf(INpcGetter npc) => npc.Packages.Count > 0 ? npc.Packages[0].FormKey : FormKey.Null;

@@ -979,8 +979,19 @@ internal sealed record FairgoersConfig
 
     public string ChildPrefix { get; init; } = "SkyrimFairVisitorChild";
 
-    /// <summary>Bumped when saves must roll the visitors again: the stage script resets them once a version.</summary>
+    /// <summary>Bumped when the retired visitors must be switched off again on saves (once a version).</summary>
     public int RefreshVersion { get; init; } = 1;
+
+    /// <summary>
+    /// The scripts' lists of visitors, renamed when they're pointed at the stand-ins: a save keeps
+    /// a property's old value, a new name it doesn't have.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> RenameLists { get; init; } = new Dictionary<string, string>
+    {
+        ["Actors"] = "Actors2",
+        ["Dancers"] = "Dancers2",
+        ["Sitters"] = "Sitters2",
+    };
 
     public IReadOnlyList<FairgoerCharacter> Characters { get; init; } = Array.Empty<FairgoerCharacter>();
 
