@@ -137,7 +137,7 @@ changelog written; Barry was uploading it). Bump the version for every release a
 `tools/package.py --version <v>`. SSE Engine Fixes is recommended on the page (a pinned post)
 for the cameos' lip sync on plain SE.
 
-**2.0.1.3, built and deployed, not yet packaged** (plugin `042d072ed31e5a2b`, deterministic;
+**2.0.1.3, packaged 2026-10-02** (`dist/release/SkyrimFair-2.0.1.3/`, changelog there; Barry uploads) (plugin `042d072ed31e5a2b`, deterministic;
 detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's new voice:** Barry re-recorded all 16 lines "to make him more of a character",
   and added a 17th ("Oh for fuck sake, how'd that horse get up there?", Barry's choice to keep).

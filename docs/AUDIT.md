@@ -2,7 +2,21 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: no running past Claudius (2026-10-02, for 2.0.1.3)
+## Current pass: 2.0.1.3 packaged (2026-10-02)
+
+Barry: "it's all working now :) Can we ship it?" (the faces as they are; Claudius facing the player).
+- `tools/package.py --version 2.0.1.3`: release plugin `042d072ed31e5a2b` (twice, the tested
+  build), 742 game files (267 MB), `SkyrimFair-2.0.1.3.zip` 182 MB (2.0.1.2: 172 MB); in it the
+  10 fairgoer voice folders, 80 FaceGen heads and tints, the `.seq`; the retired guard script
+  left out. The first run stopped at the Compatibility check: COMPATIBILITY.md's "Checked:
+  compatible" section (JK's Whiterun Outskirts and the rest) was never copied into
+  NEXUS_DESCRIPTION.md; copied across.
+- The changelog: `dist/release/SkyrimFair-2.0.1.3/CHANGELOG.md`.
+- The crowd framerate question (30-50 with framegen in big crowds) was left with Barry's
+  "it's all working now"; the A/B test plugin (`fairgoers.testOldBases`, `build/SkyrimFair.testoldbases.esp`)
+  is kept if it comes back.
+
+## Earlier pass: no running past Claudius (2026-10-02, for 2.0.1.3)
 
 Barry confirmed the stand-ins: the visitors new on an old save (in the fair, and walked in), no
 doubles, the crowd culling, dancing and sitting as before, and Claudius's focused talk. One bug:
