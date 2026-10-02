@@ -23,6 +23,11 @@ force greet wasn't picked either.
   Logged as "run-up talk started by the script".
 - The "run-up" log line adds whether the alias is filled and his distance from the entrance.
 - Plugin `662458117e54e007`, deterministic, no FormID added or lost. Deployed.
+- **Confirmed by Barry in game** ("woohoo!! that worked"). His log, two loads: "Claudius put at
+  the entrance", then within 2 s "run-up talk started by the script" (193 and 108 away), then
+  Passport stage 10. The force greet was never picked even with its alias filled (`alias TRUE`,
+  `near TRUE`, package still `0B000C`): the script's `Activate` is what starts the talk. The
+  force greet and its alias are kept (no FormID moves); they could be dropped later.
 
 ## Earlier pass: Claudius greets the player himself, within a radius (2026-10-02, for 2.0.1.3)
 

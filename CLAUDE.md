@@ -170,6 +170,8 @@ detail in `docs/AUDIT.md`'s current pass):
   talks (a force greet on the Passport quest's `Greeter` alias): "Stop! You violated the law!
   ...Well. The fair rules." (Barry's recording, a Blocking branch), then the hand-over. Within
   250, if the force greet hasn't started it, the script does (`Activate`, as pressing E).
+  **Confirmed by Barry, 2026-10-02.** The log shows the script's `Activate` starts the talk every
+  time; the force greet (alias filled, player near) is never picked.
   Passport range 0xB0000-0xB000D.
   This replaced a run-up (a force greet): its first build crashed (blank SNAM; fixed with
   `CUST`), then he waited where the player had stood, then the package was never picked and he
