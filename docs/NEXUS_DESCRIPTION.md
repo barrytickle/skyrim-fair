@@ -144,15 +144,14 @@ fixes and features above started there.
 ## A thank you
 
 To everyone who downloaded the fair, came for a song and stayed for the pies: thank you.
-When I started this, I hoped a few people might enjoy an evening out in Skyrim. Seeing you
-wander in, take screenshots, and write to say you'd spent an hour just listening to the band
-has been the best part of making it.
+When I started this, I hoped a few people might enjoy an evening out in Skyrim. Knowing
+you've wandered in, found a seat and listened to the band has been the best part of making it.
 
 And a special thank you to everyone who took the time to post a bug, a suggestion or a
-crash log. Every one of them was read. The seats that stopped flickering, the music that
-dips when you talk to someone, the compatibility answers below, and a good few of the
-fair's little touches all came from you. The fair is better because you cared enough to
-tell me.
+question. Every one of them was read. The quieter music, the louder voices, the music that
+dips when you talk to someone, the fixed xEdit error, the compatibility answers below, and
+a good few of the fair's little touches all came from you. The fair is better because you
+cared enough to tell me.
 
 Claudius has asked me to add that your feedback has been logged, filed and counter-signed,
 and that he has concerns about all of it. He's also very grateful. He just won't say so.
