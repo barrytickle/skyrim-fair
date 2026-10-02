@@ -113,3 +113,13 @@ cells (-3,-4), (-3,-3), (-2,-4), (-2,-3), with no landscape edits):
   in both, each only adds its own references) and the navmesh info map (`012FB4`), whose
   entries the game merges across plugins; neither changes an entry the other does. Any load
   order.
+- **Northern Roads** (1.3.1, checked 2026-10-02): it reshapes and retextures the roads in three
+  of the fair's four Tamriel cells (up to 56 units of ground along its road beds). Under the
+  fair's gate, wall and silhouettes the ground doesn't move; of its 360 pieces only a lamp post
+  and two street lights by the gate road sit on ground it raises, by 8 units (the post sits a
+  little deeper). Its new roadside shrine and camp are 1,450 units or more from the fair. It
+  edits no reference the fair disables. Both plugins carry the Tamriel worldspace and four of
+  its cell records; the fair's are vanilla's (it only adds its own references) and Northern
+  Roads' differ only in their region lists' order, unused padding and its height data. Load
+  Northern Roads after the fair (LOOT's order is fine either way) so its worldspace height data
+  wins.
