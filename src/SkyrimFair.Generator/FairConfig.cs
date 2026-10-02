@@ -699,7 +699,7 @@ internal sealed record PassportConfig
     public string Stop { get; init; } = string.Empty;
 
     /// <summary>The player's reply to the stop line, which leads to the hand-over.</summary>
-    public string StopReply { get; init; } = "A passport?";
+    public string StopReply { get; init; } = "Is something wrong?";
 
     /// <summary>
     /// Where he idles until the passport is issued: the marker just inside the gate, by the

@@ -25,6 +25,12 @@ doesn't seem to focus him like a forced interaction".
   - His entrance package has "Hellos to player" off: walking past he says nothing.
   - Subrecords against vanilla's linked lines (`VMAD ENAM CNAM TCLT TRDT NAM1-3 CTDA`): the same.
 - Plugin `7d9425529fe5f596`, deterministic; Passport range 0xB0000-0xB000F (2 new). Deployed.
+- Barry: the reply reads "Is something wrong?" (`passport.stopReply`). Plugin `748024ce12569cf4`.
+- Barry's test: the visitors still the old ones. His log: the reset ran only in his second
+  session, at 19:02:39, about 30 s after arriving (144 `Reset()` calls take that long), and the
+  log ends 5 s later; so not yet known whether `Reset()` rolls them again. Next: wait for the
+  "fairgoers reset" line, then look. If it doesn't, new refs (new FormIDs, nothing in a save)
+  in place of the old, the culling's, dancers' and sitters' properties renamed to reach saves.
 
 ## Earlier pass: the voiced fairgoers, first build (2026-10-02, for 2.0.1.3)
 
