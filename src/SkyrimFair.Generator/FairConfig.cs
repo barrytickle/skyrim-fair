@@ -687,25 +687,19 @@ internal sealed record PassportConfig
     public string Done { get; init; } = string.Empty;
 
     /// <summary>
-    /// What he opens his run-up with (the lines file's third entry, when recorded), before the
-    /// hand-over: a nod to Oblivion's guards. Empty: no run-up.
+    /// What he opens the hand-over with (the lines file's third entry, when recorded): a nod to
+    /// Oblivion's guards. Empty: no stop line, and he keeps his rounds until asked.
     /// </summary>
     public string Stop { get; init; } = string.Empty;
 
-    /// <summary>The vanilla force greet his run-up copies (the ForceGreet template, Run).</summary>
-    public string GreetFrom { get; init; } = "00109C68:Skyrim.esm";
-
     /// <summary>
-    /// The vanilla force greet whose wait location his takes: "near self", as Ancano's in MG03.
-    /// The copied one waits "near the player", which the game fixes where the player is when the
-    /// package starts (at the gate), so he went there and waited (Barry's test, 2026-09-26).
-    /// Near self, he waits where he is. His trigger stays on the player: Ancano's, near self
-    /// with a 12,000 radius, he didn't run in Barry's test (2026-10-02).
+    /// Where he idles until the passport is issued: the marker just inside the gate, by the
+    /// player's arrival point. (A run-up, a force greet, was never picked: Barry's tests.)
     /// </summary>
-    public string GreetTriggerFrom { get; init; } = "0010E811:Skyrim.esm";
+    public string EntranceMarker { get; init; } = "SkyrimFairWorldEntranceMarker";
 
-    /// <summary>The trigger's radius round the player (the player is always inside it).</summary>
-    public float GreetRange { get; init; } = 12000f;
+    /// <summary>How far round the entrance marker he wanders while he waits.</summary>
+    public float EntranceRadius { get; init; } = 300f;
 
     /// <summary>Visitors to talk to for the chat stamp.</summary>
     public int Chats { get; init; } = 5;

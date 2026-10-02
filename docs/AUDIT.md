@@ -2,7 +2,27 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the run-up still doesn't run, and it now logs (2026-10-02, for 2.0.1.3)
+## Current pass: Claudius waits at the entrance instead of running up (2026-10-02, for 2.0.1.3)
+
+Barry's test of `548af21f4058f665`: Claudius "getting stuck on a table"; "can we just have him
+idle around the entrance?" The new log lines show the run-up package was never picked: he
+stayed on his spot sandboxes (`06003C`, then `060042`), sitting and standing (sit 3, 4, 0, 2),
+until Barry spoke to him (passport stage 10).
+- The run-up's package (`0B000C`, same FormID) is now `SkyrimFairPassportAtEntrance`: a copy
+  of his own wide sandbox (the kind the log shows him picking), on the existing
+  `SkyrimFairWorldEntranceMarker` (`000A1A`, persistent, by the player's arrival point),
+  radius 300 (`passport.entranceRadius`); eating, sleeping, sitting and special furniture off.
+  One condition, Passport stage 0. The "player in the fair's worldspace" condition is gone
+  (he's persistent in the fair, so waiting there is harmless anywhere).
+- The stop line's topic, Blocking branch and two-response line are kept: when the player talks
+  to him at stage 0, the Blocking branch should play "Stop! You violated the law!..." then
+  the hand-over (not yet confirmed in game).
+- The stage script's `RunUp()` is unchanged (it re-evaluates him, stands him up if seated, logs).
+- Config: `greetFrom`, `greetTriggerFrom` and `greetRange` replaced by `entranceMarker` and
+  `entranceRadius` (none set in `fair.config.json`).
+- Plugin `0b536ba1493c06fa`, deterministic, 4,609 records, no FormID change. Deployed.
+
+## Earlier pass: the run-up still doesn't run, and it now logs (2026-10-02, for 2.0.1.3)
 
 Barry's test of `50c6812ec5df1b1c`: no run-up. His Papyrus log (15:02) shows the show running
 normally, but `RunUp()` logged nothing, so it can't say why: whether his save had the Passport

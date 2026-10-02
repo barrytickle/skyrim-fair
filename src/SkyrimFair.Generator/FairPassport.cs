@@ -343,30 +343,30 @@ internal static class FairPassport
             mod.DialogTopics.Add(greetTopic);
             mod.DialogBranches.Add(branch);
 
-            // The package: the vanilla one with this topic, on these conditions. Only while the player
-            // is in the fair: elsewhere he'd set out across Skyrim after them.
-            var greet = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetFrom)).Duplicate(mod.GetNextFormKey());
-            greet.EditorID = $"{config.EditorIdPrefix}RunUp";
-            greet.VirtualMachineAdapter = null;
-            // Wait (8) near himself, as Ancano's. The trigger (62) stays on the player, as the copied
-            // package's is, so the player is always in it: with a 12,000 radius round him, he
-            // didn't run in Barry's test (2026-10-02). The greet distance (75) stays on the player, so
-            // he runs to them wherever they are.
-            var nearSelf = master.Packages.First(p => p.FormKey == FormKeyHelper.Parse(config.GreetTriggerFrom)).Data[62];
-            var waitHere = (PackageDataLocation)nearSelf.DeepCopy();
-            waitHere.Location.Radius = 128;
-            greet.Data[8] = waitHere;
-            ((PackageDataLocation)greet.Data[62]).Location.Radius = (uint)config.GreetRange;
-            var topicInput = greet.Data.Values.OfType<PackageDataTopic>().Single();
-            topicInput.Topics.Clear();
-            topicInput.Topics.Add(new TopicReference { Reference = new FormLink<IDialogTopicGetter>(greetTopic.FormKey) });
+            // The package: until the passport is issued, he idles at the entrance, never sitting, so
+            // the player meets him on the way in and talking to him starts the Blocking branch
+            // above. A force greet (a run-up, as Ancano's) was never picked over his sandboxes, and
+            // he sat at his table (Barry's tests, 2026-09-26 and 2026-10-02). A copy of his own wide
+            // sandbox (last in his packages), on the entrance marker; same FormID as the run-up.
+            var wide = mod.Packages.First(p => p.FormKey == inspector.Packages[^1].FormKey);
+            var greet = wide.Duplicate(mod.GetNextFormKey());
+            greet.EditorID = $"{config.EditorIdPrefix}AtEntrance";
+            var entrance = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedObject>()).Single(o => o.EditorID == config.EntranceMarker);
+            greet.Data.Values.OfType<PackageDataLocation>().Single().Location = new LocationTargetRadius
+            {
+                Target = new LocationTarget { Link = new FormLink<IPlacedGetter>(entrance.FormKey) },
+                Radius = (uint)config.EntranceRadius,
+            };
+            // Sandbox inputs: 1 eating, 3 sleeping, 6 sitting, 31 special furniture.
+            foreach (var input in new sbyte[] { 1, 3, 6, 31 })
+            {
+                ((PackageDataBool)greet.Data[input]).Data = false;
+            }
+
             greet.Conditions.Clear();
             var stillNot = new GetStageConditionData { RunOnType = Condition.RunOnType.Subject };
             stillNot.Quest.Link.SetTo(quest.FormKey);
             greet.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 0f, Data = stillNot });
-            var inFair = new GetInWorldspaceConditionData { RunOnType = Condition.RunOnType.Reference, Reference = new FormLink<ISkyrimMajorRecordGetter>(FormKeyHelper.Parse("00000014:Skyrim.esm")) };
-            inFair.WorldspaceOrList.Link.SetTo(fairWs.FormKey);
-            greet.Conditions.Add(new ConditionFloat { CompareOperator = CompareOperator.EqualTo, ComparisonValue = 1f, Data = inFair });
             mod.Packages.Add(greet);
             inspector.Packages.Insert(0, new FormLink<IPackageGetter>(greet.FormKey));
             var stageScript = stage.VirtualMachineAdapter!.Scripts.First(s => s.Name == "SkyrimFairAudioScript");

@@ -151,8 +151,8 @@ GlobalVariable Property TalkDuckUntil Auto
 Quest Property Passport Auto
 {The Fair Passport (SkyrimFairPassport), if built: told when each song starts and ends.}
 Package Property PassportGreet Auto
-{Claudius's run up to a player without a passport (a force greet): while he runs it, no idle
-and no move to another spot, and an idle he's in is ended at once.}
+{Claudius's wait at the entrance until the passport is issued (a sandbox, no sitting): while he
+runs it, no idle and no move to another spot, and an idle he's in is ended at once.}
 Actor Property PassportInspector Auto
 {Claudius, whom RunUp nudges: his AI is only re-checked every so often, so a player arriving
 found him still seated at his table under his rounds' sandbox (Barry, 2026-09-26).}
@@ -922,9 +922,9 @@ Function Reseat()
 	Debug.Trace("SkyrimFairAudio: re-seated " + SeatChairs.Length + " chairs, " + Sitters.Length + " visitors and " + Keepers.Length + " keepers (layout " + SeatLayoutVersion + ")")
 EndFunction
 
-; Claudius's run-up, while the passport isn't issued (the player is at the fair: OnUpdate only
-; calls this there). His AI is re-checked at once if he isn't on it yet; on it but still seated
-; after two checks, he's put back to standing, as his ledger's exit is, so he can run.
+; Claudius's wait at the entrance, while the passport isn't issued (the player is at the fair:
+; OnUpdate only calls this there). His AI is re-checked at once if he isn't on it yet; on it but
+; still seated after two checks, he's put back to standing, as his ledger's exit is, so he can go.
 Function RunUp()
 	If !PassportGreet || !PassportInspector || !Passport || Passport.GetStage() != 0
 		runUpSeated = 0
