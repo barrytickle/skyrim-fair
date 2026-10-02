@@ -698,6 +698,9 @@ internal sealed record PassportConfig
     /// </summary>
     public string Stop { get; init; } = string.Empty;
 
+    /// <summary>The player's reply to the stop line, which leads to the hand-over.</summary>
+    public string StopReply { get; init; } = "A passport?";
+
     /// <summary>
     /// Where he idles until the passport is issued: the marker just inside the gate, by the
     /// player's arrival point. (A run-up, a force greet, was never picked: Barry's tests.)
@@ -975,6 +978,9 @@ internal sealed record FairgoersConfig
     public string VisitorPrefix { get; init; } = "SkyrimFairVisitor";
 
     public string ChildPrefix { get; init; } = "SkyrimFairVisitorChild";
+
+    /// <summary>Bumped when saves must roll the visitors again: the stage script resets them once a version.</summary>
+    public int RefreshVersion { get; init; } = 1;
 
     public IReadOnlyList<FairgoerCharacter> Characters { get; init; } = Array.Empty<FairgoerCharacter>();
 

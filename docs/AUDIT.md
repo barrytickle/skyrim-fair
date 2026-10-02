@@ -2,7 +2,31 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the voiced fairgoers, first build (2026-10-02, for 2.0.1.3)
+## Current pass: old saves roll the fairgoers again; Claudius's talk, focused (2026-10-02, for 2.0.1.3)
+
+Barry's test of `1258c3ad482250dc`: "the new npc's don't seem to be updated" (an old save in the
+fair, and one outside walked in); and Claudius "sometimes it's the wrong dialogue, and the game
+doesn't seem to focus him like a forced interaction".
+- **The fairgoers on old saves:** a save keeps each visitor as first rolled. The stage script's
+  `RefreshFairgoers()`, on arrival or a load, once per `FairgoersVersion` (`fairgoers.refreshVersion`,
+  1): marked done first, then `Reset()` on each of the 144 (`FairgoerRefs`), logged
+  "fairgoers reset". Whether `Reset()` rolls a leveled face again is Barry's test.
+- **Claudius, the log:** at 18:42 (45 away) the script never started the talk: its 20 s guard
+  compared real time, which starts again at each launch, with a time the save kept. Fixed (a
+  saved time ahead of now is from before this launch). What Barry heard was his stage-0 Hello,
+  the plain hand-over, said walking past, unfocused.
+- **Claudius, the talk:** stop line, the player's reply, the hand-over. With a reply to give,
+  the game opens the dialogue menu and turns the camera to him.
+  - The stop line (`0B000B`, the Blocking branch's) is the stop alone now, step 0, linked (TCLT)
+    to `0B000E`, a player topic in the same branch, "A passport?" (`passport.stopReply`, CUST),
+    whose line `0B000F` is the hand-over (step 1, its voice the hand-over recording).
+  - His stage-0 Hello (the cameos' topic, first) is the stop line too, with the same link, so
+    however the talk starts it runs the same way.
+  - His entrance package has "Hellos to player" off: walking past he says nothing.
+  - Subrecords against vanilla's linked lines (`VMAD ENAM CNAM TCLT TRDT NAM1-3 CTDA`): the same.
+- Plugin `7d9425529fe5f596`, deterministic; Passport range 0xB0000-0xB000F (2 new). Deployed.
+
+## Earlier pass: the voiced fairgoers, first build (2026-10-02, for 2.0.1.3)
 
 Barry: "Can we look at implementing the fairgoers voices?", and for 2.0.1.3 (his pick), 8 faces a
 character, picked from contact sheets. His save checks of Claudius at the entrance first: both

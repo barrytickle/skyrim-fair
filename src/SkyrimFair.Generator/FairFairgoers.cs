@@ -174,6 +174,16 @@ internal static class FairFairgoers
             r.Base = new FormLinkNullable<INpcGetter>(BaseFor(cast[r.FormKey], PackageOf(visitorBases[r.Base.FormKey])).FormKey);
         }
 
+        // A save keeps each visitor as it was first rolled (face and voice, Barry's test,
+        // 2026-10-02): the stage script resets them once per RefreshVersion, so they're rolled
+        // again from their new bases.
+        stageScript.Properties.Add(new ScriptObjectListProperty
+        {
+            Name = "FairgoerRefs",
+            Objects = refs.Select(r => new ScriptObjectProperty { Object = new FormLink<ISkyrimMajorRecordGetter>(r.FormKey) }).ToExtendedList(),
+        });
+        stageScript.Properties.Add(new ScriptIntProperty { Name = "FairgoersVersion", Data = config.RefreshVersion });
+
         // ---- their lines: a Hello a voice type --------------------------------------------------------
         var quest = new Quest(mod)
         {

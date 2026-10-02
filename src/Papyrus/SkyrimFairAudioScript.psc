@@ -159,6 +159,10 @@ ReferenceAlias Property PassportGreeter Auto
 {The alias holding him for the force greet: forced in the plugin, filled here on saves where the
 Passport quest was already running.}
 Float Property PassportGreetRadius = 800.0 Auto
+ObjectReference[] Property FairgoerRefs Auto
+{The visitors playing the voiced fairgoers (FairFairgoers.cs). A save keeps each as it was first
+rolled, face and voice, so they're reset once per FairgoersVersion and rolled again.}
+Int Property FairgoersVersion Auto
 ObjectReference Property PassportWaitMarker Auto
 {The entrance marker he waits at: on arrival (or a load) at the fair, if he's wandered off (or a
 save has him at his old table), he's put a few steps in front of it. His AI never walked him
@@ -319,6 +323,8 @@ Int seatLayoutDone = 0
 Bool reseating = False
 ; RunUp's checks with Claudius on his run-up but still seated.
 Int runUpSeated = 0
+; The fairgoer refresh this save has had (FairgoersVersion).
+Int fairgoersDone = 0
 ; The run-up's state last logged, so the log gets a line only when it changes.
 String runUpLogged = ""
 ; When the script last started his talk (real time), so a talk cut short isn't restarted at once.
@@ -484,6 +490,7 @@ Event OnUpdate()
 		StopBand(True)
 		QueueArchers()
 		PlaceInspector()
+		RefreshFairgoers()
 		; Arrived (or loaded here): companions left outside come in.
 		BringCompanions()
 	EndIf
@@ -974,8 +981,11 @@ Function RunUp()
 	EndIf
 	; Close enough and his force greet hasn't started it: start the talk (the player activating
 	; him, as pressing E does), which opens with the stop line's Blocking branch.
-	If apart < PassportTalkRange && a.Is3DLoaded() && !player.IsInCombat() && !Utility.IsInMenuMode() && Utility.GetCurrentRealTime() - runUpTalkAt > 20.0
-		runUpTalkAt = Utility.GetCurrentRealTime()
+	; (Real time starts again at each launch of the game, while a save keeps runUpTalkAt: a time
+	; ahead of now is from before this launch.)
+	Float realNow = Utility.GetCurrentRealTime()
+	If apart < PassportTalkRange && a.Is3DLoaded() && !player.IsInCombat() && !Utility.IsInMenuMode() && (realNow - runUpTalkAt > 20.0 || realNow < runUpTalkAt)
+		runUpTalkAt = realNow
 		Debug.Trace("SkyrimFairAudio: run-up talk started by the script, " + (apart as Int) + " away")
 		a.Activate(player)
 		Return
@@ -999,6 +1009,23 @@ Function RunUp()
 	Else
 		runUpSeated = 0
 	EndIf
+EndFunction
+
+;  Once per FairgoersVersion: every fairgoer reset, so a save rolls them again from their new
+; bases (their faces and voices). Marked done first: a call arriving while it runs returns.
+Function RefreshFairgoers()
+	If FairgoersVersion <= 0 || fairgoersDone >= FairgoersVersion || FairgoerRefs.Length == 0
+		Return
+	EndIf
+	fairgoersDone = FairgoersVersion
+	Int i = 0
+	While i < FairgoerRefs.Length
+		If FairgoerRefs[i]
+			FairgoerRefs[i].Reset()
+		EndIf
+		i += 1
+	EndWhile
+	Debug.Trace("SkyrimFairAudio: fairgoers reset: " + FairgoerRefs.Length + " (version " + FairgoersVersion + ")")
 EndFunction
 
 ; On arrival (or a load) at the fair: Claudius is put a few steps in front of the entrance

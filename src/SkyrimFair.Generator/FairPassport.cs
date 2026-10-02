@@ -287,21 +287,21 @@ internal static class FairPassport
             var giveCue = recorded.Count >= 1 ? recorded[0] : (System.Text.Json.JsonElement?)null;
             var stopText = stopCue?.GetProperty("text").GetString() ?? config.Stop;
             var giveText = giveCue?.GetProperty("text").GetString() ?? config.Give;
+            // The stop line alone: the player's reply (below, config.StopReply) leads to the
+            // hand-over. With a reply to give, the game opens the dialogue menu and the camera
+            // turns to him, as a forced talk does; one line of two responses played out in the
+            // world, unfocused (Barry, 2026-10-02).
             var info = new DialogResponses(mod) { Flags = new DialogResponseFlags(), FavorLevel = FavorLevel.None };  // ENAM, as vanilla's
-            byte n = 1;
-            foreach (var text in new[] { stopText, giveText })
+            info.Responses.Add(new DialogResponse
             {
-                info.Responses.Add(new DialogResponse
-                {
-                    Emotion = emotion,
-                    EmotionValue = 50,
-                    ResponseNumber = n++,
-                    Flags = DialogResponse.Flag.UseEmotionAnimation,
-                    Text = text,
-                    ScriptNotes = string.Empty,
-                    Edits = string.Empty,
-                });
-            }
+                Emotion = emotion,
+                EmotionValue = 50,
+                ResponseNumber = 1,
+                Flags = DialogResponse.Flag.UseEmotionAnimation,
+                Text = stopText,
+                ScriptNotes = string.Empty,
+                Edits = string.Empty,
+            });
 
             var him = new GetIsIDConditionData { RunOnType = Condition.RunOnType.Subject };
             him.Object.Link.SetTo(inspector.FormKey);
@@ -315,9 +315,9 @@ internal static class FairPassport
                 cue is { } c && c.TryGetProperty("seconds", out var len) ? len.GetSingle() : 1.5f + text.Length / 15f;
             var entry = new ScriptEntry { Name = config.LineScript, Flags = ScriptEntry.Flag.Local };
             entry.Properties.Add(Obj("DuckUntil", duck.FormKey));
-            entry.Properties.Add(new ScriptFloatProperty { Name = "Seconds", Data = Seconds(stopCue, stopText) + Seconds(giveCue, giveText) + 0.5f });
+            entry.Properties.Add(new ScriptFloatProperty { Name = "Seconds", Data = Seconds(stopCue, stopText) + 0.5f });
             entry.Properties.Add(Obj("Passport", quest.FormKey));
-            entry.Properties.Add(new ScriptIntProperty { Name = "Step", Data = 1 });
+            entry.Properties.Add(new ScriptIntProperty { Name = "Step", Data = 0 });
             info.VirtualMachineAdapter = new DialogResponsesAdapter
             {
                 Version = 5,
@@ -333,11 +333,6 @@ internal static class FairPassport
             if (stopCue is { } s1)
             {
                 Voice(info.FormKey, 1, s1);
-            }
-
-            if (giveCue is { } s2)
-            {
-                Voice(info.FormKey, 2, s2);
             }
 
             mod.DialogTopics.Add(greetTopic);
@@ -357,6 +352,9 @@ internal static class FairPassport
                 Target = new LocationTarget { Link = new FormLink<IPlacedGetter>(entrance.FormKey) },
                 Radius = (uint)config.EntranceRadius,
             };
+            // No "Hellos to player": walking past, he greeted the player with his stage-0 Hello,
+            // the plain hand-over, unfocused (Barry, 2026-10-02). Talked to, he says the stop line.
+            greet.InterruptFlags &= ~Package.InterruptFlag.HellosToPlayer;
             // Sandbox inputs: 1 eating, 3 sleeping, 6 sitting, 31 special furniture.
             foreach (var input in new sbyte[] { 1, 3, 6, 31 })
             {
@@ -413,6 +411,61 @@ internal static class FairPassport
             stageScript.Properties.Add(new ScriptObjectProperty { Name = "PassportGreeter", Object = new FormLink<ISkyrimMajorRecordGetter>(quest.FormKey), Alias = 1 });
             stageScript.Properties.Add(new ScriptFloatProperty { Name = "PassportGreetRadius", Data = config.GreetRadius });
             stageScript.Properties.Add(Obj("PassportWaitMarker", entrance.FormKey));
+
+            // The player's reply, a topic in the stop line's branch, linked from it (TCLT), and his
+            // hand-over on it (the passport fragment, step 1). Last in the range, so nothing moves.
+            var reply = new DialogTopic(mod)
+            {
+                Quest = new FormLinkNullable<IQuestGetter>(cameoQuest),
+                Name = config.StopReply,
+                Priority = 50f,
+                TopicFlags = 0,
+                Category = DialogTopic.CategoryEnum.Topic,
+                Subtype = DialogTopic.SubtypeEnum.Custom,
+                SubtypeName = new Mutagen.Bethesda.Plugins.RecordType("CUST"),
+                Branch = new FormLinkNullable<IDialogBranchGetter>(branch.FormKey),
+            };
+            var give = new DialogResponses(mod) { Flags = new DialogResponseFlags(), FavorLevel = FavorLevel.None };
+            give.Responses.Add(new DialogResponse
+            {
+                Emotion = emotion,
+                EmotionValue = 50,
+                ResponseNumber = 1,
+                Flags = DialogResponse.Flag.UseEmotionAnimation,
+                Text = giveText,
+                ScriptNotes = string.Empty,
+                Edits = string.Empty,
+            });
+            foreach (var c in info.Conditions)
+            {
+                give.Conditions.Add(c.DeepCopy());
+            }
+
+            var giveEntry = new ScriptEntry { Name = config.LineScript, Flags = ScriptEntry.Flag.Local };
+            giveEntry.Properties.Add(Obj("DuckUntil", duck.FormKey));
+            giveEntry.Properties.Add(new ScriptFloatProperty { Name = "Seconds", Data = Seconds(giveCue, giveText) + 0.5f });
+            giveEntry.Properties.Add(Obj("Passport", quest.FormKey));
+            giveEntry.Properties.Add(new ScriptIntProperty { Name = "Step", Data = 1 });
+            give.VirtualMachineAdapter = new DialogResponsesAdapter
+            {
+                Version = 5,
+                ObjectFormat = 2,
+                ScriptFragments = new ScriptFragments
+                {
+                    ExtraBindDataVersion = 2,
+                    FileName = config.LineScript,
+                    OnBegin = new ScriptFragment { ExtraBindDataVersion = 1, ScriptName = config.LineScript, FragmentName = "Fragment_0" },
+                },
+            };
+            give.VirtualMachineAdapter.Scripts.Add(giveEntry);
+            reply.Responses.Add(give);
+            if (giveCue is { } s2)
+            {
+                Voice(give.FormKey, 1, s2);
+            }
+
+            mod.DialogTopics.Add(reply);
+            info.LinkTo.Add(new FormLink<IDialogTopicGetter>(reply.FormKey));
             runUp = $", run-up {(stopCue is null ? "subtitled" : "voiced")}";
         }
 
