@@ -247,7 +247,7 @@ comes late in the main quest), and a rhythm game: **Bard Hero** (Nexus 186544) a
 Clone Hero chart folders, so charts of the fair's songs as an optional add-on would be ~3/10.
 
 **Compatibility answered for players** (`docs/COMPATIBILITY.md`, "Checked"): Elysium Estate,
-Whiterun Manor, Pondside Cottage and JK's Whiterun Outskirts are all compatible. The fair's Tamriel footprint is cells (-3,-4), (-3,-3), (-2,-4), (-2,-3), with no
+Whiterun Manor, Pondside Cottage, JK's Whiterun Outskirts and Northern Roads (load it after the fair) are all compatible. The fair's Tamriel footprint is cells (-3,-4), (-3,-3), (-2,-4), (-2,-3), with no
 landscape edits; about 37 vanilla refs there are disabled or sunk.
 
 **The show's data carries a 2** (`Songs2`, `CameoIdles2`, ...): a save keeps a script's
