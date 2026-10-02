@@ -267,7 +267,8 @@ internal static class FairFairgoers
         foreach (var r in refs)
         {
             var copy = (PlacedNpc)r.Duplicate(mod.GetNextFormKey());
-            copy.Base = new FormLinkNullable<INpcGetter>(newBase[r.FormKey]);
+            // (A performance test: the stand-ins on the old visitors' bases, everything else the same.)
+            copy.Base = new FormLinkNullable<INpcGetter>(config.TestOldBases ? r.Base.FormKey : newBase[r.FormKey]);
             CellListOf(mod, r).Add(copy);
             standIn[r.FormKey] = copy.FormKey;
             r.MajorRecordFlagsRaw |= InitiallyDisabledFlag;

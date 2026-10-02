@@ -979,6 +979,9 @@ internal sealed record FairgoersConfig
 
     public string ChildPrefix { get; init; } = "SkyrimFairVisitorChild";
 
+    /// <summary>A test build only: the stand-ins keep the old visitors' bases (old faces, vanilla voices).</summary>
+    public bool TestOldBases { get; init; }
+
     /// <summary>Bumped when the retired visitors must be switched off again on saves (once a version).</summary>
     public int RefreshVersion { get; init; } = 1;
 
