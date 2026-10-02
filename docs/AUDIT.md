@@ -2,7 +2,22 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: the fairgoers stand in for the old visitors (2026-10-02, for 2.0.1.3)
+## Current pass: no running past Claudius (2026-10-02, for 2.0.1.3)
+
+Barry confirmed the stand-ins: the visitors new on an old save (in the fair, and walked in), no
+doubles, the crowd culling, dancing and sitting as before, and Claudius's focused talk. One bug:
+"I can literally just run past Claudius at the start". Between songs the stage script looks
+every 2 s (a sprint is ~1,000 units), and its talk range was 250.
+- Within `PassportWatchRange` (2,000) of him, no passport issued: the stage script looks every
+  `PassportWatchPoll` (0.25 s).
+- Within `PassportTalkRange` (now 400): the player is held (`Game.DisablePlayerControls`:
+  movement, fighting, sneaking; looking and menus stay), then the talk starts (`Activate`).
+- Let go (`RunUpRelease`, the same flags back): once the passport is issued (stage 10, at the
+  hand-over); 3 s after a talk that ended without it (it starts again after the 20 s guard);
+  and on every arrival or load (a save made while held keeps the controls off).
+- Scripts only; the plugin unchanged (`042d072ed31e5a2b`). Deployed.
+
+## Earlier pass: the fairgoers stand in for the old visitors (2026-10-02, for 2.0.1.3)
 
 Barry chose new refs over the reset (my recommendation): a reset may not roll a leveled actor
 again, and it meant about 30 s of black screen (144 `Reset()` calls, ~0.23 s each).

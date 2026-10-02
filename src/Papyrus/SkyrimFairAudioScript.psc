@@ -169,8 +169,14 @@ save has him at his old table), he's put a few steps in front of it. His AI neve
 there from his table (Barry, 2026-10-02).}
 Float Property PassportWaitAhead = 300.0 Auto
 {How far in front of the entrance marker (along its heading, into the fair) he's put.}
-Float Property PassportTalkRange = 250.0 Auto
-{Within this of him, if his force greet hasn't started the talk, the script starts it.}
+Float Property PassportTalkRange = 400.0 Auto
+{Within this of him, if his force greet hasn't started the talk, the script starts it, and the
+player is held where they are until he's handed the passport over (Barry: "I can literally just
+run past Claudius").}
+Float Property PassportWatchRange = 2000.0 Auto
+{Within this of him, with no passport issued, the script looks every PassportWatchPoll seconds,
+so a sprinting player can't pass him between two looks.}
+Float Property PassportWatchPoll = 0.25 Auto
 Actor Property PassportInspector Auto
 {Claudius, whom RunUp nudges: his AI is only re-checked every so often, so a player arriving
 found him still seated at his table under his rounds' sandbox (Barry, 2026-09-26).}
@@ -329,6 +335,9 @@ Int retiredDone = 0
 String runUpLogged = ""
 ; When the script last started his talk (real time), so a talk cut short isn't restarted at once.
 Float runUpTalkAt = -100.0
+; True while the player's movement is held for his talk; the player within PassportWatchRange.
+Bool runUpHeld = False
+Bool runUpClose = False
 Int songInstance = 0
 Int cheerInstance = 0
 ; The song finishing under its cheer, and when it ends (the band plays until then).
@@ -489,6 +498,8 @@ Event OnUpdate()
 		Enter(1, FirstSongDelay, show)
 		StopBand(True)
 		QueueArchers()
+		; Never held across a load (a save made while held keeps the controls off).
+		RunUpRelease()
 		PlaceInspector()
 		RetireVisitors()
 		; Arrived (or loaded here): companions left outside come in.
@@ -590,6 +601,9 @@ Event OnUpdate()
 		left = ActivePoll
 	ElseIf left < 0.1
 		left = 0.1
+	EndIf
+	If runUpClose && left > PassportWatchPoll
+		left = PassportWatchPoll
 	EndIf
 	RegisterForSingleUpdate(left)
 EndEvent
@@ -952,6 +966,8 @@ EndFunction
 Function RunUp()
 	If !PassportGreet || !PassportInspector || !Passport || Passport.GetStage() != 0
 		runUpSeated = 0
+		runUpClose = False
+		RunUpRelease()
 		If Passport
 			RunUpLog("off, passport stage " + Passport.GetStage(), "")
 		EndIf
@@ -975,6 +991,11 @@ Function RunUp()
 	If PassportWaitMarker
 		atGate = ", " + (a.GetDistance(PassportWaitMarker) as Int) + " from the entrance"
 	EndIf
+	runUpClose = apart < PassportWatchRange
+	; Held, and the talk is over without the hand-over (or never began): let them go.
+	If runUpHeld && !a.IsInDialogueWithPlayer() && (Utility.GetCurrentRealTime() - runUpTalkAt > 3.0 || Utility.GetCurrentRealTime() < runUpTalkAt)
+		RunUpRelease()
+	EndIf
 	RunUpLog("package " + now + ", near " + near + ", alias " + (PassportGreeter && PassportGreeter.GetReference()) + ", sit " + a.GetSitState() + ", 3D " + a.Is3DLoaded() + ", talking " + a.IsInDialogueWithPlayer(), ", " + (apart as Int) + " away" + atGate)
 	If a.IsDead() || a.IsDisabled() || a.IsInDialogueWithPlayer()
 		Return
@@ -987,6 +1008,10 @@ Function RunUp()
 	If apart < PassportTalkRange && a.Is3DLoaded() && !player.IsInCombat() && !Utility.IsInMenuMode() && (realNow - runUpTalkAt > 20.0 || realNow < runUpTalkAt)
 		runUpTalkAt = realNow
 		Debug.Trace("SkyrimFairAudio: run-up talk started by the script, " + (apart as Int) + " away")
+		; Held where they are (movement, fighting, sneaking; looking and menus stay) until the
+		; hand-over, as a scene holds the player.
+		Game.DisablePlayerControls(True, True, False, False, True, False, False)
+		runUpHeld = True
 		a.Activate(player)
 		Return
 	EndIf
@@ -1050,6 +1075,14 @@ Function PlaceInspector()
 	a.SetAngle(0.0, 0.0, heading + 180.0)
 	a.EvaluatePackage()
 	Debug.Trace("SkyrimFairAudio: run-up: Claudius put at the entrance")
+EndFunction
+
+; The player's movement back, if the run-up held it.
+Function RunUpRelease()
+	If runUpHeld
+		Game.EnablePlayerControls(True, True, False, False, True, False, False)
+		runUpHeld = False
+	EndIf
 EndFunction
 
 ; A line in the log for the run-up, only when its state changes (the extra, his distance, is

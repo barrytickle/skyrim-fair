@@ -208,6 +208,9 @@ detail in `docs/AUDIT.md`'s current pass):
 - **Claudius's talk** (Barry, 2026-10-02: sometimes the wrong line, never focused): now stop line,
   the player's reply "Is something wrong?", then the hand-over (the menu opens, so the camera turns to
   him); no walk-by hellos while he waits; the script's 20 s guard survives a relaunch.
+  Barry confirmed the stand-ins and the focused talk (2026-10-02). He could run past Claudius: now
+  within 400 the player is held (DisablePlayerControls) until the hand-over, looked for every 0.25 s
+  within 2,000. **Barry: after this, ready to ship** (his face picks still to come).
 
 **Decided before (the fairgoers' design):**
 - **Visitor lines: 10 voiced fairgoers** (Barry chose voiced lines, 2026-09-26). His set is in
