@@ -2,7 +2,21 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: 2.0.2 pass 1, the fair comes and goes (2026-10-03)
+## Current pass: 2.0.2 pass 1b, the swap at once (2026-10-04)
+
+Barry's test of pass 1 failed (chose the story, fast travelled, came back: the fair still there;
+the log shows the choice and no swap: the site was never out of sight). His flow instead: pick
+a schedule, black screen, facing the campfire with Claudius, Garrick and the horse on a boulder.
+Detail and his test in `docs/CAMP.md` ("Pass 1b").
+- Plugin `0d42c1e4bea5fc67f3cb3a4e3ca6af94fee57d93179d47510323b76275518938` (twice). Against 2.0.1.3:
+  0 removed, 40 added (0xD0000-0xD0027), changed: as pass 1 plus Garrick (package
+  `SkyrimFairCampBardStand` first) and the roof horse NPC (script properties `Away`, `CampSpot`).
+- New: `SkyrimFairCampArriveMarker` (0D0023), `CampBardMarker` (0D0024), the boulder `RockL03` x1.3
+  (0D0025), `CampHorseMarker` (0D0026, -6631, -10505, -5702), `SkyrimFairCampBardStand` (0D0027).
+- Scripts: `SkyrimFairCamp` (the fade swap on a choice, Garrick's lute, the camp's three moved),
+  `SkyrimFairRoofHorse` (home is the boulder while away). Deployed, byte-identical.
+
+## Earlier pass: 2.0.2 pass 1, the fair comes and goes (2026-10-03)
 
 Barry: "Let's give it a go" (the camp and the schedule, `docs/MCM.md`), with a progress file kept
 as it goes: `docs/CAMP.md` (the plan, the design, the log). Pass 1 of 3: the switch, the camp,

@@ -409,8 +409,65 @@ internal static class FairCamp
         quest.VirtualMachineAdapter.Scripts.Add(script);
         mod.Quests.Add(quest);
 
+        // ---- appended (Barry, 2026-10-04): a schedule sends the fair away at once, the player put
+        // before the camp, with Garrick playing his lute by the fire and the roof horse on a boulder ----
+        var (ax, ay, ayaw) = At(camp.Arrive);
+        var arrive = Marker("CampArriveMarker", XMarkerHeading, ax, ay, Ground(ax, ay) + 8f, ayaw);
+        var (bx, by, byaw) = At(camp.BardSpot);
+        var bardSpot = Marker("CampBardMarker", XMarkerHeading, bx, by, Ground(bx, by) + 8f, byaw);
+
+        // The boulder, level (its top must be), and the horse's spot on the middle of its flat top.
+        var (rkx, rky, rkyaw) = At(camp.Boulder);
+        var rockZ = Ground(rkx, rky) + camp.Boulder.Z;
+        var boulder = new PlacedObject(mod)
+        {
+            Base = new FormLinkNullable<IPlaceableObjectGetter>(FormKeyHelper.Parse(camp.Boulder.Piece)),
+            Scale = camp.Boulder.Scale == 1f ? null : camp.Boulder.Scale,
+            Placement = new Placement { Position = new P3Float(rkx, rky, rockZ), Rotation = new P3Float(0f, 0f, rkyaw) },
+        };
+        SetParent(boulder, present.FormKey, true);
+        CellAt(rkx, rky).Temporary.Add(boulder);
+        // Skyrim turns clockwise: local +X goes to (cos, -sin), local +Y to (sin, cos).
+        var (tx, ty, tz) = (camp.BoulderTop[0] * camp.Boulder.Scale, camp.BoulderTop[1] * camp.Boulder.Scale, camp.BoulderTop[2] * camp.Boulder.Scale);
+        var (hx, hy) = (rkx + tx * MathF.Cos(rkyaw) + ty * MathF.Sin(rkyaw), rky - tx * MathF.Sin(rkyaw) + ty * MathF.Cos(rkyaw));
+        var horseSpot = Marker("CampHorseMarker", XMarkerHeading, hx, hy, rockZ + tz + 2f, rkyaw + camp.HorseYaw * MathF.PI / 180f);
+
+        // Garrick: stands at his spot by the fire while the fair is away (a copy of Claudius's camp
+        // sandbox, no wandering, sitting or idle markers), and the controller plays his lute.
+        var bard = mod.Npcs.First(n => n.EditorID == $"{cameos.EditorIdPrefix}{camp.Bard}");
+        var bardRef = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>()).Single(n => n.Base.FormKey == bard.FormKey);
+        var atFire = atCamp.Duplicate(mod.GetNextFormKey());
+        atFire.EditorID = $"{camp.EditorIdPrefix}BardStand";
+        atFire.Data.Values.OfType<PackageDataLocation>().Single().Location = new LocationTargetRadius
+        {
+            Target = new LocationTarget { Link = new FormLink<IPlacedGetter>(bardSpot.FormKey) },
+            Radius = (uint)camp.BardRadius,
+        };
+        foreach (var input in new sbyte[] { 5, 6, 7, 31 })  // idle markers, sitting, wandering, special furniture
+        {
+            ((PackageDataBool)atFire.Data[input]).Data = false;
+        }
+
+        mod.Packages.Add(atFire);
+        bard.Packages.Insert(0, new FormLink<IPackageGetter>(atFire.FormKey));
+
+        // The roof horse's script keeps it on its boulder while the fair is away (else on its roof).
+        var horseRef = mod.Worldspaces.SelectMany(w => w.EnumerateMajorRecords<IPlacedNpc>()).Single(n => n.EditorID == $"{cameos.EditorIdPrefix}RoofHorseRef");
+        var horseNpc = mod.Npcs.First(n => n.FormKey == horseRef.Base.FormKey);
+        var horseScript = horseNpc.VirtualMachineAdapter!.Scripts.First(s => s.Name == cameos.RoofHorse.Script);
+        horseScript.Properties.Add(Obj("Away", away.FormKey));
+        horseScript.Properties.Add(Obj("CampSpot", horseSpot.FormKey));
+
+        script.Properties.Add(Obj("ArriveMarker", arrive.FormKey));
+        script.Properties.Add(Obj("Bard", bardRef.FormKey));
+        script.Properties.Add(Obj("BardSpot", bardSpot.FormKey));
+        script.Properties.Add(Obj("Lute", FormKeyHelper.Parse(camp.BardIdle)));
+        script.Properties.Add(new ScriptFloatProperty { Name = "LuteEvery", Data = camp.LuteEvery });
+        script.Properties.Add(Obj("Horse", horseRef.FormKey));
+        script.Properties.Add(Obj("HorseSpot", horseSpot.FormKey));
+
         return $"{fair} fair references switched, {back} vanilla ones back while away, {kept} left as they were; "
-            + $"{camp.Pieces.Count} camp pieces, {greetings.Count + 6} lines";
+            + $"{camp.Pieces.Count + 1} camp pieces, {greetings.Count + 6} lines; horse on its boulder at ({hx:0}, {hy:0}, {rockZ + tz:0})";
     }
 
     private static IEnableParentGetter? EnableParentOf(IPlaced r) => r switch

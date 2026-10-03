@@ -734,6 +734,30 @@ internal sealed record CampConfig
     public string ChooseAlways { get; init; } = "Every day, as it is.";
 
     public string ChooseStory { get; init; } = "Only after I've finished the main story.";
+
+    /// <summary>Where the player is put when a schedule sends the fair away, facing the camp.</summary>
+    public ExteriorDecor Arrive { get; init; } = new();
+
+    /// <summary>The cameo who plays his lute at the camp (cameos.members[].id), his spot, and the idle.</summary>
+    public string Bard { get; init; } = "Garrick";
+
+    public ExteriorDecor BardSpot { get; init; } = new();
+
+    public float BardRadius { get; init; } = 64f;
+
+    public string BardIdle { get; init; } = "00096F8D:Skyrim.esm";
+
+    /// <summary>Seconds between the lute idle's replays at the camp.</summary>
+    public float LuteEvery { get; init; } = 300f;
+
+    /// <summary>The roof horse's boulder (a vanilla rock with a flat top: RockL03's, measured).</summary>
+    public ExteriorDecor Boulder { get; init; } = new();
+
+    /// <summary>The middle of the boulder's flat top, in the rock's own frame, unscaled.</summary>
+    public float[] BoulderTop { get; init; } = { 30f, 58f, 165f };
+
+    /// <summary>The horse's heading on the rock, degrees from the rock's.</summary>
+    public float HorseYaw { get; init; }
 }
 
 internal sealed record PassportConfig

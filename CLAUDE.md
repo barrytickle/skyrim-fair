@@ -254,8 +254,9 @@ default; the camp stands in until then. Design in `docs/MCM.md`. Its 4 lines are
 (2026-10-03, in `claudius_camp`): schedule_story, camp_story_wait, story_skip, story_done.
 Barry's plan: let 2.0.1.3 bake over the weekend of 2026-10-03/04; if no player issues, audit
 then build 2.0.2. **Started early (Barry, 2026-10-03): the progress log is `docs/CAMP.md`** (read it
-first when picking 2.0.2 up). Pass 1 (the switch, the camp, the story option, the fade) is
-built and deployed (`5a601dbbe6f1987c`, range 0xD0000), waiting on Barry's test. Open: a player's CTD loading 2.0.1.1 saves on 2.0.1.3; a static diff found
+first when picking 2.0.2 up). Pass 1 (out-of-sight swap) failed Barry's test; pass 1b swaps at once
+behind a fade (pick a schedule, black, facing the campfire with Claudius, Garrick's lute and the
+horse on a boulder): `0d42c1e4bea5fc67`, range 0xD0000-0xD0027, waiting on Barry's test. Open: a player's CTD loading 2.0.1.1 saves on 2.0.1.3; a static diff found
 no cause; waiting on their crash log.
 
 **Parked ideas** (Barry, 2026-09-26): the Festival Spirit buff (a whole song gives a skill-rate

@@ -18,6 +18,17 @@ Event OnUpdate()
 	If !Is3DLoaded()
 		Return
 	EndIf
+	; While the fair is away (2.0.2), its home is the boulder by Claudius's camp.
+	If Away && Away.GetValue() >= 0.5 && CampSpot
+		If GetDistance(CampSpot) > 40.0 || Math.Abs(GetPositionZ() - CampSpot.GetPositionZ()) > 20.0
+			SetDontMove(False)
+			MoveTo(CampSpot)
+			SetDontMove(True)
+		EndIf
+		EnableAI(False)
+		RegisterForSingleUpdate(15.0)
+		Return
+	EndIf
 	; Off its planks (fallen, pushed or warped): back to its editor location.
 	If Math.Abs(GetPositionZ() - HomeZ) > 20.0 || Math.Abs(GetPositionX() - HomeX) > 40.0 || Math.Abs(GetPositionY() - HomeY) > 40.0
 		SetDontMove(False)
@@ -33,3 +44,8 @@ Float Property HomeX Auto
 Float Property HomeY Auto
 Float Property HomeZ Auto
 {Where it stands on the planks (set by the generator from the reference).}
+
+GlobalVariable Property Away Auto
+{SkyrimFairAway: 1 while the fair is away (FairCamp.cs).}
+ObjectReference Property CampSpot Auto
+{On the boulder's flat top by the camp.}

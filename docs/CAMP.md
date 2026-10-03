@@ -10,7 +10,7 @@ pick up in another session. The design is `docs/MCM.md`, "Planned for 2.0.2". St
   the fade swap. Barry tests.
 - **Pass 2:** the other schedules (festival days, fair week, wandering), the courier letter,
   the Passport paused while the fair is away (pass 1 already hides its lines at the camp).
-- **Pass 3:** polish: Garrick and the horse at the camp (the boulder), test findings.
+- **Pass 3:** polish and test findings. (Garrick and the horse at the camp moved into pass 1b.)
 
 ## Status
 
@@ -20,7 +20,9 @@ pick up in another session. The design is `docs/MCM.md`, "Planned for 2.0.2". St
 | Pass 1 design | done (below) |
 | Pass 1 code: config, `FairCamp.cs`, scripts, voices | done |
 | Pass 1 build, verify, deploy | done: plugin `5a601dbbe6f1987c`, deployed |
-| Barry's pass 1 test | **waiting** (below) |
+| Barry's pass 1 test (2026-10-03) | **failed**: chose the story, fast travelled, came back: the fair still there (below) |
+| Pass 1b: the swap at once, with a fade; Garrick and the horse at the camp | done: plugin `0d42c1e4bea5fc67`, deployed |
+| Barry's pass 1b test | **waiting** (below) |
 | Pass 2 | not started |
 | Pass 3 | not started |
 
@@ -80,7 +82,39 @@ returning rock pile's spot). Vanilla references that come back while the
 fair's away, near there: two rock piles by the gate (-7588, -10776) and (-7080, -10692; on the
 approach, so it stays off), shrubs to the east (-6560..-6209, -11100). Nothing on the camp's spot.
 
+## Pass 1b (2026-10-04): what Barry asked for
+
+Barry: "1. Speak to claudius 2. Pick a schedule. 3. Screen goes black 4. Character is then facing
+the campfire with claudius and garrick and the boulder horse."
+- **Why pass 1 didn't swap:** his log has `SkyrimFairCamp: line, step 4` (the choice) and then
+  nothing: no error, no swap. The controller waits for the site to be out of sight, and wherever
+  he fast travelled was still in Tamriel within 12,000 of it (or he came back before a check). It
+  now logs `the fair should be away, waiting until the site is out of sight` when that happens.
+- **Now a choice swaps at once:** when his line ends, fade to black, the fair goes (or comes), the
+  player is put at `SkyrimFairCampArriveMarker` facing the fire (or `CampViewMarker`, facing the
+  gate), fade in. "Only after the main story" sends it away (if the story isn't done); "Every day"
+  at the camp brings it back. The out-of-sight swap stays for the story's end.
+- **The camp, laid out round the arrival point** (on the road, 1,000 out from the gate, facing the
+  fire): Claudius in front by the fire (his sandbox now radius 150), Garrick to the left at his
+  spot playing his lute (no music), the horse to the right on a boulder.
+- **Garrick:** `SkyrimFairCampBardStand`, a copy of the camp sandbox with no wandering, sitting
+  or idle markers, first in his packages on `Away == 1`. The controller plays `IdleLuteStart`
+  whenever he's loaded and free, again every 300 s and after a talk.
+- **The horse:** `RockL03` (018BA5) at scale 1.3: the flattest top among Tamriel's boulders
+  (measured from the meshes: a dead-flat top ~57 x 158 at z 165, so ~74 x 205 at 214 high when
+  scaled). The horse is moved onto `SkyrimFairCampHorseMarker`, the top's middle, AI off.
+  `SkyrimFairRoofHorse` gained `Away` and `CampSpot`: while away, its home is the boulder, so it
+  no longer puts itself back on the roof.
+- New records appended (0xD0023-0xD0027: the arrive, bard and horse markers, the boulder, the bard
+  package); nothing in the range renumbered, so a save from pass 1 carries on.
+
 ## Log (newest first)
+
+### 2026-10-04
+- **Pass 1b built and deployed** (plugin `0d42c1e4bea5fc67`, deterministic): against 2.0.1.3, 0
+  removed, 40 added (all 0xD0000-0xD0027); changed besides pass 1's: Garrick (a package) and the
+  roof horse (two script properties). Scripts compile.
+- Barry's test of pass 1 failed (see "Pass 1b"); his flow adopted.
 
 ### 2026-10-03
 - **Pass 1 built and deployed** (plugin `5a601dbbe6f1987c`, deterministic). The camp's range is
@@ -97,7 +131,25 @@ approach, so it stays off), shrubs to the east (-6560..-6209, -11100). Nothing o
   (above). The deployed plugin has 399 references in Tamriel: 361 the exterior's (0x30000),
   the map marker, 37 vanilla overrides (35 initially disabled, 2 sunk large ones).
 
-## Barry's test for pass 1
+## Barry's test for pass 1b
+
+On his test save (StoryGate is already 1 from the last test) or any save where the main story
+isn't finished:
+1. At the fair, talk to Claudius: "About the fair's schedule...", then "Only after I've finished
+   the main story." When his line ends: the screen goes black, a loading screen, and you're on
+   the road facing the campfire. Claudius in front of you, Garrick to the left playing his lute,
+   the horse on a boulder to the right. No wall, no gate.
+2. Talk to Claudius at the camp: "The fair is postponed. Pending dragon...". Try "When will the
+   fair be back?", then "Never mind the story. Bring the fair now." (or the schedule's "Every
+   day"): black, and you're before the gate with the fair back.
+3. Look at: the horse standing on the rock's top (not sunk, not floating, not sliding off);
+   Garrick's lute; the tent's opening (one number if it's backwards); nothing left of the fair at
+   the camp; the music inside as normal after coming back; Garrick and the horse back in the fair
+   (the horse on the roof within ~15 s of the stage loading).
+4. The log: `SkyrimFairCamp: fading, the fair to be away`, `the fair is away (the camp)`, and the
+   reverse.
+
+## Barry's test for pass 1 (failed, kept for the record)
 
 The "only after the main story" option shows only while `MQ305` isn't completed. On a save where
 Alduin is dead, use a new game from the main menu (`coc Riverwood`, then walk or `coc` near the fair) instead.
@@ -125,5 +177,5 @@ SkyrimFairStoryGate to 0` (the fair comes back next time you're out of sight).
 
 ## Next step
 
-Barry's in-game test of pass 1. Then pass 2: the festival, monthly and wandering schedules (the
+Barry's in-game test of pass 1b. Then pass 2: the festival, monthly and wandering schedules (the
 calendar from `GameDay`/`GameMonth`), the courier letter, and the Passport paused while away.
