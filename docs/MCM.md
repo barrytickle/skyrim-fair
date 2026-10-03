@@ -103,8 +103,13 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
   When `MQ305` completes, the fair arrives by its schedule and the courier letter goes out.
   The catch: a new character meets the fair before choosing, so it shows once. If that matters,
   an optional ESP in the Compatibility download that only flips the global's default on.
-  Needs new lines from Barry: the option and its answers, and the camp's "not until the
-  dragon's dealt with".
+  Barry's 4 lines for it are recorded (2026-10-03, in `claudius_camp`): `schedule_story` (the
+  answer, a fourth-wall break), `camp_story_wait` (the camp's greeting while it waits),
+  `story_skip` (asked for the fair anyway; then the fade, as `camp_bring_back`), `story_done`
+  (his first line at the fair afterwards). The player's options are text: "Only after I've
+  finished the main story." and "Never mind the story. Bring the fair now." The courier
+  letter can add: "P.S. I understand the dragon situation has been resolved. I assume that was
+  you. Filed."
 - The Passport pauses while the fair is away; its stamps keep.
 - **A courier letter when it's back** (Barry: always, no option to stop them): when the
   schedule brings the fair back, the script hands a letter from Claudius to the vanilla courier

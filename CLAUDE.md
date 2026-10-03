@@ -249,7 +249,8 @@ was dropped). Claudius can bring the fair back early. Barry's 9 lines are record
 (`claudius_camp` in `cameos/skyrim_fair_voicelines.json`: camp_hello_01/02, camp_when,
 camp_bring_back, schedule_ask/always/festivals/monthly/wandering); nothing built yet.
 Plus a toggle (Barry, 2026-10-03): **only after the main story** (`MQ305` completed), off by
-default; the camp stands in until then; needs a few new lines. Design in `docs/MCM.md`.
+default; the camp stands in until then. Design in `docs/MCM.md`. Its 4 lines are recorded
+(2026-10-03, in `claudius_camp`): schedule_story, camp_story_wait, story_skip, story_done.
 Barry's plan: let 2.0.1.3 bake over the weekend of 2026-10-03/04; if no player issues, audit
 then build 2.0.2. Open: a player's CTD loading 2.0.1.1 saves on 2.0.1.3; a static diff found
 no cause; waiting on their crash log.
