@@ -93,6 +93,18 @@ appears only at certain times of the month/year/holidays. Just to keep it fresh"
 - **No MCM** (Barry, 2026-09-26): Claudius's dialogue is the whole interface, so the fair
   keeps no requirements beyond Skyrim.esm. His lines for it: `claudius_camp` in the lines file (the 9 are recorded, in
   `cameos/claudius/mono/`, 2026-09-26).
+- **After the main story** (Barry, 2026-10-03): a second setting, on top of the schedule:
+  the fair only appears once Alduin is defeated (`MQ305`, "Dragonslayer", completed;
+  `GetQuestCompleted` in conditions, `IsCompleted()` in Papyrus, both vanilla, no SKSE). Until
+  then the camp stands in its place, and Claudius there says the fair waits for the dragon
+  business to be settled. Off by default, so no one's fair vanishes on update. Switched at
+  Claudius, like the schedule (at the fair it packs up with the usual rules: never in view,
+  never with the player inside; at the camp he can switch it off and bring the fair at once).
+  When `MQ305` completes, the fair arrives by its schedule and the courier letter goes out.
+  The catch: a new character meets the fair before choosing, so it shows once. If that matters,
+  an optional ESP in the Compatibility download that only flips the global's default on.
+  Needs new lines from Barry: the option and its answers, and the camp's "not until the
+  dragon's dealt with".
 - The Passport pauses while the fair is away; its stamps keep.
 - **A courier letter when it's back** (Barry: always, no option to stop them): when the
   schedule brings the fair back, the script hands a letter from Claudius to the vanilla courier

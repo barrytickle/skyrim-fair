@@ -248,6 +248,11 @@ Claudius, the roof horse on a boulder, and Garrick playing his lute (no singing:
 was dropped). Claudius can bring the fair back early. Barry's 9 lines are recorded
 (`claudius_camp` in `cameos/skyrim_fair_voicelines.json`: camp_hello_01/02, camp_when,
 camp_bring_back, schedule_ask/always/festivals/monthly/wandering); nothing built yet.
+Plus a toggle (Barry, 2026-10-03): **only after the main story** (`MQ305` completed), off by
+default; the camp stands in until then; needs a few new lines. Design in `docs/MCM.md`.
+Barry's plan: let 2.0.1.3 bake over the weekend of 2026-10-03/04; if no player issues, audit
+then build 2.0.2. Open: a player's CTD loading 2.0.1.1 saves on 2.0.1.3; a static diff found
+no cause; waiting on their crash log.
 
 **Parked ideas** (Barry, 2026-09-26): the Festival Spirit buff (a whole song gives a skill-rate
 buff, 2/10), the archery contest (5/10), the Shout toss (needs a lent scroll: Unrelenting Force
