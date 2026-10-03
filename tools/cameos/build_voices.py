@@ -13,6 +13,8 @@ cameos.members say (voiceLines: the json key, voiceDir: the folder). For each li
   text (the text improves the mouth shapes; curly quotes are straightened for it)
 - xwmaencode makes the xWMA audio, and LIPFuzer packs both into a .fuz
 
+Claudius's camp lines (fairWorld.camp) go to build/cameos/Camp/; `--only camp` builds just those.
+
 The fairgoers' lines (fairWorld.fairgoers, cameos/fair-visitors/fair-visitors.json) go to
 build/cameos/fairgoers/<voice>/ the same way; `--only fairgoers` builds just those.
 
@@ -69,6 +71,14 @@ def main():
                 sys.exit(f"fairgoers {character['voice']}: no lines in {src_file.name}")
             build(f"fairgoers/{character['voice']}", mine, src, loud)
     if only == 'fairgoers':
+        return
+
+    # Claudius's camp and schedule lines (fairWorld.camp, 2.0.2): build/cameos/Camp/, every entry
+    # of its key in the lines file; the generator (FairCamp.cs) finds each by its file name.
+    camp = config['fairWorld'].get('camp', {})
+    if camp.get('enabled') and only in (None, 'camp'):
+        build('Camp', all_lines[camp.get('voiceLines', 'claudius_camp')], camp.get('voiceDir', 'cameos/claudius/mono'), loud)
+    if only == 'camp':
         return
     for member in cameos['members']:
         key, src = member.get('voiceLines'), member.get('voiceDir')

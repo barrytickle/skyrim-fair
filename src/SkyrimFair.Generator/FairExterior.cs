@@ -318,6 +318,7 @@ internal static class FairExterior
                     {
                         // The way in: everything but the road itself, landscape rocks too.
                         hit = true;
+                        result.Approach.Add(o.FormKey);
                     }
                     else if (spawners.Contains(o.Base.FormKey))
                     {
@@ -755,6 +756,9 @@ internal sealed class ExteriorResult
     public int Signs { get; set; }
 
     public List<(int X, int Y)> Cells { get; set; } = new();
+
+    /// <summary>The vanilla references cleared from the way in: they stay cleared while the fair is away (FairCamp).</summary>
+    public HashSet<FormKey> Approach { get; } = new();
 
     public (uint From, uint To) FormIds { get; set; }
 }

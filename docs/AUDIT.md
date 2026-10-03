@@ -2,7 +2,34 @@
 
 This is the current verified state of Skyrim Fair and Barry's local deployment. Git history holds older reports; this file is a complete current snapshot.
 
-## Current pass: 2.0.1.3 packaged (2026-10-02)
+## Current pass: 2.0.2 pass 1, the fair comes and goes (2026-10-03)
+
+Barry: "Let's give it a go" (the camp and the schedule, `docs/MCM.md`), with a progress file kept
+as it goes: `docs/CAMP.md` (the plan, the design, the log). Pass 1 of 3: the switch, the camp,
+Claudius's talk with the story option, the fade. Not tested in game yet.
+- **`FairCamp.cs`, `fairWorld.camp`, range `0xD0000`-`0xD0022`** (35 records), built last.
+  - Globals `SkyrimFairAway` (0D0000), `Schedule` (0D0001), `StoryGate` (0D0002), `StoryDone` (0D0003).
+  - Persistent in Tamriel: `SkyrimFairPresentMarker` (0D0004, the enable parent, at the gate),
+    `SkyrimFairCampMarker` (0D0005, -7300, -10500), `SkyrimFairCampViewMarker` (0D0006, -7050, -10200, facing the gate).
+  - The camp (0D0007-0D000C, enable parent the marker, opposite): burning campfire (FieldGrass)
+    and its light at (-7400, -10420), Imperial tent (small), bedroll, table, stool.
+  - `SkyrimFairCampSandbox` (0D000D), first in Claudius's packages, on `Away == 1`.
+  - Quest `SkyrimFairCamp` (0D000E), start-game, script `SkyrimFairCamp` (the controller).
+  - 6 topics in 4 top-level player branches and 10 lines (0D000F-0D0022), in the cameos' quest.
+- **The switch:** 359 fair references in Tamriel take the marker as enable parent (all but the
+  map marker and the 2 tower banners already off); 32 vanilla references lose "initially
+  disabled" and take it opposite. Kept: the approach's rock pile (048034), the 2 sunk large
+  references, 2 critter spawners with vanilla enable parents.
+- **Changed records:** Claudius (a package at the top), the Passport's force greet (+ `Away == 0`),
+  his 17 fair Hellos, the Passport's 2 Hellos, the stop line and its reply (+ `Away == 0`).
+- **Verified:** two runs `5a601dbbe6f1987c8a909c209ea1637107d4acf6ea67ac83ec9ff90517856d0b`; against
+  2.0.1.3 (`042d072e`), 0 removed, 35 added (all in 0xD0000), changes only as above (the Seal's
+  "change" is raw-identical, the overlay false positive). New DLBR/DIAL match vanilla's
+  (`MS11RobesQuestionBranch`) subrecord for subrecord. Every persistent-group ref has 0x400.
+  Scripts compile. 10 camp lines voiced (`build_voices.py --only camp`). Deployed, byte-identical.
+- **Barry's test:** in `docs/CAMP.md`, "Barry's test for pass 1".
+
+## Earlier pass: 2.0.1.3 packaged (2026-10-02)
 
 Barry: "it's all working now :) Can we ship it?" (the faces as they are; Claudius facing the player).
 - `tools/package.py --version 2.0.1.3`: release plugin `042d072ed31e5a2b` (twice, the tested

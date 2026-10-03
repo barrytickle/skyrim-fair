@@ -305,9 +305,10 @@ internal static class FairPluginGenerator
             : null;
 
         // ---- the compound's exterior in Tamriel: replaces the old terrace, built last ------
+        ExteriorResult? exterior = null;
         if (config.Exterior.Enabled && master is not null && vanillaWorldspace is not null && fairWorld is not null)
         {
-            var ext = FairExterior.Build(mod, config, master, vanillaWorldspace, worldspace, persistentCell, mapMarker);
+            var ext = exterior = FairExterior.Build(mod, config, master, vanillaWorldspace, worldspace, persistentCell, mapMarker);
             Console.WriteLine($"  exterior: {ext.Panels} wall panels, {ext.Banners} banners, {ext.Ropes} rope halves, {ext.Lanterns} lanterns; "
                 + $"{ext.Silhouette} pieces of the fair inside; {ext.Disabled} vanilla references cleared ({ext.Sunk} large ones sunk, not disabled); {ext.Songs} songs outside, "
                 + $"{ext.FireworkSites} firework sites; {ext.Path} path pieces, {ext.Flags} gate flag pieces, {ext.Signs} road sign pieces, {ext.Hidden} tower banners off the wall, {ext.Decor} entrance dressing; cells {string.Join(" ", ext.Cells.Select(c => $"({c.X},{c.Y})"))}; "
@@ -545,6 +546,18 @@ internal static class FairPluginGenerator
             mod.ModHeader.Stats.NextFormID = fairgoers.FormIdBase;
             var summary = FairFairgoers.Build(mod, config.FairWorld, master);
             Console.WriteLine($"  fairgoers: {summary}; FormIDs 0x{fairgoers.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
+            mod.ModHeader.Stats.NextFormID = saved;
+        }
+
+        // 2.0.2, the fair comes and goes: its switch, Claudius's camp and the controller, last of
+        // all in a range of their own (they touch the exterior, the cameos and the Passport).
+        var camp = config.FairWorld.Camp;
+        if (config.FairWorld.Enabled && camp.Enabled && exterior is not null && master is not null && vanillaWorldspace is not null)
+        {
+            var saved = mod.ModHeader.Stats.NextFormID;
+            mod.ModHeader.Stats.NextFormID = camp.FormIdBase;
+            var summary = FairCamp.Build(mod, config, master, vanillaWorldspace, worldspace, exterior);
+            Console.WriteLine($"  camp: {summary}; FormIDs 0x{camp.FormIdBase:X}-0x{mod.ModHeader.Stats.NextFormID - 1:X}");
             mod.ModHeader.Stats.NextFormID = saved;
         }
 

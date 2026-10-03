@@ -199,6 +199,12 @@ internal sealed record FairWorldConfig
     public FairgoersConfig Fairgoers { get; init; } = new();
 
     /// <summary>
+    /// 2.0.2: the fair comes and goes (docs/MCM.md, docs/CAMP.md). Everything outside in Tamriel is
+    /// switched by one enable parent; while the fair is away, Claudius camps by the road.
+    /// </summary>
+    public CampConfig Camp { get; init; } = new();
+
+    /// <summary>
     /// Seats swapped last of all (their FormIDs stay): a vanilla bar stool gives its sitter the
     /// bar-counter lean, with no counter at the fair (a Nexus player's screenshot, 2026-09-25),
     /// so each becomes a chair facing its table, whose sitters sit upright and drink.
@@ -663,6 +669,73 @@ internal sealed record TalkDuckConfig
 /// the stamps; a full card, handed back to him, earns an amulet and the deed to the roof horse.
 /// Its own FormID range, made last of all (after the talk perk and the seat swap).
 /// </summary>
+/// <summary>
+/// The fair comes and goes (FairCamp.cs, docs/CAMP.md): one switch for everything outside in
+/// Tamriel, Claudius's camp in its place while the fair is away, his talk about the schedule, and
+/// the controller quest that swaps them out of the player's sight. Its own FormID range, last.
+/// </summary>
+internal sealed record CampConfig
+{
+    public bool Enabled { get; init; }
+
+    public string EditorIdPrefix { get; init; } = "SkyrimFairCamp";
+
+    public uint FormIdBase { get; init; } = 0xD0000;
+
+    public string Script { get; init; } = "SkyrimFairCamp";
+
+    /// <summary>The camp lines' fragment script.</summary>
+    public string LineScript { get; init; } = "SkyrimFairCampLine";
+
+    /// <summary>The cameo who camps (cameos.members[].id).</summary>
+    public string Inspector { get; init; } = "Claudius";
+
+    /// <summary>His camp lines in the cameos' lines file, built into build/cameos/Camp/.</summary>
+    public string VoiceLines { get; init; } = "claudius_camp";
+
+    public string VoiceDir { get; init; } = "cameos/claudius/mono";
+
+    /// <summary>The quest that, completed, ends the wait for the main story (MQ305, Dragonslayer).</summary>
+    public string MainQuest { get; init; } = "00046EF2:Skyrim.esm";
+
+    public string FadeOut { get; init; } = "000F756D:Skyrim.esm";
+
+    public string FadeHold { get; init; } = "000F756E:Skyrim.esm";
+
+    public string FadeBack { get; init; } = "000F756F:Skyrim.esm";
+
+    /// <summary>In Tamriel, how far from the site the player must be for the fair to come or go.</summary>
+    public float SwapDistance { get; init; } = 12000f;
+
+    /// <summary>Seconds between the controller's checks.</summary>
+    public float Poll { get; init; } = 5f;
+
+    /// <summary>Claudius's spot at the camp (side and forward from the gate, the yaw from facing the road).</summary>
+    public ExteriorDecor Marker { get; init; } = new();
+
+    /// <summary>How far round his spot he wanders at the camp.</summary>
+    public float Radius { get; init; } = 250f;
+
+    /// <summary>Where the player stands when the fair is brought back, facing the gate.</summary>
+    public ExteriorDecor View { get; init; } = new();
+
+    /// <summary>The camp's pieces, as exterior.decor: side and forward from the gate.</summary>
+    public List<ExteriorDecor> Pieces { get; init; } = new();
+
+    /// <summary>The player's topics and their lines (the lines file's file names).</summary>
+    public string AskWhen { get; init; } = "When will the fair be back?";
+
+    public string AskBring { get; init; } = "Can you bring the fair back now?";
+
+    public string AskSkip { get; init; } = "Never mind the story. Bring the fair now.";
+
+    public string AskSchedule { get; init; } = "About the fair's schedule...";
+
+    public string ChooseAlways { get; init; } = "Every day, as it is.";
+
+    public string ChooseStory { get; init; } = "Only after I've finished the main story.";
+}
+
 internal sealed record PassportConfig
 {
     public bool Enabled { get; init; }
