@@ -1,0 +1,2441 @@
+{
+ "_comment": "Written by tools/make_static_props.py; do not edit by hand.",
+ "props": {
+  "AmuletGems": {
+   "max": [
+    3,
+    9,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -9,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\AmuletGems.nif"
+  },
+  "AmuletGold": {
+   "max": [
+    3,
+    9,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -9,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\AmuletGold.nif"
+  },
+  "AmuletSilver": {
+   "max": [
+    3,
+    9,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -9,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\AmuletSilver.nif"
+  },
+  "Apple01": {
+   "max": [
+    6,
+    5,
+    12
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -6,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Apple01.nif"
+  },
+  "Apple02": {
+   "max": [
+    6,
+    6,
+    12
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -6,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Apple02.nif"
+  },
+  "BarrelFood": {
+   "max": [
+    28,
+    28,
+    80
+   ],
+   "measured": true,
+   "min": [
+    -28,
+    -28,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\BarrelFood.nif"
+  },
+  "Basket01": {
+   "max": [
+    17,
+    17,
+    31
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Basket01.nif"
+  },
+  "Basket02": {
+   "max": [
+    17,
+    17,
+    52
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Basket02.nif"
+  },
+  "Basket03": {
+   "max": [
+    17,
+    17,
+    32
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Basket03.nif"
+  },
+  "Basket04": {
+   "max": [
+    17,
+    17,
+    48
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Basket04.nif"
+  },
+  "Basket05": {
+   "max": [
+    25,
+    25,
+    36
+   ],
+   "measured": true,
+   "min": [
+    -25,
+    -25,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Basket05.nif"
+  },
+  "BasketClosed": {
+   "max": [
+    17,
+    17,
+    35
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\BasketClosed.nif"
+  },
+  "BearPelt": {
+   "max": [
+    36,
+    18,
+    14
+   ],
+   "measured": true,
+   "min": [
+    -36,
+    -18,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\BearPelt.nif"
+  },
+  "Beef": {
+   "max": [
+    15,
+    10,
+    10
+   ],
+   "measured": true,
+   "min": [
+    -12,
+    -12,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\Beef.nif"
+  },
+  "Book01": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Book01.nif"
+  },
+  "Book02": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Book02.nif"
+  },
+  "Book03": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Book03.nif"
+  },
+  "Book05": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Book05.nif"
+  },
+  "Bread01A": {
+   "max": [
+    8,
+    11,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -11,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Bread01A.nif"
+  },
+  "Bread01B": {
+   "max": [
+    8,
+    8,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -6,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Bread01B.nif"
+  },
+  "Broom": {
+   "max": [
+    8,
+    10,
+    60
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -10,
+    -60
+   ],
+   "model": "SkyrimFair\\Props\\Broom.nif"
+  },
+  "Bucket": {
+   "max": [
+    18,
+    19,
+    30
+   ],
+   "measured": true,
+   "min": [
+    -18,
+    -19,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Bucket.nif"
+  },
+  "Cabbage": {
+   "max": [
+    11,
+    12,
+    11
+   ],
+   "measured": true,
+   "min": [
+    -12,
+    -11,
+    -10
+   ],
+   "model": "SkyrimFair\\Props\\Cabbage.nif"
+  },
+  "CanopicJar": {
+   "max": [
+    14,
+    13,
+    66
+   ],
+   "measured": true,
+   "min": [
+    -30,
+    -13,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\CanopicJar.nif"
+  },
+  "Carrot": {
+   "max": [
+    4,
+    4,
+    23
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -5,
+    -10
+   ],
+   "model": "SkyrimFair\\Props\\Carrot.nif"
+  },
+  "CheeseWedge01": {
+   "max": [
+    8,
+    8,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -8,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\CheeseWedge01.nif"
+  },
+  "CheeseWedge02": {
+   "max": [
+    3,
+    5,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -5,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\CheeseWedge02.nif"
+  },
+  "CheeseWheel01A": {
+   "max": [
+    16,
+    16,
+    16
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\CheeseWheel01A.nif"
+  },
+  "CheeseWheel01B": {
+   "max": [
+    16,
+    16,
+    16
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -12,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\CheeseWheel01B.nif"
+  },
+  "CheeseWheel02A": {
+   "max": [
+    10,
+    9,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -10,
+    -9,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\CheeseWheel02A.nif"
+  },
+  "Circlet": {
+   "max": [
+    7,
+    9,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -7,
+    -9,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\Circlet.nif"
+  },
+  "CremeTreat": {
+   "max": [
+    7,
+    7,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -7,
+    -7,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\CremeTreat.nif"
+  },
+  "Deathbell": {
+   "max": [
+    9,
+    6,
+    11
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -10,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\Deathbell.nif"
+  },
+  "DeerPelt": {
+   "max": [
+    35,
+    23,
+    31
+   ],
+   "measured": true,
+   "min": [
+    -49,
+    -12,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\DeerPelt.nif"
+  },
+  "DragonsTongue": {
+   "max": [
+    6,
+    4,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -7,
+    -12
+   ],
+   "model": "SkyrimFair\\Props\\DragonsTongue.nif"
+  },
+  "DrinkingHorn": {
+   "max": [
+    3,
+    12,
+    21
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\DrinkingHorn.nif"
+  },
+  "Drum": {
+   "max": [
+    17,
+    17,
+    32
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Drum.nif"
+  },
+  "DwarvenHelmet": {
+   "max": [
+    8,
+    18,
+    31
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -11,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\DwarvenHelmet.nif"
+  },
+  "DwarvenShield": {
+   "max": [
+    27,
+    27,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -27,
+    -41,
+    -13
+   ],
+   "model": "SkyrimFair\\Props\\DwarvenShield.nif"
+  },
+  "DwarvenSword": {
+   "max": [
+    5,
+    72,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -13,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\DwarvenSword.nif"
+  },
+  "DweBowl": {
+   "max": [
+    19,
+    19,
+    17
+   ],
+   "measured": true,
+   "min": [
+    -19,
+    -19,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\DweBowl.nif"
+  },
+  "DweCog": {
+   "max": [
+    23,
+    22,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -23,
+    -22,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\DweCog.nif"
+  },
+  "DweCup": {
+   "max": [
+    5,
+    5,
+    10
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -5,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\DweCup.nif"
+  },
+  "DweGyro": {
+   "max": [
+    12,
+    12,
+    12
+   ],
+   "measured": true,
+   "min": [
+    -12,
+    -12,
+    -12
+   ],
+   "model": "SkyrimFair\\Props\\DweGyro.nif"
+  },
+  "DwePlateLarge": {
+   "max": [
+    27,
+    26,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -27,
+    -26,
+    -8
+   ],
+   "model": "SkyrimFair\\Props\\DwePlateLarge.nif"
+  },
+  "DwePot": {
+   "max": [
+    20,
+    20,
+    41
+   ],
+   "measured": true,
+   "min": [
+    -20,
+    -20,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\DwePot.nif"
+  },
+  "DweScrap": {
+   "max": [
+    25,
+    37,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -25,
+    -37,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\DweScrap.nif"
+  },
+  "DweUrn": {
+   "max": [
+    20,
+    17,
+    50
+   ],
+   "measured": true,
+   "min": [
+    -20,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\DweUrn.nif"
+  },
+  "ElvenHelmet": {
+   "max": [
+    8,
+    11,
+    21
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -11,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\ElvenHelmet.nif"
+  },
+  "ElvenShield": {
+   "max": [
+    22,
+    24,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -22,
+    -36,
+    -9
+   ],
+   "model": "SkyrimFair\\Props\\ElvenShield.nif"
+  },
+  "ElvenSword": {
+   "max": [
+    10,
+    70,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -14,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\ElvenSword.nif"
+  },
+  "FireSalts": {
+   "max": [
+    5,
+    7,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -6,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\FireSalts.nif"
+  },
+  "FlowerBasket": {
+   "max": [
+    31,
+    17,
+    28
+   ],
+   "measured": true,
+   "min": [
+    -31,
+    -19,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\FlowerBasket.nif"
+  },
+  "FlowerBlue": {
+   "max": [
+    3,
+    3,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -3,
+    -7
+   ],
+   "model": "SkyrimFair\\Props\\FlowerBlue.nif"
+  },
+  "FlowerPurple": {
+   "max": [
+    3,
+    3,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -3,
+    -7
+   ],
+   "model": "SkyrimFair\\Props\\FlowerPurple.nif"
+  },
+  "FlowerRed": {
+   "max": [
+    3,
+    3,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -3,
+    -7
+   ],
+   "model": "SkyrimFair\\Props\\FlowerRed.nif"
+  },
+  "Flute": {
+   "max": [
+    2,
+    19,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -2,
+    -19,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\Flute.nif"
+  },
+  "FoxPelt": {
+   "max": [
+    17,
+    50,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -32,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\FoxPelt.nif"
+  },
+  "Garnet": {
+   "max": [
+    3,
+    4,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -2,
+    -4,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\Garnet.nif"
+  },
+  "GlazedBowl": {
+   "max": [
+    18,
+    18,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -18,
+    -18,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\GlazedBowl.nif"
+  },
+  "GlazedPlate": {
+   "max": [
+    16,
+    16,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\GlazedPlate.nif"
+  },
+  "GlazedPot01": {
+   "max": [
+    18,
+    18,
+    31
+   ],
+   "measured": true,
+   "min": [
+    -18,
+    -18,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\GlazedPot01.nif"
+  },
+  "GlazedPot02": {
+   "max": [
+    17,
+    17,
+    42
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -17,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\GlazedPot02.nif"
+  },
+  "GoatMeat": {
+   "max": [
+    19,
+    16,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -19,
+    -16,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\GoatMeat.nif"
+  },
+  "GoatPelt": {
+   "max": [
+    28,
+    48,
+    6
+   ],
+   "measured": true,
+   "min": [
+    -31,
+    -51,
+    -5
+   ],
+   "model": "SkyrimFair\\Props\\GoatPelt.nif"
+  },
+  "GobletGlazed": {
+   "max": [
+    5,
+    5,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -5,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\GobletGlazed.nif"
+  },
+  "GobletSilver": {
+   "max": [
+    6,
+    6,
+    19
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -6,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\GobletSilver.nif"
+  },
+  "Gourd": {
+   "max": [
+    15,
+    20,
+    12
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -21,
+    -14
+   ],
+   "model": "SkyrimFair\\Props\\Gourd.nif"
+  },
+  "HangingElvesEar": {
+   "max": [
+    14,
+    15,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -57,
+    -16
+   ],
+   "model": "SkyrimFair\\Props\\HangingElvesEar.nif"
+  },
+  "HangingFrostMirriam": {
+   "max": [
+    21,
+    8,
+    20
+   ],
+   "measured": true,
+   "min": [
+    -21,
+    -48,
+    -15
+   ],
+   "model": "SkyrimFair\\Props\\HangingFrostMirriam.nif"
+  },
+  "HangingGarlic": {
+   "max": [
+    7,
+    9,
+    0
+   ],
+   "measured": true,
+   "min": [
+    -7,
+    -7,
+    -47
+   ],
+   "model": "SkyrimFair\\Props\\HangingGarlic.nif"
+  },
+  "HangingPheasant": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\HangingPheasant.nif"
+  },
+  "HangingRabbit": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\HangingRabbit.nif"
+  },
+  "HangingRabbit02": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\HangingRabbit02.nif"
+  },
+  "HangingSalmon": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\HangingSalmon.nif"
+  },
+  "HideCuirass": {
+   "max": [
+    23,
+    35,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -23,
+    -35,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\HideCuirass.nif"
+  },
+  "HideHelmet": {
+   "max": [
+    9,
+    11,
+    21
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -11,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\HideHelmet.nif"
+  },
+  "HideShield": {
+   "max": [
+    22,
+    22,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -22,
+    -22,
+    -6
+   ],
+   "model": "SkyrimFair\\Props\\HideShield.nif"
+  },
+  "HoneyNutTreat": {
+   "max": [
+    5,
+    15,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -17,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\HoneyNutTreat.nif"
+  },
+  "Honeycomb": {
+   "max": [
+    2,
+    12,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -1,
+    -12,
+    -11
+   ],
+   "model": "SkyrimFair\\Props\\Honeycomb.nif"
+  },
+  "HorkerMeat": {
+   "max": [
+    8,
+    20,
+    11
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -20,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\HorkerMeat.nif"
+  },
+  "HuntingBow": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\HuntingBow.nif"
+  },
+  "ImperialBow": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\ImperialBow.nif"
+  },
+  "ImperialHelmet": {
+   "max": [
+    9,
+    11,
+    20
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -9,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\ImperialHelmet.nif"
+  },
+  "ImperialShield": {
+   "max": [
+    25,
+    32,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -24,
+    -47,
+    -16
+   ],
+   "model": "SkyrimFair\\Props\\ImperialShield.nif"
+  },
+  "ImperialWarHorn": {
+   "max": [
+    35,
+    6,
+    6
+   ],
+   "measured": true,
+   "min": [
+    -35,
+    -6,
+    -6
+   ],
+   "model": "SkyrimFair\\Props\\ImperialWarHorn.nif"
+  },
+  "IngotGold": {
+   "max": [
+    12,
+    5,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -12,
+    -5,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\IngotGold.nif"
+  },
+  "IngotIron": {
+   "max": [
+    13,
+    6,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -6,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\IngotIron.nif"
+  },
+  "IngotOrichalcum": {
+   "max": [
+    13,
+    6,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -6,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\IngotOrichalcum.nif"
+  },
+  "IngotSilver": {
+   "max": [
+    13,
+    6,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -6,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\IngotSilver.nif"
+  },
+  "IngotSteel": {
+   "max": [
+    13,
+    6,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -6,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\IngotSteel.nif"
+  },
+  "Inkwell": {
+   "max": [
+    4,
+    4,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Inkwell.nif"
+  },
+  "IronArrow": {
+   "max": [
+    10,
+    1,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -58,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\IronArrow.nif"
+  },
+  "IronBattleAxe": {
+   "max": [
+    22,
+    57,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -19,
+    -39,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\IronBattleAxe.nif"
+  },
+  "IronCuirass": {
+   "max": [
+    18,
+    16,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -17,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\IronCuirass.nif"
+  },
+  "IronDagger": {
+   "max": [
+    5,
+    22,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -7,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\IronDagger.nif"
+  },
+  "IronHelmet": {
+   "max": [
+    16,
+    12,
+    18
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -11,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\IronHelmet.nif"
+  },
+  "IronMace": {
+   "max": [
+    9,
+    40,
+    9
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -17,
+    -9
+   ],
+   "model": "SkyrimFair\\Props\\IronMace.nif"
+  },
+  "IronPot": {
+   "max": [
+    15,
+    20,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -15,
+    -20,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\IronPot.nif"
+  },
+  "IronShield": {
+   "max": [
+    22,
+    22,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -21,
+    -22,
+    -9
+   ],
+   "model": "SkyrimFair\\Props\\IronShield.nif"
+  },
+  "IronSword": {
+   "max": [
+    10,
+    63,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -12,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\IronSword.nif"
+  },
+  "IronWarAxe": {
+   "max": [
+    8,
+    34,
+    9
+   ],
+   "measured": true,
+   "min": [
+    -11,
+    -11,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\IronWarAxe.nif"
+  },
+  "JugLarge": {
+   "max": [
+    16,
+    16,
+    44
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\JugLarge.nif"
+  },
+  "JugSmall": {
+   "max": [
+    12,
+    12,
+    29
+   ],
+   "measured": true,
+   "min": [
+    -12,
+    -12,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\JugSmall.nif"
+  },
+  "Lavender": {
+   "max": [
+    30,
+    8,
+    6
+   ],
+   "measured": true,
+   "min": [
+    -24,
+    -8,
+    -6
+   ],
+   "model": "SkyrimFair\\Props\\Lavender.nif"
+  },
+  "LeatherStrips": {
+   "max": [
+    18,
+    13,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -18,
+    -13,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\LeatherStrips.nif"
+  },
+  "Leek": {
+   "max": [
+    6,
+    6,
+    12
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -6,
+    -18
+   ],
+   "model": "SkyrimFair\\Props\\Leek.nif"
+  },
+  "LeeksGrilled": {
+   "max": [
+    14,
+    6,
+    6
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -6,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\LeeksGrilled.nif"
+  },
+  "LinenPile": {
+   "max": [
+    7,
+    32,
+    6
+   ],
+   "measured": true,
+   "min": [
+    -7,
+    -31,
+    -7
+   ],
+   "model": "SkyrimFair\\Props\\LinenPile.nif"
+  },
+  "LongBow": {
+   "max": [
+    10,
+    10,
+    20
+   ],
+   "measured": false,
+   "min": [
+    -10,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\LongBow.nif"
+  },
+  "Lute": {
+   "max": [
+    14,
+    5,
+    38
+   ],
+   "measured": true,
+   "min": [
+    -14,
+    -5,
+    -38
+   ],
+   "model": "SkyrimFair\\Props\\Lute.nif"
+  },
+  "Mead": {
+   "max": [
+    3,
+    3,
+    22
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -3,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Mead.nif"
+  },
+  "MeadBlackBriar": {
+   "max": [
+    4,
+    4,
+    25
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\MeadBlackBriar.nif"
+  },
+  "MeadHonningbrew": {
+   "max": [
+    4,
+    4,
+    23
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\MeadHonningbrew.nif"
+  },
+  "MilkJug": {
+   "max": [
+    18,
+    16,
+    42
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\MilkJug.nif"
+  },
+  "Nightshade": {
+   "max": [
+    5,
+    4,
+    16
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -7,
+    -13
+   ],
+   "model": "SkyrimFair\\Props\\Nightshade.nif"
+  },
+  "NordWarHorn": {
+   "max": [
+    22,
+    5,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -20,
+    -5,
+    -8
+   ],
+   "model": "SkyrimFair\\Props\\NordWarHorn.nif"
+  },
+  "OreCorundum": {
+   "max": [
+    12,
+    9,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -9,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\OreCorundum.nif"
+  },
+  "OreMoonstone": {
+   "max": [
+    11,
+    9,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -11,
+    -9,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\OreMoonstone.nif"
+  },
+  "OreOrichalcum": {
+   "max": [
+    7,
+    8,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -14,
+    -11,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\OreOrichalcum.nif"
+  },
+  "Parchment": {
+   "max": [
+    28,
+    3,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -28,
+    -3,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\Parchment.nif"
+  },
+  "Pickaxe": {
+   "max": [
+    22,
+    36,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -23,
+    -8,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\Pickaxe.nif"
+  },
+  "Pie": {
+   "max": [
+    13,
+    13,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -13,
+    -5
+   ],
+   "model": "SkyrimFair\\Props\\Pie.nif"
+  },
+  "Pitchfork": {
+   "max": [
+    3,
+    15,
+    50
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -15,
+    -48
+   ],
+   "model": "SkyrimFair\\Props\\Pitchfork.nif"
+  },
+  "Plate": {
+   "max": [
+    16,
+    16,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -16,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Plate.nif"
+  },
+  "Potato": {
+   "max": [
+    6,
+    9,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -9,
+    -8
+   ],
+   "model": "SkyrimFair\\Props\\Potato.nif"
+  },
+  "PotatoesBaked": {
+   "max": [
+    13,
+    7,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -7,
+    1
+   ],
+   "model": "SkyrimFair\\Props\\PotatoesBaked.nif"
+  },
+  "PotionHealth": {
+   "max": [
+    5,
+    4,
+    16
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\PotionHealth.nif"
+  },
+  "PotionHealthGreat": {
+   "max": [
+    3,
+    5,
+    22
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\PotionHealthGreat.nif"
+  },
+  "PotionMagicka": {
+   "max": [
+    5,
+    4,
+    17
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\PotionMagicka.nif"
+  },
+  "PotionStamina": {
+   "max": [
+    5,
+    4,
+    17
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -4,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\PotionStamina.nif"
+  },
+  "Quill": {
+   "max": [
+    0,
+    3,
+    16
+   ],
+   "measured": true,
+   "min": [
+    0,
+    -3,
+    -16
+   ],
+   "model": "SkyrimFair\\Props\\Quill.nif"
+  },
+  "RingGold": {
+   "max": [
+    1,
+    1,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -1,
+    -1,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\RingGold.nif"
+  },
+  "RingSilver": {
+   "max": [
+    1,
+    1,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -1,
+    -1,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\RingSilver.nif"
+  },
+  "Sack02Large": {
+   "max": [
+    10,
+    15,
+    22
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -15,
+    -26
+   ],
+   "model": "SkyrimFair\\Props\\Sack02Large.nif"
+  },
+  "Sack02LargeFlat": {
+   "max": [
+    23,
+    20,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -23,
+    -20,
+    -7
+   ],
+   "model": "SkyrimFair\\Props\\Sack02LargeFlat.nif"
+  },
+  "Sack02Small": {
+   "max": [
+    8,
+    11,
+    16
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -11,
+    -16
+   ],
+   "model": "SkyrimFair\\Props\\Sack02Small.nif"
+  },
+  "SackLarge": {
+   "max": [
+    18,
+    30,
+    42
+   ],
+   "measured": true,
+   "min": [
+    -19,
+    -26,
+    -28
+   ],
+   "model": "SkyrimFair\\Props\\SackLarge.nif"
+  },
+  "SackLargeFlat": {
+   "max": [
+    21,
+    31,
+    34
+   ],
+   "measured": true,
+   "min": [
+    -21,
+    -25,
+    -28
+   ],
+   "model": "SkyrimFair\\Props\\SackLargeFlat.nif"
+  },
+  "SackLargeFlat02": {
+   "max": [
+    25,
+    42,
+    19
+   ],
+   "measured": true,
+   "min": [
+    -25,
+    -42,
+    -19
+   ],
+   "model": "SkyrimFair\\Props\\SackLargeFlat02.nif"
+  },
+  "SackSmall": {
+   "max": [
+    10,
+    26,
+    39
+   ],
+   "measured": true,
+   "min": [
+    -10,
+    -29,
+    -25
+   ],
+   "model": "SkyrimFair\\Props\\SackSmall.nif"
+  },
+  "SalmonSteak": {
+   "max": [
+    8,
+    9,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -9,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\SalmonSteak.nif"
+  },
+  "SaltPile": {
+   "max": [
+    6,
+    7,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -7,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\SaltPile.nif"
+  },
+  "Satchel": {
+   "max": [
+    9,
+    8,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -9,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Satchel.nif"
+  },
+  "Scroll": {
+   "max": [
+    16,
+    4,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -16,
+    -4,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\Scroll.nif"
+  },
+  "Shovel": {
+   "max": [
+    6,
+    17,
+    53
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -17,
+    -54
+   ],
+   "model": "SkyrimFair\\Props\\Shovel.nif"
+  },
+  "SilverBowl": {
+   "max": [
+    18,
+    18,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -18,
+    -18,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\SilverBowl.nif"
+  },
+  "SilverJug": {
+   "max": [
+    17,
+    13,
+    42
+   ],
+   "measured": true,
+   "min": [
+    -13,
+    -13,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\SilverJug.nif"
+  },
+  "SmithHammer": {
+   "max": [
+    4,
+    1,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -1,
+    -27
+   ],
+   "model": "SkyrimFair\\Props\\SmithHammer.nif"
+  },
+  "SmithTongs": {
+   "max": [
+    3,
+    20,
+    1
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -12,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\SmithTongs.nif"
+  },
+  "SoulGemGrand": {
+   "max": [
+    8,
+    10,
+    13
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -10,
+    -13
+   ],
+   "model": "SkyrimFair\\Props\\SoulGemGrand.nif"
+  },
+  "SoulGemLesser": {
+   "max": [
+    3,
+    4,
+    10
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -4,
+    -10
+   ],
+   "model": "SkyrimFair\\Props\\SoulGemLesser.nif"
+  },
+  "Staff01": {
+   "max": [
+    4,
+    47,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -7,
+    -88,
+    -6
+   ],
+   "model": "SkyrimFair\\Props\\Staff01.nif"
+  },
+  "Staff02": {
+   "max": [
+    3,
+    58,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -72,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\Staff02.nif"
+  },
+  "Staff03": {
+   "max": [
+    4,
+    61,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -3,
+    -51,
+    -3
+   ],
+   "model": "SkyrimFair\\Props\\Staff03.nif"
+  },
+  "SteelDagger": {
+   "max": [
+    4,
+    39,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -9,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\SteelDagger.nif"
+  },
+  "SteelHelmet": {
+   "max": [
+    11,
+    11,
+    19
+   ],
+   "measured": true,
+   "min": [
+    -11,
+    -11,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\SteelHelmet.nif"
+  },
+  "SteelShield": {
+   "max": [
+    26,
+    25,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -26,
+    -25,
+    -11
+   ],
+   "model": "SkyrimFair\\Props\\SteelShield.nif"
+  },
+  "SteelSword": {
+   "max": [
+    8,
+    71,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -12,
+    -1
+   ],
+   "model": "SkyrimFair\\Props\\SteelSword.nif"
+  },
+  "SteelWarAxe": {
+   "max": [
+    10,
+    42,
+    7
+   ],
+   "measured": true,
+   "min": [
+    -14,
+    -13,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\SteelWarAxe.nif"
+  },
+  "StormcloakCuirass": {
+   "max": [
+    18,
+    23,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -18,
+    -23,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\StormcloakCuirass.nif"
+  },
+  "StormcloakHelmet": {
+   "max": [
+    8,
+    12,
+    28
+   ],
+   "measured": true,
+   "min": [
+    -8,
+    -10,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\StormcloakHelmet.nif"
+  },
+  "Sweetroll": {
+   "max": [
+    9,
+    10,
+    15
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Sweetroll.nif"
+  },
+  "Tankard": {
+   "max": [
+    5,
+    8,
+    12
+   ],
+   "measured": true,
+   "min": [
+    -5,
+    -5,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\Tankard.nif"
+  },
+  "Tomato": {
+   "max": [
+    4,
+    4,
+    3
+   ],
+   "measured": true,
+   "min": [
+    -4,
+    -4,
+    -4
+   ],
+   "model": "SkyrimFair\\Props\\Tomato.nif"
+  },
+  "TowerLantern": {
+   "max": [
+    9,
+    8,
+    42
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -9,
+    -2
+   ],
+   "model": "SkyrimFair\\TowerLantern.nif"
+  },
+  "TrollSkull": {
+   "max": [
+    14,
+    21,
+    20
+   ],
+   "measured": true,
+   "min": [
+    -14,
+    -21,
+    -28
+   ],
+   "model": "SkyrimFair\\Props\\TrollSkull.nif"
+  },
+  "Venison": {
+   "max": [
+    19,
+    19,
+    16
+   ],
+   "measured": true,
+   "min": [
+    -19,
+    -19,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\Venison.nif"
+  },
+  "WineBottle01": {
+   "max": [
+    9,
+    8,
+    28
+   ],
+   "measured": true,
+   "min": [
+    -9,
+    -8,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\WineBottle01.nif"
+  },
+  "WineBottle02": {
+   "max": [
+    7,
+    7,
+    30
+   ],
+   "measured": true,
+   "min": [
+    -7,
+    -7,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\WineBottle02.nif"
+  },
+  "WolfPelt": {
+   "max": [
+    23,
+    80,
+    5
+   ],
+   "measured": true,
+   "min": [
+    -23,
+    -61,
+    -6
+   ],
+   "model": "SkyrimFair\\Props\\WolfPelt.nif"
+  },
+  "WoodAxe": {
+   "max": [
+    12,
+    39,
+    2
+   ],
+   "measured": true,
+   "min": [
+    -6,
+    -32,
+    -2
+   ],
+   "model": "SkyrimFair\\Props\\WoodAxe.nif"
+  },
+  "WoodenBowl": {
+   "max": [
+    12,
+    12,
+    8
+   ],
+   "measured": true,
+   "min": [
+    -12,
+    -12,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\WoodenBowl.nif"
+  },
+  "WoodenPlate": {
+   "max": [
+    21,
+    10,
+    4
+   ],
+   "measured": true,
+   "min": [
+    -21,
+    -10,
+    0
+   ],
+   "model": "SkyrimFair\\Props\\WoodenPlate.nif"
+  }
+ }
+}

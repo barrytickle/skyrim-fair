@@ -1,0 +1,52 @@
+bin/
+obj/
+dist/
+.vs/
+.idea/
+*.user
+*.suo
+*.cache
+
+# Local third-party mod archives (never commit)
+external/
+
+# Blender backup saves
+*.blend1
+
+# Stroti's Outdoor Toilet (SE conversion by Astra): the resource's permissions forbid
+# uploading it elsewhere, so it is bundled into the built mod but never committed.
+# Restore with: unzip external/Astra_Stroti_Outdoor_Toilet_Modern_SE.zip (see CREDITS.md)
+assets/meshes/Stroti/
+assets/textures/Stroti/
+
+# Physics-free copies of vanilla meshes (the towers' lantern and the market's goods) are
+# modified Bethesda meshes: generate them, never commit them.
+#   python tools/make_static_props.py --data "<stock Data>"
+assets/meshes/SkyrimFair/TowerLantern.nif
+assets/meshes/SkyrimFair/Props/
+assets/meshes/SkyrimFair/Crowd/
+# Astra's folk dance, re-based by tools/folk/rebase_folk.py, and its generated OAR conditions
+assets/meshes/actors/
+# The singers' FaceGen tints, copied from the game's archives by the generator
+assets/textures/actors/
+
+# The "Whiterun Fair" welcome sign (Barry's conversion of a Sketchfab Standard-licensed model):
+# not in git until the author confirms it may be redistributed. The package is
+# assets/Skyrim_Fair_Sign_Assets/; its Data/ holds these files.
+assets/meshes/barry_fair_sign/
+assets/textures/barry_fair_sign/
+assets/Skyrim_Fair_Sign_Assets/
+
+# The avenue's cobbles: vanilla wrstonefloor01 (diffuse, normal) and the fair's own parallax
+# map, built output of tools/make_cobble.py --data <Steam's Skyrim SE Data>.
+assets/textures/SkyrimFair/Ground/
+assets/textures/SkyrimFair/Bunting/
+
+# Built runtime files: sound from tools/build_audio.py (from Barry's untracked music/ and
+# sound-effects/, provenance still to confirm) and scripts from tools/build_papyrus.py.
+assets/sound/
+assets/scripts/
+build/
+
+# tools/package.py's temporary release config
+fair.release.json
