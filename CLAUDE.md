@@ -83,6 +83,7 @@ python tools/package.py --version 2.0.1.3   # a release: dist/release/SkyrimFair
   - `AUDIO.md`: sound design
   - `STALLS.md`: generated stall directory
   - `DESIGN.md`, `MUSIC.md`, `MCM.md`: plans
+  - `MODDING_PLAN.md`: the recon (installs and versions, saves, logs, the route, the test rig's crash fixes)
 - To inspect the built plugin, write small throwaway Mutagen console programs in the
   scratchpad. That's the verification method: read records back, and compare new record
   types subrecord by subrecord with vanilla's.
